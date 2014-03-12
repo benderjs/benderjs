@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bender.js <%= version %> Dashboard</title>
+</head>
+<body>
+    <header>
+        <a href="/capture">Capture</a>
+        <a href="#">Run</a>
+    </header>
+    <div>
+        <p>Test cases:</p>
+        <ul>
+            <% tests.forEach(function (test) { %>
+                <li><%= test %></li>
+            <% }) %>
+        </ul>
+    </div>
+    <div>
+        <p>Captured clients:</p>
+        <ul id="clients">
+            <% clients.forEach(function (client) { %>
+                <li><%= client.userAgent %></li>
+            <% }) %>
+        </ul>
+    </div>
+    <script src="faye/client.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
