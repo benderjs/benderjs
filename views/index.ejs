@@ -12,20 +12,20 @@
     <div>
         <p>Test cases:</p>
         <ul>
-            <% tests.forEach(function (test) { %>
-                <li><%= test %></li>
-            <% }) %>
+        <% tests.forEach(function (test) { %>
+            <li><%= test %></li>
+        <% }) %>
         </ul>
     </div>
     <div>
         <p>Captured clients:</p>
         <ul id="clients">
-            <% clients.forEach(function (client) { %>
-                <li><%= client.userAgent %></li>
-            <% }) %>
+        <% clients.forEach(function (client) { %>
+            <li><%= client.userAgent %> <%= client.busy %></li>
+        <% }) %>
         </ul>
     </div>
-    <script src="faye/client.js"></script>
+    <script src="socket.io/socket.io.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

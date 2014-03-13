@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bender Test Context</title>
+    <% if (css) { %><link rel="stylesheet" href="<%= css %>"><% } %>
+</head>
+<body>
+    <%= html %>
+
+    <% scripts.forEach(function (script) { %>
+        <script src="<%= script %>"></script>
+    <% }) %>
+
+    <script>
+        window.parent.bender.setContext(window);
+        window.bender.ready();
+    </script>
+</body>
+</html>
