@@ -6,18 +6,21 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "bender": "./bin/bender"
+  },
   "repository": "",
   "author": "",
   "license": "",
   "dependencies": {
-    "winston": "~0.7.2",
-    "when": "~2.8.0",
-    "glob": "~3.2.9",
-    "nomnom": "~1.6.2",
-    "lodash": "~2.4.1",
-    "express": "~3.4.8",
     "ejs": "~0.8.5",
+    "express": "~3.4.8",
+    "glob": "~3.2.9",
     "node-uuid": "~1.4.1",
-    "socket.io": "~0.9.16"
+    "nomnom": "~1.6.2",
+    "socket.io": "~0.9.16",
+    "useragent": "~2.0.7",
+    "when": "~2.8.0",
+    "winston": "~0.7.2"
   }
 }

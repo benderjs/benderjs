@@ -3,29 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <title>Bender.js <%= version %> Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', 'Helvetica', sans-serif;
+        }
+        header {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            width: 100%;
+            padding: 1em;
+            background: rgba(200, 200, 200, .7);
+            text-align: right;
+        }
+        header h1 {
+            font-size: 1.75em;
+            margin: 0;
+            float: left;
+        }
+        header a {
+            display: inline-block;
+            text-decoration: none;
+            color: #000;
+            background: #eee;
+            padding: .5em 1em;
+            margin-right: .5em;
+        }
+        header a:hover {
+            background: #fff;
+        }
+        section {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            padding: 0 1em;
+        }
+        section h2 {
+            margin: .5em 0;
+        }
+        li {
+            margin: .5em 0;
+        }
+        table {
+            width: 100%;
+            text-align: left;
+        }
+        th, td {
+            border-bottom: 1px solid #ccc;
+            padding: .5em;
+        }
+        a.disabled:hover,
+        .disabled {
+            color: #999;
+            background: #ccc;
+        }
+    </style>
 </head>
 <body>
     <header>
+        <h1>Bender.js <%= version %> Dashboard</h1>
         <a href="/capture">Capture</a>
-        <a href="#">Run</a>
+        <a id="runBtn" class="disabled" href="#">Run</a>
     </header>
-    <div>
-        <p>Test cases:</p>
-        <ul>
+    <section>
+        <h2>Captured browser</h2>
+        <ol id="clients">
+        <% if (clients.length) { clients.forEach(function (client) { %>
+            <li><%= client.ua %> <strong><% if (client.busy) {%>Busy<% } else { %>Ready<% } %></strong></li>
+        <% }) } else { %>
+            none
+        <% } %>
+        </ol>
+        <h2>Test cases</h2>
+        <table id="tests" cellspacing="0" cellpadding="0">
+            <thead>
+                <tr>
+                    <th style="width: 1%;">&nbsp;</th>
+                    <th>Name</th>
+                    <th>Meta</th>
+                    <th>Results</th>
+                </tr>    
+            </thead>
+            <tbody>
         <% tests.forEach(function (test) { %>
-            <li><%= test %></li>
+            <tr>
+                <td>
+                    <input type="checkbox" name="<%= test.id %>" checked="checked">
+                </td>
+                <td><%= test.name %></td>
+                <td><%= test.meta %></td>
+                <td class="results"></td>
+            </tr>
         <% }) %>
-        </ul>
-    </div>
-    <div>
-        <p>Captured clients:</p>
-        <ul id="clients">
-        <% clients.forEach(function (client) { %>
-            <li><%= client.userAgent %> <%= client.busy %></li>
-        <% }) %>
-        </ul>
-    </div>
-    <script src="socket.io/socket.io.js"></script>
-    <script src="main.js"></script>
+            </tbody>
+        </table>
+    </section>
+    <script src="../socket.io/socket.io.js"></script>
+    <script src="dashboard.js"></script>
 </body>
 </html>

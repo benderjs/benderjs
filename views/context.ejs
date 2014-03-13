@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bender Test Context</title>
+    <title><%= name %></title>
     <% if (css) { %><link rel="stylesheet" href="<%= css %>"><% } %>
 </head>
 <body>
     <%= html %>
 
-    <% scripts.forEach(function (script) { %>
+    <% scripts && scripts.forEach(function (script) { %>
         <script src="<%= script %>"></script>
     <% }) %>
 
     <script>
-        window.parent.bender.setContext(window);
+        window.parent.bender.setup(window);
         window.bender.ready();
     </script>
 </body>

@@ -1,15 +1,19 @@
-var parser = require('nomnom'),
-    constants = require('./constants');
+#!/usr/bin/env node
+var argParser = require('nomnom'),
+	configParser = require('../lib/configParser'),
+    constants = require('../lib/constants');
 
-parser.command('init')
+// TODO read and parse config !!!
+
+argParser.command('init')
     .callback(initialize)
-    .help('Initialize Bender.js');
+    .help('Initialize Bender.js for this directory');
 
-parser.command('run')
+argParser.command('run')
     .callback(runTests)
     .help('Run tests on captured clients');
 
-parser.command('server')
+argParser.command('server')
     .callback(startServer)
     .option('port', {
         abbr: 'p',
@@ -24,16 +28,16 @@ parser.command('server')
     })
     .help('Start Bender.js server');
 
-parser.command('version')
+argParser.command('version')
     .callback(function () {
         console.log('Bender.js v%s', constants.VERSION);
     })
     .help('Print Bender.js version');
 
-parser.parse();
+argParser.parse();
 
 function startServer(options) {
-    var hs = require('./http-server'),
+    var hs = require('../lib/http-server'),
         server = hs.create();
 
     server.listen(options.port, function () {

@@ -45,7 +45,7 @@
             context.bender = this;
             context.onerror = this.error;
 
-            function stealLogs(context) {
+            function stealLogs() {
                 var commands = ['log', 'info', 'warn', 'debug', 'error'],
                     replace = function(command) {
                         var old = context.console[command];
@@ -76,20 +76,26 @@
 
         this.result = function (result) {
             this.results.push(result);
-            socket.emit.result(result);
+            socket.emit('result', result);
         };
 
-        this.start = function () {
+        this.ready = function () {
             // TODO start testing here
+            this.next();
         };
 
         this.next = function () {
-            var test = this.suite.unshift();
-            contextEl.src = test.src;
+            var test = this.suite.shift();
+
+            if (test) {
+                contextEl.src = '../tests/' + test.src;
+            } else {
+                this.complete();
+            }
         };
 
-        this.complete = function (result) {
-            socket.emit('complete', result);
+        this.complete = function () {
+            socket.emit('complete');
             contextEl.src = 'about:blank';
         };
 
@@ -98,21 +104,21 @@
             socket.emit('log', Array.prototype.join.call(arguments, ' '));
         };
 
-
         function register() {
             socket.emit('register', {
                 id: id,
-                userAgent: navigator.userAgent
+                ua: navigator.userAgent
             });
         }
 
         function runTests(suite) {
+            console.log(suite);
             this.suite = suite;
             this.next();
         }
 
         socket.on('connect', register);
-        socket.on('run', runTests);
+        socket.on('run', runTests.bind(this));
     }
 
     window.bender = new Bender(socket);
