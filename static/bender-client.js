@@ -39,6 +39,42 @@
         this.suite = null;
         this.results = [];
 
+        // TODO expose assertion library here
+        this.assert = null;
+
+        this.test = function (spec) {
+            // TODO execute spec here
+        };
+
+        this.error = function (error) {
+            socket.emit('error', error);
+        };
+
+        this.result = function (result) {
+            this.results.push(result);
+            socket.emit('result', result);
+        };
+
+        this.next = function () {
+            var test = this.suite.shift();
+
+            if (test) {
+                contextEl.src = '../tests/' + test.src;
+            } else {
+                this.complete();
+            }
+        };
+
+        this.complete = function () {
+            socket.emit('complete');
+            contextEl.src = 'about:blank';
+        };
+
+        this.log = function (args) {
+            // TODO add some formatting, maybe stringify objects?
+            socket.emit('log', Array.prototype.join.call(arguments, ' '));
+        };
+
         this.setup = function (context) {
             var that = this;
 
@@ -68,40 +104,6 @@
                 };
             }
             stealLogs();
-        };
-
-        this.error = function (error) {
-            socket.emit('error', error);
-        };
-
-        this.result = function (result) {
-            this.results.push(result);
-            socket.emit('result', result);
-        };
-
-        this.ready = function () {
-            // TODO start testing here
-            this.next();
-        };
-
-        this.next = function () {
-            var test = this.suite.shift();
-
-            if (test) {
-                contextEl.src = '../tests/' + test.src;
-            } else {
-                this.complete();
-            }
-        };
-
-        this.complete = function () {
-            socket.emit('complete');
-            contextEl.src = 'about:blank';
-        };
-
-        this.log = function (args) {
-            // TODO add some formatting, maybe stringify objects?
-            socket.emit('log', Array.prototype.join.call(arguments, ' '));
         };
 
         function register() {

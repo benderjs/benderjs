@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 var argParser = require('nomnom'),
-	configParser = require('../lib/configParser'),
-    constants = require('../lib/constants');
-
-// TODO read and parse config !!!
+    config = require('../lib/config'),
+    testBuilder = require('../lib/testBuilder'),
+    constants = require('../lib/constants'),
+    log = require('../lib/logger').create('cli');
 
 argParser.command('init')
     .callback(initialize)
@@ -20,35 +20,42 @@ argParser.command('server')
         default: constants.PORT,
         help: 'Port on which the server will run'
     })
-    // see if this option is really needed
     .option('hostname', {
-        abbr: 'n', // YEAH.. should be h but it's reserved for nomnom's help
+        abbr: 'H', // YEAH... should be "h" but it's reserved for nomnom's help
         default: constants.HOSTNAME,
         help: 'Hostname used to run server'
+    })
+    .option('config', {
+        abbr: 'c',
+        help: 'Alternative path to Bender.js configuration file'
     })
     .help('Start Bender.js server');
 
 argParser.command('version')
     .callback(function () {
-        console.log('Bender.js v%s', constants.VERSION);
+        log.info('Bender.js v%s', constants.VERSION);
     })
     .help('Print Bender.js version');
 
 argParser.parse();
 
 function startServer(options) {
-    var hs = require('../lib/http-server'),
-        server = hs.create();
+    var server = require('../lib/server');
 
-    server.listen(options.port, function () {
-        console.log('Bender.js Server v%s started at http://%s:%s', constants.VERSION, options.hostname, options.port);
+    config.parse(options.config);
+
+    testBuilder.build();
+    testBuilder.watch();
+
+    server.create().listen(options.port, options.hostname, function () {
+        log.info('Bender.js v%s Server started at http://%s:%s', constants.VERSION, options.hostname, options.port);
     });
 }
 
 function runTests(options) {
-    // TODO
+    // TODO run tests on captured browsers
 }
 
 function initialize(options) {
-    // TODO
+    // TODO create config file for current directory    
 }

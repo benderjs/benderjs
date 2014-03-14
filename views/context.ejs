@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title><%= name %></title>
-    <% if (css) { %><link rel="stylesheet" href="<%= css %>"><% } %>
+    
+    <% if (css) { %>
+    <link rel="stylesheet" href="<%= css %>">
+    <% } %>
+    
+    <% scripts && scripts.forEach(function (script) { %>
+    <script src="<%= script %>"></script>
+    <% }) %>
+    
+    <script>
+    window.parent.bender.setup(window);
+    </script>
 </head>
 <body>
     <%= html %>
-
-    <% scripts && scripts.forEach(function (script) { %>
-        <script src="<%= script %>"></script>
-    <% }) %>
-
-    <script>
-        window.parent.bender.setup(window);
-        window.bender.ready();
-    </script>
+    <%= spec %>
 </body>
 </html>
