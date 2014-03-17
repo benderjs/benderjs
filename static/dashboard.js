@@ -1,12 +1,12 @@
 (function () {
     var host = /^[a-z]+:\/\/([^\/]+)/.exec(window.location)[1].split(":"),
-        runBtn = document.getElementById('runBtn'),
+        runBtnEl = document.getElementById('runBtn'),
         clientsEl = document.getElementById('clients'),
         testsEl = document.getElementById('tests'),
         socket = io.connect('http://' + host[0] + ':' + (host[1] || 80)),
         isRunning = false;
 
-    runBtn.onclick = runTests;
+    runBtnEl.onclick = runTests;
 
     function updateClientList(list) {
         clientsEl.innerHTML = list.map(function (client) {
@@ -16,7 +16,7 @@
     }
 
     function updateRunButton() {
-        runBtn.className = (!isRunning && clientsEl.getElementsByTagName('li').length) ? '' : 'disabled';
+        runBtnEl.className = (!isRunning && clientsEl.getElementsByTagName('li').length) ? '' : 'disabled';
     }
 
     function addResult(result) {

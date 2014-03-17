@@ -87,9 +87,7 @@
             <tbody>
         <% tests.forEach(function (test) { %>
             <tr>
-                <td>
-                    <input type="checkbox" name="<%= test.id %>" checked="checked">
-                </td>
+                <td><input type="checkbox" name="<%= test.id %>" checked="checked"></td>
                 <td><%= test.name %></td>
                 <td><%= test.meta %></td>
                 <td class="results"></td>

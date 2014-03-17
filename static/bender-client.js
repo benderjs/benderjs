@@ -1,4 +1,4 @@
-(function () {
+(function (window, undefined) {
     var host = /^[a-z]+:\/\/([^\/]+)/.exec(window.location)[1].split(":"),
         id = /\/clients\/([^\/]+)/.exec(window.location)[1],
         statusEl = document.getElementById('status'),
@@ -44,6 +44,7 @@
 
         this.test = function (spec) {
             // TODO execute spec here
+            // should we wait for onload or just run the tests?
         };
 
         this.error = function (error) {
@@ -125,4 +126,4 @@
 
     window.bender = new Bender(socket);
 
-})();
+})(window);
