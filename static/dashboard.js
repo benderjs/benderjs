@@ -16,7 +16,8 @@
     }
 
     function updateRunButton() {
-        runBtnEl.className = (!isRunning && clientsEl.getElementsByTagName('li').length) ? '' : 'disabled';
+        runBtnEl.className = (!isRunning && clientsEl.getElementsByTagName('li').length) ?
+            'btn' : 'btn disabled';
     }
 
     function addResult(result) {

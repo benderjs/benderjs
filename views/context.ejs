@@ -1,12 +1,18 @@
+<% if (!quirks) { %>
 <!doctype html>
+<% } %>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><%= name %></title>
+    <title><%= id %></title>
     
-    <% if (css) { %>
-    <link rel="stylesheet" href="<%= css %>">
+    <% if (app && app.css) { %>
+    <link rel="stylesheet" href="<%= app.css %>">
     <% } %>
+    
+    <% app && app.scripts && app.scripts.forEach(function (script) { %>
+    <script src="<%= script %>"></script>
+    <% }) %>
     
     <% scripts && scripts.forEach(function (script) { %>
     <script src="<%= script %>"></script>
