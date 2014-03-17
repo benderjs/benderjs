@@ -9,9 +9,16 @@
     runBtnEl.onclick = runTests;
 
     function updateClientList(list) {
-        clientsEl.innerHTML = list.map(function (client) {
-            return '<li>' + client.ua + ' <strong>' + (client.busy ? 'Busy' : 'Ready') + '</strong></li>';
-        }).join('') || 'none';
+        var html = [],
+            client,
+            i;
+
+        for (i = 0; i < list.length; i++) {
+            client = list[i];
+            html.push('<li>', client.ua, ' <strong>', (client.busy ? 'Busy' : 'Ready'), '</strong></li>');
+        }
+
+        clientsEl.innerHTML = html.join('') || 'none';
         updateRunButton();
     }
 
