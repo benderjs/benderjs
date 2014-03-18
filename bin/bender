@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 var argParser = require('nomnom'),
+    path = require('path'),
     config = require('../lib/config'),
-    testBuilder = require('../lib/testBuilder'),
     constants = require('../lib/constants'),
     log = require('../lib/logger').create('cli');
 
@@ -42,10 +42,7 @@ argParser.parse();
 function startServer(options) {
     var server = require('../lib/server');
 
-    config.parse(options.config);
-
-    testBuilder.build();
-    testBuilder.watch();
+    config.load(path.resolve(process.cwd(), options.config || 'bender.js'));
 
     server.create().listen(options.port, options.hostname, function () {
         log.info('Bender.js v%s Server started at http://%s:%s', constants.VERSION, options.hostname, options.port);
