@@ -26,18 +26,23 @@
                 <tr>
                     <th style="width: 1%;">&nbsp;</th>
                     <th>ID</th>
-                    <th>Meta</th>
+                    <th>Tags</th>
                     <th>Results</th>
                 </tr>    
             </thead>
             <tbody>
-            <% Array.isArray(tests) && tests.forEach(function (test) { %>
+            <% Array.isArray(groups) && groups.forEach(function (group) { %>
+            <tr>
+                <td colspan="4" class="group"><%= group.name %></td>
+            </tr>
+                <% Array.isArray(group.tests) && group.tests.forEach(function (test) { %>
                 <tr>
                     <td><input type="checkbox" name="<%= test.id %>" checked="checked"></td>
                     <td><%= test.id %></td>
-                    <td><%= test.meta %></td>
+                    <td><%= test.tags %></td>
                     <td class="results"></td>
                 </tr>
+                <% }) %>
             <% }) %>
             </tbody>
         </table>

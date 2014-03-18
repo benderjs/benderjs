@@ -1,43 +1,40 @@
-<%# Include doctype if quirks mode not specified %>
+<!-- Include doctype if quirks mode not specified -->
 <% if (!quirks) { %><!doctype html><% } %>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title><%= id %></title>
     
-    <%# Load application CSS %>
+    <!-- Load application CSS -->
     <% app && Array.isArray(app.css) && app.css.forEach(function (css) { %>
         <link rel="stylesheet" href="<%= css %>">
     <% }) %>
     
-    <%# Load application scripts %>
+    <!-- Load application scripts -->
     <% app && Array.isArray(app.scripts) && app.scripts.forEach(function (script) { %>
         <script src="<%= script %>"></script>
     <% }) %>
     
-    <%# Load other scripts to include %>
+    <!-- Load other scripts to include -->
     <% Array.isArray(scripts) && scripts.forEach(function (script) { %>
         <script src="<%= script %>"></script>
     <% }) %>
 
-    <%# Load plugins, both CSS and scripts %>
+    <!-- Load plugins, both CSS and scripts -->
     <% Array.isArray(plugins) && plugins.forEach(function (plugin) { %>
-        <% if (plugin.css { %><link rel="stylesheet" href="<%= plugin.css %>"><% } %>
+        <% if (plugin.css) { %><link rel="stylesheet" href="<%= plugin.css %>"><% } %>
         <script src="<%= plugin.script %>"></script>
     <% }) %>
     
-    <%# Configure bender context %>
+    <!-- Configure bender context -->
     <script>window.parent.bender.setup(window);</script>
 </head>
 <body>
-    <%# Include HTML %>
+    <!-- Include HTML -->
     <%= html %>
-    
-    <%# When debugging, include spec as an external file, otherwise include its content %>
-    <% if (debug) { %>
-        <script src="<%= spec %>"></script>
-    <% } else { %>
-        <script><%= spec %></script>
+    <!-- Include spec content -->
+    <% if (js) { %>
+    <script><%= js %></script>
     <% } %>
 </body>
 </html>
