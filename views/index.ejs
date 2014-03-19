@@ -12,7 +12,7 @@
         <button id="runBtn" class="btn">Run</button>
     </header>
     <section>
-        <h2>Captured browser</h2>
+        <h1>Captured browser</h1>
         <ol id="clients">
         <% if (clients && clients.length) { clients.forEach(function (client) { %>
             <li><%= client.ua %> <strong><% if (client.busy) {%>Busy<% } else { %>Ready<% } %></strong></li>
@@ -20,7 +20,7 @@
             none
         <% } %>
         </ol>
-        <h2>Test cases</h2>
+        <h1>Test cases</h1>
         <table id="tests" cellspacing="0" cellpadding="0">
             <thead>
                 <tr>
@@ -32,13 +32,14 @@
             </thead>
             <tbody>
             <% Array.isArray(groups) && groups.forEach(function (group) { %>
-            <tr>
-                <td colspan="4" class="group"><%= group.name %></td>
+            <tr class="group">
+                <td><input type="checkbox" name="<%= group.name %>" checked="checked"></td>
+                <td colspan="3"><span>Group:</span> <%= group.name %></td>
             </tr>
                 <% Array.isArray(group.tests) && group.tests.forEach(function (test) { %>
                 <tr>
                     <td><input type="checkbox" name="<%= test.id %>" checked="checked"></td>
-                    <td><%= test.id %></td>
+                    <td><a href="tests/<%= test.id %>"><%= test.id %></a></td>
                     <td><%= test.tags %></td>
                     <td class="results"></td>
                 </tr>

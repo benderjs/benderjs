@@ -3,6 +3,7 @@ body {
     padding: 0;
     font-family: 'Arial', 'Helvetica', sans-serif;
 }
+
 header {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -11,11 +12,13 @@ header {
     background: rgba(200, 200, 200, .7);
     text-align: right;
 }
+
 header h1 {
     font-size: 1.75em;
     margin: 0;
     float: left;
 }
+
 .btn {
     font-size: 1em;
     display: inline-block;
@@ -33,6 +36,7 @@ header h1 {
     background: linear-gradient(#ffffff, #e6e6e6);
     cursor: pointer;
 }
+
 .btn:hover {
     background: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#fefefe));
     background: -webkit-linear-gradient(#ffffff, #fefefe);
@@ -40,6 +44,7 @@ header h1 {
     background: -o-linear-gradient(#ffffff, #fefefe);
     background: linear-gradient(#ffffff, #efefef);
 }
+
 .btn:active {
     background: -webkit-gradient(linear, 0 0, 0 100%, from(#ccc), to(#e6e6e6));
     background: -webkit-linear-gradient(#ccc, #e6e6e6);
@@ -47,27 +52,44 @@ header h1 {
     background: -o-linear-gradient(#ccc, #e6e6e6);
     background: linear-gradient(#ccc, #e6e6e6);
 }
+
 section {
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     padding: 0 1em;
 }
+
 h2 {
     margin: .5em 0;
 }
+
 li {
     margin: .5em 0;
 }
+
 table {
     width: 100%;
     text-align: left;
 }
+
 th, td {
     border-bottom: 1px solid #ccc;
     padding: .5em;
 }
+
 .disabled:hover,
 .disabled {
     color: #999;
     background: #ccc;
 }
+
+.group td {
+    background: #ccc;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.group span {
+    color: #999;
+}
+

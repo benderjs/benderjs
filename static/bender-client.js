@@ -60,7 +60,7 @@
             var test = this.suite.shift();
 
             if (test) {
-                contextEl.src = '../' + test.src;
+                contextEl.src = '../tests/' + test.id;
             } else {
                 this.complete();
             }
@@ -115,6 +115,7 @@
         }
 
         function runTests(suite) {
+            console.log('run', suite);
             this.suite = suite;
             this.next();
         }

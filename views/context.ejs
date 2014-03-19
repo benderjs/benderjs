@@ -27,7 +27,10 @@
     <% }) %>
     
     <!-- Configure bender context -->
-    <script>window.parent.bender.setup(window);</script>
+    <script>
+        // todo - what if the test is loaded alone? single mode?
+        window.parent.bender && window.parent.bender.setup(window);
+    </script>
 </head>
 <body>
     <!-- Include HTML -->
