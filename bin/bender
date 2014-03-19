@@ -2,6 +2,7 @@
 var argParser = require('nomnom'),
     path = require('path'),
     config = require('../lib/config'),
+    plugins = require('../lib/plugins'),
     constants = require('../lib/constants'),
     log = require('../lib/logger').create('cli');
 
@@ -43,6 +44,7 @@ function startServer(options) {
     var server = require('../lib/server');
 
     config.load(path.resolve(process.cwd(), options.config || 'bender.js'));
+    plugins.load();
 
     server.create().listen(options.port, options.hostname, function () {
         log.info('Bender.js v%s Server started at http://%s:%s', constants.VERSION, options.hostname, options.port);

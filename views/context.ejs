@@ -1,43 +1,37 @@
-<!-- Include doctype if quirks mode not specified -->
 <% if (!quirks) { %><!doctype html><% } %>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title><%= id %></title>
     
-    <!-- Load application CSS -->
-    <% app && Array.isArray(app.css) && app.css.forEach(function (css) { %>
-        <link rel="stylesheet" href="<%= css %>">
+    <% Array.isArray(apps) && apps.forEach(function (app) { %>
+        <% app && Array.isArray(app.css) && app.css.forEach(function (css) { %>
+            <link rel="stylesheet" href="<%= css %>">
+        <% }) %>
+        <% app && Array.isArray(app.js) && app.js.forEach(function (script) { %>
+            <script src="<%= script %>"></script>
+        <% }) %>
     <% }) %>
     
-    <!-- Load application scripts -->
-    <% app && Array.isArray(app.scripts) && app.scripts.forEach(function (script) { %>
-        <script src="<%= script %>"></script>
-    <% }) %>
-    
-    <!-- Load other scripts to include -->
     <% Array.isArray(scripts) && scripts.forEach(function (script) { %>
         <script src="<%= script %>"></script>
     <% }) %>
 
-    <!-- Load plugins, both CSS and scripts -->
-    <% Array.isArray(plugins) && plugins.forEach(function (plugin) { %>
-        <% if (plugin.css) { %><link rel="stylesheet" href="<%= plugin.css %>"><% } %>
-        <script src="<%= plugin.script %>"></script>
-    <% }) %>
-    
-    <!-- Configure bender context -->
     <script>
         // todo - what if the test is loaded alone? single mode?
         window.parent.bender && window.parent.bender.setup(window);
     </script>
+
+    <% Array.isArray(plugins) && plugins.forEach(function (plugin) { %>
+        <% if (plugin.css) { %><link rel="stylesheet" href="<%= plugin.css %>"><% } %>
+        <script src="<%= plugin.script %>"></script>
+    <% }) %>
 </head>
 <body>
-    <!-- Include HTML -->
-    <%= html %>
-    <!-- Include spec content -->
-    <% if (js) { %>
-    <script><%= js %></script>
-    <% } %>
+    <%- html %>
+    <% if (js) { %><script><%- js %></script><% } %>
+    <script>
+        window.bender && window.bender.ready();
+    </script>
 </body>
 </html>

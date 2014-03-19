@@ -42,11 +42,6 @@
         // TODO expose assertion library here
         this.assert = null;
 
-        this.test = function (spec) {
-            // TODO execute spec here
-            // should we wait for onload or just run the tests?
-        };
-
         this.error = function (error) {
             socket.emit('error', error);
         };
@@ -67,13 +62,22 @@
         };
 
         this.complete = function () {
-            socket.emit('complete');
+            socket.emit('complete', this.results);
             contextEl.src = 'about:blank';
+            this.results.length = 0;
         };
 
         this.log = function (args) {
             // TODO add some formatting, maybe stringify objects?
             socket.emit('log', Array.prototype.join.call(arguments, ' '));
+        };
+
+        // this will be overriden by framework adapter
+        this.start = this.complete;
+
+        this.ready = function () {
+            this.start();
+            this.start = null;
         };
 
         this.setup = function (context) {
