@@ -14,11 +14,6 @@
     <section>
         <h1>Captured browser</h1>
         <ol id="clients">
-        <% if (clients && clients.length) { clients.forEach(function (client) { %>
-            <li><%= client.ua %> <strong><% if (client.busy) {%>Busy<% } else { %>Ready<% } %></strong></li>
-        <% }) } else { %>
-            none
-        <% } %>
         </ol>
         <h1>Test cases</h1>
         <table id="tests" cellspacing="0" cellpadding="0">
@@ -34,7 +29,8 @@
             <% Array.isArray(groups) && groups.forEach(function (group) { %>
             <tr class="group">
                 <td><input type="checkbox" name="<%= group.name %>" checked="checked"></td>
-                <td colspan="3"><span>Group:</span> <%= group.name %></td>
+                <td colspan="2"><span>Group:</span> <%= group.name %></td>
+                <td class="browsers"></td>
             </tr>
                 <% Array.isArray(group.tests) && group.tests.forEach(function (test) { %>
                 <tr>

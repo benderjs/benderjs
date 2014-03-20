@@ -15,7 +15,10 @@
         DISCONNECT: 4
     };
 
-    socket = io.connect('http://' + host[0] + ':' + (host[1] || 80));
+    socket = io.connect('http://' + host[0] + ':' + (host[1] || 80), {
+        'reconnection limit': 2000
+    });
+
     socket.on('connect', setStatus(states.CONNECT));
     socket.on('reconnect', setStatus(states.RECONNECT));
     socket.on('reconnect_failed', setStatus(states.RECONNECT_FAIL));
@@ -37,6 +40,7 @@
 
     function Bender(socket) {
         this.suite = null;
+        this.current = null;
         this.results = [];
 
         // TODO expose assertion library here
@@ -47,15 +51,19 @@
         };
 
         this.result = function (result) {
-            this.results.push(result);
-            socket.emit('result', result);
+            this.results.push({
+                id: this.current.id,
+                result: result
+            });
+
+            socket.emit('result', this.current.id, result);
         };
 
         this.next = function () {
-            var test = this.suite.shift();
+            this.current = this.suite.shift();
 
-            if (test) {
-                contextEl.src = '../tests/' + test.id;
+            if (this.current) {
+                contextEl.src = '../tests/' + this.current.id;
             } else {
                 this.complete();
             }
@@ -76,11 +84,14 @@
         this.start = this.complete;
 
         this.ready = function () {
-            this.start();
+            if (typeof this.start == 'function') {
+                this.start();
+            }
+
             this.start = null;
         };
 
-        this.setup = function (context) {
+        this.setup = function (context, steal) {
             var that = this;
 
             context.bender = this;
@@ -108,7 +119,9 @@
                     that.log(msg);
                 };
             }
-            stealLogs();
+
+            if (steal) stealLogs();
+            // if (steal || steal === undefined) stealLogs();
         };
 
         function register() {
@@ -119,7 +132,6 @@
         }
 
         function runTests(suite) {
-            console.log('run', suite);
             this.suite = suite;
             this.next();
         }

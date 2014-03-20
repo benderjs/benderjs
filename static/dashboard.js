@@ -4,7 +4,8 @@
         clientsEl = document.getElementById('clients'),
         testsEl = document.getElementById('tests'),
         socket = io.connect('http://' + host[0] + ':' + (host[1] || 80)),
-        isRunning = false;
+        clients = [],
+        results = {};
 
     runBtnEl.onclick = runTests;
 
@@ -13,24 +14,38 @@
             client,
             i;
 
+        clients = list;
+
         for (i = 0; i < list.length; i++) {
             client = list[i];
             html.push('<li>', client.ua, ' <strong>', (client.busy ? 'Busy' : 'Ready'), '</strong></li>');
+            if (!results[client.id]) {
+                results[client.id] = {};
+            }
         }
 
         clientsEl.innerHTML = html.join('') || 'none';
         updateRunButton();
     }
 
+    function checkBusy() {
+        var i;
+
+        for (i = 0; i < clients.length; i++) {
+            if (clients[i].busy) return true;
+        }
+
+        return false;
+    }
+
     function updateRunButton() {
-        // TODO check clients availability instead of count
-        runBtnEl.className = (!isRunning && clientsEl.getElementsByTagName('li').length) ?
+        runBtnEl.className = (!checkBusy() && clientsEl.getElementsByTagName('li').length) ?
             'btn' : 'btn disabled';
     }
 
-    function addResult(result) {
+    function addResult(id, spec, result) {
         // TODO pass it to the table
-        console.log('result', result);
+        console.log('result', id, spec, result);
     }
 
     function clearResults() {
@@ -40,6 +55,10 @@
         while (i >= 0) {
             elems[i].innerHTML = '';
             i--;
+        }
+
+        for (i in results) {
+            results[i] = {};
         }
     }
 
@@ -59,17 +78,13 @@
     }
 
     function runTests() {
-        if (!isRunning) {
-            isRunning = true;
-            updateRunButton();
-            clearResults();
-            getTests();
-        }
+        updateRunButton();
+        clearResults();
+        getTests();
     }
 
-    function complete() {
-        console.log('complete');
-        isRunning = false;
+    function complete(id, result) {
+        console.log('complete', id, result);
         updateRunButton();
     }
 
@@ -81,10 +96,7 @@
     });
 
     function register() {
-        socket.emit('register', {
-            id: 'dashboard',
-            ua: navigator.userAgent
-        });
+        socket.emit('register_dashboard');
     }
 
     socket.on('connect', register);

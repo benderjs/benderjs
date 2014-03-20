@@ -13,10 +13,6 @@
         <% }) %>
     <% }) %>
     
-    <% Array.isArray(scripts) && scripts.forEach(function (script) { %>
-        <script src="<%= script %>"></script>
-    <% }) %>
-
     <script>window.parent.bender && window.parent.bender.setup(window);</script>
 
     <% Array.isArray(plugins) && plugins.forEach(function (plugin) { %>
