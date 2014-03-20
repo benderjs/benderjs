@@ -17,14 +17,15 @@
         <script src="<%= script %>"></script>
     <% }) %>
 
-    <script>
-        // todo - what if the test is loaded alone? single mode?
-        window.parent.bender && window.parent.bender.setup(window);
-    </script>
+    <script>window.parent.bender && window.parent.bender.setup(window);</script>
 
     <% Array.isArray(plugins) && plugins.forEach(function (plugin) { %>
-        <% if (plugin.css) { %><link rel="stylesheet" href="<%= plugin.css %>"><% } %>
-        <script src="<%= plugin.script %>"></script>
+        <% Array.isArray(plugin.css) && plugin.css.forEach(function (css) { %>
+            <link rel="stylesheet" href="/absolute<%= css %>">
+        <% }) %>
+        <% Array.isArray(plugin.js) && plugin.js.forEach(function (js) { %>
+            <script src="/absolute<%= js %>"></script>
+        <% }) %>
     <% }) %>
 </head>
 <body>

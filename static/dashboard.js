@@ -23,6 +23,7 @@
     }
 
     function updateRunButton() {
+        // TODO check clients availability instead of count
         runBtnEl.className = (!isRunning && clientsEl.getElementsByTagName('li').length) ?
             'btn' : 'btn disabled';
     }
@@ -67,6 +68,7 @@
     }
 
     function complete() {
+        console.log('complete');
         isRunning = false;
         updateRunButton();
     }
@@ -77,6 +79,15 @@
     socket.on('disconnect', function () {
         updateClientList([]);
     });
+
+    function register() {
+        socket.emit('register', {
+            id: 'dashboard',
+            ua: navigator.userAgent
+        });
+    }
+
+    socket.on('connect', register);
 
     updateRunButton();
 })();

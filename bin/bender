@@ -1,10 +1,24 @@
 #!/usr/bin/env node
 var argParser = require('nomnom'),
     path = require('path'),
-    config = require('../lib/config'),
-    plugins = require('../lib/plugins'),
-    constants = require('../lib/constants'),
-    log = require('../lib/logger').create('cli');
+    di = require('di'),
+
+    dir = '../lib/',
+
+    applications = require(dir + 'applications'),
+    assertion = require(dir + 'assertion'),
+    clients = require(dir + 'clients'),
+    config = require(dir + 'config'),
+    constants = require(dir + 'constants'),
+    emitter = require(dir + 'emitter'),
+    filesystem = require(dir + 'filesystem'),
+    logger = require(dir + 'logger'),
+    plugins = require(dir + 'plugins'),
+    server = require(dir + 'server'),
+    sockets = require(dir + 'sockets'),
+    tests = require(dir + 'tests'),
+
+    log = logger.create('cli');
 
 argParser.command('init')
     .callback(initialize)
@@ -41,14 +55,36 @@ argParser.command('version')
 argParser.parse();
 
 function startServer(options) {
-    var server = require('../lib/server');
+    var cfg, modules, injector;
 
-    config.load(path.resolve(process.cwd(), options.config || 'bender.js'));
-    plugins.load();
+    function start(server, injector) {
 
-    server.create().listen(options.port, options.hostname, function () {
-        log.info('Bender.js v%s Server started at http://%s:%s', constants.VERSION, options.hostname, options.port);
-    });
+        injector.get('bender-qunit');
+
+        server.listen(options.port, options.hostname, function () {
+            log.info('Bender.js v%s Server started at http://%s:%s', constants.VERSION, options.hostname, options.port);
+        });
+    }
+
+    cfg = config.load(path.resolve(process.cwd(), options.config || 'bender.js'));
+
+    modules = [{
+        applications: ['type', applications],
+        assertion: ['type', assertion],
+        clients: ['value', clients],
+        config: ['value', cfg],
+        constants: ['value', constants],
+        emitter: ['type', emitter],
+        filesystem: ['value', filesystem],
+        logger: ['value', logger],
+        server: ['factory', server.create],
+        sockets: ['type', sockets],
+        tests: ['type', tests]
+    }].concat(plugins.load(cfg.plugins));
+
+    injector = new di.Injector(modules);
+
+    injector.invoke(start);
 }
 
 function runTests(options) {
