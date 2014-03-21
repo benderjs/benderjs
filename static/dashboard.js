@@ -1,31 +1,71 @@
-(function () {
-    var host = /^[a-z]+:\/\/([^\/]+)/.exec(window.location)[1].split(":"),
-        runBtnEl = document.getElementById('runBtn'),
-        clientsEl = document.getElementById('clients'),
-        testsEl = document.getElementById('tests'),
-        socket = io.connect('http://' + host[0] + ':' + (host[1] || 80)),
+$(function () {
+    var $header = $('header'),
+        $clients = $('#clients'),
+        $tests = $('#tests'),
+        $run = $('#run'),
         clients = [],
-        results = {};
+        socket;
 
-    runBtnEl.onclick = runTests;
+    function template(tpl, params) {
+        return tpl.replace(/(?:%)(\w+)(?:%)/gi, function (match, param) {
+            return params[param];
+        });
+    }
 
     function updateClientList(list) {
-        var html = [],
+        var tpl = '<li class="%browserName%">%ua% - <strong>%busyText%</strong></li>',
+            html = [],
             client,
             i;
 
         clients = list;
 
-        for (i = 0; i < list.length; i++) {
-            client = list[i];
-            html.push('<li>', client.ua, ' <strong>', (client.busy ? 'Busy' : 'Ready'), '</strong></li>');
-            if (!results[client.id]) {
-                results[client.id] = {};
-            }
+        $clients.empty();
+        
+        for (i = 0; i < clients.length; i++) {
+            client = clients[i];
+            client.browserName = (client.ua.split('/')[0].split(' ')[0] || '').toLowerCase();
+            client.busyText = client.busy ? 'Busy' : 'Ready';
+
+            html.push(template(tpl, client));
         }
 
-        clientsEl.innerHTML = html.join('') || 'none';
+        $clients.html(clients.length ? html.join('') : 'none');
+
         updateRunButton();
+    }
+
+    function updateRunButton() {
+        $run.toggleClass(
+            'disabled',
+            checkBusy() || !clients.length
+        );
+    }
+
+    function handleClick(event) {
+        var $target = $(event.target);
+
+        if ($target.prop('nodeName') === 'A') {
+            if (!checkBusy() && clients.length) {
+                socket.emit('run', [$target.attr('href')]);
+            }
+            event.preventDefault();
+        }
+
+        if ($target.prop('nodeName') === 'INPUT' &&
+            $target.parent().parent().hasClass('group')) {
+            toggleAll($target);
+        }
+    }
+
+    function toggleAll(target) {
+        var state = target.prop('checked'),
+            row = target.parent().parent().next();
+
+        while (row && row.length && !row.hasClass('group')) {
+            row.find('input').prop('checked', state);
+            row = row.next();
+        }
     }
 
     function checkBusy() {
@@ -38,49 +78,19 @@
         return false;
     }
 
-    function updateRunButton() {
-        runBtnEl.className = (!checkBusy() && clientsEl.getElementsByTagName('li').length) ?
-            'btn' : 'btn disabled';
-    }
-
-    function addResult(id, spec, result) {
-        // TODO pass it to the table
-        console.log('result', id, spec, result);
-    }
-
-    function clearResults() {
-        var elems = tests.getElementsByClassName('results'),
-            i = elems.length - 1;
-
-        while (i >= 0) {
-            elems[i].innerHTML = '';
-            i--;
-        }
-
-        for (i in results) {
-            results[i] = {};
-        }
-    }
-
     function getTests() {
-        var checks = testsEl.getElementsByTagName('input'),
-            tests = [],
-            len,
-            i;
-
-        for (i = 0, len = checks.length; i < len; i++) {
-            if (checks[i].checked) {
-                tests.push(checks[i].name);
-            }
-        }
-
-        socket.emit('run', tests);
+        return $tests
+            .find('tr:not(.group) input:checked')
+            .map(function () {
+                return this.name;
+            })
+            .get();
     }
 
     function runTests() {
-        updateRunButton();
-        clearResults();
-        getTests();
+        if (checkBusy() || !clients.length) return;
+
+        socket.emit('run', getTests());
     }
 
     function complete(id, result) {
@@ -88,18 +98,37 @@
         updateRunButton();
     }
 
-    socket.on('client_list', updateClientList);
-    socket.on('result', addResult);
-    socket.on('complete', complete);
-    socket.on('disconnect', function () {
-        updateClientList([]);
-    });
-
-    function register() {
-        socket.emit('register_dashboard');
+    function addResult(client, test, result) {
+        console.log('result', client, test, result);
     }
 
-    socket.on('connect', register);
+    function setStatus(status) {
+        $header[0].className = status;
+    }
 
-    updateRunButton();
-})();
+    function initSocket() {
+        socket = io.connect('http://' + window.location.hostname +
+            ':' + (window.location.port || 80));
+
+        socket.on('connect', function () {
+            setStatus('ok');
+            socket.emit('register_dashboard');
+        });
+        socket.on('reconnect', function () { setStatus('warn'); });
+        socket.on('reconnecting', function () { setStatus('warn'); });
+        socket.on('reconnect_failed', function () { setStatus('warn'); });
+        socket.on('disconnect', function () {
+            setStatus('fail');
+            updateClientList([]);
+        });
+
+        socket.on('client_list', updateClientList);
+        socket.on('result', addResult);
+        socket.on('complete', complete);
+    }
+
+    $run.click(runTests);
+    $tests.click(handleClick);
+
+    initSocket();
+});

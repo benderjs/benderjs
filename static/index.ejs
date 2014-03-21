@@ -7,44 +7,58 @@
 </head>
 <body>
     <header>
-        <h1>Bender.js <%= version %> Dashboard</h1>
+        <h1 class="title">Bender.js <%= version %> Dashboard</h1>
         <a href="/capture" class="btn">Capture</a>
-        <button id="runBtn" class="btn">Run</button>
+        <button id="run" class="btn disabled">Run</button>
     </header>
-    <section>
-        <h1>Captured browser</h1>
-        <ol id="clients">
-        </ol>
-        <h1>Test cases</h1>
-        <table id="tests" cellspacing="0" cellpadding="0">
-            <thead>
-                <tr>
-                    <th style="width: 1%;">&nbsp;</th>
-                    <th>ID</th>
-                    <th>Tags</th>
-                    <th>Results</th>
-                </tr>    
-            </thead>
-            <tbody>
-            <% Array.isArray(groups) && groups.forEach(function (group) { %>
-            <tr class="group">
-                <td><input type="checkbox" name="<%= group.name %>" checked="checked"></td>
-                <td colspan="2"><span>Group:</span> <%= group.name %></td>
-                <td class="browsers"></td>
-            </tr>
-                <% Array.isArray(group.tests) && group.tests.forEach(function (test) { %>
-                <tr>
-                    <td><input type="checkbox" name="<%= test.id %>" checked="checked"></td>
-                    <td><a href="tests/<%= test.id %>"><%= test.id %></a></td>
-                    <td><%= test.tags %></td>
-                    <td class="results"></td>
+    <main>
+        <ul id="clients" class="clients"></ul>
+        <ul id="menu" class="menu">
+            <li class="selected">Tests</li>
+            <li>Results</li>
+        </ul>
+        <section id="tests">
+            <table cellspacing="0" cellpadding="0">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>ID</th>
+                        <th>Tags</th>
+                    </tr>    
+                </thead>
+                <tbody>
+                <% Array.isArray(groups) && groups.forEach(function (group) { %>
+                <tr class="group">
+                    <td><input type="checkbox" checked="checked"></td>
+                    <td colspan="2"><span>Group:</span> <%= group.name %></td>
                 </tr>
+                    <% Array.isArray(group.tests) && group.tests.forEach(function (test) { %>
+                    <tr>
+                        <td><input type="checkbox" name="<%= test.id %>" checked="checked"></td>
+                        <td><a href="<%= test.id %>"><%= test.id %></a></td>
+                        <td><%= test.tags %></td>
+                    </tr>
+                    <% }) %>
                 <% }) %>
-            <% }) %>
-            </tbody>
-        </table>
-    </section>
+                </tbody>
+            </table>
+        </section>
+        <section id="results">
+            <table cellspacing="0" cellpadding="0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Results</th>
+                    </tr>    
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </section>
+    </main>
     <script src="../socket.io/socket.io.js"></script>
+    <script src="jquery.1.11.0.min.js"></script>
     <script src="dashboard.js"></script>
 </body>
 </html>

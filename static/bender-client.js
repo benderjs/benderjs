@@ -3,7 +3,6 @@
         id = /\/clients\/([^\/]+)/.exec(window.location)[1],
         statusEl = document.getElementById('status'),
         contextEl = document.getElementById('context'),
-        busy = false,
         socket,
         states;
 
