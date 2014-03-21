@@ -24,10 +24,6 @@ argParser.command('init')
     .callback(initialize)
     .help('Initialize Bender.js for this directory');
 
-argParser.command('run')
-    .callback(runTests)
-    .help('Run tests on captured clients');
-
 argParser.command('server')
     .callback(startServer)
     .option('port', {
@@ -85,10 +81,6 @@ function startServer(options) {
     injector = new di.Injector(modules);
 
     injector.invoke(start);
-}
-
-function runTests(options) {
-    // TODO run tests on captured browsers
 }
 
 function initialize(options) {
