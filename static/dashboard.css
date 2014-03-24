@@ -96,8 +96,10 @@ table {
     text-align: left;
 }
 
-th:first-child,
-th:nth-child(2) {
+#tests td:first-child,
+#tests th:first-child,
+#results th:first-child,
+#tests th:nth-child(2) {
     width: 1px;
     white-space: nowrap;
 }
@@ -217,4 +219,59 @@ th, td {
 
 .menu .selected {
     border-bottom: 1px solid #fff;
+}
+
+.result {
+    background-position: 50% 50%;
+    width: 32px;
+    height: 32px;
+    font-family: 'icomoon';
+    margin-right: 1em;
+    font-size: 0.75em;
+    text-align: center;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+td.result {
+    background: #ccc;
+    color: #999;
+}
+
+td.result:before {
+    content: "\e601";
+}
+
+td.ok {
+    background: #c8f0c8;
+    background: rgba(200, 240, 200, 0.7);
+    color: #090;
+}
+
+td.ok:before {
+    content: "\e606";
+}
+
+td.fail {
+    background: #ffc8c8;
+    background: rgba(255, 200, 200, 0.7);
+    color: #900;
+}
+
+td.fail:before {
+    content: "\e605";
+}
+
+td.warn {
+    background: #fff0b4;
+    background: rgba(255, 240, 180, 0.7);
+    color: #990;
+}
+
+.busy {
+    color: #900;
+}
+
+.ready {
+    color: #090;
 }
