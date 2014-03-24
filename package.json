@@ -13,8 +13,9 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "ejs": "~0.8.5",
-    "express": "~3.4.8",
+    "connect": "~2.14.3",
+    "connect-render": "~0.3.3",
+    "di": "0.0.1",
     "glob": "~3.2.9",
     "lodash": "~2.4.1",
     "node-uuid": "~1.4.1",
@@ -23,7 +24,6 @@
     "socket.io": "~0.9.16",
     "useragent": "~2.0.7",
     "when": "~2.8.0",
-    "winston": "~0.7.2",
-    "di": "0.0.1"
+    "winston": "~0.7.2"
   }
 }
