@@ -8,14 +8,14 @@
 <body>
     <header>
         <h1 class="title">Bender.js <%= version %> Dashboard</h1>
-        <a href="/capture" class="btn">Capture</a>
-        <button id="run" class="btn disabled">Run</button>
+        <a href="/capture" class="btn capture">Capture</a>
+        <button id="run" class="btn disabled run">Run</button>
     </header>
     <main>
         <ul id="clients" class="clients"></ul>
         <ul id="menu" class="menu">
-            <li class="selected">Tests</li>
-            <li>Results</li>
+            <li><a href="#tests" class="selected">Tests</a></li>
+            <li><a href="#results">Results</a></li>
         </ul>
         <section id="tests">
             <table cellspacing="0" cellpadding="0">
@@ -29,8 +29,9 @@
                 <tbody>
                 <% Array.isArray(groups) && groups.forEach(function (group) { %>
                 <tr class="group">
-                    <td><input type="checkbox" checked="checked"></td>
-                    <td colspan="2"><span>Group:</span> <%= group.name %></td>
+                    <td><input type="checkbox" checked="checked" class="toggle"></td>
+                    <td><span>Group:</span> <%= group.name %></td>
+                    <td></td>
                 </tr>
                     <% Array.isArray(group.tests) && group.tests.forEach(function (test) { %>
                     <tr>
@@ -51,7 +52,7 @@
                         <th>Results</th>
                     </tr>    
                 </thead>
-                <tbody>
+                <tbody id="resultsBody">
                     
                 </tbody>
             </table>

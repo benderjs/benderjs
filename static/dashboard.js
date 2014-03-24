@@ -2,7 +2,9 @@ $(function () {
     var $header = $('header'),
         $clients = $('#clients'),
         $tests = $('#tests'),
+        $results = $('#resultsBody'),
         $run = $('#run'),
+        $menu = $('#menu'),
         clients = [],
         socket;
 
@@ -30,37 +32,55 @@ $(function () {
             html.push(template(tpl, client));
         }
 
-        $clients.html(clients.length ? html.join('') : 'none');
+        $clients.html(clients.length ? html.join('') : '<li>none</li>');
 
         updateRunButton();
     }
 
     function updateRunButton() {
-        $run.toggleClass(
-            'disabled',
-            checkBusy() || !clients.length
-        );
+        $run.toggleClass('disabled',checkBusy() || !clients.length);
     }
 
-    function handleClick(event) {
+    function testClick(event) {
         var $target = $(event.target);
 
         if ($target.prop('nodeName') === 'A') {
-            if (!checkBusy() && clients.length) {
-                socket.emit('run', [$target.attr('href')]);
-            }
+            runTests($target.attr('href'));
             event.preventDefault();
-        }
-
-        if ($target.prop('nodeName') === 'INPUT' &&
-            $target.parent().parent().hasClass('group')) {
-            toggleAll($target);
         }
     }
 
-    function toggleAll(target) {
-        var state = target.prop('checked'),
-            row = target.parent().parent().next();
+    function toggleCollapse(event) {
+        var $this = $(this),
+            collapsed = $this.hasClass('collapsed'),
+            next = $this.next();
+
+        $this[collapsed ? 'removeClass' : 'addClass']('collapsed');
+
+        while (next && next.length && !next.hasClass('group')) {
+            next[collapsed ? 'show' : 'hide']();
+            next = next.next();
+        }
+    }
+
+    function handleTabs(event) {
+        switchTab($(this).attr('href').substring(1));
+        event.preventDefault();
+    }
+
+    function switchTab(name) {
+        $('section').hide();
+        $menu.find('.selected').removeClass('selected');
+        $menu.find('a[href="#' + name +'"]').addClass('selected');
+        $('#' + name).show();
+    }
+
+    function toggleGroup(event) {
+        var $this = $(this),
+            state = $this.prop('checked'),
+            row = $this.parent().parent().next();
+
+        event.stopPropagation();
 
         while (row && row.length && !row.hasClass('group')) {
             row.find('input').prop('checked', state);
@@ -80,17 +100,20 @@ $(function () {
 
     function getTests() {
         return $tests
-            .find('tr:not(.group) input:checked')
+            .find('input:not(.toggle):checked')
             .map(function () {
                 return this.name;
             })
             .get();
     }
 
-    function runTests() {
+    function runTests(test) {
         if (checkBusy() || !clients.length) return;
 
-        socket.emit('run', getTests());
+        $results.empty();
+
+        switchTab('results');
+        socket.emit('run', typeof test == 'string' ? [test] : getTests());
     }
 
     function complete(id, result) {
@@ -128,7 +151,13 @@ $(function () {
     }
 
     $run.click(runTests);
-    $tests.click(handleClick);
+    $menu.find('a').click(handleTabs);
+
+    $tests.click(testClick);
+    $tests.find('.group').click(toggleCollapse);
+    $tests.find('.toggle').click(toggleGroup);
+
+    $('#results').hide();
 
     initSocket();
 });

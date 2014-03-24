@@ -1,3 +1,14 @@
+@font-face {
+    font-family: 'icomoon';
+    src:url('fonts/icomoon.eot?k684wo');
+    src:url('fonts/icomoon.eot?#iefixk684wo') format('embedded-opentype'),
+        url('fonts/icomoon.woff?k684wo') format('woff'),
+        url('fonts/icomoon.ttf?k684wo') format('truetype'),
+        url('fonts/icomoon.svg?k684wo#icomoon') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -80,10 +91,6 @@ h2 {
     margin: .5em 0;
 }
 
-li {
-    margin: .5em 0;
-}
-
 table {
     width: 100%;
     text-align: left;
@@ -95,11 +102,10 @@ th:nth-child(2) {
     white-space: nowrap;
 }
 
-
-
 th, td {
     border-bottom: 1px solid #ccc;
     padding: .5em;
+    white-space: nowrap;
 }
 
 .disabled:hover,
@@ -108,8 +114,12 @@ th, td {
     background: #ccc;
 }
 
+.group {
+    cursor: pointer;
+}
+
 .group td {
-    background: #ccc;
+    background: #eee;
     font-weight: bold;
 }
 
@@ -117,24 +127,30 @@ th, td {
     color: #999;
 }
 
-.menu {
-    list-style-type: none;
-    border-bottom: 1px solid #ccc;
-    padding-left: .2em;
+.group span:before,
+.run:before,
+.capture:before {
+    font-family: 'icomoon';
+    margin-right: 1em;
+    font-size: 0.75em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.menu li {
-    display: inline-block;
-    padding: .5em 2em;
-    border: 1px solid #ccc;
-    margin: 0 .1em -1px;
-    border-top-left-radius: .25em;
-    border-top-right-radius: .25em;
-    cursor: pointer;
+.group span:before {
+    content: "\e601";
 }
 
-.menu .selected {
-    border-bottom: 1px solid #fff;
+.collapsed span:before {
+    content: "\e602";
+}
+
+.capture:before {
+    content: "\e600";
+}
+
+.run:before {
+    content: "\e603";
 }
 
 .clients:before {
@@ -152,7 +168,7 @@ th, td {
     height: 32px;
     line-height: 32px;
     padding-left: 37px;
-    margin-bottom: 5px;
+    margin-top: 5px;
 }
 
 .chrome {
@@ -177,4 +193,28 @@ th, td {
 
 .safari {
     background: url('logos/safari_32x32.png') no-repeat;
+}
+
+.menu {
+    list-style-type: none;
+    border-bottom: 1px solid #ccc;
+    padding-left: .2em;
+}
+
+.menu li {
+    display: inline-block;
+    margin: 0 .1em -1px;
+}
+
+.menu li a {
+    display: block;
+    padding: .5em 2em;
+    border: 1px solid #ccc;
+    border-top-left-radius: .25em;
+    border-top-right-radius: .25em;
+    cursor: pointer;
+}
+
+.menu .selected {
+    border-bottom: 1px solid #fff;
 }
