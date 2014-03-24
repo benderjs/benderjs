@@ -5,10 +5,10 @@
     <title><%= id %></title>
     
     <% Array.isArray(apps) && apps.forEach(function (app) { %>
-        <% app && Array.isArray(app.css) && app.css.forEach(function (css) { %>
+        <% Array.isArray(app.css) && app.css.forEach(function (css) { %>
             <link rel="stylesheet" href="<%= css %>">
         <% }) %>
-        <% app && Array.isArray(app.js) && app.js.forEach(function (script) { %>
+        <% Array.isArray(app.js) && app.js.forEach(function (script) { %>
             <script src="<%= script %>"></script>
         <% }) %>
     <% }) %>
@@ -17,18 +17,16 @@
 
     <% Array.isArray(plugins) && plugins.forEach(function (plugin) { %>
         <% Array.isArray(plugin.css) && plugin.css.forEach(function (css) { %>
-            <link rel="stylesheet" href="/absolute<%= css %>">
+            <link rel="stylesheet" href="<%= css %>">
         <% }) %>
         <% Array.isArray(plugin.js) && plugin.js.forEach(function (js) { %>
-            <script src="/absolute<%= js %>"></script>
+            <script src="<%= js %>"></script>
         <% }) %>
     <% }) %>
 </head>
 <body>
     <%- html %>
     <% if (js) { %><script><%- js %></script><% } %>
-    <script>
-        window.bender && window.bender.ready();
-    </script>
+    <script>window.bender && window.bender.ready();</script>
 </body>
 </html>
