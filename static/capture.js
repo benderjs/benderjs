@@ -37,13 +37,27 @@
         };
     }
 
-    function Bender(socket) {
-        this.suite = null;
-        this.current = null;
-        this.results = [];
+    function addListener(target, name, callback, scope) {
+        function handler () {
+            callback.call(scope || this);
+        }
 
-        // TODO expose assertion library here
+        if (target.addEventListener) {
+            target.addEventListener(name, handler, false);
+        } else if (target.attachEvent) {
+            target.attachEvent('on' + name, handler);
+        } else {
+            target['on' + name] = handler;
+        }
+    }
+
+    function Bender(socket) {
+        var that = this;
+
         this.assert = null;
+        this.current = null;
+        this.suite = null;
+        this.results = [];
 
         this.error = function (error) {
             socket.emit('error', error);
@@ -79,7 +93,7 @@
             socket.emit('log', Array.prototype.join.call(arguments, ' '));
         };
 
-        // this will be overriden by framework adapter
+        // this will be overriden by a framework adapter
         this.start = this.complete;
 
         this.ready = function () {
@@ -91,10 +105,12 @@
         };
 
         this.setup = function (context, steal) {
-            var that = this;
-
             context.bender = this;
             context.onerror = this.error;
+
+            addListener(context, 'load', function () {
+                that.ready.call(that);
+            });
 
             function stealLogs() {
                 var commands = ['log', 'info', 'warn', 'debug', 'error'],
@@ -119,24 +135,20 @@
                 };
             }
 
-            if (steal) stealLogs();
-            // if (steal || steal === undefined) stealLogs();
+            if (steal || steal === undefined) stealLogs();
         };
 
-        function register() {
+        socket.on('connect', function () {
             socket.emit('register', {
                 id: id,
                 ua: navigator.userAgent
             });
-        }
+        });
 
-        function runTests(suite) {
-            this.suite = suite;
-            this.next();
-        }
-
-        socket.on('connect', register);
-        socket.on('run', runTests.bind(this));
+        socket.on('run', function (suite) {
+            that.suite = suite;
+            that.next.call(that);
+        });
     }
 
     window.bender = new Bender(socket);
