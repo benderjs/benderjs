@@ -3,39 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Bender.js <%= version %> Client</title>
-    <style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden;
-        font-family: 'Arial', 'Helvetica', sans-serif;
-    }
-    #status {
-        position: absolute;
-        top: 0;
-        right: 0;
-        background: rgba(200, 200, 200, 0.7);
-        padding: 1em;
-        margin: 0;
-        box-sizing: border-box;
-        -moz-box-sizing: border-box;
-    }
-    #context {
-        width: 100%;
-        height: 100%;
-        border: 0;
-        margin: 0;
-    }
-    #status.ok { background: rgba(200, 240, 200, 0.7); }
-    #status.warn { background: rgba(255, 240, 180, 0.7); }
-    #status.fail { background: rgba(255, 200, 200, 0.7); }
-    </style>
+    <link rel="stylesheet" href="/capture.css">
 </head>
 <body>
     <iframe src="about:blank" id="context"></iframe>
     <header id="status"></header>
-    <script src="../socket.io/socket.io.js"></script>
-    <script src="../bender-client.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/capture.js"></script>
 </body>
 </html>

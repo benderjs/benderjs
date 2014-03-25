@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title><%= id %></title>
+    <script>window.parent.bender && window.parent.bender.setup(window);</script>
     
     <% Array.isArray(apps) && apps.forEach(function (app) { %>
         <% Array.isArray(app.css) && app.css.forEach(function (css) { %>
@@ -12,8 +13,6 @@
             <script src="<%= script %>"></script>
         <% }) %>
     <% }) %>
-    
-    <script>window.parent.bender && window.parent.bender.setup(window);</script>
 
     <% Array.isArray(plugins) && plugins.forEach(function (plugin) { %>
         <% Array.isArray(plugin.css) && plugin.css.forEach(function (css) { %>

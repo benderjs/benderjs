@@ -28,11 +28,11 @@
                 </thead>
                 <tbody>
                 <% Array.isArray(groups) && groups.forEach(function (group) { %>
-                <tr class="group">
-                    <td><input type="checkbox" checked="checked" class="toggle"></td>
-                    <td><span>Group:</span> <%= group.name %></td>
-                    <td></td>
-                </tr>
+                    <tr class="group">
+                        <td><input type="checkbox" checked="checked" class="toggle"></td>
+                        <td><span>Group:</span> <%= group.name %></td>
+                        <td></td>
+                    </tr>
                     <% Array.isArray(group.tests) && group.tests.forEach(function (test) { %>
                     <tr>
                         <td><input type="checkbox" name="<%= test.id %>" checked="checked"></td>

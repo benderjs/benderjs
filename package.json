@@ -17,6 +17,7 @@
     "connect-render": "~0.3.3",
     "di": "0.0.1",
     "glob": "~3.2.9",
+    "jsdom": "~0.10.3",
     "lodash": "~2.4.1",
     "node-uuid": "~1.4.1",
     "nomnom": "~1.6.2",
