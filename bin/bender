@@ -7,6 +7,7 @@ var argParser = require('nomnom'),
 
     applications = require(dir + 'applications'),
     assertions = require(dir + 'assertions'),
+    cache = require(dir + 'cache'),
     clients = require(dir + 'clients'),
     config = require(dir + 'config'),
     constants = require(dir + 'constants'),
@@ -67,6 +68,7 @@ function startServer(options) {
     modules = [{
         applications: ['type', applications],
         assertions: ['type', assertions],
+        cache: ['type', cache],
         clients: ['value', clients],
         config: ['value', cfg],
         constants: ['value', constants],
