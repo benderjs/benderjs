@@ -135,7 +135,7 @@
                 };
             }
 
-            if (steal || steal === undefined) stealLogs();
+            // if (steal || steal === undefined) stealLogs();
         };
 
         socket.on('connect', function () {

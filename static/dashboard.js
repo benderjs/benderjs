@@ -54,15 +54,10 @@ $(function () {
 
     function toggleCollapse(event) {
         var $this = $(this),
-            collapsed = $this.hasClass('collapsed'),
-            next = $this.next();
+            collapsed = $this.hasClass('collapsed');
 
         $this[collapsed ? 'removeClass' : 'addClass']('collapsed');
-
-        while (next && next.length && !next.hasClass('group')) {
-            next[collapsed ? 'show' : 'hide']();
-            next = next.next();
-        }
+        $this.nextUntil('.group')[collapsed ? 'show' : 'hide']();
     }
 
     function handleTabs(event) {
@@ -79,15 +74,10 @@ $(function () {
 
     function toggleGroup(event) {
         var $this = $(this),
-            state = $this.prop('checked'),
-            row = $this.parent().parent().next();
+            state = $this.prop('checked');
 
+        $this.parent().parent().nextUntil('.group').find('input').prop('checked', state);
         event.stopPropagation();
-
-        while (row && row.length && !row.hasClass('group')) {
-            row.find('input').prop('checked', state);
-            row = row.next();
-        }
     }
 
     function checkBusy() {
