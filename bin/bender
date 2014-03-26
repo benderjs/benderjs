@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 var argParser = require('nomnom'),
     path = require('path'),
-    di = require('di'),
+    broadway = require('broadway'),
 
     dir = '../lib/',
 
@@ -9,9 +9,8 @@ var argParser = require('nomnom'),
     assertions = require(dir + 'assertions'),
     cache = require(dir + 'cache'),
     clients = require(dir + 'clients'),
-    config = require(dir + 'config'),
+    conf = require(dir + 'config'),
     constants = require(dir + 'constants'),
-    emitter = require(dir + 'emitter'),
     files = require(dir + 'files'),
     logger = require(dir + 'logger'),
     plugins = require(dir + 'plugins'),
@@ -52,37 +51,33 @@ argParser.command('version')
 argParser.parse();
 
 function startServer(options) {
-    var cfg, modules, injector;
+    var bender = new broadway.App();
 
-    function start(server, injector) {
+    bender.use(logger);
+    bender.use(conf, { path: path.resolve(process.cwd(), options.config || 'bender.js') });
+    bender.use(applications);
+    bender.use(files);
+    bender.use(assertions);
+    bender.use(cache);
+    bender.use(clients);
+    bender.use(constants);
+    bender.use(tests);
+    bender.use(sockets);
+    bender.use(server);
+    bender.use(plugins);
 
-        injector.get('bender-qunit');
+    bender.init(function (err) {
+        if (err) {
+            log.error(error);
+            process.exit(1);
+        }
 
-        server.listen(options.port, options.hostname, function () {
-            log.info('Bender.js v%s Server started at http://%s:%s', constants.VERSION, options.hostname, options.port);
+        bender.plugins.load();
+
+        bender.server.create().listen(options.port, options.hostname, function () {
+            log.info('Bender.js v%s Server started at http://%s:%s', bender.constants.VERSION, options.hostname, options.port);
         });
-    }
-
-    cfg = config.load(path.resolve(process.cwd(), options.config || 'bender.js'));
-
-    modules = [{
-        applications: ['type', applications],
-        assertions: ['type', assertions],
-        cache: ['type', cache],
-        clients: ['value', clients],
-        config: ['value', cfg],
-        constants: ['value', constants],
-        emitter: ['type', emitter],
-        files: ['type', files],
-        logger: ['value', logger],
-        server: ['factory', server.create],
-        sockets: ['type', sockets],
-        tests: ['type', tests]
-    }].concat(plugins.load(cfg.plugins));
-
-    injector = new di.Injector(modules);
-
-    injector.invoke(start);
+    });
 }
 
 function initialize(options) {
