@@ -143,7 +143,7 @@
         };
 
         socket.on('connect', function () {
-            socket.emit('register', {
+            socket.emit('register:client', {
                 id: id,
                 ua: navigator.userAgent
             });

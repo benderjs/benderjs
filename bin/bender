@@ -50,7 +50,9 @@ argParser.command('version')
 argParser.parse();
 
 function startServer(options) {
-    var bender = new broadway.App(),
+    var bender = new broadway.App({
+            delimeter: ':'
+        }),
         modules = [
             utils, applications, cache, clients,
             constants, tests, sockets, server, plugins

@@ -171,7 +171,7 @@ $(function () {
 
         socket.on('connect', function () {
             setStatus('ok');
-            socket.emit('register_dashboard');
+            socket.emit('register:dashboard');
         });
         socket.on('reconnect', function () { setStatus('warn'); });
         socket.on('reconnecting', function () { setStatus('warn'); });
@@ -181,7 +181,7 @@ $(function () {
             updateClientList([]);
         });
 
-        socket.on('client_list', updateClientList);
+        socket.on('client:list', updateClientList);
         socket.on('result', addResult);
         socket.on('complete', complete);
     }
