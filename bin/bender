@@ -17,6 +17,7 @@ var argParser = require('nomnom'),
     server = require(dir + 'server'),
     sockets = require(dir + 'sockets'),
     tests = require(dir + 'tests'),
+    utils = require(dir + 'utils'),
 
     log = logger.create('cli');
 
@@ -51,20 +52,15 @@ argParser.command('version')
 argParser.parse();
 
 function startServer(options) {
-    var bender = new broadway.App();
+    var bender = new broadway.App(),
+        modules = [
+            utils, applications, files, assertions, cache, clients,
+            constants, tests, sockets, server, plugins
+        ];
 
-    bender.use(logger);
     bender.use(conf, { path: path.resolve(process.cwd(), options.config || 'bender.js') });
-    bender.use(applications);
-    bender.use(files);
-    bender.use(assertions);
-    bender.use(cache);
-    bender.use(clients);
-    bender.use(constants);
-    bender.use(tests);
-    bender.use(sockets);
-    bender.use(server);
-    bender.use(plugins);
+    
+    modules.forEach(function (module) { bender.use(module); });
 
     bender.init(function (err) {
         if (err) {
