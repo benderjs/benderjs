@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bender.js <%= version %> Dashboard</title>
+    <title>Bender.js %VERSION% Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
     <header>
-        <h1 class="title">Bender.js <%= version %> Dashboard</h1>
+        <h1 class="title">Bender.js %VERSION% Dashboard</h1>
         <a href="/capture" class="btn capture">Capture</a>
         <button id="run" class="btn disabled run">Run</button>
     </header>
@@ -18,8 +18,8 @@
             <li><a href="#results">Results</a></li>
         </ul>
         <section id="tests">
-            <table cellspacing="0" cellpadding="0">
-                <thead>
+            <table cellspacing="0" cellpadding="0" id="testsTable"></table>
+                <!-- <thead>
                     <tr>
                         <th></th>
                         <th>ID</th>
@@ -27,26 +27,20 @@
                     </tr>    
                 </thead>
                 <tbody>
-                <% Array.isArray(groups) && groups.forEach(function (group) { %>
                     <tr class="group">
                         <td><input type="checkbox" checked="checked" class="toggle"></td>
                         <td><span>Group:</span> <%= group.name %></td>
                         <td></td>
                     </tr>
-                    <% Array.isArray(group.tests) && group.tests.forEach(function (test) { %>
                     <tr>
                         <td><input type="checkbox" name="<%= test.id %>" checked="checked"></td>
                         <td><a href="<%= test.id %>"><%= test.id %></a></td>
                         <td><%= test.tags %></td>
                     </tr>
-                    <% }) %>
-                <% }) %>
-                </tbody>
-            </table>
+                </tbody> -->
         </section>
         <section id="results">
-            <table cellspacing="0" cellpadding="0" id="resultsTable">
-            </table>
+            <table cellspacing="0" cellpadding="0" id="resultsTable"></table>
         </section>
     </main>
     <script src="../socket.io/socket.io.js"></script>

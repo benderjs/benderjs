@@ -1,7 +1,7 @@
 $(function () {
     var $header = $('header'),
         $clients = $('#clients'),
-        $tests = $('#tests'),
+        $tests = $('#testsTable'),
         $results = $('#resultsTable'),
         $run = $('#run'),
         $menu = $('#menu'),
