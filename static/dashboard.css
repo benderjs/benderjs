@@ -275,3 +275,8 @@ td.warn {
 .ready {
     color: #090;
 }
+
+.loading {
+    background: url('loader.gif') 50% 50% no-repeat;
+    min-height: 32px;
+}

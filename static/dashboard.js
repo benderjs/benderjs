@@ -39,6 +39,34 @@ $(function () {
         updateRunButton();
     }
 
+    function updateTestList(tests) {
+        var html = ['<thead><tr><th></th><th>ID</th><th>Tags</th></tr></thead><tbody>'],
+            groupTpl = ['<tr class="group">',
+                        '<td><input type="checkbox" checked="checked" class="toggle"></td>',
+                        '<td><span>Group:</span> %name%</td>',
+                        '<td></td></tr>'].join(''),
+            testTpl = ['<tr><td><input type="checkbox" name="%id%" checked="checked"></td>',
+                        '<td><a href="%id%">%id%</a></td>',
+                        '<td>%tags%</td></tr>'].join(''),
+            group,
+            i, j, iLen, jLen;
+
+        for (i = 0, iLen = tests.length; i < iLen; i++) {
+            group = tests[i];
+            html.push(template(groupTpl, group));
+            for (j = 0, jLen = group.tests.length; j < jLen; j++) {
+                html.push(template(testTpl, group.tests[j]));
+            }
+        }
+
+        html.push('</tbody>');
+
+        $tests.html(html.join('')).removeClass('loading');
+
+        $tests.find('.group').click(toggleCollapse);
+        $tests.find('.toggle').click(toggleGroup);
+    }
+
     function updateRunButton() {
         $run.toggleClass('disabled',checkBusy() || !clients.length);
     }
@@ -141,23 +169,21 @@ $(function () {
         $results.html(html.join(''));
     }
 
-    function addResult(client, test, result) {
-        console.log('result', client, test, result);
-        
-        var pattern = /[\/\\\%\. \,]+/gi,
-            elem = $('#' + test.replace(pattern, '_')).find('.' + client);
+    function addResult(data) {
+        var pattern = /[\/\\\%\. \,]+/g,
+            elem = $('#' + data.suite.replace(pattern, '_')).find('.' + data.client);
 
         if (!elem.length) return;
 
-        if (result.success) {
+        if (data.result.success) {
             elem.addClass('ok');
         } else {
-            elem.addClass('fail').attr('title', result.errors.join(''));
+            elem.addClass('fail').attr('title', data.result.errors.join(''));
         }
     }
 
-    function complete(id, result) {
-        console.log('complete', id, result);
+    function complete(data) {
+        console.log('complete', data);
         updateRunButton();
     }
 
@@ -181,7 +207,8 @@ $(function () {
             updateClientList([]);
         });
 
-        socket.on('client:list', updateClientList);
+        socket.on('clients:update', updateClientList);
+        socket.on('tests:update', updateTestList);
         socket.on('result', addResult);
         socket.on('complete', complete);
     }
@@ -190,8 +217,6 @@ $(function () {
     $menu.find('a').click(handleTabs);
 
     $tests.click(testClick);
-    $tests.find('.group').click(toggleCollapse);
-    $tests.find('.toggle').click(toggleGroup);
 
     $('#results').hide();
 
