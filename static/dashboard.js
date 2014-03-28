@@ -11,7 +11,7 @@ $(function () {
     function template(tpl, params) {
         var args = Array.prototype.slice.call(arguments, 1);
 
-        return tpl.replace(/(?:%)(\w+)(?:%)/gi, function (match, param) {
+        return tpl.replace(/(?:%)(\w+)(?:%)/g, function (match, param) {
             return typeof params == 'object' ? params[param] : args.shift() || '';
         });
     }
@@ -167,11 +167,11 @@ $(function () {
 
     function initSocket() {
         socket = io.connect('http://' + window.location.hostname +
-            ':' + (window.location.port || 80));
+            ':' + (window.location.port || 80) + '/dashboard');
 
         socket.on('connect', function () {
             setStatus('ok');
-            socket.emit('register:dashboard');
+            socket.emit('register');
         });
         socket.on('reconnect', function () { setStatus('warn'); });
         socket.on('reconnecting', function () { setStatus('warn'); });

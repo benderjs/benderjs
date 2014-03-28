@@ -14,7 +14,7 @@
         DISCONNECT: 4
     };
 
-    socket = io.connect('http://' + host[0] + ':' + (host[1] || 80), {
+    socket = io.connect('http://' + host[0] + ':' + (host[1] || 80) + '/client', {
         'reconnection limit': 2000
     });
 
@@ -143,7 +143,7 @@
         };
 
         socket.on('connect', function () {
-            socket.emit('register:client', {
+            socket.emit('register', {
                 id: id,
                 ua: navigator.userAgent
             });
