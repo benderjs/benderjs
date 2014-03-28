@@ -51,6 +51,8 @@ $(function () {
             group,
             i, j, iLen, jLen;
 
+        if (!tests) return $tests.empty().addClass('loading');
+
         for (i = 0, iLen = tests.length; i < iLen; i++) {
             group = tests[i];
             html.push(template(groupTpl, group));
@@ -205,6 +207,7 @@ $(function () {
         socket.on('disconnect', function () {
             setStatus('fail');
             updateClientList([]);
+            updateTestList(null);
         });
 
         socket.on('clients:update', updateClientList);
