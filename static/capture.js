@@ -74,7 +74,7 @@
             this.results.length = 0;
         };
 
-        this.log = function (args) {
+        this.log = function () {
             // TODO add some formatting, maybe stringify objects?
             socket.emit('log', Array.prototype.join.call(arguments, ' '));
         };
@@ -139,7 +139,7 @@
                 };
             }
 
-            // if (steal || steal === undefined) stealLogs();
+            if (steal) stealLogs();
         };
 
         socket.on('connect', function () {

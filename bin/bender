@@ -6,6 +6,7 @@ var argParser = require('nomnom'),
     dir = '../lib/',
 
     applications = require(dir + 'applications'),
+    builders = require(dir + 'builders'),
     cache = require(dir + 'cache'),
     clients = require(dir + 'clients'),
     conf = require(dir + 'config'),
@@ -52,7 +53,7 @@ argParser.parse();
 function startServer(options) {
     var bender = new broadway.App({ delimeter: ':' }),
         modules = [
-            utils, applications, cache, clients,
+            utils, applications, builders, cache, clients,
             constants, tests, sockets, server, plugins
         ].concat(reporters.modules);
 
@@ -62,7 +63,7 @@ function startServer(options) {
 
     bender.init(function (err) {
         if (err) {
-            log.error(error);
+            log.error(err);
             process.exit(1);
         }
 

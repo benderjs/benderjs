@@ -49,15 +49,22 @@ $(function () {
                         '<td><a href="%id%">%id%</a></td>',
                         '<td>%tags%</td></tr>'].join(''),
             group,
-            i, j, iLen, jLen;
+            test,
+            name;
 
         if (!tests) return $tests.empty().addClass('loading');
 
-        for (i = 0, iLen = tests.length; i < iLen; i++) {
-            group = tests[i];
-            html.push(template(groupTpl, group));
-            for (j = 0, jLen = group.tests.length; j < jLen; j++) {
-                html.push(template(testTpl, group.tests[j]));
+        for (name in tests) {
+            group = tests[name];
+            
+            if (!group) continue;
+            
+            html.push(template(groupTpl, name));
+
+            for (name in group.tests) {
+                test = group.tests[name];
+                if (!test) continue;
+                html.push(template(testTpl, test));
             }
         }
 
@@ -82,7 +89,7 @@ $(function () {
         }
     }
 
-    function toggleCollapse(event) {
+    function toggleCollapse() {
         var $this = $(this),
             collapsed = $this.hasClass('collapsed');
 
