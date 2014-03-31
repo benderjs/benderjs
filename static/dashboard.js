@@ -47,7 +47,7 @@ $(function () {
                         '<td></td></tr>'].join(''),
             testTpl = ['<tr><td><input type="checkbox" name="%id%" checked="checked"></td>',
                         '<td><a href="%id%">%id%</a></td>',
-                        '<td>%tags%</td></tr>'].join(''),
+                        '<td>%tagStr%</td></tr>'].join(''),
             group,
             test,
             name;
@@ -63,6 +63,7 @@ $(function () {
 
             for (name in group.tests) {
                 test = group.tests[name];
+                test.tagStr = test.tags.join(', ');
                 if (!test) continue;
                 html.push(template(testTpl, test));
             }
