@@ -80,13 +80,13 @@ $(function () {
     }
 
     function switchTab(name) {
-        $('section').hide();
+        $('section').addClass('hidden');
         
         $menu
             .find('.selected').removeClass('selected').end()
             .find('a[href="#' + name +'"]').addClass('selected');
 
-        $('#' + name).show();
+        $('#' + name).removeClass('hidden');
     }
 
     function toggleGroup(event) {
@@ -208,7 +208,6 @@ $(function () {
     $run.click(runTests);
     $menu.find('a').click(handleTabs);
     $tests.click(testClick);
-    $('#results').hide();
 
     initSocket();
 });

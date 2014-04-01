@@ -26,6 +26,23 @@ header {
     text-align: right;
 }
 
+main {
+    display: block;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 0 1em;
+}
+
+h2 {
+    margin: .5em 0;
+}
+
+table {
+    width: 100%;
+    text-align: left;
+}
+
 .title {
     font-size: 1.75em;
     margin: 0;
@@ -77,23 +94,6 @@ header {
     background: -moz-linear-gradient(#ccc, #e6e6e6);
     background: -o-linear-gradient(#ccc, #e6e6e6);
     background: linear-gradient(#ccc, #e6e6e6);
-}
-
-main {
-    display: block;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    padding: 0 1em;
-}
-
-h2 {
-    margin: .5em 0;
-}
-
-table {
-    width: 100%;
-    text-align: left;
 }
 
 #tests td:first-child,
@@ -279,4 +279,8 @@ td.warn {
 .loading {
     background: url('loader.gif') 50% 50% no-repeat;
     min-height: 32px;
+}
+
+.hidden {
+    display: none;
 }
