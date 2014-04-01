@@ -4,6 +4,80 @@
     <meta charset="UTF-8">
     <title>Bender.js Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
+
+    <script id="clients-tmpl" type="text/x-dot-template">
+    {{? it.clients.length }}
+        {{~ it.clients :client }}
+            <li class="{{= client.browser }}">
+                {{= client.ua }} -
+                {{? client.busy }}<strong class="busy">busy</strong>
+                {{??}}<strong class="ready">ready</strong>
+                {{?}}
+            </li>
+        {{~}}
+    {{??}}
+        <li>none</li>
+    {{?}}
+    </script>
+
+    <script id="tests-tmpl" type="text/x-dot-template">
+    <thead>
+        <tr>
+            <th></th>
+            <th>ID</th>
+            <th>Tags</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{= it.html }}
+    </tbody>
+    </script>
+
+    <script id="group-tmpl" type="text/x-dot-template">
+    <tr class="group">
+        <td><input type="checkbox" checked="checked" class="toggle"></td>
+        <td><span>Group:</span> {{= it.name }}</td>
+        <td></td>
+    </tr>
+    </script>
+
+    <script id="test-tmpl" type="text/x-dot-template">
+    <tr>
+        <td><input type="checkbox" name="{{= it.id }}" checked="checked"></td>
+        <td><a href="{{= it.id }}">{{= it.id }}</a></td>
+        <td>{{= it.tags.join(', ') }}</td>
+    </tr>
+    </script>
+
+    <script id="results-tmpl" type="text/x-dot-template">
+    <thead>
+        <tr>
+            <th>ID</th>
+            {{~ it.clients :client }}
+            <th class="result {{= client.browser }}" title="{{= client.ua }}"></th>
+            {{~}}
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {{= it.html }}
+    </tbody>
+    </script>
+
+    <script id="result-tmpl" type="text/x-dot-template">
+    <tr id="{{= it.idEsc }}">
+        <td>{{= it.id }}</td>
+        {{= it.clients }}
+        <td></td>
+    </tr>
+    </script>
+
+    <script id="client-tmpl" type="text/x-dot-template">
+    {{~ it.clients :client }}
+        <td class="result {{= client.id }}"></td>
+    {{~}}
+    </script>
+
 </head>
 <body>
     <header>
@@ -15,17 +89,22 @@
         <ul id="clients" class="clients"></ul>
         <ul id="menu" class="menu">
             <li><a href="#tests" class="selected">Tests</a></li>
+            <li><a href="#jobs">Jobs</a></li>
+            <li><a href="#history">History</a></li>
             <li><a href="#results">Results</a></li>
         </ul>
         <section id="tests">
             <table cellspacing="0" cellpadding="0" id="testsTable" class="loading"></table>
         </section>
+        <section id="jobs"></section>
+        <section id="history"></section>
         <section id="results">
             <table cellspacing="0" cellpadding="0" id="resultsTable"></table>
         </section>
     </main>
-    <script src="../socket.io/socket.io.js"></script>
+    <script src="doT.min.js"></script>
     <script src="jquery.1.11.0.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="dashboard.js"></script>
 </body>
 </html>

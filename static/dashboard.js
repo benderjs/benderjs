@@ -5,76 +5,51 @@ $(function () {
         $results = $('#resultsTable'),
         $run = $('#run'),
         $menu = $('#menu'),
+        tpl = getTemplates(),
         clients = null,
+        tests = null,
         socket;
 
-    function template(tpl, params) {
-        var args = Array.prototype.slice.call(arguments, 1);
+    function getTemplates() {
+        var tpl = {};
 
-        return tpl.replace(/(?:%)(\w+)(?:%)/g, function (match, param) {
-            return typeof params == 'object' ? params[param] : args.shift() || '';
+        $('script[type="text/x-dot-template"]').each(function (idx, elem) {
+            tpl[elem.id.split('-')[0]] = doT.template(elem.innerText);
         });
+
+        return tpl;
     }
 
     function updateClientList(list) {
-        var tpl = '<li class="%browserName%">%ua% - <strong class="%busyText%">%busyText%</strong></li>',
-            html = [],
-            client,
-            i;
-
         clients = list;
-
-        $clients.empty();
-        
-        for (i = 0; i < clients.length; i++) {
-            client = clients[i];
-            client.browserName = (client.ua.split('/')[0].split(' ')[0] || '').toLowerCase();
-            client.busyText = client.busy ? 'busy' : 'ready';
-
-            html.push(template(tpl, client));
-        }
-
-        $clients.html(clients.length ? html.join('') : '<li>none</li>');
-
+        $clients.html(tpl.clients({ clients: list }));
         updateRunButton();
     }
 
-    function updateTestList(tests) {
-        var html = ['<thead><tr><th></th><th>ID</th><th>Tags</th></tr></thead><tbody>'],
-            groupTpl = ['<tr class="group">',
-                        '<td><input type="checkbox" checked="checked" class="toggle"></td>',
-                        '<td><span>Group:</span> %name%</td>',
-                        '<td></td></tr>'].join(''),
-            testTpl = ['<tr><td><input type="checkbox" name="%id%" checked="checked"></td>',
-                        '<td><a href="%id%">%id%</a></td>',
-                        '<td>%tagStr%</td></tr>'].join(''),
+    function updateTestList(list) {
+        var html = [],
             group,
-            test,
             name;
+
+        tests = list;
 
         if (!tests) return $tests.empty().addClass('loading');
 
         for (name in tests) {
-            group = tests[name];
-            
-            if (!group) continue;
-            
-            html.push(template(groupTpl, name));
+            if (!(group = tests[name])) continue;
+            group.name = name;
+            html.push(tpl.group(group));
 
             for (name in group.tests) {
-                test = group.tests[name];
-                test.tagStr = test.tags.join(', ');
-                if (!test) continue;
-                html.push(template(testTpl, test));
+                if (group.tests[name]) html.push(tpl.test(group.tests[name]));
             }
         }
 
-        html.push('</tbody>');
-
-        $tests.html(html.join('')).removeClass('loading');
-
-        $tests.find('.group').click(toggleCollapse);
-        $tests.find('.toggle').click(toggleGroup);
+        $tests
+            .html(tpl.tests({ html: html.join('') }))
+            .removeClass('loading')
+            .find('.group').click(toggleCollapse).end()
+            .find('.toggle').click(toggleGroup);
     }
 
     function updateRunButton() {
@@ -92,10 +67,11 @@ $(function () {
 
     function toggleCollapse() {
         var $this = $(this),
-            collapsed = $this.hasClass('collapsed');
+            isCollapsed = $this.hasClass('collapsed');
 
-        $this[collapsed ? 'removeClass' : 'addClass']('collapsed');
-        $this.nextUntil('.group')[collapsed ? 'show' : 'hide']();
+        $this
+            .toggleClas('collapsed', isCollapsed)
+            .nextUntil('.group')[isCollapsed ? 'show' : 'hide']();
     }
 
     function handleTabs(event) {
@@ -105,8 +81,11 @@ $(function () {
 
     function switchTab(name) {
         $('section').hide();
-        $menu.find('.selected').removeClass('selected');
-        $menu.find('a[href="#' + name +'"]').addClass('selected');
+        
+        $menu
+            .find('.selected').removeClass('selected').end()
+            .find('a[href="#' + name +'"]').addClass('selected');
+
         $('#' + name).show();
     }
 
@@ -114,7 +93,10 @@ $(function () {
         var $this = $(this),
             state = $this.prop('checked');
 
-        $this.parent().parent().nextUntil('.group').find('input').prop('checked', state);
+        $this.parent().parent()
+            .nextUntil('.group')
+            .find('input').prop('checked', state);
+
         event.stopPropagation();
     }
 
@@ -151,32 +133,23 @@ $(function () {
     }
 
     function prepareResults(tests) {
-        var thTpl = '<th class="result %browserName%" title="%ua%"></th>',
-            tdTpl = '<td class="result %id%"></td>',
-            trTpl = '<tr id="%s%"><td>%s%</td>%s%<td></td></tr>',
-            pattern = /[\/\\\%\. \,]/gi,
-            clientHeader = [],
-            clientBody = [],
-            html = [];
-
-        $.each(clients, function (idx, client) {
-            clientHeader.push(template(thTpl, client));
-            clientBody.push(template(tdTpl, client));
-        });
-
-        html.push('<thead><tr><th>ID</th>');
-        html = html.concat(clientHeader);
-        html.push('<th></th></tr></thead><tbody>');
+        var pattern = /[\/\\\%\. \,]/gi,
+            clientsHtml = tpl.client({ clients: clients }),
+            html = [],
+            i;
         
-        clientBody = clientBody.join('');
+        for (i = 0; i < tests.length; i++) {
+            html.push(tpl.result({
+                id: tests[i],
+                idEsc: tests[i].replace(pattern, '_'),
+                clients: clientsHtml
+            }));
+        }
 
-        $.each(tests, function (idx, test) {
-            html.push(template(trTpl, test.replace(pattern, '_'), test, clientBody));
-        });
-
-        html.push('</tbody>');
-
-        $results.html(html.join(''));
+        $results.html(tpl.results({
+            clients: clients,
+            html: html.join('')
+        }));
     }
 
     function addResult(data) {
@@ -198,37 +171,43 @@ $(function () {
     }
 
     function setStatus(status) {
-        $header[0].className = status;
+        return function () {
+            $header[0].className = status;
+        };
     }
 
     function initSocket() {
-        socket = io.connect('http://' + window.location.hostname +
-            ':' + (window.location.port || 80) + '/dashboard');
+        var loc = window.location;
 
-        socket.on('connect', function () {
-            setStatus('ok');
-            socket.emit('register');
-        });
-        socket.on('reconnect', function () { setStatus('warn'); });
-        socket.on('reconnecting', function () { setStatus('warn'); });
-        socket.on('reconnect_failed', function () { setStatus('warn'); });
-        socket.on('disconnect', function () {
-            setStatus('fail');
-            updateClientList([]);
-            updateTestList(null);
-        });
+        socket = io.connect(
+            'http://' + loc.hostname + ':' + (loc.port || 80) + '/dashboard',
+            {
+                'reconnection limit': 2000,
+                'max reconnection attempts': 30
+            });
 
-        socket.on('clients:update', updateClientList);
-        socket.on('tests:update', updateTestList);
-        socket.on('result', addResult);
-        socket.on('complete', complete);
+        socket
+            .on('connect', setStatus('ok'))
+            .on('reconnect', setStatus('warn'))
+            .on('reconnecting', setStatus('warn'))
+            .on('reconnect_failed', setStatus('warn'))
+            .on('disconnect', setStatus('fail'))
+            .on('connect', function () {
+                socket.emit('register');
+            })
+            .on('disconnect', function () {
+                updateClientList([]);
+                updateTestList(null);
+            })
+            .on('clients:update', updateClientList)
+            .on('tests:update', updateTestList)
+            .on('result', addResult)
+            .on('complete', complete);
     }
 
     $run.click(runTests);
     $menu.find('a').click(handleTabs);
-
     $tests.click(testClick);
-
     $('#results').hide();
 
     initSocket();

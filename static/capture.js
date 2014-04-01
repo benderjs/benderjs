@@ -3,30 +3,33 @@
         id = /\/clients\/([^\/]+)/.exec(window.location)[1],
         statusEl = document.getElementById('status'),
         contextEl = document.getElementById('context'),
-        socket,
-        states;
+        states = {
+            CONNECT: 0,
+            RECONNECT: 1,
+            RECONNECT_FAIL: 2,
+            RECONNECTING: 3,
+            DISCONNECT: 4
+        },
+        socket = io.connect(
+            'http://' + host[0] + ':' + (host[1] || 80) + '/client',
+            {
+                'reconnection limit': 2000,
+                'max reconnection attempts': 30
+            }
+        );
 
-    states = {
-        CONNECT: 0,
-        RECONNECT: 1,
-        RECONNECT_FAIL: 2,
-        RECONNECTING: 3,
-        DISCONNECT: 4
-    };
-
-    socket = io.connect('http://' + host[0] + ':' + (host[1] || 80) + '/client', {
-        'reconnection limit': 2000
-    });
-
-    socket.on('connect', setStatus(states.CONNECT));
-    socket.on('reconnect', setStatus(states.RECONNECT));
-    socket.on('reconnect_failed', setStatus(states.RECONNECT_FAIL));
-    socket.on('reconnecting', setStatus(states.RECONNECTING));
-    socket.on('disconnect', setStatus(states.DISCONNECT));
+    socket
+        .on('connect', setStatus(states.CONNECT))
+        .on('reconnect', setStatus(states.RECONNECT))
+        .on('reconnect_failed', setStatus(states.RECONNECT_FAIL))
+        .on('reconnecting', setStatus(states.RECONNECTING))
+        .on('disconnect', setStatus(states.DISCONNECT));
 
     function setStatus(status) {
-        var messages = ['Connected', 'Reconnected', 'Failed to reconnect',
-            'Reconnecting in ', 'Disconnected'];
+        var messages = [
+                'Connected', 'Reconnected', 'Failed to reconnect',
+                'Reconnecting in ', 'Disconnected'
+            ];
 
         return function (options) {
             var msg = messages[status];
@@ -75,7 +78,6 @@
         };
 
         this.log = function () {
-            // TODO add some formatting, maybe stringify objects?
             socket.emit('log', Array.prototype.join.call(arguments, ' '));
         };
 
