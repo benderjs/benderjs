@@ -96,10 +96,16 @@ table {
     background: linear-gradient(#ccc, #e6e6e6);
 }
 
+#tests .btn {
+    padding: .25em .5em;
+}
+
 #tests td:first-child,
 #tests th:first-child,
 #results th:first-child,
-#tests th:nth-child(2) {
+#tests th:nth-child(2),
+#tests th:nth-child(3),
+#tests th:nth-child(4) {
     width: 1px;
     white-space: nowrap;
 }
@@ -131,10 +137,11 @@ th, td {
 
 .group span:before,
 .run:before,
-.capture:before {
+.capture:before,
+.single:before {
     font-family: 'icomoon';
-    margin-right: 1em;
     font-size: 0.75em;
+    margin-right: 1em;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -148,11 +155,19 @@ th, td {
 }
 
 .capture:before {
-    content: "\e600";
+    content: "\e607";
 }
 
 .run:before {
+    content: "\e600";
+}
+
+.single:before {
     content: "\e603";
+}
+
+#tests .btn:before {
+    margin: 0;
 }
 
 .clients:before {
@@ -195,6 +210,24 @@ th, td {
 
 .safari {
     background: url('logos/safari_32x32.png') no-repeat;
+}
+
+.status {
+    min-width: 32px;
+    min-height: 32px;
+    text-align: center;
+    color: #999;
+}
+
+.ready:before {
+    font-family: 'icomoon';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: "\e606";
+}
+
+.running {
+    background: url('loader_small.gif') 50% 50% no-repeat;
 }
 
 .menu {
@@ -272,7 +305,7 @@ td.warn {
     color: #900;
 }
 
-.ready {
+.waiting {
     color: #090;
 }
 

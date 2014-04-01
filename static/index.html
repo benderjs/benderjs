@@ -11,7 +11,7 @@
             <li class="{{= client.browser }}">
                 {{= client.ua }} -
                 {{? client.busy }}<strong class="busy">busy</strong>
-                {{??}}<strong class="ready">ready</strong>
+                {{??}}<strong class="waiting">ready</strong>
                 {{?}}
             </li>
         {{~}}
@@ -24,19 +24,21 @@
     <thead>
         <tr>
             <th></th>
+            <th>Status</th>
             <th>ID</th>
+            <th></th>
             <th>Tags</th>
         </tr>
     </thead>
     <tbody>
-        {{= it.html }}
     </tbody>
     </script>
 
     <script id="group-tmpl" type="text/x-dot-template">
     <tr class="group">
         <td><input type="checkbox" checked="checked" class="toggle"></td>
-        <td><span>Group:</span> {{= it.name }}</td>
+        <td colspan="2"><span>Group:</span> {{= it.name }}</td>
+        <td></td>
         <td></td>
     </tr>
     </script>
@@ -44,7 +46,12 @@
     <script id="test-tmpl" type="text/x-dot-template">
     <tr>
         <td><input type="checkbox" name="{{= it.id }}" checked="checked"></td>
-        <td><a href="{{= it.id }}">{{= it.id }}</a></td>
+        <td class="status ready"></td>
+        <td>{{= it.id }}</td>
+        <td>
+            <button class="btn run" data-id="{{= it.id }}" title="Run on all clients"></button>
+            <a href="/single/{{= it.id}}" title="Run locally" class="btn single"></a>
+        </td>
         <td>{{= it.tags.join(', ') }}</td>
     </tr>
     </script>
@@ -65,7 +72,7 @@
     </script>
 
     <script id="result-tmpl" type="text/x-dot-template">
-    <tr id="{{= it.idEsc }}">
+    <tr data-id="{{= it.id }}">
         <td>{{= it.id }}</td>
         {{= it.clients }}
         <td></td>
@@ -74,7 +81,7 @@
 
     <script id="client-tmpl" type="text/x-dot-template">
     {{~ it.clients :client }}
-        <td class="result {{= client.id }}"></td>
+        <td class="result" data-id="{{= client.id }}"></td>
     {{~}}
     </script>
 
@@ -82,8 +89,8 @@
 <body>
     <header>
         <h1 class="title">Bender.js Dashboard</h1>
-        <a href="/capture" class="btn capture">Capture</a>
-        <button id="run" class="btn disabled run">Run</button>
+        <a href="/capture" class="btn capture" title="Capture browser">Capture</a>
+        <button id="run" class="btn disabled run" title="Run selected tests">Run</button>
     </header>
     <main>
         <ul id="clients" class="clients"></ul>

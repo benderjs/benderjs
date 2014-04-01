@@ -29,27 +29,40 @@ $(function () {
     function updateTestList(list) {
         var html = [],
             group,
+            test,
             name;
 
-        tests = list;
+        if (!list) return $tests.empty().addClass('loading');
 
-        if (!tests) return $tests.empty().addClass('loading');
+        $tests
+            .html(tpl.tests({ html: html.join('') }))
+            .removeClass('loading');
 
-        for (name in tests) {
-            if (!(group = tests[name])) continue;
+        tests = {};
+
+        for (name in list) {
+            if (!(group = list[name])) continue;
             group.name = name;
             html.push(tpl.group(group));
 
             for (name in group.tests) {
-                if (group.tests[name]) html.push(tpl.test(group.tests[name]));
+                
+                if (!(test = group.tests[name])) continue;
+                
+                tests[test.id] = {
+                    id: test.id,
+                    tags: test.tags,
+                    el: $(tpl.test(test))
+                };
+
+                html.push(tests[test.id].el);
             }
         }
 
         $tests
-            .html(tpl.tests({ html: html.join('') }))
-            .removeClass('loading')
-            .find('.group').click(toggleCollapse).end()
-            .find('.toggle').click(toggleGroup);
+            .find('tbody')
+            .append(html)
+            .find('.group').click(toggleCollapse);
     }
 
     function updateRunButton() {
@@ -59,9 +72,14 @@ $(function () {
     function testClick(event) {
         var $target = $(event.target);
 
-        if ($target.prop('nodeName') === 'A') {
-            runTests($target.attr('href'));
-            event.preventDefault();
+        if ($target.hasClass('run')) {
+            runTests($target.data('id'));
+            return event.preventDefault();
+        }
+
+        if ($target.hasClass('toggle')) {
+            toggleGroup($target);
+            return event.stopPropagation();
         }
     }
 
@@ -70,7 +88,7 @@ $(function () {
             isCollapsed = $this.hasClass('collapsed');
 
         $this
-            .toggleClas('collapsed', isCollapsed)
+            .toggleClass('collapsed', !isCollapsed)
             .nextUntil('.group')[isCollapsed ? 'show' : 'hide']();
     }
 
@@ -89,15 +107,12 @@ $(function () {
         $('#' + name).removeClass('hidden');
     }
 
-    function toggleGroup(event) {
-        var $this = $(this),
-            state = $this.prop('checked');
+    function toggleGroup(elem) {
+        var state = elem.prop('checked');
 
-        $this.parent().parent()
+        elem.parent().parent()
             .nextUntil('.group')
             .find('input').prop('checked', state);
-
-        event.stopPropagation();
     }
 
     function checkBusy() {
@@ -120,28 +135,23 @@ $(function () {
     }
 
     function runTests(test) {
-        var tests;
-
         if (checkBusy() || !clients.length) return;
 
-        tests = typeof test == 'string' ? [test] : getTests();
+        test = typeof test == 'string' ? [test] : getTests();
 
-        prepareResults(tests);
-
+        prepareResults(test);
         switchTab('results');
-        socket.emit('run', tests);
+        socket.emit('run', test);
     }
 
     function prepareResults(tests) {
-        var pattern = /[\/\\\%\. \,]/gi,
-            clientsHtml = tpl.client({ clients: clients }),
+        var clientsHtml = tpl.client({ clients: clients }),
             html = [],
             i;
         
         for (i = 0; i < tests.length; i++) {
             html.push(tpl.result({
                 id: tests[i],
-                idEsc: tests[i].replace(pattern, '_'),
                 clients: clientsHtml
             }));
         }
@@ -153,8 +163,8 @@ $(function () {
     }
 
     function addResult(data) {
-        var pattern = /[\/\\\%\. \,]+/g,
-            elem = $('#' + data.suite.replace(pattern, '_')).find('.' + data.client);
+        var elem = $('tr[data-id="' + data.suite + '"]')
+            .find('td[data-id="' + data.client + '"]');
 
         if (!elem.length) return;
 
@@ -162,6 +172,26 @@ $(function () {
             elem.addClass('ok');
         } else {
             elem.addClass('fail').attr('title', data.result.errors.join(''));
+        }
+    }
+
+    function setReady(id) {
+        if (!tests[id]) return;
+
+        tests[id].el.find('.status')
+            .removeClass('running').addClass('ready');
+    }
+
+    function setRunning(data) {
+        var test,
+            i;
+
+        for (i = 0; i < data.length; i++) {
+            test = tests[data[i]];
+            if (test) {
+                test.el.find('.status')
+                    .removeClass('ready').addClass('running');
+            }
         }
     }
 
@@ -201,6 +231,7 @@ $(function () {
             })
             .on('clients:update', updateClientList)
             .on('tests:update', updateTestList)
+            .on('run', setRunning)
             .on('result', addResult)
             .on('complete', complete);
     }

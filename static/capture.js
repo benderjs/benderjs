@@ -46,26 +46,29 @@
         this.assert = null;
         this.current = null;
         this.suite = null;
-        this.results = [];
+        this.results = {
+            results: [],
+            suite: null
+        };
 
         this.error = function (error) {
             socket.emit('error', error);
         };
 
         this.result = function (result) {
-            this.results.push({
-                id: this.current.id,
+            this.results.results.push({
+                id: this.current,
                 result: result
             });
 
-            socket.emit('result', this.current.id, result);
+            socket.emit('result', this.current, result);
         };
 
         this.next = function () {
             this.current = this.suite.shift();
 
             if (this.current) {
-                contextEl.src = '../tests/' + this.current.id;
+                contextEl.src = '../tests/' + this.current;
             } else {
                 this.complete();
             }
@@ -74,7 +77,8 @@
         this.complete = function () {
             socket.emit('complete', this.results);
             contextEl.src = 'about:blank';
-            this.results.length = 0;
+            this.results.results.length = 0;
+            this.results.suite = null;
         };
 
         this.log = function () {
@@ -153,6 +157,7 @@
 
         socket.on('run', function (suite) {
             that.suite = suite;
+            that.results.suite = [].concat(suite);
             that.next.call(that);
         });
     }
