@@ -1,5 +1,22 @@
 (function (window, undefined) {
 
+    var resultsEl = document.getElementById('results');
+
+    function addResult(result) {
+        var resEl = document.createElement('li');
+
+        resEl.className = result.success ? 'ok' : 'fail';
+
+        resEl.innerHTML = [
+            '<p>', result.module, result.name,
+            '<strong>', result.success ? 'PASSED' : 'FAILED', '</strong>',
+            result.failed, '/', result.passed, '/', result.total, '</p>',
+            result.failed ? ('<p>' + result.errors.join('</p><p>').replace(/\n/g, '<br>') + '</p>') : null
+        ].join(' ');
+
+        resultsEl.appendChild(resEl);
+    }
+
     function Bender() {
         this.assert = null;
 
@@ -9,24 +26,21 @@
 
         this.result = function (result) {
             this.log(result);
-        };
-
-        this.next = this.complete = function () {
-            // TODO log summary
+            addResult(result);
         };
 
         this.log = function () {
             console.log.apply(console, arguments);
         };
 
+        // stubbed for compability
+        this.next = this.complete = function () {};
+
         // this will be overriden by a framework adapter
         this.start = this.complete;
 
         this.ready = function () {
-            if (typeof this.start == 'function') {
-                this.start();
-            }
-
+            if (typeof this.start == 'function') this.start();
             this.start = null;
         };
 

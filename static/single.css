@@ -18,14 +18,26 @@ iframe {
     background: rgba(200, 240, 200, 0.7);
 }
 
+.ok strong {
+    color: #090;
+}
+
 .warn {
     background: #fff0b4;
     background: rgba(255, 240, 180, 0.7);
 }
 
+.warn strong {
+    color: #960;
+}
+
 .fail {
     background: #ffc8c8;
     background: rgba(255, 200, 200, 0.7);
+}
+
+.fail strong {
+    color: #900;
 }
 
 .results {
@@ -34,5 +46,17 @@ iframe {
     left: 0;
     width: 100%;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.results li {
+    margin: .5em;
+    padding: .5em;
+}
+
+.results p {
+    margin: .25em 0;
 }
