@@ -56,12 +56,13 @@
         };
 
         this.result = function (result) {
-            this.results.results.push({
-                id: this.current,
-                result: result
-            });
+            var res = {
+                    id: this.current,
+                    result: result
+                };
 
-            socket.emit('result', this.current, result);
+            this.results.results.push(res);
+            socket.emit('result', res);
         };
 
         this.next = function () {

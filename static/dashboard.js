@@ -168,7 +168,7 @@ $(function () {
     }
 
     function addResult(data) {
-        var elem = $('tr[data-id="' + data.suite + '"]')
+        var elem = $('tr[data-id="' + data.id + '"]')
             .find('td[data-id="' + data.client + '"]');
 
         if (!elem.length) return;
@@ -180,11 +180,12 @@ $(function () {
         }
     }
 
-    function setReady(id) {
-        if (!tests[id]) return;
+    function setReady(data) {
+        if (!tests[data.id]) return;
 
-        tests[id].el.find('.status')
-            .removeClass('running').addClass('ready');
+        tests[data.id].el.find('.status')
+            .removeClass(data.running ? 'ready' : 'running')
+            .addClass(data.running ? 'running' : 'ready');
     }
 
     function setRunning(data) {
@@ -236,6 +237,7 @@ $(function () {
             })
             .on('clients:update', updateClientList)
             .on('tests:update', updateTestList)
+            .on('test:update', setReady)
             .on('run', setRunning)
             .on('result', addResult)
             .on('complete', complete);

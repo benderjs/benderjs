@@ -116,6 +116,10 @@ th, td {
     white-space: nowrap;
 }
 
+tr:not(.group):hover td {
+    background: #ffe;
+}
+
 .disabled:hover,
 .disabled {
     color: #999;
