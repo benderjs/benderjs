@@ -76,16 +76,21 @@ $(function () {
             runTests($target.data('id'));
             return event.preventDefault();
         }
+    }
 
+    function toggleCollapse(event) {
+        var $target = $(event.target),
+            $this,
+            isCollapsed;
+
+        // handle toggle all checkbox
         if ($target.hasClass('toggle')) {
             toggleGroup($target);
             return event.stopPropagation();
         }
-    }
 
-    function toggleCollapse() {
-        var $this = $(this),
-            isCollapsed = $this.hasClass('collapsed');
+        $this = $(this);
+        isCollapsed = $this.hasClass('collapsed');
 
         $this
             .toggleClass('collapsed', !isCollapsed)
