@@ -16,7 +16,7 @@
             </li>
         {{~}}
     {{??}}
-        <li>none</li>
+        <li>no clients connected</li>
     {{?}}
     </script>
 
@@ -26,8 +26,8 @@
             <th></th>
             <th>Status</th>
             <th>ID</th>
-            <th></th>
             <th>Tags</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -48,11 +48,11 @@
         <td><input type="checkbox" name="{{= it.id }}" checked="checked"></td>
         <td class="status ready"></td>
         <td>{{= it.id }}</td>
+        <td>{{= it.tags.join(', ') }}</td>
         <td>
             <button class="btn run" data-id="{{= it.id }}" title="Run on all clients"></button>
             <a href="/single/{{= it.id}}" title="Run locally" class="btn single"></a>
         </td>
-        <td>{{= it.tags.join(', ') }}</td>
     </tr>
     </script>
 
