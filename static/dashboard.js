@@ -14,7 +14,7 @@ $(function () {
         var tpl = {};
 
         $('script[type="text/x-dot-template"]').each(function (idx, elem) {
-            tpl[elem.id.split('-')[0]] = doT.template(elem.innerText);
+            tpl[elem.id.split('-')[0]] = doT.template($(elem).text());
         });
 
         return tpl;
