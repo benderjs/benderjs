@@ -9,9 +9,9 @@
     {{? it.clients.length }}
         {{~ it.clients :client }}
             <li class="{{= client.browser }}">
-                {{= client.ua }} -
-                {{? client.busy }}<strong class="busy">busy</strong>
-                {{??}}<strong class="waiting">ready</strong>
+                {{= client.ua }}
+                {{? client.busy }}<span class="busy"></span>
+                {{??}}<span class="waiting"></span>
                 {{?}}
             </li>
         {{~}}

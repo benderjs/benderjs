@@ -243,6 +243,8 @@ tr .btn:before {
     color: #999;
 }
 
+.busy:before,
+.waiting:before,
 .ready:before,
 .running:before {
     font-family: 'icomoon';
@@ -256,6 +258,18 @@ tr .btn:before {
 
 .running:before {
     content: '\e608';
+}
+
+.busy:before {
+    color: #900;
+    content: '\e608';
+    margin: 0 .5em;
+}
+
+.waiting:before {
+    color: #090;
+    content: '\e606';
+    margin: 0 .5em;
 }
 
 .menu {
@@ -335,14 +349,6 @@ td.warn {
     background: #fff0b4;
     background: rgba(255, 240, 180, 0.7);
     color: #990;
-}
-
-.busy {
-    color: #900;
-}
-
-.waiting {
-    color: #090;
 }
 
 .loading {
