@@ -2,6 +2,7 @@
 var argParser = require('nomnom'),
     path = require('path'),
     broadway = require('broadway'),
+    forever = require('forever'),
 
     dir = '../lib/',
 
@@ -18,14 +19,15 @@ var argParser = require('nomnom'),
     tests = require(dir + 'tests'),
     utils = require(dir + 'utils'),
 
-    log = require(dir + 'logger').create('cli');
+    log = require(dir + 'logger').create('cli'),
+    scriptPath = path.join(__dirname, __filename);
 
 argParser.command('init')
     .callback(initialize)
     .help('Initialize Bender.js for this directory');
 
 argParser.command('server')
-    .callback(startServer)
+    .callback(handleServer)
     .option('port', {
         abbr: 'p',
         default: constants.PORT,
@@ -50,6 +52,109 @@ argParser.command('version')
 
 argParser.parse();
 
+/**
+ * Handle server command line
+ * @param {Object} options Command line options
+ */
+function handleServer(options) {
+    switch (options[1]) {
+        case 'start':
+            getMeta(function (meta) {
+                if (meta) log.info('Bender server is already running');
+                else startDaemon();
+            });
+            break;
+
+        case 'stop':
+            forever.stop(scriptPath)
+                .on('stop', function () {
+                    log.info('Bender server stopped successfully');
+                })
+                .on('error', function () {
+                    log.error('Bender server not running or user not authorized to stop it');
+                });
+            break;
+
+        case 'restart':
+            getMeta(function (meta) {
+                if (meta) {
+                    forever.stop(scriptPath)
+                        .on('stop', function () {
+                            log.info('Bender server stopped successfully');
+                            startDaemon();
+                        });
+                } else {
+                    startDaemon();
+                }
+            });
+            break;
+
+        case 'status':
+            getMeta(function (meta) {
+                if (meta) log.info('Bender server is running since ' + new Date(meta.ctime));
+                else log.error('Bender server is not running or user not authorized to see the status');
+            });
+            break;
+
+        case 'run':
+            startServer(options);
+            break;
+
+        default: // TODO improve this help part / include in cli help
+            log.info('Yo can use start, stop, restart or status commands');
+    }
+}
+
+/**
+ * Get child process metadata
+ * @param  {Function} callback Function called when done
+ */
+function getMeta(callback) {
+    forever.list(false, function (err, list) {
+        if (err || !list) return callback(null);
+
+        list.some(function (meta) {
+            if (meta.file === scriptPath) {
+                callback(meta);
+                return true;
+            }
+        });
+    });
+}
+
+/**
+ * Restart this script as a deamon
+ */
+function startDaemon() {
+    var opts, child;
+
+    opts = process.argv.slice(2);
+    opts[1] = 'run';
+
+    child = forever.startDaemon(scriptPath, {
+        max: 3,
+        silent: false,
+        outFile: 'bender-out.log',
+        errFile: 'bender-err.log',
+        options: opts
+    });
+
+    child.on('error', function (err) {
+        log.error('child process error', err);
+    });
+
+    child.on('exit', function () {
+        log.error('child process exit after 3 retries');
+    });
+
+    log.info('Bender server started successfully');
+}
+
+/**
+ * Start bender server
+ * @param  {Object} options Command line options
+ * @return {[type]}         [description]
+ */
 function startServer(options) {
     var bender = new broadway.App({ delimeter: ':' }),
         modules = [
