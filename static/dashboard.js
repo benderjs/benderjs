@@ -20,7 +20,14 @@ $(function () {
         return tpl;
     }
 
-    function updateClientList(list) {
+    function updateClientList(data) {
+        var list = [],
+            name;
+
+        for (name in data) {
+            if (data[name]) list.push(data[name]);
+        }
+
         clients = list;
         $clients.html(tpl.clients({ clients: list }));
         updateRunButton();
@@ -66,7 +73,7 @@ $(function () {
     }
 
     function updateRunButton() {
-        $run.toggleClass('disabled',checkBusy() || !clients.length);
+        $run.toggleClass('disabled', checkBusy() || !clients.length);
     }
 
     function testClick(event) {
@@ -150,14 +157,14 @@ $(function () {
     }
 
     function prepareResults(tests) {
-        var clientsHtml = tpl.client({ clients: clients }),
+        var clientHtml = tpl.client({ clients: clients }),
             html = [],
             i;
         
         for (i = 0; i < tests.length; i++) {
             html.push(tpl.result({
                 id: tests[i],
-                clients: clientsHtml
+                clients: clientHtml
             }));
         }
 
