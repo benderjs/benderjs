@@ -19,8 +19,7 @@ var argParser = require('nomnom'),
     tests = require(dir + 'tests'),
     utils = require(dir + 'utils'),
 
-    log = require(dir + 'logger').create('cli'),
-    scriptPath = path.join(__dirname, __filename);
+    log = require(dir + 'logger').create('cli');
 
 argParser.command('init')
     .callback(initialize)
@@ -66,7 +65,7 @@ function handleServer(options) {
             break;
 
         case 'stop':
-            forever.stop(scriptPath)
+            forever.stop(__filename)
                 .on('stop', function () {
                     log.info('Bender server stopped successfully');
                 })
@@ -78,7 +77,7 @@ function handleServer(options) {
         case 'restart':
             getMeta(function (meta) {
                 if (meta) {
-                    forever.stop(scriptPath)
+                    forever.stop(__filename)
                         .on('stop', function () {
                             log.info('Bender server stopped successfully');
                             startDaemon();
@@ -114,7 +113,7 @@ function getMeta(callback) {
         if (err || !list) return callback(null);
 
         list.some(function (meta) {
-            if (meta.file === scriptPath) {
+            if (meta.file === __filename) {
                 callback(meta);
                 return true;
             }
@@ -131,7 +130,7 @@ function startDaemon() {
     opts = process.argv.slice(2);
     opts[1] = 'run';
 
-    child = forever.startDaemon(scriptPath, {
+    child = forever.startDaemon(__filename, {
         max: 3,
         silent: false,
         outFile: 'bender-out.log',
