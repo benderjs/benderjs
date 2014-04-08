@@ -1,122 +1,81 @@
 $(function () {
-    var $header = $('header'),
-        $clients = $('#clients'),
+    var $clients = $('#browsers ul'),
+        $status = $('.title span'),
         $tests = $('#testsTable'),
-        $results = $('#resultsTable'),
-        $run = $('#run'),
         $menu = $('#menu'),
-        tpl = getTemplates(),
-        clients = null,
-        tests = null,
-        socket;
+        $run = $('#run'),
+        contextEl = $('#context')[0],
+        headerEl = $('header')[0],
+        socket,
+        status,
+        tpl;
 
     function getTemplates() {
-        var tpl = {};
+        tpl = {};
 
         $('script[type="text/x-dot-template"]').each(function (idx, elem) {
             tpl[elem.id.split('-')[0]] = doT.template($(elem).text());
         });
-
-        return tpl;
     }
 
-    function updateClientList(data) {
-        var list = [],
-            name;
-
-        for (name in data) {
-            if (data[name]) list.push(data[name]);
-        }
-
-        clients = list;
-        $clients.html(tpl.clients({ clients: list }));
-        updateRunButton();
-    }
-
-    function updateTestList(list) {
+    function updateTests(data) {
         var html = [],
             group,
             test,
             name;
 
-        if (!list) return $tests.empty().addClass('loading');
+        if (!data) return $tests.empty().addClass('loading');
 
-        $tests
-            .html(tpl.tests({ html: html.join('') }))
-            .removeClass('loading');
-
-        tests = {};
-
-        for (name in list) {
-            if (!(group = list[name])) continue;
+        for (name in data) {
+            if (!(group = data[name])) continue;
             group.name = name;
             html.push(tpl.group(group));
 
             for (name in group.tests) {
-                
                 if (!(test = group.tests[name])) continue;
-                
-                tests[test.id] = {
-                    id: test.id,
-                    tags: test.tags,
-                    el: $(tpl.test(test))
-                };
-
-                html.push(tests[test.id].el);
+                html.push(tpl.test(test));
             }
         }
 
         $tests
-            .find('tbody')
-            .append(html)
-            .find('.group').click(toggleCollapse);
+            .html(tpl.tests({ html: html.join('') }))
+            .removeClass('loading')
+            .find('.group')
+                .click(clickGroup);
     }
 
-    function updateRunButton() {
-        $run.toggleClass('disabled', checkBusy() || !clients.length);
+    function updateJobs(data) {
+        // TODO
     }
 
-    function testClick(event) {
-        var $target = $(event.target);
+    function updateClients(data) {
+        var list = [],
+            name;
 
-        if ($target.hasClass('run')) {
-            runTests($target.data('id'));
-            return event.preventDefault();
+        if (data) {
+            for (name in data) {
+                if (data[name]) list.push(data[name]);
+            }
         }
+
+        $clients.html(tpl.clients({ clients: list }));
     }
 
-    function toggleCollapse(event) {
+    function clickGroup(event) {
         var $target = $(event.target),
-            $this,
+            $this = $(this),
             isCollapsed;
 
-        // handle toggle all checkbox
         if ($target.hasClass('toggle')) {
             toggleGroup($target);
             return event.stopPropagation();
         }
 
-        $this = $(this);
         isCollapsed = $this.hasClass('collapsed');
 
         $this
             .toggleClass('collapsed', !isCollapsed)
             .nextUntil('.group')[isCollapsed ? 'show' : 'hide']();
-    }
-
-    function handleTabs(event) {
-        switchTab($(this).attr('href').substring(1));
-        event.preventDefault();
-    }
-
-    function switchTab(name) {
-        $('section').addClass('hidden');
-        
-        $menu
-            .find('.selected').removeClass('selected').end()
-            .find('a[href="#' + name +'"]').addClass('selected');
-
-        $('#' + name).removeClass('hidden');
     }
 
     function toggleGroup(elem) {
@@ -127,14 +86,15 @@ $(function () {
             .find('input').prop('checked', state);
     }
 
-    function checkBusy() {
-        var i;
+    function switchTabs(event) {
+        var $this = $(this);
 
-        for (i = 0; i < clients.length; i++) {
-            if (clients[i].busy) return true;
-        }
+        $('section').addClass('hidden');
+        $menu.find('.selected').removeClass('selected');
+        $this.addClass('selected');
+        $($this.attr('href')).removeClass('hidden');
 
-        return false;
+        event.preventDefault();
     }
 
     function getTests() {
@@ -146,88 +106,67 @@ $(function () {
             .get();
     }
 
-    function runTests(test) {
-        if (checkBusy() || !clients.length) return;
+    function runTests() {
+        var tests = getTests();
 
-        test = typeof test == 'string' ? [test] : getTests();
+        if (!tests.length) return;
 
-        prepareResults(test);
-        switchTab('results');
-        socket.emit('run', test);
+        $tests.find('.result').empty().removeClass('ok fail');
+        $run.addClass('disabled');
+
+        $status.empty();
+        status = {
+            passed: 0,
+            failed: 0,
+            runtime: 0
+        };
+
+        bender.suite = tests;
+        bender.next();
+
     }
 
-    function prepareResults(tests) {
-        var clientHtml = tpl.client({ clients: clients }),
-            html = [],
-            i;
-        
-        for (i = 0; i < tests.length; i++) {
-            html.push(tpl.result({
-                id: tests[i],
-                clients: clientHtml
-            }));
-        }
-
-        $results.html(tpl.results({
-            clients: clients,
-            html: html.join('')
-        }));
+    function startTest(id) {
+        $('td[data-id="' + id + '"]').html('Testing...');
     }
 
-    function addResult(data) {
-        var elem = $('tr[data-id="' + data.id + '"]')
-            .find('td[data-id="' + data.client + '"]');
+    function endTest(data) {
+        $('td[data-id="' + data.id + '"]')
+            .addClass(data.passed === data.total ? 'ok' : 'fail')
+            .html(tpl.result(data));
 
-        if (!elem.length) return;
-
-        if (data.result.success) {
-            elem.addClass('ok');
-        } else {
-            elem.addClass('fail').attr('title', data.result.errors.join(''));
-        }
+        updateStatus(data);
     }
 
-    function setReady(data) {
-        if (!tests[data.id]) return;
+    function updateStatus(data) {
+        status.passed += data.passed;
+        status.failed += data.failed;
+        status.runtime += data.runtime;
 
-        tests[data.id].el.find('.status')
-            .removeClass(data.running ? 'ready' : 'running')
-            .addClass(data.running ? 'running' : 'ready');
-    }
-
-    function setRunning(data) {
-        var test,
-            i;
-
-        for (i = 0; i < data.length; i++) {
-            test = tests[data[i]];
-            if (test) {
-                test.el.find('.status')
-                    .removeClass('ready').addClass('running');
-            }
-        }
-    }
-
-    function complete(data) {
-        console.log('complete', data);
-        updateRunButton();
+        $status.html(status.passed + ' passed / ' + status.failed + ' failed in ' + status.runtime + 'ms');
     }
 
     function setStatus(status) {
         return function () {
-            $header[0].className = status;
+            headerEl.className = status;
         };
     }
 
-    function initSocket() {
-        var loc = window.location;
+    function cleanTabs() {
+        updateClients(null);
+        updateJobs(null);
+        updateTests(null);
+    }
 
-        socket = io.connect(
-            'http://' + loc.hostname + ':' + (loc.port || 80) + '/dashboard',
-            {
-                'reconnection limit': 2000,
-                'max reconnection attempts': 30
-            });
+    function initSocket() {
+        var loc = window.location,
+            url = 'http://' + loc.hostname + ':' +
+                (loc.port || 80) + '/dashboard';
+
+        socket = io.connect(url, {
+            'reconnection limit': 2000,
+            'max reconnection attempts': 30
+        });
 
         socket
             .on('connect', setStatus('ok'))
@@ -235,24 +174,92 @@ $(function () {
             .on('reconnecting', setStatus('warn'))
             .on('reconnect_failed', setStatus('warn'))
             .on('disconnect', setStatus('fail'))
-            .on('connect', function () {
-                socket.emit('register');
-            })
-            .on('disconnect', function () {
-                updateClientList([]);
-                updateTestList(null);
-            })
-            .on('clients:update', updateClientList)
-            .on('tests:update', updateTestList)
-            .on('test:update', setReady)
-            .on('run', setRunning)
-            .on('result', addResult)
-            .on('complete', complete);
+            .on('connect', function () { socket.emit('register'); })
+            .on('disconnect', cleanTabs)
+            .on('clients:update', updateClients)
+            .on('jobs:update', updateJobs)
+            .on('tests:update', updateTests);
     }
 
-    $run.click(runTests);
-    $menu.find('a').click(handleTabs);
-    $tests.click(testClick);
+    function Bender() {
+        this.current = null;
+        this.suite = null;
 
-    initSocket();
+        this.error = function () {
+            console.error.apply(console, arguments);
+        };
+
+        // stubbed for compatibility
+        this.result = function () {};
+
+        this.log = function () {
+            console.log.apply(console, arguments);
+        };
+
+        this.next = function (details) {
+            if (details) {
+                details.id = this.current;
+                endTest(details);
+            }
+
+            this.current = this.suite.shift();
+
+            if (this.current) {
+                startTest(this.current);
+                contextEl.src = '../tests/' + this.current;
+            } else {
+                this.complete();
+            }
+        };
+
+        this.complete = function () {
+            contextEl.src = 'about:blank';
+            $run.removeClass('disabled');
+        };
+
+        // this will be overriden by a framework adapter
+        this.start = this.complete;
+
+        this.ready = function () {
+            if (typeof this.start == 'function') this.start();
+            this.start = null;
+        };
+
+        this.addListener = function (target, name, callback, scope) {
+            function handler () { callback.call(scope || this); }
+
+            if (target.addEventListener) {
+                target.addEventListener(name, handler, false);
+            } else if (target.attachEvent) {
+                target.attachEvent('on' + name, handler);
+            } else {
+                target['on' + name] = handler;
+            }
+        };
+
+        this.removeListener = function (target, name, callback) {
+            if (target.removeEventListener) {
+                target.removeEventListener(name, callback, false);
+            } else {
+                target.detachEvent('on' + name, callback);
+            }
+        };
+
+        this.setup = function (context) {
+            context.bender = this;
+            context.onerror = this.error;
+
+            this.addListener(context, 'load', this.ready, this);
+        };
+    }
+
+    function init() {
+        $run.click(runTests);
+        $menu.find('a').click(switchTabs);
+        getTemplates();
+        initSocket();
+        window.bender = new Bender();
+    }
+
+    init();
 });
