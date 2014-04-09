@@ -1,87 +1,130 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Bender.js Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css">
-
-    <script id="clients-tmpl" type="text/x-dot-template">
-    {{? it.clients.length }}
-        {{~ it.clients :client }}
-            <li class="{{= client.browser }}">
-                {{= client.ua }}
-                {{? client.busy }}<span class="busy"></span>
-                {{??}}<span class="waiting"></span>
-                {{?}}
-            </li>
-        {{~}}
-    {{??}}
-        <li>no browsers connected</li>
-    {{?}}
-    </script>
-
-    <script id="tests-tmpl" type="text/x-dot-template">
-    <thead>
-        <tr>
-            <th></th>
-            <th>ID</th>
-            <th>Tags</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {{= it.html }}
-    </tbody>
-    </script>
-
-    <script id="group-tmpl" type="text/x-dot-template">
-    <tr class="group">
-        <td><input type="checkbox" checked="checked" class="toggle"></td>
-        <td colspan="2"><span>Group:</span> {{= it.name }}</td>
-        <td></td>
-    </tr>
-    </script>
-
-    <script id="test-tmpl" type="text/x-dot-template">
-    <tr>
-        <td><input type="checkbox" name="{{= it.id }}" checked="checked"></td>
-        <td><a href="/single/{{= it.id }}" title="Run locally">{{= it.id }}</a></td>
-        <td>{{= it.tags.join(', ') }}</td>
-        <td class="result" data-id="{{= it.id }}"></td>
-    </tr>
-    </script>
-
-    <script id="result-tmpl" type="text/x-dot-template">
-    {{= it.passed }} passed / {{= it.failed }} failed in {{= it.runtime }}ms
-    </script>
+    <meta charset="utf-8">
+    <title>Bender Dashboard</title>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 <body>
-    <iframe src="about:blank" id="context"></iframe>
-    <header>
-        <h1 class="title">Bender.js Dashboard <span></span></h1>
-        <a href="/capture" class="btn capture" title="Capture this browser">Capture</a>
-        <button id="run" class="btn run" title="Run selected tests">Run</button>
-        <button id="create" class="btn create" title="Create new job">Create new job</button>
-        <ul id="menu" class="menu">
-            <li><a href="#tests" class="selected">Tests</a></li>
-            <li><a href="#jobs">Jobs</a></li>
-            <li><a href="#browsers">Browsers</a></li>
-        </ul>
-    </header>
-    <main>
-        <section id="tests">
-            <table cellspacing="0" cellpadding="0" id="testsTable" class="loading"></table>
-        </section>
-        <section id="jobs" class="hidden">
-            
-        </section>
-        <section id="browsers" class="hidden">
-            <ul class="clients"></ul>
-        </section>
-    </main>
-    <script src="doT.min.js"></script>
-    <script src="jquery.1.11.0.min.js"></script>
+    <script type="text/x-handlebars">
+        <nav class="navbar navbar-default navbar-static-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Bender Dashboard</a>
+                </div>
+                <p class="navbar-text">
+                    <span {{bind-attr class=":label App.status.css"}}>{{App.status.text}}</span>
+                    <span id="test-status"></span>
+                </p>
+                <div class="navbar-right">
+                    <a class="btn btn-primary navbar-btn" href="/capture" title="Capture browser">Capture browser</a>
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            <ul class="nav nav-tabs menu" role="navigation">
+                {{#link-to "tests" tagName="li"}}<a {{bind-attr href="view.href"}}>Tests</a>{{/link-to}}
+                {{#link-to "jobs" tagName="li"}}<a {{bind-attr href="view.href"}}>Jobs</a>{{/link-to}}
+                {{#link-to "browsers" tagName="li"}}<a {{bind-attr href="view.href"}}>Browsers</a>{{/link-to}}
+            </ul>
+            <div class="content">
+                {{outlet}}
+            </div>
+        </div>
+    </script>
+
+    <script type="text/x-handlebars" id="tests">
+        <form class="form-inline filter-form" role="form">
+            <div class="form-group">
+                <label class="sr-only" for="filter">Filter tags</label>
+                {{input type="text" class="form-control" placeholder="Filter tags" value=tags}}
+            </div>
+            <button type="button" class="btn btn-default run-button">Run selected</button>
+        </form>
+        <div class="panel panel-default">
+            <table class="table table-hover table-condensed">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Group</th>
+                        <th>Tags</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each filteredContent}}
+                    <tr>
+                        <td>{{input type="checkbox"}} {{id}}</td>
+                        <td>{{group}}</td>
+                        <td>{{tags}}</td>
+                        <td></td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </script>
+    
+    <script type="text/x-handlebars" id="jobs">
+        <div class="panel panel-default">
+            <div class="panel-heading"><h3 class="panel-title">Waiting</h3></div>
+            <table class="table table-hover table-condensed">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Browsers</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>12345-67890-12345-67890</td>
+                        <td>Lorem ipsum dolor sit amet.</td>
+                        <td>Chrome, IE, Firefox, Opera</td>
+                        <td>April 9, 2014 10:49:25</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </script>
+
+    <script type="text/x-handlebars" id="browsers">
+        <div class="panel panel-default">
+            <table class="table table-hover table-condensed">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User Agent</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each}}
+                    <tr>
+                        <td>{{id}}</td>
+                        <td>{{ua}}</td>
+                        <td>
+                            {{#if busy}}
+                            <span class="label label-danger">busy</span>
+                            {{else}}
+                            <span class="label label-success">ready</span>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </script>
+
     <script src="/socket.io/socket.io.js"></script>
-    <script src="dashboard.js"></script>
+    <script src="/js/libs/jquery-1.10.2.js"></script>
+    <script src="/js/libs/handlebars-1.1.2.js"></script>
+    <script src="/js/libs/ember-1.5.0.js"></script>
+    <script src="/js/libs/ember-sockets.js"></script>
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>

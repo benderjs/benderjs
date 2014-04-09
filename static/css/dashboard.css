@@ -1,0 +1,13 @@
+a {
+    cursor: pointer;
+}
+
+.content {
+    margin: 1em 0;
+}
+
+.filter-form {
+    text-align: right;
+    margin-bottom: 1em;
+}
+
