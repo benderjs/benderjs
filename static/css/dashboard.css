@@ -6,12 +6,17 @@ body {
     padding-top: 70px;
 }
 
-td {
+td, th {
     width: 1px;
     white-space: nowrap;
 }
 
-td:last-child {
+.table thead tr th {
+    vertical-align: middle;
+}
+
+td:last-child,
+th:last-child {
     width: auto;
     white-space: normal;
 }
@@ -39,7 +44,7 @@ td:last-child {
     margin-bottom: 1em;
 }
 
-.filter-tags {
+.filter-form ul {
     text-align: left;
 }
 
@@ -85,7 +90,11 @@ td:last-child {
     color: #900;
 }
 
-.browsers tbody tr td {
+.browsers th:first-child {
+    min-width: 200px;
+}
+
+.browsers tbody tr th {
     line-height: 32px;
 }
 
@@ -93,6 +102,7 @@ td:last-child {
     background-position: 8px 50%;
     background-repeat: no-repeat;
     padding-left: 48px;
+    text-transform: capitalize;
 }
 
 .chrome {
@@ -115,6 +125,14 @@ td:last-child {
     background-image: url('../images/logos/opera_32x32.png');
 }
 
+.phantomjs {
+    background-image: url('../images/logos/phantomjs_32x32.png');
+}
+
 .safari {
     background-image: url('../images/logos/safari_32x32.png');
+}
+
+.btn-group {
+    display: block;
 }

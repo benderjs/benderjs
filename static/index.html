@@ -55,10 +55,9 @@
         <div class="col-md-6">
             <div class="form-inline filter-form" role="form">
                 <div class="form-group input-append btn-group">
-                    <label class="sr-only" for="filter">Filter tags</label>
                     {{input type="text" class="form-control" name="filter" data-toggle="dropdown" placeholder="Filter tags" value=search disabled=App.testStatus.running}}
                     <span {{bind-attr class=":glyphicon :glyphicon-remove :clear-filter search:visible"}}{{bind-attr disabled=App.testStatus.running}} {{action "clearFilter"}}></span>
-                    <ul class="dropdown-menu filter-tags">
+                    <ul class="dropdown-menu">
                         {{#each tags}}
                             <li><a {{action "addTag" this}}>{{this}}</a></li>
                         {{/each}}
@@ -139,24 +138,44 @@
         <table class="table table-hover browsers">
             <thead>
                 <tr>
+                    <th rowspan="2">Browser</th>
+                    <th colspan="3">Clients</th>
+                </tr>
+                <tr>
                     <th>ID</th>
-                    <th>User Agent</th>
+                    <th>UA</th>
                     <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 {{#each}}
                 <tr>
-                    <td>{{id}}</td>
-                    <td {{bind-attr class=":browser browser"}}>{{ua}}</td>
-                    <td>
-                        {{#if busy}}
-                        <span class="label label-danger">busy</span>
-                        {{else}}
-                        <span class="label label-success">ready</span>
-                        {{/if}}
-                    </td>
+                    <th {{bind-attr class=":browser name"}}>{{id}}</th>
+                    <th colspan="3"></th>
                 </tr>
+                    {{#if clients.length}}
+                    {{#each clients}}
+                    <tr>
+                        <td></td>
+                        <td>{{id}}</td>
+                        <td>{{ua}}</td>
+                        <td>
+                            {{#if busy}}
+                            <span class="label label-warning">busy</span>
+                            {{else}}
+                            <span class="label label-success">ready</span>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/each}}
+                    {{else}}
+                    <tr>
+                        <td></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    {{/if}}
                 {{/each}}
             </tbody>
         </table>
@@ -168,15 +187,28 @@
     
     <script type="text/x-handlebars" data-template-name="create-job">
     <div class="modal-header">
-        <button type="button" class="close" {{action 'closeModal' this}}>&times;</button>
-        <h4 class="modal-title">Create new job</h4>
+        <button type="button" class="close" {{action 'closeModal'}}>&times;</button>
+        <h4 class="modal-title">Create New Job</h4>
     </div>
     <div class="modal-body">
-        <p>TODO</p>
+        <div class="form-group">
+            <label for="job-description">Job description</label>
+            {{input type="text" class="form-control" name="job-description" placeholder="Enter description" value=description}}
+        </div>
+        <div class="form-group input-append btn-group">
+            <label for="job-description">Browsers</label>
+            {{input type="text" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome, Firefox, IE9, Safari" value=browsers}}
+
+            <ul class="dropdown-menu">
+                {{#each browsers}}
+                    <li><a {{action "addTag" this}}>{{this}}</a></li>
+                {{/each}}
+            </ul>
+        </div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-default" {{action 'closeModal' this}}>Cancel</button>
-        <button type="button" class="btn btn-primary" {{action 'createJob' this}}>Create</button>
+        <button type="button" class="btn btn-default" {{action 'closeModal'}}>Cancel</button>
+        <button type="button" class="btn btn-primary" {{action 'createJob'}}>Create</button>
     </div>
     </script>
     

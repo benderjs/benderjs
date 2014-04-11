@@ -98,6 +98,17 @@
                     into: 'application',
                     outlet: 'modal'
                 });
+            },
+
+            closeModal: function () {
+                return this.disconnectOutlet({
+                    outlet: 'modal',
+                    parentView: 'application'
+                });
+            },
+
+            createJob: function () {
+                
             }
         }
     });
@@ -133,7 +144,7 @@
         content: [],
 
         sockets: {
-            'clients:update': function (data) {
+            'browsers:update': function (data) {
                 this.set('content', data);
             },
 
