@@ -24,6 +24,8 @@ header {
     background: #c8c8c8;
     background: rgba(200, 200, 200, .7);
     text-align: right;
+    position: fixed;
+    height: 100px;
 }
 
 header.ok {
@@ -55,7 +57,19 @@ main {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    padding: 0 1em;
+    padding: 100px 1em 0;
+}
+
+iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    margin: 0;
+    padding: 0;
+    border: 0;
 }
 
 table {
@@ -78,7 +92,7 @@ th, td {
     white-space: nowrap;
 }
 
-tr:not(.group):hover td:not(.result) {
+tr:not(.group):hover td {
     background: #ffe;
 }
 
@@ -88,19 +102,9 @@ tr:not(.group):hover td:not(.result) {
     float: left;
 }
 
-.ok {
-    background: #c8f0c8;
-    background: rgba(200, 240, 200, 0.7);
-}
-
-.warn {
-    background: #fff0b4;
-    background: rgba(255, 240, 180, 0.7);
-}
-
-.fail {
-    background: #ffc8c8;
-    background: rgba(255, 200, 200, 0.7);
+.title span {
+    font-size: 0.75em;
+    color: #666;
 }
 
 .btn {
@@ -170,9 +174,7 @@ tr .btn:before {
 }
 
 .group span:before,
-.run:before,
-.capture:before,
-.single:before {
+.btn:before {
     font-family: 'icomoon';
     font-size: 0.75em;
     margin-right: 1em;
@@ -196,8 +198,8 @@ tr .btn:before {
     content: '\e600';
 }
 
-.single:before {
-    content: '\e603';
+.create:before {
+    content: '\e602';
 }
 
 .clients {
@@ -273,14 +275,24 @@ tr .btn:before {
 }
 
 .menu {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
     list-style-type: none;
     border-bottom: 1px solid #ccc;
-    padding-left: .2em;
+    text-align: left;
 }
 
 .menu li {
     display: inline-block;
     margin: 0 .1em -1px;
+}
+
+.menu li:first-child {
+    margin-left: 1em;
 }
 
 .menu li a {
@@ -290,6 +302,7 @@ tr .btn:before {
     text-decoration: none;
     font-weight: bold;
     color: #999;
+    margin: 1px;
 }
 
 .menu .selected {
@@ -297,6 +310,8 @@ tr .btn:before {
     border-bottom: 1px solid #fff;
     border-top-left-radius: .25em;
     border-top-right-radius: .25em;
+    background: #fff;
+    margin: 0;
 }
 
 .menu .selected,
@@ -304,51 +319,27 @@ tr .btn:before {
     color: #000;
 }
 
-.result {
-    background-position: 50% 50%;
-    width: 32px;
-    height: 32px;
+.result:before {
     font-family: 'icomoon';
-    margin-right: 1em;
+    margin: 0 .5em;
     font-size: 0.75em;
-    text-align: center;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-td.result {
-    background: #ccc;
-    color: #999;
-}
-
-td.result:before {
-    content: '\e601';
-}
-
-td.ok {
-    background: #c8f0c8;
-    background: rgba(200, 240, 200, 0.7);
-    color: #090;
-}
-
 td.ok:before {
+    color: #090;
     content: '\e606';
 }
 
-td.fail {
-    background: #ffc8c8;
-    background: rgba(255, 200, 200, 0.7);
-    color: #900;
-}
-
 td.fail:before {
+    color: #900;
     content: '\e605';
 }
 
-td.warn {
-    background: #fff0b4;
-    background: rgba(255, 240, 180, 0.7);
+td.warn:before {
     color: #990;
+    content: '\e601';
 }
 
 .loading {
