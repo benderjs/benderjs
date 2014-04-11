@@ -43,6 +43,18 @@ td:last-child {
     text-align: left;
 }
 
+.clear-filter {
+    margin-left: -25px;
+    cursor: pointer;
+    color: #999;
+    margin-right: 7px;
+    display: none;
+}
+
+.clear-filter.visible {
+    display: inline-block;
+}
+
 .tests input[type="checkbox"] {
     margin: 0 .5em;
 }

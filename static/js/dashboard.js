@@ -318,6 +318,8 @@
                         return item.id;
                     });
 
+                if (!tests.length) return;
+
                 bender.suite = tests;
                 bender.next();
 
@@ -333,6 +335,10 @@
 
             addTag: function (tag) {
                 this.set('search', tag);
+            },
+
+            clearFilter: function () {
+                this.set('search', '');
             }
         },
 

@@ -56,6 +56,7 @@
                     <div class="form-group input-append btn-group">
                         <label class="sr-only" for="filter">Filter tags</label>
                         {{input type="text" class="form-control" name="filter" data-toggle="dropdown" placeholder="Filter tags" value=search disabled=App.testStatus.running}}
+                        <span {{bind-attr class=":glyphicon :glyphicon-remove :clear-filter search:visible"}}{{bind-attr disabled=App.testStatus.running}} {{action 'clearFilter'}}></span>
                         <ul class="dropdown-menu filter-tags">
                             {{#each tags}}
                                 <li><a {{action "addTag" this}}>{{this}}</a></li>
