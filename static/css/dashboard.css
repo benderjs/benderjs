@@ -72,3 +72,37 @@ td:last-child {
 .danger .glyphicon {
     color: #900;
 }
+
+.browsers tbody tr td {
+    line-height: 32px;
+}
+
+.browsers .browser {
+    background-position: 8px 50%;
+    background-repeat: no-repeat;
+    padding-left: 48px;
+}
+
+.chrome {
+    background-image: url('../images/logos/chrome_32x32.png');
+}
+
+.chromium {
+    background-image: url('../images/logos/chromium_32x32.png');
+}
+
+.firefox {
+    background-image: url('../images/logos/firefox_32x32.png');
+}
+
+.ie {
+    background-image: url('../images/logos/ie_32x32.png');
+}
+
+.opera {
+    background-image: url('../images/logos/opera_32x32.png');
+}
+
+.safari {
+    background-image: url('../images/logos/safari_32x32.png');
+}

@@ -129,7 +129,7 @@
     <script type="text/x-handlebars" id="browsers">
         <div class="panel panel-default">
         {{#if length}}
-            <table class="table table-hover">
+            <table class="table table-hover browsers">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -141,7 +141,7 @@
                     {{#each}}
                     <tr>
                         <td>{{id}}</td>
-                        <td>{{ua}}</td>
+                        <td {{bind-attr class=":browser browser"}}>{{ua}}</td>
                         <td>
                             {{#if busy}}
                             <span class="label label-danger">busy</span>
