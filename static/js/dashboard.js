@@ -1,82 +1,4 @@
-(function (window, Ember) {
-
-    function Bender() {
-        var contextEl = document.getElementById('context');
-
-        this.current = null;
-        this.suite = null;
-
-        this.error = function () {
-            console.error.apply(console, arguments);
-        };
-
-        // stubbed for compatibility
-        this.result = function () {};
-
-        this.log = function () {
-            console.log.apply(console, arguments);
-        };
-
-        this.next = function (summary) {
-            if (summary) {
-                summary.id = this.current;
-                summary.success = summary.passed === summary.total;
-                App.testStatus.update(summary);
-            }
-
-            this.current = this.suite.shift();
-
-            if (this.current) {
-                App.testStatus.update(this.current);
-                contextEl.src = '../tests/' + this.current;
-            } else {
-                this.complete();
-            }
-        };
-
-        this.complete = function () {
-            App.testStatus.stop();
-            contextEl.src = 'about:blank';
-        };
-
-        // this will be overriden by a framework adapter
-        this.start = this.complete;
-
-        this.ready = function () {
-            if (typeof this.start == 'function') this.start();
-            this.start = null;
-        };
-
-        this.addListener = function (target, name, callback, scope) {
-            function handler () { callback.call(scope || this); }
-
-            if (target.addEventListener) {
-                target.addEventListener(name, handler, false);
-            } else if (target.attachEvent) {
-                target.attachEvent('on' + name, handler);
-            } else {
-                target['on' + name] = handler;
-            }
-        };
-
-        this.removeListener = function (target, name, callback) {
-            if (target.removeEventListener) {
-                target.removeEventListener(name, callback, false);
-            } else {
-                target.detachEvent('on' + name, callback);
-            }
-        };
-
-        this.setup = function (context) {
-            context.bender = this;
-            context.onerror = this.error;
-            this.addListener(context, 'load', this.ready, this);
-        };
-    }
-
-    window.bender = new Bender();
-
-    
+(function (window, Ember, bender) {
 
     window.App = Ember.Application.create({
         Socket: EmberSockets.extend({
@@ -118,6 +40,7 @@
         },
 
         start: function () {
+            this.init();
             this.set('running', true);
         },
 
@@ -142,6 +65,14 @@
         }.observes('time')
     }).create();
 
+    bender.on('update', function (data) {
+        App.testStatus.update(data);
+    });
+
+    bender.on('complete', function () {
+        App.testStatus.stop();
+    });
+
     App.socketStatus = Ember.Object.extend({
         status: 'disconnected',
         css: 'label-danger',
@@ -158,6 +89,17 @@
         this.resource('tests');
         this.resource('jobs');
         this.resource('browsers');
+    });
+
+    App.ApplicationRoute = Ember.Route.extend({
+        actions: {
+            openModal: function (name) {
+                return this.render(name, {
+                    into: 'application',
+                    outlet: 'modal'
+                });
+            }
+        }
     });
 
     App.IndexRoute = Ember.Route.extend({
@@ -275,7 +217,7 @@
             });
         }.observes('isChecked'),
 
-        resetStatus: function () {
+        resetTests: function () {
             this.get('content').forEach(function (item) {
                 Ember.set(item, 'status', 'waiting');
                 Ember.set(item, 'result', null);
@@ -320,15 +262,12 @@
 
                 if (!tests.length) return;
 
-                bender.suite = tests;
-                bender.next();
+                bender.run(tests);
 
                 if (App.testStatus.get('running')) {
-                    bender.suite = [];
-                    bender.complete();
+                    bender.stop();
                 } else {
-                    this.resetStatus();
-                    App.testStatus.init();
+                    this.resetTests();
                     App.testStatus.start();
                 }
             },
@@ -345,10 +284,7 @@
         sockets: {
             'tests:update': function (data) {
                 // stop testing if necessary
-                if (App.testStatus.get('running')) {
-                    bender.suite = [];
-                    bender.complete();
-                }
+                if (App.testStatus.get('running')) bender.stop();
                 this.prepareData(data);
                 this.set('content', data);
             },
@@ -359,9 +295,17 @@
         }
     });
 
+    App.CreateJobView = Ember.View.extend({
+        didInsertElement: function () {
+            this.$('.modal, .modal-backdrop').addClass('in').show();
+        },
+
+        layoutName: 'modal-layout'
+    });
+
     // enable data-toggle attribute for inputs
     Ember.TextField.reopen({
         attributeBindings: ['data-toggle']
     });
 
-})(this, Ember);
+})(this, Ember, bender);
