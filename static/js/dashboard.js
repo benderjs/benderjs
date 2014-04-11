@@ -283,7 +283,10 @@
         },
 
         filtered: function () {
-            var search = this.get('search').trim(),
+            var search = this
+                    .get('search')
+                        .trim()
+                        .replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'),
                 content = this.get('content'),
                 reg;
 

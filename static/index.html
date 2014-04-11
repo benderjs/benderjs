@@ -52,7 +52,7 @@
                 </p>
             </div>
             <div class="col-md-6">
-                <form class="form-inline filter-form" role="form">
+                <div class="form-inline filter-form" role="form">
                     <div class="form-group input-append btn-group">
                         <label class="sr-only" for="filter">Filter tags</label>
                         {{input type="text" class="form-control" name="filter" data-toggle="dropdown" placeholder="Filter tags" value=search disabled=App.testStatus.running}}
@@ -62,14 +62,14 @@
                             {{/each}}
                         </ul>
                     </div>
-                <button type="button" class="btn btn-primary run-button" {{action "runTests"}}>
-                {{#if App.testStatus.running}}
-                    <span class="glyphicon glyphicon-stop"></span> Stop testing
-                {{else}}
-                    <span class="glyphicon glyphicon-play"></span> Run selected
-                {{/if}}
-                </button>
-                </form>
+                    <button type="button" class="btn btn-primary run-button" {{action "runTests"}}>
+                    {{#if App.testStatus.running}}
+                        <span class="glyphicon glyphicon-stop"></span> Stop testing
+                    {{else}}
+                        <span class="glyphicon glyphicon-play"></span> Run selected
+                    {{/if}}
+                    </button>
+                </div>
             </div>
         </div>
         <div class="panel panel-default">
