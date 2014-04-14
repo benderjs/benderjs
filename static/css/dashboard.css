@@ -136,3 +136,16 @@ th:last-child {
 .btn-group {
     display: block;
 }
+
+.notifications {
+    z-index: 1060;
+    position: fixed;
+    width: 50%;
+    left: 0;
+    right: 0;
+    margin: 50px auto auto;
+}
+
+.notifications .alert {
+    box-shadow: 0 0 50px rgba(0, 0, 0, .5);
+}

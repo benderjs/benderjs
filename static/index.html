@@ -10,6 +10,7 @@
 <body>
     <iframe src="about:blank" id="context" class="context-frame"></iframe>
     <script type="text/x-handlebars">
+    {{bs-notifications fadeOutTime=400}}
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
@@ -28,16 +29,14 @@
     </nav>
     <div class="container">
         <ul class="nav nav-tabs menu" role="navigation">
-            {{#with view}}
-            {{#link-to "tests" tagName="li" disabled=App.testStatus.running}}<a {{bind-attr href=href}}>Tests</a>{{/link-to}}
-            {{#link-to "jobs" tagName="li" disabled=App.testStatus.running}}<a {{bind-attr href=href}}>Jobs</a>{{/link-to}}
-            {{#link-to "browsers" tagName="li" disabled=App.testStatus.running}}<a {{bind-attr href=href}}>Browsers</a>{{/link-to}}
-            {{/with}}
+        {{#each tabs}}
+            {{#link-to target tagName="li" disabled=controllers.tests.testStatus.running}}
+                <a {{bind-attr href=view.href}}>{{name}}</a>
+            {{/link-to}}
+        {{/each}}
         </ul>
         <div class="content">
-            {{outlet alert}}
             {{outlet}}
-            {{outlet modal}}
         </div>
     </div>
     </script>
@@ -69,7 +68,7 @@
                     <span class="glyphicon glyphicon-play"></span> Run selected
                 {{/if}}
                 </button>
-                <button type="button" class="btn btn-default" {{action "openModal" "create-job" job}}>
+                <button type="button" class="btn btn-default" {{action "openCreateJob"}}>
                 <span class="glyphicon glyphicon-file"></span> Create job
                 </button>
             </div>
@@ -190,57 +189,22 @@
     {{/if}}
     </div>
     </script>
-
-    <script type="text/x-handlebars" data-template-name="components/alert-msg">
-        <div {{bind-attr class=":alert :alert-dismissable type"}}>
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            {{msg}}
-        </div>
-    </script>
-
-    <script type="text/x-handlebars" data-template-name="components/modal-dialog">
-    <div class="modal-backdrop fade"></div>
-    <div class="modal fade">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" {{action "cancel"}}>&times;</button>
-                    <h4 class="modal-title">{{title}}</h4>
-                </div>
-                <div class="modal-body">
-                    {{yield}}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" {{action "cancel"}}>Cancel</button>
-                    <button type="button" class="btn btn-primary" {{action "submit"}}>Submit</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    </script>
     
     <script type="text/x-handlebars" data-template-name="create-job">
-        {{#modal-dialog title="Create New Job" submit="createJob" cancel="closeModal"}}
         <div class="form-group">
             <label for="job-description">Job description</label>
-            {{input type="text" class="form-control" name="job-description" placeholder="Enter description, optional" value=description}}
+            {{input type="text" class="form-control" name="job-description" placeholder="Enter job description, optional" value=job.description}}
         </div>
         <div class="form-group input-append btn-group">
             <label for="job-description">Browsers</label>
-            {{input type="text" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value=browsersText}}
+            {{input type="text" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value=job.browsersText}}
             <ul class="dropdown-menu">
                 {{#each controllers.browsers.content}}
                     <li><a {{action "addBrowser" id}}>{{id}}</a></li>
                 {{/each}}
             </ul>
         </div>
-        {{/modal-dialog}}
-    </script>
-
-    <script type="text/x-handlebars" data-template-name="alert">
-    {{#alert-msg type=type msg=msg action="closeAlert"}}{{/alert-msg}}
-    </script>
-    
+    </script>    
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/libs/jquery-1.10.2.js"></script>
@@ -248,6 +212,10 @@
     <script src="/js/libs/ember-1.5.0.js"></script>
     <script src="/js/libs/ember-sockets.js"></script>
     <script src="/js/libs/bootstrap.js"></script>
+    <script src="/js/libs/bs-core.min.js"></script>
+    <script src="/js/libs/bs-button.min.js"></script>
+    <script src="/js/libs/bs-modal.min.js"></script>
+    <script src="/js/libs/bs-notifications.min.js"></script>
     <script src="/js/bender.js"></script>
     <script src="/js/dashboard.js"></script>
 </body>

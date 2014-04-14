@@ -1,4 +1,4 @@
-(function (window, Ember, bender) {
+(function (window, Ember, Bootstrap, bender) {
 
     window.App = Ember.Application.create({
         Socket: EmberSockets.extend({
@@ -66,6 +66,7 @@
 
     App.SocketStatus = Ember.Object.extend({
         status: 'disconnected',
+
         css: function () {
             var status = this.get('status');
 
@@ -87,44 +88,14 @@
         }
     });
 
-    App.ApplicationRoute = Ember.Route.extend({
-        actions: {
-            openModal: function (name, model) {
-                if (model) this.controllerFor(name).set('model', model);
-
-                return this.render(name, {
-                    into: 'application',
-                    outlet: 'modal'
-                });
-            },
-
-            closeModal: function () {
-                return this.disconnectOutlet({
-                    outlet: 'modal',
-                    parentView: 'application'
-                });
-            },
-
-            showAlert: function (type, msg) {
-                this.controllerFor('alert').set('msg', msg).set('type', 'alert-' + type);
-
-                return this.render('alert', {
-                    into: 'application',
-                    outlet: 'alert'
-                });
-            },
-
-            closeAlert: function () {
-                return this.disconnectOutlet({
-                    outlet: 'alert',
-                    parentView: 'application'
-                });
-            }
-        }
-    });
-
     App.ApplicationController = Ember.Controller.extend({
-        needs: ['browsers', 'tests'],
+        needs: ['tests'],
+
+        tabs: [
+            { target: 'tests', name: 'Tests' },
+            { target: 'jobs', name: 'Jobs' },
+            { target: 'browsers', name: 'Browsers' }
+        ],
 
         socketStatus: App.SocketStatus.create(),
 
@@ -148,32 +119,9 @@
         }
     });
 
-    App.TestsRoute = Ember.Route.extend({
-        actions: {
-            createJob: function () {
-                var job = this.controller.job,
-                    that = this;
-
-                // todo validate job
-
-                this.controller.socket.emit('job:create', {
-                    description: job.get('description'),
-                    browsers: job.get('browsers'),
-                    tests: this.controller.get('checked')
-                }, function (id) {
-                    console.log('created', id);
-
-                    that.send('closeModal');
-                });
-            },
-
-            addBrowser: function (name) {
-                this.controller.job.addBrowser(name);
-            }
-        }
-    });
-
     App.TestsController = Ember.ArrayController.extend({
+        needs: ['browsers'],
+
         itemController: 'test',
 
         isChecked: true,
@@ -186,13 +134,23 @@
 
         testStatus: App.TestStatus.create(),
 
+        createJobButtons: [
+            Ember.Object.create({ title: 'Cancel', dismiss: 'modal' }),
+            Ember.Object.create({ title: 'Create', clicked: 'createJob' })
+        ],
+
         job: Ember.Object.extend({
             description: '',
             browsersText: '',
             tests: [],
 
             browsers: function () {
-                return this.get('browsersText').trim().split(' ').uniq();
+                return this.get('browsersText')
+                    .trim().split(' ')
+                        .uniq()
+                        .filter(function (item) {
+                            return item;
+                        });
             }.property('browsersText'),
 
             addBrowser: function (name) {
@@ -287,7 +245,7 @@
                 var tests = this.get('checked');
 
                 if (!tests.length) {
-                    this.send('showAlert', 'warning', 'You must select at least 1 test to run!');
+                    Bootstrap.NM.push('You must select at least 1 test to run!', 'warning');
                     return;
                 }
 
@@ -306,6 +264,39 @@
 
             clearFilter: function () {
                 this.set('search', '');
+            },
+
+            openCreateJob: function () {
+                if (!this.get('checked').length)
+                    return Bootstrap.NM.push('You must specify at least one test for the job!', 'warning');
+
+                Bootstrap.ModalManager.open(
+                    'create-job',
+                    'Create New Job',
+                    'create-job',
+                    this.createJobButtons,
+                    this
+                );
+            },
+
+            createJob: function () {
+                var browsers = this.job.get('browsers');
+
+                if (!browsers.length)
+                    return Bootstrap.NM.push('You must specify at least one browser for the job!', 'warning');
+                
+                this.socket.emit('job:create', {
+                    description: this.job.get('description'),
+                    browsers: browsers,
+                    tests: this.get('checked')
+                }, function (id) {
+                    Bootstrap.NM.push('Successfully created new job - ' + id, 'success');
+                    Bootstrap.ModalManager.close('create-job');
+                });
+            },
+
+            addBrowser: function (name) {
+                this.job.addBrowser(name);
             }
         },
 
@@ -369,43 +360,19 @@
         }
     });
 
-    App.ModalDialogComponent = Ember.Component.extend({
-        didInsertElement: function () {
-            this.$('.modal, .modal-backdrop').addClass('in').show();
-        },
+    Ember.Handlebars.registerHelper('tab-link', function (name) {
+        var options = [].slice.call(arguments, -1)[0],
+            params = [].slice.call(arguments, 0, -1),
+            hash = options.hash;
 
-        actions: {
-            cancel: function () {
-                this.sendAction('cancel');
-            },
+        hash.disabledBinding = hash.disabledWhen;
+        hash.parameters = {
+          context: this,
+          options: options,
+          params: params
+        };
 
-            submit: function () {
-                this.sendAction('submit');
-            }
-        }
-    });
-
-    App.AlertMsgComponent = Ember.Component.extend({
-        didInsertElement: function () {
-            var that = this;
-
-            this.$('.alert').on('closed.bs.alert', function () {
-                that.sendAction();
-            });
-        },
-
-        willDestroyElement: function () {
-            this.$('.alert').off();
-        }
-    });
-    
-    App.AlertController = Ember.ObjectController.extend({
-        msg: '',
-        type: ''
-    });
-
-    App.CreateJobController = Ember.ObjectController.extend({
-        needs: ['browsers']
+        return Ember.Handlebars.helpers.view.call(this, App.TabLinkView, options);
     });
 
     // enable data-toggle attribute for inputs
@@ -413,4 +380,4 @@
         attributeBindings: ['data-toggle']
     });
 
-})(this, Ember, bender);
+})(this, Ember, Bootstrap, bender);
