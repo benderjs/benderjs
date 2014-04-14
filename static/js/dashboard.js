@@ -9,11 +9,11 @@
                 'reconnection limit': 2000,
                 'max reconnection attempts': 30
             },
-            controllers: ['index', 'browsers', 'tests']
+            controllers: ['application', 'browsers', 'tests']
         })
     });
 
-    App.testStatus = Ember.Object.extend({
+    App.TestStatus = Ember.Object.extend({
         _defaults: {
             passed: 0,
             failed: 0,
@@ -63,17 +63,9 @@
                 (s < 10 ? '0' : '') + s + 's ' +
                 (ms < 10 ? '00' : ms < 100 ? '0' : '') + ms + 'ms');
         }.observes('time')
-    }).create();
-
-    bender.on('update', function (data) {
-        App.testStatus.update(data);
     });
 
-    bender.on('complete', function () {
-        App.testStatus.stop();
-    });
-
-    App.socketStatus = Ember.Object.extend({
+    App.SocketStatus = Ember.Object.extend({
         status: 'disconnected',
         css: 'label-danger',
 
@@ -83,12 +75,19 @@
             this.set('css', 'label-' + (status === 'connected' ? 'success' :
                 status === 'reconnecting' ? 'warning' : 'danger'));
         }.observes('status')
-    }).create();
+    });
 
     App.Router.map(function () {
         this.resource('tests');
         this.resource('jobs');
         this.resource('browsers');
+    });
+
+    // redirect to tests tab
+    App.IndexRoute = Ember.Route.extend({
+        redirect: function () {
+            this.transitionTo('tests');
+        }
     });
 
     App.ApplicationRoute = Ember.Route.extend({
@@ -105,88 +104,45 @@
                     outlet: 'modal',
                     parentView: 'application'
                 });
-            },
-
-            createJob: function () {
-                
             }
         }
     });
 
-    App.IndexRoute = Ember.Route.extend({
-        redirect: function () {
-            this.transitionTo('tests');
+    App.TestsRoute = Ember.Route.extend({
+        actions: {
+            createJob: function () {
+                console.log('create job');
+            },
+
+            addBrowser: function (name) {
+                console.log('add tag', name);
+            }
         }
     });
 
-    App.IndexController = Ember.Controller.extend({
+    App.ApplicationController = Ember.Controller.extend({
+        needs: ['browsers', 'tests'],
+
+        socketStatus: App.SocketStatus.create(),
+
         sockets: {
             connect: function () {
                 this.socket.emit('register');
-                App.socketStatus.set('status', 'connected');
+                this.socketStatus.set('status', 'connected');
             },
             reconnect: function () {
-                App.socketStatus.set('status', 'reconnecting');
+                this.socketStatus.set('status', 'reconnecting');
             },
             reconnecting: function () {
-                App.socketStatus.set('status', 'reconnecting');
+                this.socketStatus.set('status', 'reconnecting');
             },
             reconnect_failed: function () {
-                App.socketStatus.set('status', 'disconnected');
+                this.socketStatus.set('status', 'disconnected');
             },
             disconnect: function () {
-                App.socketStatus.set('status', 'disconnected');
+                this.socketStatus.set('status', 'disconnected');
             }
         }
-    });
-
-    App.BrowsersController = Ember.ArrayController.extend({
-        content: [],
-
-        sockets: {
-            'browsers:update': function (data) {
-                this.set('content', data);
-            },
-
-            disconnect: function () {
-                this.set('content', []);
-            }
-        }
-    });
-
-    App.TestController = Ember.ObjectController.extend({
-        singleUrl: function () {
-            return '/single/' + this.get('id');
-        }.property('id'),
-
-        resultCss: function () {
-            var result = this.get('result');
-            
-            if (!result) return '';
-
-            return result.success ? 'success' : 'danger';
-        }.property('status'),
-
-        iconCss: function () {
-            var result = this.get('result');
-            
-            if (!result) return '';
-
-            return 'glyphicon-' + (result.success ? 'ok' : 'remove');
-        }.property('status'),
-
-        statusText: function () {
-            var status = this.get('status'),
-                result;
-
-            if (status === 'waiting') return '';
-            if (status === 'running') return 'Running...';
-
-            result = this.get('result');
-
-            return result.passed + ' passed / ' + result.failed + ' failed ' +
-                ' in ' + result.runtime + 'ms';
-        }.property('status', 'result')
     });
 
     App.TestsController = Ember.ArrayController.extend({
@@ -200,25 +156,38 @@
 
         tags: [],
 
+        testStatus: App.TestStatus.create(),
+
+        init: function () {
+            var that = this;
+
+            bender.on('update', function (data) {
+                that.testStatus.update(data);
+            });
+            bender.on('complete', function () {
+                that.testStatus.stop();
+            });
+        },
+
         updateRunning: function () {
-            var id = App.testStatus.get('current'),
+            var id = this.testStatus.get('current'),
                 current = this.get('content').findBy('id', id);
 
             if (!id ||!current) return;
 
             Ember.set(current, 'status', 'running');
-        }.observes('App.testStatus.current'),
+        }.observes('testStatus.current'),
 
         updateResult: function () {
             var result,
                 current;
 
-            if (!(result = App.testStatus.get('currentResult')) ||
+            if (!(result = this.testStatus.get('currentResult')) ||
                 !(current = this.get('content').findBy('id', result.id))) return;
 
             Ember.set(current, 'status', 'done');
             Ember.set(current, 'result', result);
-        }.observes('App.testStatus.currentResult'),
+        }.observes('testStatus.currentResult'),
 
         toggleChecked: function () {
             var checked = this.get('isChecked');
@@ -275,11 +244,11 @@
 
                 bender.run(tests);
 
-                if (App.testStatus.get('running')) {
+                if (this.testStatus.get('running')) {
                     bender.stop();
                 } else {
                     this.resetTests();
-                    App.testStatus.start();
+                    this.testStatus.start();
                 }
             },
 
@@ -295,7 +264,7 @@
         sockets: {
             'tests:update': function (data) {
                 // stop testing if necessary
-                if (App.testStatus.get('running')) bender.stop();
+                if (this.testStatus.get('running')) bender.stop();
                 this.prepareData(data);
                 this.set('content', data);
             },
@@ -306,12 +275,69 @@
         }
     });
 
-    App.CreateJobView = Ember.View.extend({
+    App.TestController = Ember.ObjectController.extend({
+        singleUrl: function () {
+            return '/single/' + this.get('id');
+        }.property('id'),
+
+        resultCss: function () {
+            var result = this.get('result');
+            
+            if (!result) return '';
+
+            return result.success ? 'success' : 'danger';
+        }.property('status'),
+
+        iconCss: function () {
+            var result = this.get('result');
+            
+            if (!result) return '';
+
+            return 'glyphicon-' + (result.success ? 'ok' : 'remove');
+        }.property('status'),
+
+        statusText: function () {
+            var status = this.get('status'),
+                result;
+
+            if (status === 'waiting') return '';
+            if (status === 'running') return 'Running...';
+
+            result = this.get('result');
+
+            return result.passed + ' passed / ' + result.failed + ' failed ' +
+                ' in ' + result.runtime + 'ms';
+        }.property('status', 'result')
+    });
+
+    App.BrowsersController = Ember.ArrayController.extend({
+        content: [],
+
+        sockets: {
+            'browsers:update': function (data) {
+                this.set('content', data);
+            },
+
+            disconnect: function () {
+                this.set('content', []);
+            }
+        }
+    });
+
+    App.ModalDialogComponent = Ember.Component.extend({
         didInsertElement: function () {
             this.$('.modal, .modal-backdrop').addClass('in').show();
         },
 
-        layoutName: 'modal-layout'
+        actions: {
+            cancel: function () {
+                this.sendAction('cancel');
+            },
+
+            submit: function () {
+                this.sendAction('submit');
+            }
+        }
     });
 
     // enable data-toggle attribute for inputs

@@ -15,9 +15,7 @@
             <div class="navbar-header">
                 <a class="navbar-brand app-title" href="#">Bender Dashboard</a>
                 <p class="navbar-text socket-status">
-                    {{#with App.socketStatus}}
-                    <span {{bind-attr class=":label css"}}>{{status}}</span>
-                    {{/with}}
+                    <span {{bind-attr class=":label socketStatus.css"}}>{{socketStatus.status}}</span>
                 </p>
             </div>
             <div class="navbar-right">
@@ -47,7 +45,7 @@
     <div class="row">
         <div class="col-md-6">
             <p class="test-status">
-                {{#with App.testStatus}}
+                {{#with testStatus}}
                 <strong>{{passed}}</strong> passed / <strong>{{failed}}</strong> failed in {{timeText}}
                 {{/with}}
             </p>
@@ -55,8 +53,8 @@
         <div class="col-md-6">
             <div class="form-inline filter-form" role="form">
                 <div class="form-group input-append btn-group">
-                    {{input type="text" class="form-control" name="filter" data-toggle="dropdown" placeholder="Filter tags" value=search disabled=App.testStatus.running}}
-                    <span {{bind-attr class=":glyphicon :glyphicon-remove :clear-filter search:visible"}}{{bind-attr disabled=App.testStatus.running}} {{action "clearFilter"}}></span>
+                    {{input type="text" class="form-control" name="filter" data-toggle="dropdown" placeholder="Filter tags" value=search disabled=testStatus.running}}
+                    <span {{bind-attr class=":glyphicon :glyphicon-remove :clear-filter search:visible"}}{{bind-attr disabled=testStatus.running}} {{action "clearFilter"}}></span>
                     <ul class="dropdown-menu">
                         {{#each tags}}
                             <li><a {{action "addTag" this}}>{{this}}</a></li>
@@ -64,7 +62,7 @@
                     </ul>
                 </div>
                 <button type="button" class="btn btn-primary" {{action "runTests"}}>
-                {{#if App.testStatus.running}}
+                {{#if testStatus.running}}
                     <span class="glyphicon glyphicon-stop"></span> Stop testing
                 {{else}}
                     <span class="glyphicon glyphicon-play"></span> Run selected
@@ -189,11 +187,7 @@
     </script>
     
     <script type="text/x-handlebars" data-template-name="create-job">
-    <div class="modal-header">
-        <button type="button" class="close" {{action 'closeModal'}}>&times;</button>
-        <h4 class="modal-title">Create New Job</h4>
-    </div>
-    <div class="modal-body">
+        {{#modal-dialog title="Create New Job" submit="createJob" cancel="closeModal"}}
         <div class="form-group">
             <label for="job-description">Job description</label>
             {{input type="text" class="form-control" name="job-description" placeholder="Enter description" value=description}}
@@ -203,24 +197,30 @@
             {{input type="text" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome, Firefox, IE9, Safari" value=browsers}}
 
             <ul class="dropdown-menu">
-                {{#each browsers}}
-                    <li><a {{action "addTag" this}}>{{this}}</a></li>
+                {{#each controllers.browsers.content}}
+                    <li><a {{action "addBrowser" id}}>{{id}}</a></li>
                 {{/each}}
             </ul>
         </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" {{action 'closeModal'}}>Cancel</button>
-        <button type="button" class="btn btn-primary" {{action 'createJob'}}>Create</button>
-    </div>
+        {{/modal-dialog}}
     </script>
     
-    <script type="text/x-handlebars" data-template-name="modal-layout">
+    <script type="text/x-handlebars" data-template-name="components/modal-dialog">
     <div class="modal-backdrop fade"></div>
     <div class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
-                {{yield}}
+                <div class="modal-header">
+                    <button type="button" class="close" aria-hidden="true" {{action "cancel"}}>&times;</button>
+                    <h4 class="modal-title">{{title}}</h4>
+                </div>
+                <div class="modal-body">
+                    {{yield}}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" {{action "cancel"}}>Cancel</button>
+                    <button type="button" class="btn btn-primary" {{action "submit"}}>Submit</button>
+                </div>
             </div>
         </div>
     </div>
