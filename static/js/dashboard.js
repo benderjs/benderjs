@@ -89,12 +89,16 @@
     });
 
     App.ApplicationController = Ember.Controller.extend({
-        needs: ['tests'],
+        needs: ['tests', 'browsers'],
+
+        browsersCount: Ember.computed.alias('controllers.browsers.clients.length'),
+        testsCount: Ember.computed.alias('controllers.tests.content.length'),
+        testsRunning: Ember.computed.alias('controllers.tests.testStatus.running'),
 
         tabs: [
-            { target: 'tests', name: 'Tests' },
+            { target: 'tests', name: 'Tests', tests: true },
             { target: 'jobs', name: 'Jobs' },
-            { target: 'browsers', name: 'Browsers' }
+            { target: 'browsers', name: 'Browsers', browsers: true }
         ],
 
         socketStatus: App.SocketStatus.create(),
@@ -350,6 +354,13 @@
     });
 
     App.BrowsersController = Ember.ArrayController.extend({
+        clients: function () {
+            return this.get('content')
+                .reduce(function (result, current) {
+                    return result.concat(current.clients);
+                }, []);
+        }.property('content'),
+
         sockets: {
             'browsers:update': function (data) {
                 this.set('content', data);

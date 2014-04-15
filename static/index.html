@@ -28,10 +28,14 @@
         </div>
     </nav>
     <div class="container">
-        <ul class="nav nav-tabs menu" role="navigation">
+        <ul class="nav nav-tabs nav-justified" role="navigation">
         {{#each tabs}}
-            {{#link-to target tagName="li" disabled=controllers.tests.testStatus.running}}
-                <a {{bind-attr href=view.href}}>{{name}}</a>
+            {{#link-to target tagName="li" disabled=controller.testsRunning}}
+                <a {{bind-attr href=view.href}}>
+                    {{name}}
+                    {{#if tests}}<span class="badge">{{controller.testsCount}}</span>{{/if}}
+                    {{#if browsers}}<span class="badge">{{controller.browsersCount}}</span>{{/if}}
+                </a>
             {{/link-to}}
         {{/each}}
         </ul>
@@ -69,7 +73,7 @@
                 {{/if}}
                 </button>
                 <button type="button" class="btn btn-default" {{action "openCreateJob"}}>
-                <span class="glyphicon glyphicon-file"></span> Create job
+                <span class="glyphicon glyphicon-file"></span> Create a job
                 </button>
             </div>
         </div>
@@ -140,14 +144,11 @@
         <table class="table table-hover table-condensed browsers">
             <thead>
                 <tr>
-                    <th rowspan="2">Browser</th>
-                    <th colspan="4">Clients</th>
-                </tr>
-                <tr>
-                    <th>ID</th>
-                    <th>UA</th>
-                    <th>Address</th>
-                    <th>Status</th>
+                    <th class="col-md-2">Browser</th>
+                    <th class="col-md-4">ID</th>
+                    <th class="col-md-3">UA</th>
+                    <th class="col-md-2">Address</th>
+                    <th class="col-md-1">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -161,6 +162,7 @@
                 {{else}}
                 <tr>
                     <td></td>
+                    <td>-</td>
                     <td>-</td>
                     <td>-</td>
                     <td>-</td>
