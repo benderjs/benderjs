@@ -146,7 +146,6 @@
         job: Ember.Object.extend({
             description: '',
             browsersText: '',
-            tests: [],
 
             browsers: function () {
                 return this.get('browsersText')
@@ -284,7 +283,8 @@
             },
 
             createJob: function () {
-                var browsers = this.job.get('browsers');
+                var job = this.job,
+                    browsers = job.get('browsers');
 
                 if (!browsers.length)
                     return Bootstrap.NM.push('You must specify at least one browser for the job!', 'warning');
@@ -296,6 +296,8 @@
                 }, function (id) {
                     Bootstrap.NM.push('Successfully created new job - ' + id, 'success');
                     Bootstrap.ModalManager.close('create-job');
+                    
+                    job.set('browsersText', '').set('description', '');
                 });
             },
 
