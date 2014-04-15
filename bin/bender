@@ -12,6 +12,7 @@ var argParser = require('nomnom'),
     cache = require(dir + 'cache'),
     conf = require(dir + 'config'),
     constants = require(dir + 'constants'),
+    jobs = require(dir + 'jobs'),
     plugins = require(dir + 'plugins'),
     reporters = require(dir + 'reporters'),
     server = require(dir + 'server'),
@@ -158,7 +159,7 @@ function startServer(options) {
     var bender = new broadway.App({ delimeter: ':' }),
         modules = [
             utils, applications, builders, browsers, cache,
-            constants, tests, sockets, server, plugins
+            constants, tests, jobs, sockets, server, plugins
         ].concat(reporters.modules);
 
     bender.use(conf, { path: path.resolve(process.cwd(), options.config || 'bender.js') });
