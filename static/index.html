@@ -195,10 +195,6 @@
 
     
     <script type="text/x-handlebars" data-template-name="create-job">
-        <div class="form-group">
-            <label for="job-description">Job description</label>
-            {{input type="text" class="form-control" name="job-description" placeholder="Enter job description, optional" value=job.description}}
-        </div>
         <div class="form-group input-append btn-group">
             <label for="job-description">Browsers</label>
             {{input type="text" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value=job.browsersText}}
@@ -207,6 +203,10 @@
                     <li><a {{action "addBrowser" id}}>{{id}}</a></li>
                 {{/each}}
             </ul>
+        </div>
+        <div class="form-group">
+            <label for="job-description">Job description <span>(optional)</span></label>
+            {{input type="text" class="form-control" name="job-description" placeholder="Enter job description" value=job.description}}
         </div>
     </script>    
 

@@ -149,3 +149,9 @@ th:last-child {
 .notifications .alert {
     box-shadow: 0 0 50px rgba(0, 0, 0, .5);
 }
+
+.form-group label span {
+    font-weight: normal;
+    font-style: italic;
+    color: #999;
+}
