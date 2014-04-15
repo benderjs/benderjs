@@ -137,8 +137,7 @@
     <script type="text/x-handlebars" id="browsers">
     <div class="panel panel-default">
     {{#if length}}
-        <table class="table table-hover table-condensed 
-        browsers">
+        <table class="table table-hover table-condensed browsers">
             <thead>
                 <tr>
                     <th rowspan="2">Browser</th>
@@ -157,30 +156,16 @@
                     <th {{bind-attr class=":browser name"}}>{{id}}</th>
                     <th colspan="4"></th>
                 </tr>
-                    {{#if clients.length}}
-                    {{#each clients}}
-                    <tr>
-                        <td></td>
-                        <td>{{id}}</td>
-                        <td>{{ua}}</td>
-                        <td>{{addr}}</td>
-                        <td>
-                            {{#if busy}}
-                            <span class="label label-warning">busy</span>
-                            {{else}}
-                            <span class="label label-success">ready</span>
-                            {{/if}}
-                        </td>
-                    </tr>
-                    {{/each}}
-                    {{else}}
-                    <tr>
-                        <td></td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                    {{/if}}
+                {{#if clients.length}}
+                {{#each clients}}{{partial "client"}}{{/each}}
+                {{else}}
+                <tr>
+                    <td></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                {{/if}}
                 {{/each}}
             </tbody>
         </table>
@@ -189,6 +174,23 @@
     {{/if}}
     </div>
     </script>
+
+    <script type="text/x-handlebars" data-template-name="_client">
+    <tr>
+        <td></td>
+        <td>{{id}}</td>
+        <td>{{ua}}</td>
+        <td>{{addr}}</td>
+        <td>
+            {{#if ready}}
+            <span class="label label-success">ready</span>
+            {{else}}
+            <span class="label label-warning">busy</span>
+            {{/if}}
+        </td>
+    </tr>
+    </script>
+
     
     <script type="text/x-handlebars" data-template-name="create-job">
         <div class="form-group">

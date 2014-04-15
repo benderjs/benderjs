@@ -45,7 +45,7 @@
 
         this.assert = null;
         this.current = null;
-        this.suite = null;
+
         this.results = {
             results: [],
             suite: null
@@ -66,10 +66,9 @@
         };
 
         this.next = function () {
-            this.current = this.suite.shift();
-
             if (this.current) {
                 contextEl.src = '../tests/' + this.current;
+                this.current = null;
             } else {
                 this.complete();
             }
@@ -156,9 +155,8 @@
             });
         });
 
-        socket.on('run', function (suite) {
-            that.suite = suite;
-            that.results.suite = [].concat(suite);
+        socket.on('run', function (id) {
+            that.current = id;
             that.next.call(that);
         });
     }
