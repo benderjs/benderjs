@@ -16,7 +16,7 @@
             <div class="navbar-header">
                 <a class="navbar-brand app-title" href="#">Bender Dashboard</a>
                 <p class="navbar-text socket-status">
-                    <span {{bind-attr class=":label socketStatus.css"}}>{{socketStatus.status}}</span>
+                    {{bs-label type=socketStatus.css text=socketStatus.status}}
                 </p>
             </div>
             <div class="navbar-right">
@@ -119,10 +119,7 @@
             <thead>
                 <tr>
                     <th class="col-md-2">ID</th>
-                    <th class="col-md-4">Description</th>
-                    <th class="col-md-3">Browsers</th>
-                    <th class="col-md-2">Created</th>
-                    <th class="col-md-1">Status</th>
+                    <th class="col-md-3">Description</th>
                 </tr>
             </thead>
             <tbody>
@@ -130,9 +127,6 @@
                 <tr>
                     <td>{{_id}}</td>
                     <td>{{description}}</td>
-                    <td>{{browsersText}}</td>
-                    <td>{{createdText}}</td>
-                    <td><span {{bind-attr class=":label statusCss"}}>{{statusText}}</span></td>
                 </tr>
             {{/each}}
             </tbody>
@@ -187,14 +181,13 @@
         <td>{{addr}}</td>
         <td>
             {{#if ready}}
-            <span class="label label-success">ready</span>
+                {{bs-label type="success" text="ready"}}
             {{else}}
-            <span class="label label-warning">busy</span>
+                {{bs-label type="warning" text="busy"}}
             {{/if}}
         </td>
     </tr>
     </script>
-
     
     <script type="text/x-handlebars" data-template-name="create-job">
         <div class="form-group input-append btn-group">
@@ -221,7 +214,6 @@
     <script src="/js/libs/bs-core.min.js"></script>
     <script src="/js/libs/bs-button.min.js"></script>
     <script src="/js/libs/bs-modal.min.js"></script>
-    <script src="/js/libs/bs-notifications.min.js"></script>
     <script src="/js/bender.js"></script>
     <script src="/js/dashboard.js"></script>
 </body>

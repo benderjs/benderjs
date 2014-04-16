@@ -148,6 +148,7 @@ th:last-child {
 
 .notifications .alert {
     box-shadow: 0 0 50px rgba(0, 0, 0, .5);
+    cursor: pointer;
 }
 
 .form-group label span {

@@ -70,8 +70,8 @@
         css: function () {
             var status = this.get('status');
 
-            return 'label-' + (status === 'connected' ? 'success' :
-                status === 'reconnecting' ? 'warning' : 'danger');
+            return status === 'connected' ? 'success' :
+                status === 'reconnecting' ? 'warning' : 'danger';
         }.property('status')
     });
 
@@ -316,7 +316,7 @@
                 this.set('content', data);
             },
             disconnect: function () {
-                this.set('content', []);
+                this.get('content').clear();
             }
         }
     });
@@ -366,7 +366,7 @@
             },
 
             disconnect: function () {
-                this.set('content', []);
+                this.get('content').clear();
             }
         }
     });
@@ -396,7 +396,7 @@
             if (status === 2) text = 'success';
             if (status === 3) text = 'danger';
 
-            return 'label-' + css;
+            return css;
         }.property('status'),
 
         createdText: function () {
@@ -417,10 +417,110 @@
                 this.set('content', data);
             },
             disconnect: function () {
-                this.set('content', []);
+                this.get('content').clear();
             }
         }
     });
+
+    Bootstrap.NM = Bootstrap.NotificationManager = Ember.Object.create({
+        content: Ember.A(),
+
+        push: function(message, type) {
+            return this.get('content')
+                .pushObject(
+                    Ember.Object.create({
+                        message: message,
+                        type: type || 'info'
+                    })
+                );
+        }
+    });
+
+    Bootstrap.NotificationView = Ember.View.extend({
+        classNames: ['alert', 'notification'],
+        template: Ember.Handlebars.compile('{{view.content.message}}'),
+        classNameBindings: ['alertType'],
+        isVisible: false,
+
+        alertType: function () {
+            var type = this.get('content').get('type');
+
+            return type ? 'alert-' + type : null;
+        }.property('content'),
+        
+        didInsertElement: function () {
+            this.$().fadeIn(this.get('fadeInTime'));
+        },
+
+        click: function () {
+            this.$().hide();
+        }
+    });
+
+    Bootstrap.NotificationsView = Ember.CollectionView.extend({
+        classNames: ['notifications'],
+        attributeBindings: ['style'],
+        contentBinding: 'Bootstrap.NM.content',
+        itemViewClass: Bootstrap.NotificationView,
+        
+        showTime: 2000,
+        fadeInTime: 500,
+        fadeOutTime: 500,
+        showTimeout: null,
+        
+        contentChanged: function () {
+            if (this.get('content').length) this.resetShowTime();
+        }.observes('content.length'),
+        
+        resetShowTime: function () {
+            this.$().css('display', 'block');
+            
+            if (this.$().is(':animated')) {
+                this.$().stop().animate({
+                    opacity: '100'
+                });
+            }
+            
+            if (this.showTimeout) clearTimeout(this.showTimeout);
+
+            this.showTimeout = setTimeout(this.fadeOut, this.showTime, this);
+        },
+        
+        fadeOut: function(that) {
+            return that.$().fadeOut(that.fadeOutTime, function () {
+                return that.get('content').clear();
+            });
+        },
+        
+        mouseEnter: function () {
+            if (this.$().is(':animated')) {
+                this.$().stop().animate({
+                    opacity: '100'
+                });
+            }
+
+            if (this.showTimeout) clearTimeout(this.showTimeout);
+        },
+
+        mouseLeave: function () {
+          this.resetShowTime();
+        }
+    });
+
+    Ember.Handlebars.helper('bs-notifications', Bootstrap.NotificationsView);
+
+    Bootstrap.LabelView = Ember.View.extend({
+        classNames: ['label'],
+        classNameBindings: ['labelType'],
+        tagName: 'span',
+        template: Ember.Handlebars.compile('{{view.text}}'),
+
+        labelType: function () {
+            return 'label-' + this.get('type');
+        }.property('type')
+    });
+
+    Ember.Handlebars.helper('bs-label', Bootstrap.LabelView);
 
     // enable data-toggle attribute for inputs
     Ember.TextField.reopen({
