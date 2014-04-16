@@ -9,7 +9,7 @@
                 'reconnection limit': 2000,
                 'max reconnection attempts': 30
             },
-            controllers: ['application', 'browsers', 'tests']
+            controllers: ['application', 'browsers', 'jobs', 'tests']
         })
     });
 
@@ -89,15 +89,16 @@
     });
 
     App.ApplicationController = Ember.Controller.extend({
-        needs: ['tests', 'browsers'],
+        needs: ['tests', 'browsers', 'jobs'],
 
         browsersCount: Ember.computed.alias('controllers.browsers.clients.length'),
         testsCount: Ember.computed.alias('controllers.tests.content.length'),
+        jobsCount: Ember.computed.alias('controllers.jobs.content.length'),
         testsRunning: Ember.computed.alias('controllers.tests.testStatus.running'),
 
         tabs: [
             { target: 'tests', name: 'Tests', tests: true },
-            { target: 'jobs', name: 'Jobs' },
+            { target: 'jobs', name: 'Jobs', jobs: true },
             { target: 'browsers', name: 'Browsers', browsers: true }
         ],
 
@@ -355,6 +356,54 @@
         }.property('status', 'result')
     });
 
+    App.JobsController = Ember.ArrayController.extend({
+        itemController: 'job',
+
+        sockets: {
+            'jobs:update': function (data) {
+                console.log(data);
+                this.set('content', data);
+            },
+
+            disconnect: function () {
+                this.set('content', []);
+            }
+        }
+    });
+
+    App.JobController = Ember.ObjectController.extend({
+        browsersText: function () {
+            return this.get('browsers').join(', ');
+        }.property('browsers'),
+
+        statusText: function () {
+            var status = this.get('status'),
+                text = 'unknown';
+
+            if (status === 0) text = 'waiting';
+            if (status === 1) text = 'pending';
+            if (status === 2) text = 'passed';
+            if (status === 3) text = 'failed';
+
+            return text;
+        }.property('status'),
+
+        statusCss: function () {
+            var status = this.get('status'),
+                css = 'default';
+
+            if (status === 1) text = 'primary';
+            if (status === 2) text = 'success';
+            if (status === 3) text = 'danger';
+
+            return 'label-' + css;
+        }.property('status'),
+
+        createdText: function () {
+            return new Date(this.get('created')).toLocaleString();
+        }.property('created')
+    });
+
     App.BrowsersController = Ember.ArrayController.extend({
         clients: function () {
             return this.get('content')
@@ -371,21 +420,6 @@
                 this.set('content', []);
             }
         }
-    });
-
-    Ember.Handlebars.registerHelper('tab-link', function (name) {
-        var options = [].slice.call(arguments, -1)[0],
-            params = [].slice.call(arguments, 0, -1),
-            hash = options.hash;
-
-        hash.disabledBinding = hash.disabledWhen;
-        hash.parameters = {
-          context: this,
-          options: options,
-          params: params
-        };
-
-        return Ember.Handlebars.helpers.view.call(this, App.TabLinkView, options);
     });
 
     // enable data-toggle attribute for inputs

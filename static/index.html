@@ -35,6 +35,7 @@
                     {{name}}
                     {{#if tests}}<span class="badge">{{controller.testsCount}}</span>{{/if}}
                     {{#if browsers}}<span class="badge">{{controller.browsersCount}}</span>{{/if}}
+                    {{#if jobs}}<span class="badge">{{controller.jobsCount}}</span>{{/if}}
                 </a>
             {{/link-to}}
         {{/each}}
@@ -113,29 +114,30 @@
     </script>
     
     <script type="text/x-handlebars" id="jobs">
-    {{!--
-        <div class="panel panel-default">
-            <div class="panel-heading"><h3 class="panel-title">Waiting</h3></div>
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Description</th>
-                        <th>Browsers</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>12345-67890-12345-67890</td>
-                        <td>Lorem ipsum dolor sit amet.</td>
-                        <td>Chrome, IE, Firefox, Opera</td>
-                        <td>April 9, 2014 10:49:25</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    --}}
+    <div class="panel panel-default">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-2">ID</th>
+                    <th class="col-md-4">Description</th>
+                    <th class="col-md-3">Browsers</th>
+                    <th class="col-md-2">Created</th>
+                    <th class="col-md-1">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#each}}
+                <tr>
+                    <td>{{_id}}</td>
+                    <td>{{description}}</td>
+                    <td>{{browsersText}}</td>
+                    <td>{{createdText}}</td>
+                    <td><span {{bind-attr class=":label statusCss"}}>{{statusText}}</span></td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
     </script>
 
     <script type="text/x-handlebars" id="browsers">
