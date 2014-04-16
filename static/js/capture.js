@@ -1,8 +1,5 @@
 (function (window, undefined) {
-    var host = /^[a-z]+:\/\/([^\/]+)/.exec(window.location)[1].split(":"),
-        id = /\/clients\/([^\/]+)/.exec(window.location)[1],
-        statusEl = document.getElementById('status'),
-        contextEl = document.getElementById('context'),
+    var statusEl = document.getElementById('status'),
         states = {
             CONNECT: 0,
             RECONNECT: 1,
@@ -11,7 +8,7 @@
             DISCONNECT: 4
         },
         socket = io.connect(
-            'http://' + host[0] + ':' + (host[1] || 80) + '/client',
+            'http://' + window.location.hostname + ':' + (window.location.port || 80) + '/client',
             {
                 'reconnection limit': 2000,
                 'max reconnection attempts': 30
@@ -41,10 +38,13 @@
     }
 
     function Bender(socket) {
-        var that = this;
+        var contextEl = document.getElementById('context'),
+            that = this,
+            fetchInterval = null;
 
         this.assert = null;
         this.current = null;
+        this.running = false;
 
         this.results = {
             results: [],
@@ -68,6 +68,7 @@
         this.next = function () {
             if (this.current) {
                 contextEl.src = '../tests/' + this.current;
+                this.running = true;
                 this.current = null;
             } else {
                 this.complete();
@@ -77,6 +78,7 @@
         this.complete = function () {
             socket.emit('complete', this.results);
             contextEl.src = 'about:blank';
+            this.running = false;
             this.results.results.length = 0;
             this.results.suite = null;
         };
@@ -148,11 +150,29 @@
             if (steal) stealLogs();
         };
 
+        function startFetch() {
+            fetchInterval = setInterval(function () {
+                if (!that.running) socket.emit('fetch');
+            }, 3000);
+        }
+
+        function stopFetch() {
+            if (fetchInterval) clearInterval(fetchInterval);
+        }
+
         socket.on('connect', function () {
+            var id = /\/clients\/([^\/]+)/.exec(window.location)[1];
+
             socket.emit('register', {
                 id: id,
                 ua: navigator.userAgent
             });
+
+            startFetch();
+        });
+
+        socket.on('disconnect', function () {
+            stopFetch();
         });
 
         socket.on('run', function (id) {
