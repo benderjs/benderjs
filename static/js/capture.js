@@ -10,8 +10,9 @@
         socket = io.connect(
             'http://' + window.location.hostname + ':' + (window.location.port || 80) + '/client',
             {
+                'reconnection delay': 2000,
                 'reconnection limit': 2000,
-                'max reconnection attempts': 30
+                'max reconnection attempts': Infinity
             }
         );
 
@@ -52,13 +53,8 @@
         };
 
         this.result = function (result) {
-            var res = {
-                    id: this.current,
-                    result: result
-                };
-
-            this.results.results.push(res);
-            socket.emit('result', res);
+            this.results.results.push(result);
+            socket.emit('result', result);
         };
 
         this.next = function () {
@@ -75,8 +71,7 @@
             socket.emit('fetch'); // let's speed up the fetching
             contextEl.src = 'about:blank';
             this.running = false;
-            this.results.results.length = 0;
-            this.results.id = null;
+            this.results = null;
         };
 
         this.log = function () {
@@ -149,7 +144,7 @@
         function startFetch() {
             fetchInterval = setInterval(function () {
                 if (!that.running) socket.emit('fetch');
-            }, 3000);
+            }, 2000);
         }
 
         function stopFetch() {
@@ -171,14 +166,10 @@
             stopFetch();
         });
 
-        socket.on('run', function (id) {
-            that.current = id;
-
-            that.results = {
-                results: [],
-                id: id
-            };
-
+        socket.on('run', function (data) {
+            that.current = data.id;
+            data.results = [];
+            that.results = data;
             that.running = true;
 
             that.next.call(that);

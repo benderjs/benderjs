@@ -6,8 +6,9 @@
             port: window.location.port,
             namespace: 'dashboard',
             options: {
+                'reconnection delay': 2000,
                 'reconnection limit': 2000,
-                'max reconnection attempts': 30
+                'max reconnection attempts': Infinity
             },
             controllers: ['application', 'browsers', 'jobs', 'tests']
         })
@@ -388,7 +389,7 @@
                 status = result.status === 2 ? 'success' :
                     result.status === 3 ? 'danger' : 'info';
 
-                result.statusCss = status + ' bg-' + status;
+                result.statusCss = status + ' bg-' + status + ' text-' + status;
                 result.iconCss = 'glyphicon-' + icon;
 
                 return result;

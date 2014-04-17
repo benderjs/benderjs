@@ -91,14 +91,6 @@ th:last-child {
     color: #555;
 }
 
-.success .glyphicon {
-    color: #090;
-}
-
-.danger .glyphicon {
-    color: #900;
-}
-
 .browsers th:first-child {
     min-width: 200px;
 }
@@ -126,8 +118,18 @@ th:last-child {
     padding: 5px 5px 5px 42px;
     margin-right: 1px;
     line-height: 32px;
+    text-align: center;
     background-repeat: no-repeat;
     background-position: 5px 5px;
+}
+
+.jobs .browser .glyphicon,
+.jobs .browser small {
+    float: left; 
+    clear: left;
+    width: 20px;
+    height: 16px;
+    line-height: 16px;
 }
 
 .chrome {

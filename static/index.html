@@ -135,6 +135,7 @@
                         {{#each parsedResults}}
                             <div {{bind-attr class=":browser name statusCss"}}>
                                 <span {{bind-attr class=":glyphicon iconCss"}}></span>
+                                <small>{{#if version}}{{version}}{{else}}-{{/if}}</small>
                             </div>
                         {{/each}}
                     </td>
