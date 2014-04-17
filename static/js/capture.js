@@ -45,11 +45,7 @@
         this.assert = null;
         this.current = null;
         this.running = false;
-
-        this.results = {
-            results: [],
-            suite: null
-        };
+        this.results = null;
 
         this.error = function (error) {
             socket.emit('error', error);
@@ -68,7 +64,6 @@
         this.next = function () {
             if (this.current) {
                 contextEl.src = '../tests/' + this.current;
-                this.running = true;
                 this.current = null;
             } else {
                 this.complete();
@@ -77,10 +72,11 @@
 
         this.complete = function () {
             socket.emit('complete', this.results);
+            socket.emit('fetch'); // let's speed up the fetching
             contextEl.src = 'about:blank';
             this.running = false;
             this.results.results.length = 0;
-            this.results.suite = null;
+            this.results.id = null;
         };
 
         this.log = function () {
@@ -177,6 +173,14 @@
 
         socket.on('run', function (id) {
             that.current = id;
+
+            that.results = {
+                results: [],
+                id: id
+            };
+
+            that.running = true;
+
             that.next.call(that);
         });
     }
