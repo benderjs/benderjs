@@ -1,4 +1,4 @@
-(function (window, Ember, Bootstrap, bender) {
+(function (window, Ember, Bootstrap, moment, bender) {
 
     window.App = Ember.Application.create({
         Socket: EmberSockets.extend({
@@ -357,11 +357,13 @@
     });
 
     App.JobsController = Ember.ArrayController.extend({
-        itemController: 'job',
+        itemController: 'job-row',
+
+        sortProperties: ['created'],
+        sortAscending: false,
 
         sockets: {
             'jobs:update': function (data) {
-                console.log(data);
                 this.set('content', data);
             },
 
@@ -371,36 +373,30 @@
         }
     });
 
-    App.JobController = Ember.ObjectController.extend({
-        browsersText: function () {
-            return this.get('browsers').join(', ');
-        }.property('browsers'),
+    App.JobRowController = Ember.ObjectController.extend({
+        parsedResults: function () {
+            var results = this.get('results');
 
-        statusText: function () {
-            var status = this.get('status'),
-                text = 'unknown';
+            return results.map(function (result) {
+                var status,
+                    icon;
 
-            if (status === 0) text = 'waiting';
-            if (status === 1) text = 'pending';
-            if (status === 2) text = 'passed';
-            if (status === 3) text = 'failed';
+                icon = result.status === 0 ? 'time' :
+                    result.status === 1 ? 'refresh' :
+                    result.status === 2 ? 'ok' : 'remove';
 
-            return text;
-        }.property('status'),
+                status = result.status === 2 ? 'success' :
+                    result.status === 3 ? 'danger' : 'info';
 
-        statusCss: function () {
-            var status = this.get('status'),
-                css = 'default';
+                result.statusCss = status + ' bg-' + status;
+                result.iconCss = 'glyphicon-' + icon;
 
-            if (status === 1) text = 'primary';
-            if (status === 2) text = 'success';
-            if (status === 3) text = 'danger';
-
-            return css;
-        }.property('status'),
+                return result;
+            });
+        }.property('results'),
 
         createdText: function () {
-            return new Date(this.get('created')).toLocaleString();
+            return moment(this.get('created')).fromNow().replace(/\s/g, '&nbsp;');
         }.property('created')
     });
 
@@ -527,4 +523,4 @@
         attributeBindings: ['data-toggle']
     });
 
-})(this, Ember, Bootstrap, bender);
+})(this, Ember, Bootstrap, moment, bender);

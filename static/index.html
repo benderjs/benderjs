@@ -115,22 +115,36 @@
     
     <script type="text/x-handlebars" id="jobs">
     <div class="panel panel-default">
-        <table class="table table-hover">
+        {{#if length}}
+        <table class="table table-hover jobs">
             <thead>
                 <tr>
                     <th class="col-md-2">ID</th>
-                    <th class="col-md-3">Description</th>
+                    <th class="col-md-2">Description</th>
+                    <th class="col-md-1">Created</th>
+                    <th>Results</th>
                 </tr>
             </thead>
             <tbody>
             {{#each}}
                 <tr>
-                    <td>{{_id}}</td>
+                    <td><a href="#/jobs">{{_id}}</a></td>
                     <td>{{description}}</td>
+                    <td><small>{{{createdText}}}</small></td>
+                    <td>
+                        {{#each parsedResults}}
+                            <div {{bind-attr class=":browser name statusCss"}}>
+                                <span {{bind-attr class=":glyphicon iconCss"}}></span>
+                            </div>
+                        {{/each}}
+                    </td>
                 </tr>
             {{/each}}
             </tbody>
         </table>
+        {{else}}
+        <div class="panel-body">No jobs available</div>
+        {{/if}}
     </div>
     </script>
 
@@ -214,6 +228,7 @@
     <script src="/js/libs/bs-core.min.js"></script>
     <script src="/js/libs/bs-button.min.js"></script>
     <script src="/js/libs/bs-modal.min.js"></script>
+    <script src="/js/libs/moment.min.js"></script>
     <script src="/js/bender.js"></script>
     <script src="/js/dashboard.js"></script>
 </body>

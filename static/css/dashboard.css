@@ -1,13 +1,22 @@
-a {
-    cursor: pointer;
-}
-
 body {
     padding-top: 70px;
 }
 
-td, th {
+a {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+td:first-child,
+th:first-child {
+    white-space: nowrap;
+}
+
+.tests th {
     width: 1px;
+}
+
+.tests td {
     white-space: nowrap;
 }
 
@@ -103,6 +112,22 @@ th:last-child {
     background-repeat: no-repeat;
     padding-left: 48px;
     text-transform: capitalize;
+}
+
+.jobs tbody tr td {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 42px;
+}
+
+.jobs .browser {
+    float: left;
+    height: 42px;
+    padding: 5px 5px 5px 42px;
+    margin-right: 1px;
+    line-height: 32px;
+    background-repeat: no-repeat;
+    background-position: 5px 5px;
 }
 
 .chrome {
