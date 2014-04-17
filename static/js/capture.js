@@ -53,6 +53,7 @@
         };
 
         this.result = function (result) {
+            if (!result.success) this.results.success = false;
             this.results.results.push(result);
             socket.emit('result', result);
         };
@@ -168,8 +169,11 @@
 
         socket.on('run', function (data) {
             that.current = data.id;
+
             data.results = [];
+            data.success = true;
             that.results = data;
+            
             that.running = true;
 
             that.next.call(that);

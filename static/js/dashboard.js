@@ -368,6 +368,11 @@
                 this.set('content', data);
             },
 
+            'job:update': function (data) {
+                // TODO
+                // console.log('job update', data);
+            },
+
             disconnect: function () {
                 this.get('content').clear();
             }
@@ -412,6 +417,11 @@
         sockets: {
             'browsers:update': function (data) {
                 this.set('content', data);
+            },
+            'client:update': function (data) {
+                var client = this.get('clients').findBy('id', data.id);
+
+                if (client) Ember.setProperties(client, data);
             },
             disconnect: function () {
                 this.get('content').clear();
