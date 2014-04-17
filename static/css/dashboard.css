@@ -1,0 +1,185 @@
+body {
+    padding-top: 70px;
+}
+
+a {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+td:first-child,
+th:first-child {
+    white-space: nowrap;
+}
+
+.tests th {
+    width: 1px;
+}
+
+.tests td {
+    white-space: nowrap;
+}
+
+.table thead tr th {
+    vertical-align: middle;
+}
+
+td:last-child,
+th:last-child {
+    width: auto;
+    white-space: normal;
+}
+
+.content {
+    margin: 1em 0;
+}
+
+.app-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.socket-status {
+    margin-left: 0;
+}
+
+.socket-status .label {
+    font-size: 85.7142857%;
+    padding: .3em .6em;
+}
+
+.filter-form {
+    text-align: right;
+    margin-bottom: 1em;
+}
+
+.filter-form ul {
+    text-align: left;
+}
+
+.clear-filter {
+    margin-left: -25px;
+    cursor: pointer;
+    color: #999;
+    margin-right: 7px;
+    display: none;
+}
+
+.clear-filter.visible {
+    display: inline-block;
+}
+
+.tests input[type="checkbox"] {
+    margin: 0 .5em;
+}
+
+.context-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    filter: alpha(opacity=0);
+    opacity: 0;
+}
+
+.test-status {
+    height: 34px;
+    padding: 6px 12px;
+    line-height: 22px;
+    font-size: 18px;
+    color: #555;
+}
+
+.browsers th:first-child {
+    min-width: 200px;
+}
+
+.browsers tbody tr th {
+    line-height: 32px;
+}
+
+.browsers .browser {
+    background-position: 8px 50%;
+    background-repeat: no-repeat;
+    padding-left: 48px;
+    text-transform: capitalize;
+}
+
+.jobs tbody tr td {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 42px;
+}
+
+.jobs .browser {
+    float: left;
+    height: 42px;
+    padding: 5px 5px 5px 42px;
+    margin-right: 1px;
+    line-height: 32px;
+    text-align: center;
+    background-repeat: no-repeat;
+    background-position: 5px 5px;
+}
+
+.jobs .browser .glyphicon,
+.jobs .browser small {
+    float: left; 
+    clear: left;
+    width: 20px;
+    height: 16px;
+    line-height: 16px;
+}
+
+.chrome {
+    background-image: url('../images/logos/chrome_32x32.png');
+}
+
+.chromium {
+    background-image: url('../images/logos/chromium_32x32.png');
+}
+
+.firefox {
+    background-image: url('../images/logos/firefox_32x32.png');
+}
+
+.ie {
+    background-image: url('../images/logos/ie_32x32.png');
+}
+
+.opera {
+    background-image: url('../images/logos/opera_32x32.png');
+}
+
+.phantomjs {
+    background-image: url('../images/logos/phantomjs_32x32.png');
+}
+
+.safari {
+    background-image: url('../images/logos/safari_32x32.png');
+}
+
+.btn-group {
+    display: block;
+}
+
+.notifications {
+    z-index: 1060;
+    position: fixed;
+    width: 50%;
+    left: 0;
+    right: 0;
+    margin: 50px auto auto;
+}
+
+.notifications .alert {
+    box-shadow: 0 0 50px rgba(0, 0, 0, .5);
+    cursor: pointer;
+}
+
+.form-group label span {
+    font-weight: normal;
+    font-style: italic;
+    color: #999;
+}

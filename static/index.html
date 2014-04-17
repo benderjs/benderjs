@@ -1,87 +1,236 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Bender.js Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css">
-
-    <script id="clients-tmpl" type="text/x-dot-template">
-    {{? it.clients.length }}
-        {{~ it.clients :client }}
-            <li class="{{= client.browser }}">
-                {{= client.ua }}
-                {{? client.busy }}<span class="busy"></span>
-                {{??}}<span class="waiting"></span>
-                {{?}}
-            </li>
-        {{~}}
-    {{??}}
-        <li>no browsers connected</li>
-    {{?}}
-    </script>
-
-    <script id="tests-tmpl" type="text/x-dot-template">
-    <thead>
-        <tr>
-            <th></th>
-            <th>ID</th>
-            <th>Tags</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {{= it.html }}
-    </tbody>
-    </script>
-
-    <script id="group-tmpl" type="text/x-dot-template">
-    <tr class="group">
-        <td><input type="checkbox" checked="checked" class="toggle"></td>
-        <td colspan="2"><span>Group:</span> {{= it.name }}</td>
-        <td></td>
-    </tr>
-    </script>
-
-    <script id="test-tmpl" type="text/x-dot-template">
-    <tr>
-        <td><input type="checkbox" name="{{= it.id }}" checked="checked"></td>
-        <td><a href="/single/{{= it.id }}" title="Run locally">{{= it.id }}</a></td>
-        <td>{{= it.tags.join(', ') }}</td>
-        <td class="result" data-id="{{= it.id }}"></td>
-    </tr>
-    </script>
-
-    <script id="result-tmpl" type="text/x-dot-template">
-    {{= it.passed }} passed / {{= it.failed }} failed in {{= it.runtime }}ms
-    </script>
+    <meta charset="utf-8">
+    <title>Bender Dashboard</title>
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
-    <iframe src="about:blank" id="context"></iframe>
-    <header>
-        <h1 class="title">Bender.js Dashboard <span></span></h1>
-        <a href="/capture" class="btn capture" title="Capture this browser">Capture</a>
-        <button id="run" class="btn run" title="Run selected tests">Run</button>
-        <button id="create" class="btn create" title="Create new job">Create new job</button>
-        <ul id="menu" class="menu">
-            <li><a href="#tests" class="selected">Tests</a></li>
-            <li><a href="#jobs">Jobs</a></li>
-            <li><a href="#browsers">Browsers</a></li>
-        </ul>
-    </header>
-    <main>
-        <section id="tests">
-            <table cellspacing="0" cellpadding="0" id="testsTable" class="loading"></table>
-        </section>
-        <section id="jobs" class="hidden">
+    <iframe src="about:blank" id="context" class="context-frame"></iframe>
+    <script type="text/x-handlebars">
+    {{bs-notifications fadeOutTime=400}}
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand app-title" href="#">Bender Dashboard</a>
+                <p class="navbar-text socket-status">
+                    {{bs-label type=socketStatus.css text=socketStatus.status}}
+                </p>
+            </div>
+            <div class="navbar-right">
+                <a class="btn btn-default navbar-btn" href="/capture" title="Capture browser">
+                    <span class="glyphicon glyphicon-download"></span> Capture browser
+                </a>
+            </div>
             
-        </section>
-        <section id="browsers" class="hidden">
-            <ul class="clients"></ul>
-        </section>
-    </main>
-    <script src="doT.min.js"></script>
-    <script src="jquery.1.11.0.min.js"></script>
+        </div>
+    </nav>
+    <div class="container">
+        <ul class="nav nav-tabs nav-justified" role="navigation">
+        {{#each tabs}}
+            {{#link-to target tagName="li" disabled=controller.testsRunning}}
+                <a {{bind-attr href=view.href}}>
+                    {{name}}
+                    {{#if tests}}<span class="badge">{{controller.testsCount}}</span>{{/if}}
+                    {{#if browsers}}<span class="badge">{{controller.browsersCount}}</span>{{/if}}
+                    {{#if jobs}}<span class="badge">{{controller.jobsCount}}</span>{{/if}}
+                </a>
+            {{/link-to}}
+        {{/each}}
+        </ul>
+        <div class="content">
+            {{outlet}}
+        </div>
+    </div>
+    </script>
+
+    <script type="text/x-handlebars" id="tests">
+    <div class="row">
+        <div class="col-md-6">
+            <p class="test-status">
+                {{#with testStatus}}
+                <strong>{{passed}}</strong> passed / <strong>{{failed}}</strong> failed in {{timeText}}
+                {{/with}}
+            </p>
+        </div>
+        <div class="col-md-6">
+            <div class="form-inline filter-form" role="form">
+                <div class="form-group input-append btn-group">
+                    {{input type="text" class="form-control" name="filter" data-toggle="dropdown" placeholder="Filter tags" value=search disabled=testStatus.running}}
+                    <span {{bind-attr class=":glyphicon :glyphicon-remove :clear-filter search:visible"}}{{bind-attr disabled=testStatus.running}} {{action "clearFilter"}}></span>
+                    <ul class="dropdown-menu">
+                        {{#each tags}}
+                            <li><a {{action "addTag" this}}>{{this}}</a></li>
+                        {{/each}}
+                    </ul>
+                </div>
+                <button type="button" class="btn btn-primary" {{action "runTests"}}>
+                {{#if testStatus.running}}
+                    <span class="glyphicon glyphicon-stop"></span> Stop testing
+                {{else}}
+                    <span class="glyphicon glyphicon-play"></span> Run selected
+                {{/if}}
+                </button>
+                <button type="button" class="btn btn-default" {{action "openCreateJob"}}>
+                <span class="glyphicon glyphicon-file"></span> Create a job
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        {{#if length}}
+        <table class="table table-hover tests">
+            <thead>
+                <tr>
+                    <th>{{input type="checkbox" checked=isChecked}}</th>
+                    <th>ID</th>
+                    <th>Group</th>
+                    <th>Tags</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#if filtered.length}}
+                {{#each filtered itemController="test"}}
+                <tr {{bind-attr class=resultCss}}>
+                    <td>{{input type="checkbox" checked=isChecked}}</td>
+                    <td><a {{bind-attr href=singleUrl}}>{{id}}</a></td>
+                    <td>{{group}}</td>
+                    <td>{{tags}}</td>
+                    <td><span {{bind-attr class=":glyphicon iconCss" }}></span> {{statusText}}</td>
+                </tr>
+                {{/each}}
+                {{else}}
+                <tr><td colspan="5">No tests matching specified tags</td></tr>
+                {{/if}}
+            </tbody>
+        </table>
+        {{else}}
+        <div class="panel-body">No tests available</div>
+        {{/if}}
+    </div>
+    </script>
+    
+    <script type="text/x-handlebars" id="jobs">
+    <div class="panel panel-default">
+        {{#if length}}
+        <table class="table table-hover jobs">
+            <thead>
+                <tr>
+                    <th class="col-md-2">ID</th>
+                    <th class="col-md-2">Description</th>
+                    <th class="col-md-1">Created</th>
+                    <th>Results</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#each}}
+                <tr>
+                    <td><a href="#/jobs">{{_id}}</a></td>
+                    <td>{{description}}</td>
+                    <td><small>{{{createdText}}}</small></td>
+                    <td>
+                        {{#each parsedResults}}
+                            <div {{bind-attr class=":browser name statusCss"}}>
+                                <span {{bind-attr class=":glyphicon iconCss"}}></span>
+                                <small>{{#if version}}{{version}}{{else}}-{{/if}}</small>
+                            </div>
+                        {{/each}}
+                    </td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
+        {{else}}
+        <div class="panel-body">No jobs available</div>
+        {{/if}}
+    </div>
+    </script>
+
+    <script type="text/x-handlebars" id="browsers">
+    <div class="panel panel-default">
+    {{#if length}}
+        <table class="table table-hover table-condensed browsers">
+            <thead>
+                <tr>
+                    <th class="col-md-2">Browser</th>
+                    <th class="col-md-4">ID</th>
+                    <th class="col-md-3">UA</th>
+                    <th class="col-md-2">Address</th>
+                    <th class="col-md-1">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each}}
+                <tr>
+                    <th {{bind-attr class=":browser name"}}>{{id}}</th>
+                    <th colspan="4"></th>
+                </tr>
+                {{#if clients.length}}
+                {{#each clients}}{{partial "client"}}{{/each}}
+                {{else}}
+                <tr>
+                    <td></td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+                {{/if}}
+                {{/each}}
+            </tbody>
+        </table>
+    {{else}}
+        <div class="panel-body">No browsers connected</div>
+    {{/if}}
+    </div>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="_client">
+    <tr>
+        <td></td>
+        <td>{{id}}</td>
+        <td>{{ua}}</td>
+        <td>{{addr}}</td>
+        <td>
+            {{#if ready}}
+                {{bs-label type="success" text="ready"}}
+            {{else}}
+                {{bs-label type="warning" text="busy"}}
+            {{/if}}
+        </td>
+    </tr>
+    </script>
+    
+    <script type="text/x-handlebars" data-template-name="create-job">
+        <div class="form-group input-append btn-group">
+            <label for="job-description">Browsers</label>
+            {{input type="text" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value=job.browsersText}}
+            <ul class="dropdown-menu">
+                {{#each controllers.browsers.content}}
+                    <li><a {{action "addBrowser" id}}>{{id}}</a></li>
+                {{/each}}
+            </ul>
+        </div>
+        <div class="form-group">
+            <label for="job-description">Job description <span>(optional)</span></label>
+            {{input type="text" class="form-control" name="job-description" placeholder="Enter job description" value=job.description}}
+        </div>
+    </script>    
+
     <script src="/socket.io/socket.io.js"></script>
-    <script src="dashboard.js"></script>
+    <script src="/js/libs/jquery-1.10.2.js"></script>
+    <script src="/js/libs/handlebars-1.1.2.js"></script>
+    <script src="/js/libs/ember-1.5.0.js"></script>
+    <script src="/js/libs/ember-sockets.js"></script>
+    <script src="/js/libs/bootstrap.js"></script>
+    <script src="/js/libs/bs-core.min.js"></script>
+    <script src="/js/libs/bs-button.min.js"></script>
+    <script src="/js/libs/bs-modal.min.js"></script>
+    <script src="/js/libs/moment.min.js"></script>
+    <script src="/js/bender.js"></script>
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>
