@@ -107,16 +107,20 @@ th:last-child {
 }
 
 .jobs tbody tr td {
+    padding-top: 11px;
+    padding-bottom: 11px;
+}
+
+.jobs td:last-child {
     padding-top: 0;
     padding-bottom: 0;
-    line-height: 42px;
 }
 
 .jobs .browser {
     float: left;
     height: 42px;
     padding: 5px 5px 5px 42px;
-    margin-right: 1px;
+    margin: 0 1px 1px 0;
     line-height: 32px;
     text-align: center;
     background-repeat: no-repeat;
