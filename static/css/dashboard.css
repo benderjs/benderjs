@@ -106,25 +106,36 @@ th:last-child {
     text-transform: capitalize;
 }
 
-.jobs tbody tr td {
+.jobs tbody tr td,
+.jobs tbody tr th {
     padding-top: 11px;
     padding-bottom: 11px;
 }
 
-.jobs td:last-child {
+.jobs td:last-child,
+.jobs th:last-child {
     padding-top: 0;
     padding-bottom: 0;
 }
 
-.jobs .browser {
+.jobs .browser,
+.jobs .result {
     float: left;
     height: 42px;
-    padding: 5px 5px 5px 42px;
     margin: 0 1px 1px 0;
-    line-height: 32px;
+    line-height: 42px;
     text-align: center;
     background-repeat: no-repeat;
     background-position: 5px 5px;
+}
+
+.jobs .browser {
+    padding: 5px 5px 5px 42px;
+}
+
+.jobs .result {
+    width: 67px;
+    font-size: 1.25em;
 }
 
 .jobs .browser .glyphicon,
@@ -186,4 +197,8 @@ th:last-child {
     font-weight: normal;
     font-style: italic;
     color: #999;
+}
+
+.moment {
+    white-space: nowrap;
 }

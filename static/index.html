@@ -33,9 +33,7 @@
             {{#link-to target tagName="li" disabled=controller.testsRunning}}
                 <a {{bind-attr href=view.href}}>
                     {{name}}
-                    {{#if tests}}<span class="badge">{{controller.testsCount}}</span>{{/if}}
                     {{#if browsers}}<span class="badge">{{controller.browsersCount}}</span>{{/if}}
-                    {{#if jobs}}<span class="badge">{{controller.jobsCount}}</span>{{/if}}
                 </a>
             {{/link-to}}
         {{/each}}
@@ -128,9 +126,9 @@
             <tbody>
             {{#each}}
                 <tr>
-                    <td><a href="#/jobs">{{_id}}</a></td>
+                    <td>{{#link-to 'job' _id}}{{_id}}{{/link-to}}</td>
                     <td>{{description}}</td>
-                    <td><small>{{{createdText}}}</small></td>
+                    <td><small>{{bs-moment time=created}}</small></td>
                     <td>
                         {{#each parsedResults}}
                             <div {{bind-attr class=":browser name statusCss"}}>
@@ -146,6 +144,41 @@
         {{else}}
         <div class="panel-body">No jobs available</div>
         {{/if}}
+    </div>
+    </script>
+
+    <script type="text/x-handlebars" id="job">
+    <h4><small>Job:</small> {{_id}} <small>created {{bs-moment time=created}}</small></h4>
+    <h4><small>Description:</small> {{#if description}}{{description}}{{else}}-{{/if}}</h4>
+    <div class="panel panel-default">
+        <table class="table table-hover jobs">
+            <thead>
+                <tr>
+                    <th class="col-md-3">Test ID</th>
+                    <th>
+                        {{#each browsers}}
+                        <div {{bind-attr class=":browser name"}}>
+                            <small>{{#if version}}{{version}}{{else}}-{{/if}}</small>
+                        </div>
+                        {{/each}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#each parsedTasks}}
+                <tr>
+                    <td>{{id}}</td>
+                    <td>
+                        {{#each results}}
+                            <div {{bind-attr class=":result statusCss"}}>
+                                <span {{bind-attr class=":glyphicon iconCss"}}></span>
+                            </div>
+                        {{/each}}
+                    </td>
+                </tr>
+            {{/each}}
+            </tbody>
+        </table>
     </div>
     </script>
 

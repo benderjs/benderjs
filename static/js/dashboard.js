@@ -1,4 +1,4 @@
-(function (window, Ember, Bootstrap, moment, bender) {
+(function (window, Ember, $, Bootstrap, moment, bender) {
 
     window.App = Ember.Application.create({
         Socket: EmberSockets.extend({
@@ -10,7 +10,7 @@
                 'reconnection limit': 2000,
                 'max reconnection attempts': Infinity
             },
-            controllers: ['application', 'browsers', 'jobs', 'tests']
+            controllers: ['application', 'browsers']
         })
     });
 
@@ -79,10 +79,10 @@
     App.Router.map(function () {
         this.resource('tests');
         this.resource('jobs');
+        this.resource('job', { path: '/jobs/:job_id' });
         this.resource('browsers');
     });
 
-    // redirect to tests tab
     App.IndexRoute = Ember.Route.extend({
         redirect: function () {
             this.transitionTo('tests');
@@ -90,16 +90,14 @@
     });
 
     App.ApplicationController = Ember.Controller.extend({
-        needs: ['tests', 'browsers', 'jobs'],
+        needs: ['tests', 'browsers'],
 
         browsersCount: Ember.computed.alias('controllers.browsers.clients.length'),
-        testsCount: Ember.computed.alias('controllers.tests.content.length'),
-        jobsCount: Ember.computed.alias('controllers.jobs.content.length'),
         testsRunning: Ember.computed.alias('controllers.tests.testStatus.running'),
 
         tabs: [
-            { target: 'tests', name: 'Tests', tests: true },
-            { target: 'jobs', name: 'Jobs', jobs: true },
+            { target: 'tests', name: 'Tests' },
+            { target: 'jobs', name: 'Jobs' },
             { target: 'browsers', name: 'Browsers', browsers: true }
         ],
 
@@ -125,14 +123,30 @@
         }
     });
 
+    App.TestsRoute = Ember.Route.extend({
+        model: function () {
+            return $.getJSON('/tests');
+        },
+
+        setupController: function (controller, model) {
+            var tags = model.reduce(function (result, current) {
+                    current.isChecked = true;
+                    current.status = 'waiting'; // test status - waiting, running, done
+                    current.result = null; // test result
+                    return result.concat(current.tags.split(', '));
+                }, []);
+
+            controller.set('model', model);
+            controller.set('tags', tags.uniq());
+        }
+    });
+
     App.TestsController = Ember.ArrayController.extend({
         needs: ['browsers'],
 
         itemController: 'test',
 
         isChecked: true,
-
-        content: [],
 
         search: '',
 
@@ -234,17 +248,6 @@
             });
         },
 
-        prepareData: function (data) {
-            var tags = data.reduce(function (result, current) {
-                    current.isChecked = true;
-                    current.status = 'waiting'; // test status - waiting, running, done
-                    current.result = null; // test result
-                    return result.concat(current.tags.split(', '));
-                }, []);
-
-            this.set('tags', tags.uniq());
-        },
-
         actions: {
             runTests: function () {
                 var tests = this.get('checked');
@@ -291,33 +294,22 @@
                 if (!browsers.length)
                     return Bootstrap.NM.push('You must specify at least one browser for the job!', 'warning');
                 
-                this.socket.emit('job:create', {
+                $.post('/jobs', {
                     description: this.job.get('description'),
                     browsers: browsers,
                     tests: this.get('checked')
-                }, function (id) {
-                    Bootstrap.NM.push('Successfully created new job - ' + id, 'success');
+                }, function (data) {
+                    Bootstrap.NM.push('Successfully created new job - ' + data.id, 'success');
                     Bootstrap.ModalManager.close('create-job');
-                    
                     job.set('browsersText', '').set('description', '');
+                }, 'json')
+                .fail(function () {
+                    Bootstrap.NM.push('Couldn\'t create new job due to server error', 'danger');
                 });
             },
 
             addBrowser: function (name) {
                 this.job.addBrowser(name);
-            }
-        },
-
-        sockets: {
-            'tests:update': function (data) {
-                // stop testing if necessary
-                if (this.testStatus.get('running')) bender.stop();
-
-                this.prepareData(data);
-                this.set('content', data);
-            },
-            disconnect: function () {
-                this.get('content').clear();
             }
         }
     });
@@ -328,11 +320,14 @@
         }.property('id'),
 
         resultCss: function () {
-            var result = this.get('result');
+            var result = this.get('result'),
+                css;
             
             if (!result) return '';
 
-            return result.success ? 'success' : 'danger';
+            css = result.success ? 'success' : 'danger';
+
+            return css + ' bg-' + css + ' text-' + css;
         }.property('status'),
 
         iconCss: function () {
@@ -357,26 +352,16 @@
         }.property('status', 'result')
     });
 
+    App.JobsRoute = Ember.Route.extend({
+        model: function () {
+            return $.getJSON('/jobs');
+        }
+    });
+
     App.JobsController = Ember.ArrayController.extend({
         itemController: 'job-row',
-
         sortProperties: ['created'],
-        sortAscending: false,
-
-        sockets: {
-            'jobs:update': function (data) {
-                this.set('content', data);
-            },
-
-            'job:update': function (data) {
-                // TODO
-                // console.log('job update', data);
-            },
-
-            disconnect: function () {
-                this.get('content').clear();
-            }
-        }
+        sortAscending: false
     });
 
     App.JobRowController = Ember.ObjectController.extend({
@@ -399,11 +384,61 @@
 
                 return result;
             });
-        }.property('results'),
+        }.property('results')
+    });
 
-        createdText: function () {
-            return moment(this.get('created')).fromNow().replace(/\s/g, '&nbsp;');
-        }.property('created')
+    App.JobRoute = Ember.Route.extend({
+        model: function (params) {
+            return $.getJSON('/jobs/' + params.job_id);
+        }
+    });
+
+    App.JobController = Ember.ObjectController.extend({
+        sortResults: function (prev, next) {
+            var pv = parseInt(prev.version, 10),
+                nv = parseInt(next.version, 10);
+
+            return prev.name > next.name ? 1 : prev.name < next.name ? -1 :
+                pv > nv ? 1 : pv < nv ? -1 : 0;
+        },
+
+        browsers: function () {
+            var task = this.get('tasks')[0];
+
+            if (!task) return [];
+
+            return task.results.sort(this.sortResults);
+        }.property('tasks'),
+
+        parsedTasks: function () {
+            var tasks = this.get('tasks'),
+                that = this;
+
+            function parseResult(result) {
+                var status,
+                    icon;
+
+                icon = result.status === 0 ? 'time' :
+                    result.status === 1 ? 'refresh' :
+                    result.status === 2 ? 'ok' : 'remove';
+
+                status = result.status === 2 ? 'success' :
+                    result.status === 3 ? 'danger' : 'info';
+
+                result.statusCss = status + ' bg-' + status + ' text-' + status;
+                result.iconCss = 'glyphicon-' + icon;
+
+                return result;
+            }
+
+            return tasks.map(function (task) {
+                task.results = task.results
+                    .map(parseResult)
+                    .sort(that.sortResults);
+
+                return task;
+            });
+        }.property('tasks')
     });
 
     App.BrowsersController = Ember.ArrayController.extend({
@@ -529,9 +564,21 @@
 
     Ember.Handlebars.helper('bs-label', Bootstrap.LabelView);
 
+    Bootstrap.MomentView = Ember.View.extend({
+        template: Ember.Handlebars.compile('{{view.converted}}'),
+        classNames: ['moment'],
+        tagName: 'span',
+
+        converted: function () {
+            return moment(this.get('time')).fromNow();
+        }.property('time')
+    });
+
+    Ember.Handlebars.helper('bs-moment', Bootstrap.MomentView);
+
     // enable data-toggle attribute for inputs
     Ember.TextField.reopen({
         attributeBindings: ['data-toggle']
     });
 
-})(this, Ember, Bootstrap, moment, bender);
+})(this, Ember, Ember.$, Bootstrap, moment, bender);
