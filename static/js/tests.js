@@ -1,35 +1,124 @@
 (function (Ember, App, $, bender, Bootstrap) {
 
+    var TestStatus = Ember.Object.extend({
+        _defaults: {
+            passed: 0,
+            failed: 0,
+            time: 0,
+            running: false,
+            current: null,
+            currentResult: null
+        },
+
+        init: function () {
+            this.setProperties(this._defaults);
+        },
+
+        update: function (data) {
+            if (typeof data == 'string') return this.set('current', data);
+
+            this.incrementProperty('passed', data.passed);
+            this.incrementProperty('failed', data.failed);
+            this.incrementProperty('total', data.total);
+            this.incrementProperty('time', data.runtime);
+
+            this.set('currentResult', data);
+        },
+
+        start: function () {
+            this.init();
+            this.set('running', true);
+        },
+
+        stop: function () {
+            this.set('running', false);
+        },
+
+        timeText: function () {
+            var ms = this.get('time'),
+                h, m, s;
+
+            s = Math.floor(ms / 1000);
+            ms %= 1000;
+            m = Math.floor(s / 60);
+            s %= 60;
+            h = Math.floor(m / 60);
+            m %= 60;
+
+            return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' +
+                (s < 10 ? '0' : '') + s + 's ' +
+                (ms < 10 ? '00' : ms < 100 ? '0' : '') + ms + 'ms';
+        }.property('time')
+    });
+
+    App.Test = DS.Model.extend({
+        group: DS.attr('string'),
+        tags: DS.attr('string'),
+
+        singleUrl: function () {
+            return '/single/' + this.get('id');
+        }.property('id'),
+
+        resultCss: function () {
+            var result = this.get('result'),
+                css;
+            
+            if (!result) return '';
+
+            css = result.success ? 'success' : 'danger';
+
+            return css + ' bg-' + css + ' text-' + css;
+        }.property('status'),
+
+        iconCss: function () {
+            var result = this.get('result');
+            
+            if (!result) return '';
+
+            return 'glyphicon-' + (result.success ? 'ok' : 'remove');
+        }.property('status'),
+
+        statusText: function () {
+            var status = this.get('status'),
+                result;
+
+            if (status === 'waiting') return '';
+            if (status === 'running') return 'Running...';
+
+            result = this.get('result');
+
+            return result.passed + ' passed / ' + result.failed + ' failed ' +
+                ' in ' + result.runtime + 'ms';
+        }.property('status', 'result')
+    });
+
     App.TestsRoute = Ember.Route.extend({
         model: function () {
-            return $.getJSON('/tests');
+            return this.store.find('test');
         },
 
         setupController: function (controller, model) {
             var tags = model.reduce(function (result, current) {
-                    current.isChecked = true;
-                    current.status = 'waiting'; // test status - waiting, running, done
-                    current.result = null; // test result
-                    return result.concat(current.tags.split(', '));
+                    current.setProperties({
+                        status: 'waiting',
+                        result: null,
+                        isChecked: true
+                    });
+
+                    return result.concat(current.get('tags').split(', '));
                 }, []);
 
-            controller.set('model', model);
-            controller.set('tags', tags.uniq());
+            controller.set('model', model).set('tags', tags.uniq());
         }
     });
 
     App.TestsController = Ember.ArrayController.extend({
         needs: ['browsers'],
 
-        itemController: 'test',
-
         isChecked: true,
-
         search: '',
-
         tags: [],
-
-        testStatus: App.TestStatus.create(),
+        testStatus: TestStatus.create(),
 
         init: function () {
             var that = this;
@@ -48,7 +137,7 @@
 
             if (!id ||!current) return;
 
-            Ember.set(current, 'status', 'running');
+            current.set('status', 'running');
         }.observes('testStatus.current'),
 
         updateResult: function () {
@@ -58,15 +147,18 @@
             if (!(result = this.testStatus.get('currentResult')) ||
                 !(current = this.get('content').findBy('id', result.id))) return;
 
-            Ember.set(current, 'status', 'done');
-            Ember.set(current, 'result', result);
+            current.setProperties({
+                status: 'done',
+                result: result
+            });
+
         }.observes('testStatus.currentResult'),
 
         toggleChecked: function () {
             var checked = this.get('isChecked');
 
             this.get('filtered').forEach(function (item) {
-                Ember.set(item, 'isChecked', checked);
+                item.set('isChecked', checked);
             });
         }.observes('isChecked'),
 
@@ -97,8 +189,10 @@
 
         resetTests: function () {
             this.get('content').forEach(function (item) {
-                Ember.set(item, 'status', 'waiting');
-                Ember.set(item, 'result', null);
+                item.setProperties({
+                    status: 'waiting',
+                    result: null
+                });
             });
         },
 
@@ -169,44 +263,6 @@
                 App.newJob.addBrowser(name);
             }
         }
-    });
-
-    App.TestController = Ember.ObjectController.extend({
-        singleUrl: function () {
-            return '/single/' + this.get('id');
-        }.property('id'),
-
-        resultCss: function () {
-            var result = this.get('result'),
-                css;
-            
-            if (!result) return '';
-
-            css = result.success ? 'success' : 'danger';
-
-            return css + ' bg-' + css + ' text-' + css;
-        }.property('status'),
-
-        iconCss: function () {
-            var result = this.get('result');
-            
-            if (!result) return '';
-
-            return 'glyphicon-' + (result.success ? 'ok' : 'remove');
-        }.property('status'),
-
-        statusText: function () {
-            var status = this.get('status'),
-                result;
-
-            if (status === 'waiting') return '';
-            if (status === 'running') return 'Running...';
-
-            result = this.get('result');
-
-            return result.passed + ' passed / ' + result.failed + ' failed ' +
-                ' in ' + result.runtime + 'ms';
-        }.property('status', 'result')
     });
 
 })(Ember, App, Ember.$, bender, Bootstrap);

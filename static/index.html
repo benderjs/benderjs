@@ -9,6 +9,7 @@
 </head>
 <body>
     <iframe src="about:blank" id="context" class="context-frame"></iframe>
+
     <script type="text/x-handlebars">
     {{bs-notifications fadeOutTime=400}}
     <nav class="navbar navbar-default navbar-fixed-top">
@@ -91,15 +92,7 @@
             </thead>
             <tbody>
                 {{#if filtered.length}}
-                {{#each filtered itemController="test"}}
-                <tr {{bind-attr class=resultCss}}>
-                    <td>{{input type="checkbox" checked=isChecked}}</td>
-                    <td><a {{bind-attr href=singleUrl}}>{{id}}</a></td>
-                    <td>{{group}}</td>
-                    <td>{{tags}}</td>
-                    <td><span {{bind-attr class=":glyphicon iconCss" }}></span> {{statusText}}</td>
-                </tr>
-                {{/each}}
+                {{#each filtered}}{{partial "test"}}{{/each}}
                 {{else}}
                 <tr><td colspan="5">No tests matching specified tags</td></tr>
                 {{/if}}
@@ -110,7 +103,17 @@
         {{/if}}
     </div>
     </script>
-    
+
+    <script type="text/x-handlebars" data-template-name="_test">
+    <tr {{bind-attr class=resultCss}}>
+        <td>{{input type="checkbox" checked=isChecked}}</td>
+        <td><a {{bind-attr href=singleUrl}}>{{id}}</a></td>
+        <td>{{group}}</td>
+        <td>{{tags}}</td>
+        <td><span {{bind-attr class=":glyphicon iconCss" }}></span> {{statusText}}</td>
+    </tr>
+    </script>
+
     <script type="text/x-handlebars" id="jobs">
     <div class="panel panel-default">
         {{#if length}}
@@ -124,27 +127,29 @@
                 </tr>
             </thead>
             <tbody>
-            {{#each}}
-                <tr>
-                    <td>{{#link-to 'job' _id}}{{_id}}{{/link-to}}</td>
-                    <td>{{description}}</td>
-                    <td><small>{{bs-moment time=created}}</small></td>
-                    <td>
-                        {{#each parsedResults}}
-                            <div {{bind-attr class=":browser name statusCss"}}>
-                                <span {{bind-attr class=":glyphicon iconCss"}}></span>
-                                <small>{{#if version}}{{version}}{{else}}-{{/if}}</small>
-                            </div>
-                        {{/each}}
-                    </td>
-                </tr>
-            {{/each}}
+            {{#each}}{{partial "job"}}{{/each}}
             </tbody>
         </table>
         {{else}}
         <div class="panel-body">No jobs available</div>
         {{/if}}
     </div>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="_job">
+    <tr>
+        <td>{{#link-to 'job' _id}}{{_id}}{{/link-to}}</td>
+        <td>{{description}}</td>
+        <td><small>{{bs-moment time=created}}</small></td>
+        <td>
+            {{#each parsedResults}}
+                <div {{bind-attr class=":browser name statusCss"}}>
+                    <span {{bind-attr class=":glyphicon iconCss"}}></span>
+                    <small>{{#if version}}{{version}}{{else}}-{{/if}}</small>
+                </div>
+            {{/each}}
+        </td>
+    </tr>
     </script>
 
     <script type="text/x-handlebars" id="job">
@@ -205,11 +210,7 @@
                 {{#each clients}}{{partial "client"}}{{/each}}
                 {{else}}
                 <tr>
-                    <td></td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
+                    <td></td><td>-</td><td>-</td><td>-</td><td>-</td>
                 </tr>
                 {{/if}}
                 {{/each}}
@@ -258,6 +259,7 @@
     <script src="/js/libs/handlebars-1.1.2.js"></script>
     <script src="/js/libs/ember-1.5.0.js"></script>
     <script src="/js/libs/ember-sockets.js"></script>
+    <script src="/js/libs/ember-data.js"></script>
     <script src="/js/libs/bootstrap.js"></script>
     <script src="/js/libs/bs-core.min.js"></script>
     <script src="/js/libs/bs-button.min.js"></script>

@@ -1,5 +1,6 @@
 (function (Ember, Bootstrap) {
 
+    // Bootstrap for Ember - Notification Manager modification
     Bootstrap.NM = Bootstrap.NotificationManager = Ember.Object.create({
         content: Ember.A(),
 
@@ -87,6 +88,7 @@
 
     Ember.Handlebars.helper('bs-notifications', Bootstrap.NotificationsView);
 
+    
     Bootstrap.LabelView = Ember.View.extend({
         classNames: ['label'],
         classNameBindings: ['labelType'],
@@ -100,6 +102,7 @@
 
     Ember.Handlebars.helper('bs-label', Bootstrap.LabelView);
 
+    
     Bootstrap.MomentView = Ember.View.extend({
         template: Ember.Handlebars.compile('{{view.converted}}'),
         classNames: ['moment'],
@@ -112,6 +115,7 @@
 
     Ember.Handlebars.helper('bs-moment', Bootstrap.MomentView);
 
+    
     // enable data-toggle attribute for inputs
     Ember.TextField.reopen({
         attributeBindings: ['data-toggle']

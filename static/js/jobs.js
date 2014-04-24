@@ -79,13 +79,18 @@
                 return result;
             }
 
-            return tasks.map(function (task) {
-                task.results = task.results
-                    .map(parseResult)
-                    .sort(that.sortResults);
+            return tasks
+                .map(function (task) {
+                    task.results = task.results
+                        .map(parseResult)
+                        .sort(that.sortResults);
 
-                return task;
-            });
+                    return task;
+                })
+                .sort(function (prev, next) {
+                    return prev.id > next.id ? 1 : prev.id < next.id ? -1 : 0;
+                });
         }.property('tasks')
     });
+
 })(Ember, App, Ember.$);
