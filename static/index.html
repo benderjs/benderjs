@@ -252,8 +252,18 @@
             <label for="job-description">Job description <span>(optional)</span></label>
             {{input type="text" class="form-control" name="job-description" placeholder="Enter job description" value=newJob.description}}
         </div>
-    </script>    
+    </script>
 
+    <script type="text/x-handlebars" data-template-name="error404">
+    <h4>Error 404</h4>
+    <h5>Page not found</h5>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="error">
+    <h4>Error</h4>
+    <h5>Unknown error occured</h5>
+    </script>
+    
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/libs/jquery-1.10.2.js"></script>
     <script src="/js/libs/handlebars-1.1.2.js"></script>

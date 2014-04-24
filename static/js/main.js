@@ -21,9 +21,20 @@
         this.resource('browsers');
     });
 
+
     App.IndexRoute = Ember.Route.extend({
         redirect: function () {
             this.transitionTo('tests');
+        }
+    });
+
+    App.ErrorRoute = Ember.Route.extend({
+        renderTemplate: function () {
+            if (this.get('controller.content.status') === 404)  {
+                this.render('error404');
+            } else {
+                this.render();
+            }
         }
     });
 
