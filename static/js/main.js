@@ -14,24 +14,6 @@
         })
     });
 
-    App.newJob = Ember.Object.extend({
-        description: '',
-        browsersText: '',
-
-        browsers: function () {
-            return this.get('browsersText')
-                .trim().split(' ')
-                    .uniq()
-                    .filter(function (item) {
-                        return item;
-                    });
-        }.property('browsersText'),
-
-        addBrowser: function (name) {
-            this.set('browsersText', this.get('browsersText').trim() + ' ' + name);
-        }
-    }).create();
-
     App.Router.map(function () {
         this.resource('tests');
         this.resource('jobs');

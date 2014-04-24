@@ -1,55 +1,73 @@
 (function (Ember, App, $, bender, Bootstrap) {
 
     var TestStatus = Ember.Object.extend({
-        _defaults: {
-            passed: 0,
-            failed: 0,
-            time: 0,
-            running: false,
-            current: null,
-            currentResult: null
-        },
+            _defaults: {
+                passed: 0,
+                failed: 0,
+                time: 0,
+                running: false,
+                current: null,
+                currentResult: null
+            },
 
-        init: function () {
-            this.setProperties(this._defaults);
-        },
+            init: function () {
+                this.setProperties(this._defaults);
+            },
 
-        update: function (data) {
-            if (typeof data == 'string') return this.set('current', data);
+            update: function (data) {
+                if (typeof data == 'string') return this.set('current', data);
 
-            this.incrementProperty('passed', data.passed);
-            this.incrementProperty('failed', data.failed);
-            this.incrementProperty('total', data.total);
-            this.incrementProperty('time', data.runtime);
+                this.incrementProperty('passed', data.passed);
+                this.incrementProperty('failed', data.failed);
+                this.incrementProperty('total', data.total);
+                this.incrementProperty('time', data.runtime);
 
-            this.set('currentResult', data);
-        },
+                this.set('currentResult', data);
+            },
 
-        start: function () {
-            this.init();
-            this.set('running', true);
-        },
+            start: function () {
+                this.init();
+                this.set('running', true);
+            },
 
-        stop: function () {
-            this.set('running', false);
-        },
+            stop: function () {
+                this.set('running', false);
+            },
 
-        timeText: function () {
-            var ms = this.get('time'),
-                h, m, s;
+            timeText: function () {
+                var ms = this.get('time'),
+                    h, m, s;
 
-            s = Math.floor(ms / 1000);
-            ms %= 1000;
-            m = Math.floor(s / 60);
-            s %= 60;
-            h = Math.floor(m / 60);
-            m %= 60;
+                s = Math.floor(ms / 1000);
+                ms %= 1000;
+                m = Math.floor(s / 60);
+                s %= 60;
+                h = Math.floor(m / 60);
+                m %= 60;
 
-            return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' +
-                (s < 10 ? '0' : '') + s + 's ' +
-                (ms < 10 ? '00' : ms < 100 ? '0' : '') + ms + 'ms';
-        }.property('time')
-    });
+                return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' +
+                    (s < 10 ? '0' : '') + s + 's ' +
+                    (ms < 10 ? '00' : ms < 100 ? '0' : '') + ms + 'ms';
+            }.property('time')
+        }),
+
+        NewJob = Ember.Object.extend({
+            description: '',
+            browsersText: '',
+
+            browsers: function () {
+                return this.get('browsersText')
+                    .trim().split(' ')
+                        .uniq()
+                        .filter(function (item) {
+                            return item;
+                        });
+            }.property('browsersText'),
+
+            addBrowser: function (name) {
+                this.set('browsersText', this.get('browsersText').trim() + ' ' + name);
+            }
+        });
 
     App.Test = DS.Model.extend({
         group: DS.attr('string'),
@@ -119,6 +137,7 @@
         search: '',
         tags: [],
         testStatus: TestStatus.create(),
+        newJob: NewJob.create(),
 
         init: function () {
             var that = this;
@@ -239,7 +258,7 @@
             },
 
             createJob: function () {
-                var job = App.newJob,
+                var job = this.newJob,
                     browsers = job.get('browsers');
 
                 if (!browsers.length)
@@ -260,7 +279,7 @@
             },
 
             addBrowser: function (name) {
-                App.newJob.addBrowser(name);
+                this.newJob.addBrowser(name);
             }
         }
     });

@@ -69,10 +69,10 @@
 
         this.complete = function () {
             socket.emit('complete', this.results);
-            socket.emit('fetch'); // let's speed up the fetching
             contextEl.src = 'about:blank';
             this.running = false;
             this.results = null;
+            socket.emit('fetch');
         };
 
         this.log = function () {
