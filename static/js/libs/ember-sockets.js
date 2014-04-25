@@ -9,6 +9,12 @@
     $window.EmberSockets = $ember.ObjectController.extend({
 
         /**
+         * @constant NAMESPACE
+         * @type {String}
+         */
+        NAMESPACE: 'sockets',
+
+        /**
          * @property host
          * @type {String}
          * @default 'localhost'
@@ -23,53 +29,36 @@
         port: 80,
 
         /**
-         * @property namespace
-         * @type {String}
-         * @default ''
-         */
-        namespace: '',
-
-        /**
-         * @property options
-         * @type {Object}
-         * @default {}
-         */
-        options: {},
-
-        /**
+         * List of controllers for which the events can be emitted to.
+         *
          * @property controllers
          * @type {Array}
-         * List of controllers for which the events can be emitted to.
          * @default []
          */
         controllers: [],
 
         /**
          * @property socket {Object}
-         * @type {Object}
+         * @type {Object|null}
          */
         socket: null,
 
         /**
-         * @constant NAMESPACE
-         * @type {String}
-         */
-        NAMESPACE: 'sockets',
-
-        /**
-         * @constructor
          * Responsible for establishing a connect to the Socket.io server.
+         *
+         * @constructor
          */
         init: function init() {
 
             // Create the host:port string for connecting, and then attempt to establish
             // a connection.
-            var server      = 'http://%@:%@/%@'.fmt(
-                                $ember.get(this, 'host'),
-                                $ember.get(this, 'port'),
-                                $ember.get(this, 'namespace')
-                            ),
-                socket      = $io.connect(server, $ember.get(this, 'options'));
+            var host   = $ember.get(this, 'host'),
+                port   = $ember.get(this, 'port'),
+                scheme = $ember.get(this, 'scheme') || 'http',
+                path   = $ember.get(this, 'path') || '',
+                options = $ember.get(this, 'options') || {},
+                server = '%@://%@:%@/%@'.fmt(scheme, host, port, path),
+                socket = $io.connect(server, options);
 
             socket.on('error', function socketError() {
                 // Throw an exception if an error occurs.
@@ -87,10 +76,11 @@
         },
 
         /**
+         * Responsible for emitting an event to the waiting Socket.io server.
+         *
          * @method emit
          * @param eventName {String}
          * @param params {Array}
-         * Responsible for emitting an event to the waiting Socket.io server.
          * @return {void}
          */
         emit: function emit(eventName, params) {
@@ -104,9 +94,10 @@
         },
 
         /**
-         * @method _listen
          * Responsible for listening to events from Socket.io, and updating controller properties that
          * subscribe to those events.
+         *
+         * @method _listen
          * @return {void}
          * @private
          */
@@ -237,9 +228,10 @@
         },
 
         /**
+         * Responsible for retrieving a controller if it exists, and if it has defined a `events` hash.
+         * 
          * @method _getController
          * @param name {String}
-         * Responsible for retrieving a controller if it exists, and if it has defined a `events` hash.
          * @return {Object|Boolean}
          * @private
          */
