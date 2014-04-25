@@ -8,10 +8,9 @@
         resEl.className = result.success ? 'ok' : 'fail';
 
         resEl.innerHTML = [
-            '<p>', result.module, result.name,
-            '<strong>', result.success ? 'PASSED' : 'FAILED', '</strong>',
-            result.failed, '/', result.passed, '/', result.total, '</p>',
-            result.failed ? ('<p>' + result.errors.join('</p><p>').replace(/\n/g, '<br>') + '</p>') : null
+            '<p>', result.module, '-', result.name,
+            '<strong>', result.success ? 'PASSED' : 'FAILED', '</strong></p>',
+            !result.success ? ('<p>' + result.errors.join('</p><p>').replace(/\n/g, '<br>') + '</p>') : null
         ].join(' ');
 
         resultsEl.appendChild(resEl);
@@ -25,7 +24,6 @@
         };
 
         this.result = function (result) {
-            this.log(result);
             addResult(result);
         };
 
