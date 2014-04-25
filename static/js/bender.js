@@ -49,7 +49,7 @@
 
             if (this.current) {
                 this.emit('update', this.current);
-                contextEl.src = '../tests/' + this.current;
+                contextEl.src = '/tests/' + this.current;
             } else {
                 this.complete();
             }

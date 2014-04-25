@@ -60,7 +60,7 @@
 
         this.next = function () {
             if (this.current) {
-                contextEl.src = '../tests/' + this.current;
+                contextEl.src = this.current;
                 this.current = null;
             } else {
                 this.complete();
