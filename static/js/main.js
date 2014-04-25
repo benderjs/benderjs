@@ -4,7 +4,7 @@
         Socket: EmberSockets.extend({
             host: window.location.hostname,
             port: window.location.port,
-            namespace: 'dashboard',
+            path: 'dashboard',
             options: {
                 'reconnection delay': 2000,
                 'reconnection limit': 2000,
