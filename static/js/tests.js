@@ -20,7 +20,7 @@
                 this.incrementProperty('passed', data.passed);
                 this.incrementProperty('failed', data.failed);
                 this.incrementProperty('total', data.total);
-                this.incrementProperty('time', data.runtime);
+                this.incrementProperty('time', data.duration);
 
                 this.set('currentResult', data);
             },
@@ -106,7 +106,7 @@
             result = this.get('result');
 
             return result.passed + ' passed / ' + result.failed + ' failed ' +
-                ' in ' + result.runtime + 'ms';
+                ' in ' + result.duration + 'ms';
         }.property('status', 'result')
     });
 
