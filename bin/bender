@@ -13,6 +13,7 @@ var argParser = require('nomnom'),
     conf = require(dir + 'config'),
     constants = require(dir + 'constants'),
     jobs = require(dir + 'jobs'),
+    middleware = require(dir + 'middleware'),
     plugins = require(dir + 'plugins'),
     reporters = require(dir + 'reporters'),
     server = require(dir + 'server'),
@@ -159,11 +160,13 @@ function startDaemon() {
 function startServer(options) {
     var bender = new broadway.App({ delimeter: ':' }),
         modules = [
-            utils, applications, builders, browsers, cache, template,
-            constants, tests, jobs, sockets, server, plugins
+            plugins, utils, applications, builders, middleware, browsers,
+            cache, template, constants, tests, jobs, sockets, server
         ].concat(reporters.modules);
 
-    bender.use(conf, { path: path.resolve(process.cwd(), options.config || 'bender.js') });
+    bender.use(conf, {
+        path: path.resolve(process.cwd(), options.config || 'bender.js')
+    });
 
     modules.forEach(function (module) { bender.use(module); });
 
@@ -173,9 +176,20 @@ function startServer(options) {
             process.exit(1);
         }
 
-        bender.server.create().listen(options.port, options.hostname, function () {
-            log.info('Bender.js v%s Server started at http://%s:%s', bender.constants.VERSION, options.hostname, options.port);
-        });
+        bender.server
+            .create()
+            .listen(
+                options.port,
+                options.hostname,
+                function () {
+                    log.info(
+                        'Bender.js v%s Server started at http://%s:%s',
+                        bender.constants.VERSION,
+                        options.hostname,
+                        options.port
+                    );
+                }
+            );
     });
 }
 
