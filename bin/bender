@@ -185,7 +185,7 @@ function startServer(options) {
                 function () {
                     log.info(
                         'Bender.js v%s Server started at http://%s:%s',
-                        bender.constants.VERSION,
+                        constants.VERSION,
                         options.hostname,
                         options.port
                     );
