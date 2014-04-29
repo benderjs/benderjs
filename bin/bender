@@ -7,18 +7,19 @@ var argParser = require('nomnom'),
     dir = '../lib/',
 
     applications = require(dir + 'applications'),
-    builders = require(dir + 'builders'),
     browsers = require(dir + 'browsers'),
     cache = require(dir + 'cache'),
     conf = require(dir + 'config'),
     constants = require(dir + 'constants'),
     jobs = require(dir + 'jobs'),
     middleware = require(dir + 'middleware'),
+    pagebuilders = require(dir + 'pagebuilders'),
     plugins = require(dir + 'plugins'),
     reporters = require(dir + 'reporters'),
     server = require(dir + 'server'),
     sockets = require(dir + 'sockets'),
     template = require(dir + 'template'),
+    testbuilders = require(dir + 'testbuilders'),
     tests = require(dir + 'tests'),
     utils = require(dir + 'utils'),
 
@@ -160,10 +161,10 @@ function startDaemon() {
 function startServer(options) {
     var bender = new broadway.App({ delimeter: ':' }),
         modules = [
-            utils, applications, builders, middleware, browsers,
-            cache, template, constants, tests, jobs, sockets, server,
-            reporters, plugins
-        ].concat(reporters.modules);
+            utils, applications, testbuilders, pagebuilders, middleware,
+            browsers, cache, template, constants, tests, jobs, sockets,
+            server, reporters, plugins
+        ];
 
     bender.use(conf, {
         path: path.resolve(process.cwd(), options.config || 'bender.js')
