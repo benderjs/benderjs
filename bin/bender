@@ -160,9 +160,9 @@ function startDaemon() {
 function startServer(options) {
     var bender = new broadway.App({ delimeter: ':' }),
         modules = [
-            plugins, utils, applications, builders, middleware, browsers,
+            utils, applications, builders, middleware, browsers,
             cache, template, constants, tests, jobs, sockets, server,
-            reporters
+            reporters, plugins
         ].concat(reporters.modules);
 
     bender.use(conf, {
