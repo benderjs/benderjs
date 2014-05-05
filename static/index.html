@@ -175,9 +175,11 @@
                     <td>{{id}}</td>
                     <td>
                         {{#each results}}
+                            {{#if errors}}<a {{action "showErrorDetails" this}}>{{/if}}
                             <div {{bind-attr class=":result statusCss"}}>
                                 <span {{bind-attr class=":glyphicon iconCss"}}></span>
                             </div>
+                            {{#if errors}}</a>{{/if}}
                         {{/each}}
                     </td>
                 </tr>
@@ -252,6 +254,10 @@
             <label for="job-description">Job description <span>(optional)</span></label>
             {{input type="text" class="form-control" name="job-description" placeholder="Enter job description" value=newJob.description}}
         </div>
+    </script>
+    
+    <script type="text/x-handlebars" data-template-name="error-details">
+        <p>{{{errors}}}</p>
     </script>
 
     <script type="text/x-handlebars" data-template-name="error404">

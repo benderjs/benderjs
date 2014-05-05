@@ -90,7 +90,25 @@
                 .sort(function (prev, next) {
                     return prev.id > next.id ? 1 : prev.id < next.id ? -1 : 0;
                 });
-        }.property('tasks')
+        }.property('tasks'),
+
+        errors: null,
+
+        actions: {
+            showErrorDetails: function (task) {
+                this.set('errors', task.errors.split('\n').join('<br>'));
+
+                Bootstrap.ModalManager.open(
+                    'error-details',
+                    'Test error details',
+                    'error-details',
+                    [
+                        Ember.Object.create({ title: 'Close', dismiss: 'modal' }),
+                    ],
+                    this
+                );
+            }
+        }
     });
 
 })(Ember, App, Ember.$);
