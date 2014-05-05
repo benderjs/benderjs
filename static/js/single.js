@@ -1,9 +1,10 @@
 (function (window, undefined) {
-
-    var resultsEl = document.getElementById('results');
+    var resultsEl;
 
     function addResult(result) {
         var resEl = document.createElement('li');
+
+        resultsEl = resultsEl || document.getElementById('results');
 
         resEl.className = result.success ? 'ok' : 'fail';
 
