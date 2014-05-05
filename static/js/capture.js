@@ -143,6 +143,9 @@
         };
 
         function startFetch() {
+            // let's speed this up
+            if (!this.running) socket.emit('fetch');
+
             fetchInterval = setInterval(function () {
                 if (!that.running) socket.emit('fetch');
             }, 2000);
@@ -168,12 +171,11 @@
         });
 
         socket.on('run', function (data) {
-            that.current = data.id;
-
             data.results = [];
             data.success = true;
+
+            that.current = data.id;
             that.results = data;
-            
             that.running = true;
 
             that.next.call(that);
