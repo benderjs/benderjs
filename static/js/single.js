@@ -4,16 +4,14 @@
     function addResult(result) {
         var resEl = document.createElement('li');
 
-        resultsEl = resultsEl || document.getElementById('results');
-
         resEl.className = result.success ? 'ok' : 'fail';
-
         resEl.innerHTML = [
             '<p>', result.module, '-', result.name,
             '<strong>', result.success ? 'PASSED' : 'FAILED', '</strong></p>',
             !result.success ? ('<p>' + result.errors.join('</p><p>').replace(/\n/g, '<br>') + '</p>') : null
         ].join(' ');
 
+        if (!resultsEl) resultsEl = document.getElementById('results');
         resultsEl.appendChild(resEl);
     }
 
