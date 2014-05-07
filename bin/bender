@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 var argParser = require('nomnom'),
     path = require('path'),
+    fs = require('fs'),
+    when = require('when'),
+    whenCb = require('when/callbacks'),
+    whenFs = require('when/node').liftAll(fs),
     broadway = require('broadway'),
     forever = require('forever'),
 
@@ -104,7 +108,7 @@ function handleServer(options) {
             break;
 
         default: // TODO improve this help part / include in cli help
-            log.info('Yo can use start, stop, restart or status commands');
+            log.info('Use server start, stop, restart or status commands');
     }
 }
 
@@ -195,6 +199,47 @@ function startServer(options) {
     });
 }
 
-function initialize(options) {
-    // TODO create config file for current directory    
+/**
+ * Initialize Bender in current directory
+ */
+function initialize() {
+    var defaultConfig;
+
+    // get default configuration file
+    function getDefaultConfig() {
+        return defaultConfig ?
+            when.resolve(defaultConfig) :
+            whenFs.readFile(__dirname + '/../lib/config-default.js');
+    }
+    
+    // create Bender configuration file with default content
+    function createConfig(file) {
+        return whenCb
+            .call(fs.exists, '.bender/')
+            .then(function (exists) {
+                if (!exists)
+                    return getDefaultConfig()
+                        .then(function (config) {
+                            return whenFs.writeFile(file, config);
+                        });
+            });
+    }
+
+    // create a directory for Bender's resources
+    function createBenderDir() {
+        return whenCb
+            .call(fs.exists, '.bender/')
+            .then(function (exists) {
+                if (!exists) return whenFs.mkdir('.bender/');
+            });
+    }
+
+    createBenderDir()
+        .yield(createConfig('.bender/bender.js'))
+        .yield(createConfig('bender.js'))
+        .done(function () {
+            log.info('Created Bender configuration files');
+        }, function (err) {
+            log.error('Error while initializing Bender', err);
+        });
 }
