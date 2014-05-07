@@ -272,7 +272,10 @@
                     browsers: browsers,
                     tests: this.get('checked')
                 }, function (data) {
-                    Bootstrap.NM.push('Successfully created new job - ' + data.id, 'success');
+                    Bootstrap.NM.push(
+                        'Successfully created new job - <a href="/#/jobs/' + data.id + '">' + data.id + '</a>',
+                        'success'
+                    );
                     Bootstrap.ModalManager.close('create-job');
                     job.set('browsersText', '').set('description', '');
                 }, 'json')

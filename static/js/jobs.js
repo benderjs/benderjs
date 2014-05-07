@@ -2,7 +2,7 @@
 
     App.JobsRoute = Ember.Route.extend({
         model: function () {
-            return $.getJSON('/jobs');
+            return this.store.find('job');
         }
     });
 
@@ -41,21 +41,25 @@
         }
     });
 
+    App.Job = DS.Model.extend({
+        description: DS.attr('string'),
+        created: DS.attr('number'),
+        results: DS.attr('raw')
+    });
+
     App.JobController = Ember.ObjectController.extend({
-        sortResults: function (prev, next) {
-            var pv = parseInt(prev.version, 10),
-                nv = parseInt(next.version, 10);
-
-            return prev.name > next.name ? 1 : prev.name < next.name ? -1 :
-                pv > nv ? 1 : pv < nv ? -1 : 0;
-        },
-
         browsers: function () {
             var task = this.get('tasks')[0];
 
             if (!task) return [];
 
-            return task.results.sort(this.sortResults);
+            return task.results.sort(function (prev, next) {
+                var pv = parseInt(prev.version, 10),
+                    nv = parseInt(next.version, 10);
+
+                return prev.name > next.name ? 1 : prev.name < next.name ? -1 :
+                    pv > nv ? 1 : pv < nv ? -1 : 0;
+            });
         }.property('tasks'),
 
         parsedTasks: function () {
@@ -95,8 +99,8 @@
         errors: null,
 
         actions: {
-            showErrorDetails: function (task) {
-                this.set('errors', task.errors.split('\n').join('<br>'));
+            showErrorDetails: function (errors) {
+                this.set('errors', errors);
 
                 Bootstrap.ModalManager.open(
                     'error-details',

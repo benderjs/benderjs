@@ -1,4 +1,4 @@
-(function (Ember, Bootstrap) {
+(function (Ember, App, DS, Bootstrap) {
 
     // Bootstrap for Ember - Notification Manager modification
     Bootstrap.NM = Bootstrap.NotificationManager = Ember.Object.create({
@@ -17,7 +17,7 @@
 
     Bootstrap.NotificationView = Ember.View.extend({
         classNames: ['alert', 'notification'],
-        template: Ember.Handlebars.compile('{{view.content.message}}'),
+        template: Ember.Handlebars.compile('{{{view.content.message}}}'),
         classNameBindings: ['alertType'],
         isVisible: false,
 
@@ -121,4 +121,14 @@
         attributeBindings: ['data-toggle']
     });
 
-})(Ember, Bootstrap);
+
+    App.RawTransform = DS.Transform.extend({
+        serialize: function (data) {
+            return data;
+        },
+        deserialize: function (data) {
+            return data;
+        }
+    });
+
+})(Ember, App, DS, Bootstrap);

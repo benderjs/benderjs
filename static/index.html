@@ -137,7 +137,7 @@
 
     <script type="text/x-handlebars" data-template-name="_job">
     <tr>
-        <td>{{#link-to 'job' _id}}{{_id}}{{/link-to}}</td>
+        <td>{{#link-to 'job' id}}{{id}}{{/link-to}}</td>
         <td>{{description}}</td>
         <td><small>{{bs-moment time=created}}</small></td>
         <td>
@@ -152,7 +152,7 @@
     </script>
 
     <script type="text/x-handlebars" id="job">
-    <h4><small>Job:</small> {{_id}} <small>created {{bs-moment time=created}}</small></h4>
+    <h4><small>Job:</small> {{id}} <small>created {{bs-moment time=created}}</small></h4>
     <h4><small>Description:</small> {{#if description}}{{description}}{{else}}-{{/if}}</h4>
     <div class="panel panel-default">
         <table class="table table-hover jobs">
@@ -174,7 +174,7 @@
                     <td>{{id}}</td>
                     <td>
                         {{#each results}}
-                            {{#if errors}}<a {{action "showErrorDetails" this}}>{{/if}}
+                            {{#if errors}}<a {{action "showErrorDetails" errors}}>{{/if}}
                             <div {{bind-attr class=":result statusCss"}}>
                                 <span {{bind-attr class=":glyphicon iconCss"}}></span>
                             </div>
@@ -256,7 +256,12 @@
     </script>
     
     <script type="text/x-handlebars" data-template-name="error-details">
-        <p>{{{errors}}}</p>
+        {{#each errors}}
+            <p>
+                <strong>{{name}}</strong><br>
+                <pre>{{#each errors}}{{this}}{{/each}}</pre>
+            </p>
+        {{/each}}
     </script>
 
     <script type="text/x-handlebars" data-template-name="error404">
