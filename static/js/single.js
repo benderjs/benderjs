@@ -4,10 +4,10 @@
     function addResult(result) {
         var resEl = document.createElement('li');
 
-        resEl.className = result.success ? 'ok' : 'fail';
+        resEl.className = result.success ? result.ignored ? 'warn' : 'ok' : 'fail';
         resEl.innerHTML = [
             '<p>', result.module, '-', result.name,
-            '<strong>', result.success ? 'PASSED' : 'FAILED', '</strong></p>',
+            '<strong>', result.success ? result.ignored ? 'IGNORED' : 'PASSED' : 'FAILED', '</strong></p>',
             !result.success ? ('<p>' + result.errors.join('</p><p>').replace(/\n/g, '<br>') + '</p>') : null
         ].join(' ');
 

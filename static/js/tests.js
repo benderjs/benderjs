@@ -4,6 +4,7 @@
             _defaults: {
                 passed: 0,
                 failed: 0,
+                ignored: 0,
                 time: 0,
                 running: false,
                 current: null,
@@ -19,6 +20,7 @@
 
                 this.incrementProperty('passed', data.passed);
                 this.incrementProperty('failed', data.failed);
+                this.incrementProperty('ignored', data.ignored);
                 this.incrementProperty('total', data.total);
                 this.incrementProperty('time', data.duration);
 
@@ -105,7 +107,8 @@
 
             result = this.get('result');
 
-            return result.passed + ' passed / ' + result.failed + ' failed ' +
+            return result.passed + ' passed / ' + result.failed + ' failed' +
+                (result.ignored ? (' / ' + result.ignored + ' ignored') : '') +
                 ' in ' + result.duration + 'ms';
         }.property('status', 'result')
     });

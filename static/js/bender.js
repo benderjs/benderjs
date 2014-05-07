@@ -41,7 +41,7 @@
         this.next = function (summary) {
             if (summary) {
                 summary.id = this.current;
-                summary.success = summary.passed === summary.total;
+                summary.success = summary.failed === 0;
                 this.emit('update', summary);
             }
 
