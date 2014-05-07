@@ -235,8 +235,12 @@ function initialize() {
     }
 
     createBenderDir()
-        .yield(createConfig('.bender/bender.js'))
-        .yield(createConfig('bender.js'))
+        .then(function () {
+            return createConfig('.bender/bender.js');
+        })
+        .then(function () {
+            return createConfig('bender.js');
+        })
         .done(function () {
             log.info('Created Bender configuration files');
         }, function (err) {
