@@ -211,25 +211,39 @@ function startServer(options) {
  * Initialize Bender in current directory
  */
 function initialize() {
-    var defaultConfig;
+    var defaultConfig = buildDefaultConfig();
 
-    // get default configuration file
-    function getDefaultConfig() {
-        return defaultConfig ?
-            when.resolve(defaultConfig) :
-            whenFs.readFile(__dirname + '/../lib/config-default.js');
+    // build default configuration file
+    function buildDefaultConfig() {
+        var schema = require('../lib/config-schema.js'),
+            example = ['/**', ' * Bender configuration file', ' * '],
+            props = schema.properties;
+
+        function addParam(name) {
+            var type = props[name].type;
+
+            type = type.charAt(0).toUpperCase() + type.slice(1);
+
+            example.push(' * @param {' + type + '}\t' + name +
+                (name.length < 8 ? '\t\t' : '\t') + props[name].description);
+        }
+
+        Object.keys(props).forEach(addParam);
+
+        example.push(
+            ' */', 'var config = {', '\t// put your configuration here',
+            '};', 'module.exports = config;'
+        );
+
+        return example.join('\n');
     }
-    
+
     // create Bender configuration file with default content
     function createConfig(file) {
         return whenCb
-            .call(fs.exists, '.bender/')
+            .call(fs.exists, file)
             .then(function (exists) {
-                if (!exists)
-                    return getDefaultConfig()
-                        .then(function (config) {
-                            return whenFs.writeFile(file, config);
-                        });
+                if (!exists) return whenFs.writeFile(file, defaultConfig);
             });
     }
 
@@ -249,9 +263,13 @@ function initialize() {
         .then(function () {
             return createConfig('bender.js');
         })
-        .done(function () {
+        .then(function () {
             log.info('Created Bender configuration files');
         }, function (err) {
             log.error('Error while initializing Bender', err);
+        })
+        // TODO remove after disabling nodetime
+        .finally(function () {
+            precess.exit(1);
         });
 }
