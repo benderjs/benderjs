@@ -202,3 +202,7 @@ th:last-child {
 .moment {
     white-space: nowrap;
 }
+
+.modal {
+    display: block;
+}

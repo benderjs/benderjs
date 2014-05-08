@@ -1,4 +1,4 @@
-(function (Ember, App, $, bender, Bootstrap) {
+(function (Ember, App, $, bender) {
 
     var TestStatus = Ember.Object.extend({
             _defaults: {
@@ -53,7 +53,7 @@
             }.property('time')
         }),
 
-        NewJob = Ember.Object.extend({
+        newJob = Ember.Object.extend({
             description: '',
             browsersText: '',
 
@@ -69,7 +69,7 @@
             addBrowser: function (name) {
                 this.set('browsersText', this.get('browsersText').trim() + ' ' + name);
             }
-        });
+        }).create();
 
     App.Test = DS.Model.extend({
         group: DS.attr('string'),
@@ -130,6 +130,56 @@
                 }, []);
 
             controller.set('model', model).set('tags', tags.uniq());
+        },
+
+        closeModal: function () {
+            this.disconnectOutlet({
+                outlet: 'modal',
+                parentView: 'application'
+            });
+        },
+
+        actions: {
+            openModal: function (modalName) {
+                return this.render(modalName, {
+                    into: 'application',
+                    outlet: 'modal'
+                });
+            },
+
+            closeModal: function () {
+                return this.closeModal();
+            },
+
+            createJob: function () {
+                var job = newJob,
+                    browsers = job.get('browsers'),
+                    controller = this.get('controller'),
+                    that = this;
+
+                if (!browsers.length)
+                    return App.NM.push('You must specify at least one browser for the job!', 'warning');
+                
+                controller.set('isCreating', true);
+
+                $.post('/jobs', {
+                    description: job.get('description'),
+                    browsers: browsers,
+                    tests: controller.get('checked')
+                }, function (data) {
+                    App.NM.push(
+                        'Successfully created new job - <a href="/#/jobs/' + data.id + '">' + data.id + '</a>',
+                        'success'
+                    );
+                    job.set('browsersText', '').set('description', '');
+                    controller.set('isCreating', false);
+                    that.closeModal();
+                }, 'json')
+                .fail(function () {
+                    App.NM.push('Couldn\'t create new job due to server error', 'danger');
+                    controller.set('isCreating', false);
+                });
+            },
         }
     });
 
@@ -137,10 +187,11 @@
         needs: ['browsers'],
 
         isChecked: true,
+        isCreating: false,
         search: '',
         tags: [],
         testStatus: TestStatus.create(),
-        newJob: NewJob.create(),
+        newJob: newJob,
 
         init: function () {
             var that = this;
@@ -223,7 +274,7 @@
                 var tests = this.get('checked');
 
                 if (!tests.length) {
-                    Bootstrap.NM.push('You must select at least 1 test to run!', 'warning');
+                    App.NM.push('You must select at least 1 test to run!', 'warning');
                     return;
                 }
 
@@ -244,50 +295,17 @@
                 this.set('search', '');
             },
 
-            openCreateJob: function () {
-                if (!this.get('checked').length)
-                    return Bootstrap.NM.push('You must specify at least one test for the job!', 'warning');
-
-                Bootstrap.ModalManager.open(
-                    'create-job',
-                    'Create New Job',
-                    'create-job',
-                    [
-                        Ember.Object.create({ title: 'Cancel', dismiss: 'modal' }),
-                        Ember.Object.create({ title: 'Create', clicked: 'createJob' })
-                    ],
-                    this
-                );
-            },
-
-            createJob: function () {
-                var job = this.newJob,
-                    browsers = job.get('browsers');
-
-                if (!browsers.length)
-                    return Bootstrap.NM.push('You must specify at least one browser for the job!', 'warning');
-                
-                $.post('/jobs', {
-                    description: job.get('description'),
-                    browsers: browsers,
-                    tests: this.get('checked')
-                }, function (data) {
-                    Bootstrap.NM.push(
-                        'Successfully created new job - <a href="/#/jobs/' + data.id + '">' + data.id + '</a>',
-                        'success'
-                    );
-                    Bootstrap.ModalManager.close('create-job');
-                    job.set('browsersText', '').set('description', '');
-                }, 'json')
-                .fail(function () {
-                    Bootstrap.NM.push('Couldn\'t create new job due to server error', 'danger');
-                });
-            },
-
             addBrowser: function (name) {
-                this.newJob.addBrowser(name);
+                newJob.addBrowser(name);
             }
         }
     });
 
-})(Ember, App, Ember.$, bender, Bootstrap);
+    App.CreateJobModalView = Ember.View.extend({
+        name: 'create-job-modal',
+        layoutName: 'modal',
+        templateName: 'create-job',
+        isVisible: true
+    });
+
+})(Ember, App, Ember.$, bender);

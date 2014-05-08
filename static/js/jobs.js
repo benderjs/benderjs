@@ -38,6 +38,21 @@
     App.JobRoute = Ember.Route.extend({
         model: function (params) {
             return $.getJSON('/jobs/' + params.job_id);
+        },
+        actions: {
+            openModal: function (modalName, errors) {
+                this.controller.set('errors', errors);
+                return this.render(modalName, {
+                    into: 'application',
+                    outlet: 'modal'
+                });
+            },
+            closeModal: function () {
+                this.disconnectOutlet({
+                    outlet: 'modal',
+                    parentView: 'application'
+                });
+            }
         }
     });
 
@@ -48,18 +63,20 @@
     });
 
     App.JobController = Ember.ObjectController.extend({
+        sortResults: function (prev, next) {
+            var pv = parseInt(prev.version, 10),
+                nv = parseInt(next.version, 10);
+
+            return prev.name > next.name ? 1 : prev.name < next.name ? -1 :
+                pv > nv ? 1 : pv < nv ? -1 : 0;
+        },
+
         browsers: function () {
             var task = this.get('tasks')[0];
 
             if (!task) return [];
 
-            return task.results.sort(function (prev, next) {
-                var pv = parseInt(prev.version, 10),
-                    nv = parseInt(next.version, 10);
-
-                return prev.name > next.name ? 1 : prev.name < next.name ? -1 :
-                    pv > nv ? 1 : pv < nv ? -1 : 0;
-            });
+            return task.results.sort(this.sortResults);
         }.property('tasks'),
 
         parsedTasks: function () {
@@ -96,23 +113,14 @@
                 });
         }.property('tasks'),
 
-        errors: null,
+        errors: null
+    });
 
-        actions: {
-            showErrorDetails: function (errors) {
-                this.set('errors', errors);
-
-                Bootstrap.ModalManager.open(
-                    'error-details',
-                    'Test error details',
-                    'error-details',
-                    [
-                        Ember.Object.create({ title: 'Close', dismiss: 'modal' }),
-                    ],
-                    this
-                );
-            }
-        }
+    App.JobErrorsModalView = Ember.View.extend({
+        name: 'job-errors-modal',
+        layoutName: 'modal',
+        templateName: 'job-errors',
+        isVisible: true
     });
 
 })(Ember, App, Ember.$);

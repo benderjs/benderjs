@@ -55,7 +55,7 @@
         this.result = function (result) {
             if (!result.success) this.results.success = false;
             this.results.results.push(result);
-            socket.emit('result', result);
+            // socket.emit('result', result);
         };
 
         this.next = function () {

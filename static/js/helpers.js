@@ -1,7 +1,7 @@
-(function (Ember, App, DS, Bootstrap) {
+(function (Ember, App, DS) {
 
     // Bootstrap for Ember - Notification Manager modification
-    Bootstrap.NM = Bootstrap.NotificationManager = Ember.Object.create({
+    App.NM = App.NotificationManager = Ember.Object.create({
         content: Ember.A(),
 
         push: function(message, type) {
@@ -15,7 +15,7 @@
         }
     });
 
-    Bootstrap.NotificationView = Ember.View.extend({
+    App.NotificationView = Ember.View.extend({
         classNames: ['alert', 'notification'],
         template: Ember.Handlebars.compile('{{{view.content.message}}}'),
         classNameBindings: ['alertType'],
@@ -36,11 +36,11 @@
         }
     });
 
-    Bootstrap.NotificationsView = Ember.CollectionView.extend({
+    App.NotificationsView = Ember.CollectionView.extend({
         classNames: ['notifications'],
         attributeBindings: ['style'],
-        contentBinding: 'Bootstrap.NM.content',
-        itemViewClass: Bootstrap.NotificationView,
+        contentBinding: 'App.NM.content',
+        itemViewClass: App.NotificationView,
         
         showTime: 2000,
         fadeInTime: 500,
@@ -86,10 +86,10 @@
         }
     });
 
-    Ember.Handlebars.helper('bs-notifications', Bootstrap.NotificationsView);
+    Ember.Handlebars.helper('notifications', App.NotificationsView);
 
     
-    Bootstrap.LabelView = Ember.View.extend({
+    App.LabelView = Ember.View.extend({
         classNames: ['label'],
         classNameBindings: ['labelType'],
         tagName: 'span',
@@ -100,10 +100,10 @@
         }.property('type')
     });
 
-    Ember.Handlebars.helper('bs-label', Bootstrap.LabelView);
+    Ember.Handlebars.helper('label', App.LabelView);
 
     
-    Bootstrap.MomentView = Ember.View.extend({
+    App.MomentView = Ember.View.extend({
         template: Ember.Handlebars.compile('{{view.converted}}'),
         classNames: ['moment'],
         tagName: 'span',
@@ -113,8 +113,7 @@
         }.property('time')
     });
 
-    Ember.Handlebars.helper('bs-moment', Bootstrap.MomentView);
-
+    Ember.Handlebars.helper('moment', App.MomentView);
     
     // enable data-toggle attribute for inputs
     Ember.TextField.reopen({
@@ -131,4 +130,4 @@
         }
     });
 
-})(Ember, App, DS, Bootstrap);
+})(Ember, App, DS);

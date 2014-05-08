@@ -10,13 +10,13 @@
     <iframe src="about:blank" id="context" class="context-frame"></iframe>
 
     <script type="text/x-handlebars">
-    {{bs-notifications fadeOutTime=400}}
+    {{notifications fadeOutTime=400}}
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
                 <a class="navbar-brand app-title" href="#">Bender Dashboard</a>
                 <p class="navbar-text socket-status">
-                    {{bs-label type=socketStatus.css text=socketStatus.status}}
+                    {{label type=socketStatus.css text=socketStatus.status}}
                 </p>
             </div>
             <div class="navbar-right">
@@ -40,6 +40,7 @@
         </ul>
         <div class="content">
             {{outlet}}
+            {{outlet modal}}
         </div>
     </div>
     </script>
@@ -71,7 +72,7 @@
                     <span class="glyphicon glyphicon-play"></span> Run selected
                 {{/if}}
                 </button>
-                <button type="button" class="btn btn-default" {{action "openCreateJob"}}>
+                <button type="button" class="btn btn-default" {{action "openModal" "createJobModal"}} {{bind-attr disabled=testStatus.running}}>
                 <span class="glyphicon glyphicon-file"></span> Create a job
                 </button>
             </div>
@@ -139,7 +140,7 @@
     <tr>
         <td>{{#link-to 'job' id}}{{id}}{{/link-to}}</td>
         <td>{{description}}</td>
-        <td><small>{{bs-moment time=created}}</small></td>
+        <td><small>{{moment time=created}}</small></td>
         <td>
             {{#each parsedResults}}
                 <div {{bind-attr class=":browser name statusCss"}}>
@@ -152,7 +153,7 @@
     </script>
 
     <script type="text/x-handlebars" id="job">
-    <h4><small>Job:</small> {{id}} <small>created {{bs-moment time=created}}</small></h4>
+    <h4><small>Job:</small> {{id}} <small>created {{moment time=created}}</small></h4>
     <h4><small>Description:</small> {{#if description}}{{description}}{{else}}-{{/if}}</h4>
     <div class="panel panel-default">
         <table class="table table-hover jobs">
@@ -174,7 +175,7 @@
                     <td>{{id}}</td>
                     <td>
                         {{#each results}}
-                            {{#if errors}}<a {{action "showErrorDetails" errors}}>{{/if}}
+                            {{#if errors}}<a {{action "openModal" "jobErrorsModal" errors}}>{{/if}}
                             <div {{bind-attr class=":result statusCss"}}>
                                 <span {{bind-attr class=":glyphicon iconCss"}}></span>
                             </div>
@@ -231,15 +232,31 @@
         <td>{{addr}}</td>
         <td>
             {{#if ready}}
-                {{bs-label type="success" text="ready"}}
+                {{label type="success" text="ready"}}
             {{else}}
-                {{bs-label type="warning" text="busy"}}
+                {{label type="warning" text="busy"}}
             {{/if}}
         </td>
     </tr>
     </script>
     
+    <script type="text/x-handlebars" data-template-name="modal">
+    <div class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                {{yield}}
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade in"></div>
+    </script>
+
     <script type="text/x-handlebars" data-template-name="create-job">
+    <div class="modal-header">
+        <button type="button" class="close" {{action "closeModal"}} {{bind-attr disabled=isCreating}}>&times;</button>
+        <h4 class="modal-title">Modal title</h4>
+    </div>
+    <div class="modal-body">
         <div class="form-group input-append btn-group">
             <label for="job-description">Browsers</label>
             {{input type="text" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value=newJob.browsersText}}
@@ -253,15 +270,29 @@
             <label for="job-description">Job description <span>(optional)</span></label>
             {{input type="text" class="form-control" name="job-description" placeholder="Enter job description" value=newJob.description}}
         </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" {{action "closeModal"}} {{bind-attr disabled=isCreating}}>Cancel</button>
+        <button type="button" class="btn btn-primary" {{action "createJob"}} {{bind-attr disabled=isCreating}}>Create</button>
+    </div>
     </script>
     
-    <script type="text/x-handlebars" data-template-name="error-details">
-        {{#each errors}}
-            <p>
-                <strong>{{name}}</strong><br>
-                <pre>{{#each errors}}{{this}}{{/each}}</pre>
-            </p>
-        {{/each}}
+    <script type="text/x-handlebars" data-template-name="job-errors">
+    <div class="modal-header">
+        <button type="button" class="close" {{action "closeModal"}}>&times;</button>
+        <h4 class="modal-title">Modal title</h4>
+    </div>
+    <div class="modal-body">
+    {{#each errors}}
+        <p>
+            <strong>{{name}}</strong><br>
+            <pre>{{#each errors}}{{this}}{{/each}}</pre>
+        </p>
+    {{/each}}
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" {{action "closeModal"}}>Cancel</button>
+    </div>
     </script>
 
     <script type="text/x-handlebars" data-template-name="error404">
@@ -281,9 +312,6 @@
     <script src="/js/libs/ember-sockets.js"></script>
     <script src="/js/libs/ember-data.js"></script>
     <script src="/js/libs/bootstrap.js"></script>
-    <script src="/js/libs/bs-core.min.js"></script>
-    <script src="/js/libs/bs-button.min.js"></script>
-    <script src="/js/libs/bs-modal.min.js"></script>
     <script src="/js/libs/moment.min.js"></script>
     <script src="/js/bender.js"></script>
     <script src="/js/main.js"></script>
