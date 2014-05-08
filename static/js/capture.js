@@ -47,6 +47,7 @@
         this.current = null;
         this.running = false;
         this.results = null;
+        this.testTimeout = null;
 
         this.error = function (error) {
             socket.emit('error', error);
@@ -55,14 +56,21 @@
         this.result = function (result) {
             if (!result.success) this.results.success = false;
             this.results.results.push(result);
-            // socket.emit('result', result);
         };
 
         this.next = function () {
             if (this.current) {
                 contextEl.src = this.current;
                 this.current = null;
+
+                // reload the page if frozen
+                if (BENDER_TEST_TIMEOUT) {
+                    this.testTimeout = setTimeout(function () {
+                        window.location.reload();
+                    }, BENDER_TEST_TIMEOUT);
+                }
             } else {
+                if (this.testTimeout) clearTimeout(this.testTimeout);
                 this.complete();
             }
         };
