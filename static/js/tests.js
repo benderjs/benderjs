@@ -142,6 +142,9 @@
 
         actions: {
             openModal: function (modalName) {
+                if (!this.controller.get('checked').length)
+                    return App.NM.push('You must specify at least one test for the job!', 'warning');
+
                 return this.render(modalName, {
                     into: 'application',
                     outlet: 'modal'
