@@ -119,17 +119,18 @@
         },
 
         setupController: function (controller, model) {
+            // build tags array used for filtering
             var tags = model.reduce(function (result, current) {
-                    current.setProperties({
-                        status: 'waiting',
-                        result: null,
-                        isChecked: true
-                    });
-
+                    // set default status of a test
+                    current.set('status', 'waiting');
                     return result.concat(current.get('tags').split(', '));
                 }, []);
 
-            controller.set('model', model).set('tags', tags.uniq());
+            controller.setProperties({
+                model: model,
+                tags: tags.uniq(),
+                isChecked: false
+            });
         },
 
         closeModal: function () {
@@ -186,7 +187,7 @@
     App.TestsController = Ember.ArrayController.extend({
         needs: ['browsers'],
 
-        isChecked: true,
+        isChecked: false,
         isCreating: false,
         search: '',
         tags: [],
@@ -248,7 +249,7 @@
             reg = new RegExp(search, 'i');
 
             return content.filter(function (test) {
-                return reg.test(test.tags);
+                return reg.test(test.get('tags'));
             });
         }.property('content.isLoaded', 'search'),
 
