@@ -2,6 +2,7 @@
 
     App.JobsRoute = Ember.Route.extend({
         model: function () {
+            console.time('job');
             return this.store.find('job');
         }
     });

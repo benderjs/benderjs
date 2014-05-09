@@ -133,7 +133,7 @@
             });
         },
 
-        closeModal: function () {
+        closeCreateJob: function () {
             this.disconnectOutlet({
                 outlet: 'modal',
                 parentView: 'application'
@@ -141,18 +141,18 @@
         },
 
         actions: {
-            openModal: function (modalName) {
+            openCreateJob: function () {
                 if (!this.controller.get('checked').length)
                     return App.NM.push('You must specify at least one test for the job!', 'warning');
 
-                return this.render(modalName, {
+                return this.render('create-job-modal', {
                     into: 'application',
                     outlet: 'modal'
                 });
             },
 
-            closeModal: function () {
-                return this.closeModal();
+            closeCreateJob: function () {
+                return this.closeCreateJob();
             },
 
             createJob: function () {
@@ -177,7 +177,7 @@
                     );
                     job.set('browsersText', '').set('description', '');
                     controller.set('isCreating', false);
-                    that.closeModal();
+                    that.closeCreateJob();
                 }, 'json')
                 .fail(function () {
                     App.NM.push('Couldn\'t create new job due to server error', 'danger');

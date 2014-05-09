@@ -72,7 +72,7 @@
                     <span class="glyphicon glyphicon-play"></span> Run selected
                 {{/if}}
                 </button>
-                <button type="button" class="btn btn-default" {{action "openModal" "createJobModal"}} {{bind-attr disabled=testStatus.running}}>
+                <button type="button" class="btn btn-default" {{action "openCreateJob"}} {{bind-attr disabled=testStatus.running}}>
                 <span class="glyphicon glyphicon-file"></span> Create a job
                 </button>
             </div>
@@ -143,10 +143,10 @@
         <td><small>{{moment time=created}}</small></td>
         <td>
             {{#each parsedResults}}
-                <div {{bind-attr class=":browser name statusCss"}}>
-                    <span {{bind-attr class=":glyphicon iconCss"}}></span>
-                    <small>{{#if version}}{{version}}{{else}}-{{/if}}</small>
-                </div>
+            <div {{bind-attr class=":browser name statusCss"}}>
+                <span {{bind-attr class=":glyphicon iconCss"}}></span>
+                <small>{{#if version}}{{version}}{{else}}-{{/if}}</small>
+            </div>
             {{/each}}
         </td>
     </tr>
@@ -253,7 +253,7 @@
 
     <script type="text/x-handlebars" data-template-name="create-job">
     <div class="modal-header">
-        <button type="button" class="close" {{action "closeModal"}} {{bind-attr disabled=isCreating}}>&times;</button>
+        <button type="button" class="close" {{action "closeCreateJob"}} {{bind-attr disabled=isCreating}}>&times;</button>
         <h4 class="modal-title">Modal title</h4>
     </div>
     <div class="modal-body">
@@ -272,7 +272,7 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-default" {{action "closeModal"}} {{bind-attr disabled=isCreating}}>Cancel</button>
+        <button type="button" class="btn btn-default" {{action "closeCreateJob"}} {{bind-attr disabled=isCreating}}>Cancel</button>
         <button type="button" class="btn btn-primary" {{action "createJob"}} {{bind-attr disabled=isCreating}}>Create</button>
     </div>
     </script>
