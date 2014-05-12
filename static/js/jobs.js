@@ -2,15 +2,12 @@
 
     App.JobsRoute = Ember.Route.extend({
         model: function () {
-            console.time('job');
             return this.store.find('job');
         }
     });
 
     App.JobsController = Ember.ArrayController.extend({
-        itemController: 'job-row',
-        sortProperties: ['created'],
-        sortAscending: false
+        itemController: 'job-row'
     });
 
     App.JobRowController = Ember.ObjectController.extend({
@@ -64,20 +61,12 @@
     });
 
     App.JobController = Ember.ObjectController.extend({
-        sortResults: function (prev, next) {
-            var pv = parseInt(prev.version, 10),
-                nv = parseInt(next.version, 10);
-
-            return prev.name > next.name ? 1 : prev.name < next.name ? -1 :
-                pv > nv ? 1 : pv < nv ? -1 : 0;
-        },
-
         browsers: function () {
             var task = this.get('tasks')[0];
 
             if (!task) return [];
 
-            return task.results.sort(this.sortResults);
+            return task.results;
         }.property('tasks'),
 
         parsedTasks: function () {
@@ -104,13 +93,9 @@
             return tasks
                 .map(function (task) {
                     task.results = task.results
-                        .map(parseResult)
-                        .sort(that.sortResults);
+                        .map(parseResult);
 
                     return task;
-                })
-                .sort(function (prev, next) {
-                    return prev.id > next.id ? 1 : prev.id < next.id ? -1 : 0;
                 });
         }.property('tasks'),
 
