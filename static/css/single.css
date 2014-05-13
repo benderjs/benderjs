@@ -4,6 +4,7 @@ html, body {
     height: 100%;
     overflow: hidden;
     font-family: 'Arial', 'Helvetica', sans-serif;
+    font-size: 14px;
 }
 
 iframe {
@@ -14,8 +15,12 @@ iframe {
 }
 
 .ok {
-    background: #c8f0c8;
-    background: rgba(200, 240, 200, 0.7);
+    background: #dff0d8;
+    background: rgba(223, 240, 216, 0.7);
+}
+
+.ok:hover {
+    background: #dff0d8;
 }
 
 .ok strong {
@@ -23,8 +28,12 @@ iframe {
 }
 
 .warn {
-    background: #fff0b4;
-    background: rgba(255, 240, 180, 0.7);
+    background: #fcf8e3;
+    background: rgba(252, 248, 227, 0.7);
+}
+
+.warn:hover {
+    background: #fcf8e3;
 }
 
 .warn strong {
@@ -32,8 +41,12 @@ iframe {
 }
 
 .fail {
-    background: #ffc8c8;
-    background: rgba(255, 200, 200, 0.7);
+    background: #f2dede;
+    background: rgba(242, 222, 222, 0.7);
+}
+
+.fail:hover {
+    background: #f2dede;
 }
 
 .fail strong {

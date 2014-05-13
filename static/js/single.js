@@ -1,15 +1,34 @@
 (function (window, undefined) {
     var resultsEl;
 
+    function escapeTags(str) {
+        var replacements = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;'
+        };
+
+        return str.replace(/[&<>]/g, function (item) {
+            return replacements[item] || item;
+        });
+    }
+
     function addResult(result) {
-        var resEl = document.createElement('li');
+        var resEl = document.createElement('li'),
+            res = [
+                '<p>', result.module, ' - ', result.name,
+                '<strong> ', result.success ? result.ignored ? 'IGNORED' : 'PASSED' : 'FAILED', '</strong></p>'
+            ],
+            i;
+
+        if (!result.success) {
+            for (i = 0; i < result.errors.length; i++) {
+                res.push('<pre>', escapeTags(result.errors[i]), '</pre>');
+            }
+        }
 
         resEl.className = result.success ? result.ignored ? 'warn' : 'ok' : 'fail';
-        resEl.innerHTML = [
-            '<p>', result.module, '-', result.name,
-            '<strong>', result.success ? result.ignored ? 'IGNORED' : 'PASSED' : 'FAILED', '</strong></p>',
-            !result.success ? ('<p>' + result.errors.join('</p><p>').replace(/\n/g, '<br>') + '</p>') : null
-        ].join(' ');
+        resEl.innerHTML = res.join('');
 
         if (!resultsEl) resultsEl = document.getElementById('results');
         resultsEl.appendChild(resEl);
