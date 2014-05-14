@@ -273,7 +273,10 @@
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-default" {{action "closeCreateJob"}} {{bind-attr disabled=isCreating}}>Cancel</button>
-        <button type="button" class="btn btn-primary" {{action "createJob"}} {{bind-attr disabled=isCreating}}>Create</button>
+        <button type="button" class="btn btn-primary" {{action "createJob"}} {{bind-attr disabled=isCreating}}>
+            Create
+            <span class="loader"></span>
+        </button>
     </div>
     </script>
     

@@ -206,3 +206,16 @@ th:last-child {
 .modal {
     display: block;
 }
+
+button .loader {
+    display: none;
+    position: relative;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    background: url('../images/button-loader.gif') no-repeat;
+}
+
+button:disabled .loader {
+    display: inline-block;
+}
