@@ -6,7 +6,7 @@ html, body {
     font-family: 'Arial', 'Helvetica', sans-serif;
 }
 
-header {
+#status {
     position: absolute;
     top: 0;
     right: 0;
@@ -14,9 +14,6 @@ header {
     background: rgba(200, 200, 200, 0.7);
     padding: 1em;
     margin: 0;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
 }
 
 iframe {

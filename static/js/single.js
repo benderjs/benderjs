@@ -82,7 +82,7 @@
 
         this.setup = function (context) {
             context.bender = this;
-            context.onerror = this.error;
+            // context.onerror = this.error;
 
             this.addListener(context, 'load', this.ready, this);
         };
