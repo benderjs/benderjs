@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Untitled</title>
-    <script>window.parent.bender && window.parent.bender.setup(window);</script>
+    <script>
+    (function () {
+        var bender = (opener || parent).bender;
+
+        if (bender) bender.setup(window/*, true */);
+    })();
+    </script>
 </head>
 <body>
 </body>

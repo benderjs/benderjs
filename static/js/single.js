@@ -35,9 +35,27 @@
         resultsEl.appendChild(resEl);
     }
 
-    function Bender() {
-        this.assert = null;
+    addListener = function (target, name, callback, scope) {
+        function handler () { callback.call(scope || this); }
 
+        if (target.addEventListener) {
+            target.addEventListener(name, handler, false);
+        } else if (target.attachEvent) {
+            target.attachEvent('on' + name, handler);
+        } else {
+            target['on' + name] = handler;
+        }
+    };
+
+    removeListener = function (target, name, callback) {
+        if (target.removeEventListener) {
+            target.removeEventListener(name, callback, false);
+        } else {
+            target.detachEvent('on' + name, callback);
+        }
+    };
+
+    function Bender() {
         this.error = function () {
             console.error.apply(console, arguments);
         };
@@ -50,46 +68,21 @@
             console.log.apply(console, arguments);
         };
 
-        // stubbed for compability
-        this.next = this.complete = this.setup = function () {};
-
-        // this will be overriden by a framework adapter
-        this.start = this.complete;
-
         this.ready = function () {
             if (typeof this.start == 'function') this.start();
             this.start = null;
         };
 
-        this.addListener = function (target, name, callback, scope) {
-            function handler () { callback.call(scope || this); }
-
-            if (target.addEventListener) {
-                target.addEventListener(name, handler, false);
-            } else if (target.attachEvent) {
-                target.attachEvent('on' + name, handler);
-            } else {
-                target['on' + name] = handler;
-            }
-        };
-
-        this.removeListener = function (target, name, callback) {
-            if (target.removeEventListener) {
-                target.removeEventListener(name, callback, false);
-            } else {
-                target.detachEvent('on' + name, callback);
-            }
-        };
+        // stubbed for compability
+        // this might be overriden by a framework adapter
+        this.start = this.next = this.complete = this.setup = function () {};
     }
 
     window.bender = new Bender();
 
-    function init() {
+    addListener(window, 'load', function () {
         document.body.appendChild(resultsEl);
         bender.ready();
-    }
-
-    bender.addListener(window, 'load', init, this);
-
+    }, this);
 
 })(this);
