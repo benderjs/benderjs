@@ -7,7 +7,9 @@
     });
 
     App.JobsController = Ember.ArrayController.extend({
-        itemController: 'job-row'
+        itemController: 'job-row',
+        sortProperties: ['created'],
+        sortAscending: false
     });
 
     App.JobRowController = Ember.ObjectController.extend({
