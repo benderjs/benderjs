@@ -1,5 +1,7 @@
 (function (window, undefined) {
-    var resultsEl;
+    var resultsEl = document.createElement('div');
+
+    resultsEl.className = 'results';
 
     function escapeTags(str) {
         var replacements = {
@@ -30,7 +32,6 @@
         resEl.className = result.success ? result.ignored ? 'warn' : 'ok' : 'fail';
         resEl.innerHTML = res.join('');
 
-        if (!resultsEl) resultsEl = document.getElementById('results');
         resultsEl.appendChild(resEl);
     }
 
@@ -50,7 +51,7 @@
         };
 
         // stubbed for compability
-        this.next = this.complete = function () {};
+        this.next = this.complete = this.setup = function () {};
 
         // this will be overriden by a framework adapter
         this.start = this.complete;
@@ -79,15 +80,16 @@
                 target.detachEvent('on' + name, callback);
             }
         };
-
-        this.setup = function (context) {
-            context.bender = this;
-            // context.onerror = this.error;
-
-            this.addListener(context, 'load', this.ready, this);
-        };
     }
 
     window.bender = new Bender();
+
+    function init() {
+        document.body.appendChild(resultsEl);
+        bender.ready();
+    }
+
+    bender.addListener(window, 'load', init, this);
+
 
 })(this);
