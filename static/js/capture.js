@@ -3,7 +3,6 @@
         isIE = navigator.userAgent.match(/msie (\d+)/i),
         oldIE = isIE && isIE[1] < 9,
         fetchInterval = null,
-        testTimeout = null,
         states = {
             CONNECT: 0,
             RECONNECT: 1,
@@ -13,95 +12,114 @@
         },
         socket;
 
-    function clearTestTimeout() {
-        if (testTimeout) clearTimeout(testTimeout);
+    function clone(src) {
+        var output,
+            i;
+
+        if (src === null || typeof src !== 'object') return src;
+
+        if (typeof src == 'object') {
+            output = {};
+
+            for (i in src) {
+                if (src.hasOwnProperty(i)) output[i] = clone(src[i]);
+            }
+
+            return output;
+        }
+
+        return src;
     }
-
-    function resetTestTimeout() {
-        if (!BENDER_TEST_TIMEOUT) return;
-
-        testTimeout = setTimeout(function () {
-            // reload the page if frozen
-            window.location.reload();
-        }, BENDER_TEST_TIMEOUT);
-    }
-
-    addListener = function (target, name, callback, scope) {
-        function handler () { callback.call(scope || this); }
-
-        if (target.addEventListener) target.addEventListener(name, handler, false);
-        else if (target.attachEvent) target.attachEvent('on' + name, handler);
-        else target['on' + name] = handler;
-    };
-
-    removeListener = function (target, name, callback) {
-        if (target.removeEventListener) target.removeEventListener(name, callback, false);
-        else if (target.detachEvent) target.detachEvent('on' + name, callback);
-        else target['on' + name] = undefined;
-    };
 
     function Bender(socket) {
         var testFrame = document.getElementById('context'),
+            testTimeout = null,
             testWindow = null,
+            runs = 0,
             that = this;
 
         this.assert = null;
-        this.current = null;
         this.running = false;
         this.results = null;
+
+        function clearTestTimeout() {
+            if (testTimeout) clearTimeout(testTimeout);
+        }
+
+        function resetTestTimeout() {
+            if (!BENDER_TEST_TIMEOUT) return;
+
+            clearTestTimeout();
+
+            testTimeout = setTimeout(function () {
+                // reload the page if frozen
+                if (testWindow) testWindow.close();
+                window.location.reload();
+            }, BENDER_TEST_TIMEOUT);
+        }
 
         this.error = function (error) {
             socket.emit('error', error);
         };
 
         this.result = function (result) {
+            // workaround for IE8 and popup issues
+            if (isIE) result = clone(result);
+
             if (!result.success) this.results.success = false;
-            this.results.results.push(result);
+
+            this.results.results[result.name] = result;
+
             resetTestTimeout();
         };
 
-        this.next = function () {
-            if (this.current) {
-                testFrame.src = this.current;
-                this.current = null;
+        this.next = function (id) {
+            if (typeof id == 'string') {
+                runs++;
+
+                if (isIE) {
+                    if (runs >= 20 && testWindow) {
+                        testWindow.close();
+                        setTimeout(function () {
+                            runs = 0;
+                            window.open(id, 'bendertest');
+                        }, 300);
+                    } else {
+                        testWindow = window.open(id, 'bendertest');
+                    }
+                } else {
+                    testFrame.src = id;
+                }
+
                 resetTestTimeout();
             } else {
-                clearTestTimeout();
                 this.complete();
             }
         };
 
+
         this.complete = function () {
+            clearTestTimeout();
             socket.emit('complete', this.results);
             
-            if (isIE) {
+            if (!isIE) testFrame.src = 'about:blank';
 
-            } else {
-                testFrame.src = 'about:blank';
-            }
             this.running = false;
             this.results = null;
             socket.emit('fetch');
         };
 
-        this.log = function () {
-            socket.emit('log', Array.prototype.join.call(arguments, ' '));
-        };
-
         // this will be overriden by a framework adapter
         this.start = this.complete;
 
-        this.ready = function () {
-            if (typeof this.start == 'function') this.start();
-            this.start = null;
+        this.log = function () {
+            socket.emit('log', Array.prototype.join.call(arguments, ' '));
         };
 
         this.setup = function (context, steal) {
             context.bender = this;
 
             if (steal) context.onerror = this.error;
-
-            addListener(context, 'load', this.ready, this);
 
             function stealLogs() {
                 var commands = ['log', 'info', 'warn', 'debug', 'error'],
@@ -128,6 +146,17 @@
 
             if (steal) stealLogs();
         };
+
+        // handle socket run message
+        socket.on('run', function (data) {
+            data.results = {};
+            data.success = true;
+
+            that.results = data;
+            that.running = true;
+
+            that.next(data.id);
+        });
     }
 
     function startFetch() {
@@ -181,18 +210,6 @@
         .on('reconnecting', setStatus(states.RECONNECTING))
         .on('disconnect', setStatus(states.DISCONNECT))
         .on('disconnect', stopFetch);
-
-    // handle socket run message
-    socket.on('run', function (data) {
-        data.results = [];
-        data.success = true;
-
-        bender.current = data.id;
-        bender.results = data;
-        bender.running = true;
-
-        bender.next();
-    });
 
     window.bender = new Bender(socket);
 
