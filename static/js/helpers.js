@@ -52,6 +52,8 @@
         }.observes('content.length'),
         
         resetShowTime: function () {
+            var that = this;
+
             this.$().css('display', 'block');
             
             if (this.$().is(':animated')) {
@@ -62,11 +64,15 @@
             
             if (this.showTimeout) clearTimeout(this.showTimeout);
 
-            this.showTimeout = setTimeout(this.fadeOut, this.showTime, this);
+            this.showTimeout = setTimeout(function () {
+                that.fadeOut.call(that);
+            }, this.showTime, this);
         },
         
-        fadeOut: function(that) {
-            return that.$().fadeOut(that.fadeOutTime, function () {
+        fadeOut: function() {
+            var that = this;
+
+            return this.$().fadeOut(this.fadeOutTime, function () {
                 return that.get('content').clear();
             });
         },
