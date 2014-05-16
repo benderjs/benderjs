@@ -1,7 +1,10 @@
 (function (window) {
+    var isIE = navigator.userAgent.match(/msie (\d+)/i);
 
     function Bender() {
-        var contextEl = document.getElementById('context');
+        var testFrame = document.getElementById('context'),
+            testWindow = null,
+            runs = 0;
 
         this.handlers = {};
         this.current = null;
@@ -39,7 +42,9 @@
         };
 
         this.next = function (summary) {
-            if (summary) {
+            var id;
+
+            if (typeof summary == 'object' && summary !== null) {
                 summary.id = this.current;
                 summary.success = summary.failed === 0;
                 this.emit('update', summary);
@@ -48,8 +53,24 @@
             this.current = this.suite.shift();
 
             if (this.current) {
+                id = '/tests/' + this.current;
+                runs++;
+
                 this.emit('update', this.current);
-                contextEl.src = '/tests/' + this.current;
+
+                if (isIE) {
+                    if (runs >= 20 && testWindow) {
+                        testWindow.close();
+                        setTimeout(function () {
+                            runs = 0;
+                            window.open(id, 'bendertest');
+                        }, 300);
+                    } else {
+                        testWindow = window.open(id, 'bendertest');
+                    }
+                } else {
+                    testFrame.src = id;
+                }
             } else {
                 this.complete();
             }
@@ -57,7 +78,9 @@
 
         this.complete = function () {
             this.emit('complete');
-            contextEl.src = 'about:blank';
+
+            if (isIE && testWindow) testWindow.close();
+            else testFrame.src = 'about:blank';
         };
 
         this.run = function (tests) {
