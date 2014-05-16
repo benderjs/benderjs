@@ -14,21 +14,15 @@
 
     function clone(src) {
         var output,
-            i;
+            prop;
 
         if (src === null || typeof src !== 'object') return src;
 
-        if (typeof src == 'object') {
-            output = {};
+        output = {};
 
-            for (i in src) {
-                if (src.hasOwnProperty(i)) output[i] = clone(src[i]);
-            }
+        for (prop in src) output[prop] = clone(src[prop]);
 
-            return output;
-        }
-
-        return src;
+        return output;
     }
 
     function Bender(socket) {
