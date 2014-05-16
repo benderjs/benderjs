@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
     // nodetime analytics code >>
-var nt = require('nodetime').profile({
-        accountKey: 'fa285297454b5d8a2a12e2686fc17c0a102a8c85',
-        appName: 'Bender'
-    }),
+// var nt = require('nodetime').profile({
+//         accountKey: 'fa285297454b5d8a2a12e2686fc17c0a102a8c85',
+//         appName: 'Bender'
+//     }),
     // << nodetime analytics code
 
-    argParser = require('nomnom'),
+var argParser = require('nomnom'),
     path = require('path'),
     fs = require('fs'),
     when = require('when'),
@@ -55,6 +55,7 @@ argParser.command('server')
     })
     .option('config', {
         abbr: 'c',
+        default: constants.CONFIG_NAME,
         help: 'Alternative path to Bender.js configuration file'
     })
     .help('Start Bender.js server');
@@ -179,7 +180,7 @@ function startServer(options) {
         ];
 
     bender.use(conf, {
-        path: path.resolve(process.cwd(), options.config || 'bender.js')
+        path: path.resolve(process.cwd(), options.config)
     });
 
     modules.forEach(function (module) { bender.use(module); });
