@@ -14,7 +14,7 @@
   "dependencies": {
     "broadway": "~0.2.9",
     "connect": "~2.14.3",
-    "dom-combiner": "git://github.com/cksource/dom-combiner.git",
+    "dom-combiner": "git+ssh://git@github.com:cksource/dom-combiner.git",
     "forever": "~0.10.11",
     "glob": "~3.2.9",
     "lodash": "~2.4.1",
