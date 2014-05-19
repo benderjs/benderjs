@@ -1,11 +1,15 @@
 #!/usr/bin/env node
 
-    // nodetime analytics code >>
+/**
+ * @file Bender command line interface
+ */
+
+// nodetime analytics code >>
 // var nt = require('nodetime').profile({
 //         accountKey: 'fa285297454b5d8a2a12e2686fc17c0a102a8c85',
 //         appName: 'Bender'
 //     }),
-    // << nodetime analytics code
+// << nodetime analytics code
 
 var argParser = require('nomnom'),
     path = require('path'),
@@ -169,7 +173,6 @@ function startDaemon() {
 /**
  * Start bender server
  * @param  {Object} options Command line options
- * @return {[type]}         [description]
  */
 function startServer(options) {
     var bender = new broadway.App({ delimeter: ':' }),
@@ -214,12 +217,13 @@ function startServer(options) {
 function initialize() {
     var defaultConfig = buildDefaultConfig();
 
-    // build default configuration file
+    // build default configuration file from schema
     function buildDefaultConfig() {
         var schema = require('../lib/config-schema.js'),
             example = ['/**', ' * Bender configuration file', ' * '],
             props = schema.properties;
 
+        // create documentation for config option
         function addParam(name) {
             var type = props[name].type;
 
