@@ -1,5 +1,46 @@
 (function (window, Ember, EmberSockets) {
 
+    var App = window.App = new Backbone.Marionette.Application();
+
+    App.socket = null;
+    App.socketUrl = 'http://' + window.location.hostname + ':' +
+        window.location.port + '/dashboard';
+
+    App.addInitializer(function () {
+        App.socket = io.connect(App.socketUrl);
+
+        App.socket.on('connect', function () {
+            App.socket.emit('register');
+            // this.socketStatus.set('status', 'connected');
+        });
+        App.socket.on('reconnect', function () {
+            // this.socketStatus.set('status', 'reconnecting');
+        });
+        App.socket.on('reconnecting', function () {
+            // this.socketStatus.set('status', 'reconnecting');
+        });
+        App.socket.on('reconnect_failed', function () {
+            // this.socketStatus.set('status', 'disconnected');
+        });
+        App.socket.on('disconnect', function () {
+            // this.socketStatus.set('status', 'disconnected');
+        });
+    });
+
+
+
+
+
+
+
+
+
+
+    App.start();
+
+
+
+// OLD EMBER CODE >>>
     window.App = Ember.Application.create({
         Socket: EmberSockets.extend({
             host: window.location.hostname,
