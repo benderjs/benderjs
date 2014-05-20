@@ -9,8 +9,8 @@
     "bender": "./bin/bender"
   },
   "repository": {
-    "type" : "git",
-    "url" : "http://github.com/benderjs/benderjs.git"
+    "type": "git",
+    "url": "http://github.com/benderjs/benderjs.git"
   },
   "author": "",
   "license": "",
@@ -36,6 +36,7 @@
     "winston": "~0.7.2"
   },
   "devDependencies": {
+    "jsdoc": "~3.3.0-alpha5",
     "nodetime": "~0.8.15"
   }
 }
