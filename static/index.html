@@ -8,15 +8,12 @@
 </head>
 <body>
     <iframe src="about:blank" id="context" class="context-frame"></iframe>
-
-    <script type="text/x-handlebars">
-    {{notifications fadeOutTime=400}}
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
                 <a class="navbar-brand app-title" href="#">Bender Dashboard</a>
-                <p class="navbar-text socket-status">
-                    {{label type=socketStatus.css text=socketStatus.status}}
+                <p class="navbar-text">
+                    <span class="label label-success" id="socket-status">connected</span>
                 </p>
             </div>
             <div class="navbar-right">
@@ -24,66 +21,55 @@
                     <span class="glyphicon glyphicon-download"></span> Capture browser
                 </a>
             </div>
-            
         </div>
     </nav>
     <div class="container">
         <ul class="nav nav-tabs nav-justified" role="navigation">
-        {{#each tabs}}
-            {{#link-to target tagName="li" disabled=controller.testsRunning}}
-                <a {{bind-attr href=view.href}}>
-                    {{name}}
-                    {{#if browsers}}<span class="badge">{{controller.browsersCount}}</span>{{/if}}
-                </a>
-            {{/link-to}}
-        {{/each}}
+            <li><a href="#tests">Tests</a></li>
+            <li><a href="#jobs">Jobs</a></li>
+            <li><a href="#browsers">Browsers</a></li>
         </ul>
-        <div class="content">
-            {{outlet}}
-            {{outlet modal}}
+        <div class="header" id="header">
+            <!-- place for subpage header -->
+        </div>
+        <div class="content" id="content">
+            <!-- place for subpage content -->
         </div>
     </div>
-    </script>
 
-    <script type="text/x-handlebars" id="tests">
+    <script type="text/x-dot-template" id="tests">
     <div class="row">
         <div class="col-md-6">
             <p class="test-status">
-                {{#with testStatus}}
-                <strong>{{passed}}</strong> passed / <strong>{{failed}}</strong> failed in {{timeText}}
-                {{/with}}
+                <strong class="passed">0</strong> passed /
+                <strong class="failed">0</strong> failed in
+                <strong class="time">0h 00m 00s 000ms</strong> -
+                <strong class="percent">0</strong>%
             </p>
         </div>
         <div class="col-md-6">
             <div class="form-inline filter-form" role="form">
                 <div class="form-group input-append btn-group">
-                    {{input type="text" class="form-control" name="filter" data-toggle="dropdown" placeholder="Filter tags" value=search disabled=testStatus.running}}
-                    <span {{bind-attr class=":glyphicon :glyphicon-remove :clear-filter search:visible"}}{{bind-attr disabled=testStatus.running}} {{action "clearFilter"}}></span>
+                    <input type="text" class="form-control tag-filter" name="filter" data-toggle="dropdown" placeholder="Filter tags">
+                    <span class="glyphicon glyphicon-remove clear-filter"></span>
                     <ul class="dropdown-menu">
-                        {{#each tags}}
-                            <li><a {{action "addTag" this}}>{{this}}</a></li>
-                        {{/each}}
+                        <li><a>Sample</a></li>
                     </ul>
                 </div>
-                <button type="button" class="btn btn-primary" {{action "runTests"}}>
-                {{#if testStatus.running}}
-                    <span class="glyphicon glyphicon-stop"></span> Stop testing
-                {{else}}
-                    <span class="glyphicon glyphicon-play"></span> Run selected
-                {{/if}}
+                <button type="button" class="btn btn-primary run-button">
+                <span class="glyphicon glyphicon-play"></span> Run selected
                 </button>
-                <button type="button" class="btn btn-default" {{action "openCreateJob"}} {{bind-attr disabled=testStatus.running}}>
+                <button type="button" class="btn btn-default create-button">
                 <span class="glyphicon glyphicon-file"></span> Create a job
                 </button>
             </div>
         </div>
     </div>
+
     <div class="panel panel-default">
-        {{#if length}}
         <table class="table table-hover tests">
             <thead>
                 <tr>
-                    <th>{{input type="checkbox" checked=isChecked}}</th>
                     <th>ID</th>
                     <th>Group</th>
                     <th>Tags</th>
@@ -91,30 +77,33 @@
                 </tr>
             </thead>
             <tbody>
-                {{#if filtered.length}}
-                {{#each filtered}}{{partial "test"}}{{/each}}
-                {{else}}
-                <tr><td colspan="5">No tests matching specified tags</td></tr>
-                {{/if}}
             </tbody>
         </table>
-        {{else}}
-        <div class="panel-body">No tests available</div>
-        {{/if}}
     </div>
     </script>
+    <!-- markup for no tests
+    <tr><td colspan="5">No tests matching specified tags</td></tr>
+    -->
 
-    <script type="text/x-handlebars" data-template-name="_test">
-    <tr {{bind-attr class=resultCss}}>
-        <td>{{input type="checkbox" checked=isChecked}}</td>
-        <td><a {{bind-attr href=singleUrl}}>{{id}}</a></td>
-        <td>{{group}}</td>
-        <td>{{tags}}</td>
-        <td><span {{bind-attr class=":glyphicon iconCss" }}></span> {{statusText}}</td>
-    </tr>
+    <script type="text/x-dot-template" id="test">
+    <td><a href="single/<%= id %>"><%= id %></a></td>
+    <td><%= group %></td>
+    <td><%= tags %></td>
+    <td><span class="glyphicon"></span><span class="status"></span></td>
     </script>
 
-    <script type="text/x-handlebars" id="jobs">
+
+
+
+
+
+
+
+
+
+
+
+    <script type="text/x-dot-template" id="jobs">
     <div class="panel panel-default">
         {{#if length}}
         <table class="table table-hover jobs">
@@ -136,7 +125,7 @@
     </div>
     </script>
 
-    <script type="text/x-handlebars" data-template-name="_job">
+    <script type="text/x-dot-template" id="job">
     <tr>
         <td>{{#link-to 'job' id}}{{id}}{{/link-to}}</td>
         <td>{{description}}</td>
@@ -152,7 +141,7 @@
     </tr>
     </script>
 
-    <script type="text/x-handlebars" id="job">
+    <script type="text/x-dot-template" id="job">
     <h4><small>Job:</small> {{id}} <small>created {{moment time=created}}</small></h4>
     <h4><small>Description:</small> {{#if description}}{{description}}{{else}}-{{/if}}</h4>
     <div class="panel panel-default">
@@ -189,7 +178,7 @@
     </div>
     </script>
 
-    <script type="text/x-handlebars" id="browsers">
+    <script type="text/x-dot-template" id="browsers">
     <div class="panel panel-default">
     {{#if length}}
         <table class="table table-hover table-condensed browsers">
@@ -224,7 +213,7 @@
     </div>
     </script>
 
-    <script type="text/x-handlebars" data-template-name="_client">
+    <script type="text/x-dot-template" id="client">
     <tr>
         <td></td>
         <td>{{id}}</td>
@@ -240,7 +229,7 @@
     </tr>
     </script>
     
-    <script type="text/x-handlebars" data-template-name="modal">
+    <script type="text/x-dot-template" id="modal">
     <div class="modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -251,7 +240,7 @@
     <div class="modal-backdrop fade in"></div>
     </script>
 
-    <script type="text/x-handlebars" data-template-name="create-job">
+    <script type="text/x-dot-template" id="create-job">
     <div class="modal-header">
         <button type="button" class="close" {{action "closeCreateJob"}} {{bind-attr disabled=isCreating}}>&times;</button>
         <h4 class="modal-title">Create a job</h4>
@@ -280,7 +269,7 @@
     </div>
     </script>
     
-    <script type="text/x-handlebars" data-template-name="job-errors">
+    <script type="text/x-dot-template" id="job-errors">
     <div class="modal-header">
         <button type="button" class="close" {{action "closeModal"}}>&times;</button>
         <h4 class="modal-title">Error details</h4>
@@ -298,12 +287,12 @@
     </div>
     </script>
 
-    <script type="text/x-handlebars" data-template-name="error404">
+    <script type="text/x-dot-template" id="error404">
     <h4>Error 404</h4>
     <h5>Page not found</h5>
     </script>
 
-    <script type="text/x-handlebars" data-template-name="error">
+    <script type="text/x-dot-template" id="error">
     <h4>Error</h4>
     <h5>Unknown error occured</h5>
     </script>
@@ -312,7 +301,6 @@
 
     <script src="/js/libs/jquery-1.10.2.js"></script>
     <script src="/js/libs/underscore.js"></script>
-    <script src="/js/libs/doT.js"></script>
     <script src="/js/libs/moment.min.js"></script>
     <script src="/js/libs/backbone.js"></script>
     <script src="/js/libs/backbone.marionette.js"></script>
@@ -321,9 +309,15 @@
     <script src="/js/bender.js"></script>
 
     <script src="/js/main.js"></script>
-    <script src="/js/helpers.js"></script>
+    <script src="/js/sockets.js"></script>
     <script src="/js/tests.js"></script>
     <script src="/js/jobs.js"></script>
     <script src="/js/browsers.js"></script>
+
+    <script>
+        $(function () {
+            App.start();
+        });
+    </script>
 </body>
 </html>

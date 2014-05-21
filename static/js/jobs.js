@@ -1,114 +1,118 @@
-(function (Ember, App, $) {
+App.module('Jobs', function (Jobs, App, Backbone) {
 
-    App.JobsRoute = Ember.Route.extend({
-        model: function () {
-            return this.store.find('job');
-        }
-    });
+});
 
-    App.JobsController = Ember.ArrayController.extend({
-        itemController: 'job-row',
-        sortProperties: ['created'],
-        sortAscending: false
-    });
+// (function (Ember, App, $) {
 
-    App.JobRowController = Ember.ObjectController.extend({
-        parsedResults: function () {
-            var results = this.get('results');
+//     App.JobsRoute = Ember.Route.extend({
+//         model: function () {
+//             return this.store.find('job');
+//         }
+//     });
 
-            return results.map(function (result) {
-                var status,
-                    icon;
+//     App.JobsController = Ember.ArrayController.extend({
+//         itemController: 'job-row',
+//         sortProperties: ['created'],
+//         sortAscending: false
+//     });
 
-                icon = result.status === 0 ? 'time' :
-                    result.status === 1 ? 'refresh' :
-                    result.status === 2 ? 'ok' : 'remove';
+//     App.JobRowController = Ember.ObjectController.extend({
+//         parsedResults: function () {
+//             var results = this.get('results');
 
-                status = result.status === 2 ? 'success' :
-                    result.status === 3 ? 'danger' : 'info';
+//             return results.map(function (result) {
+//                 var status,
+//                     icon;
 
-                result.statusCss = status + ' bg-' + status + ' text-' + status;
-                result.iconCss = 'glyphicon-' + icon;
+//                 icon = result.status === 0 ? 'time' :
+//                     result.status === 1 ? 'refresh' :
+//                     result.status === 2 ? 'ok' : 'remove';
 
-                return result;
-            });
-        }.property('results')
-    });
+//                 status = result.status === 2 ? 'success' :
+//                     result.status === 3 ? 'danger' : 'info';
 
-    App.JobRoute = Ember.Route.extend({
-        model: function (params) {
-            return $.getJSON('/jobs/' + params.job_id);
-        },
-        actions: {
-            openModal: function (modalName, errors) {
-                this.controller.set('errors', errors);
-                return this.render(modalName, {
-                    into: 'application',
-                    outlet: 'modal'
-                });
-            },
-            closeModal: function () {
-                this.disconnectOutlet({
-                    outlet: 'modal',
-                    parentView: 'application'
-                });
-            }
-        }
-    });
+//                 result.statusCss = status + ' bg-' + status + ' text-' + status;
+//                 result.iconCss = 'glyphicon-' + icon;
 
-    App.Job = DS.Model.extend({
-        description: DS.attr('string'),
-        created: DS.attr('number'),
-        results: DS.attr('raw')
-    });
+//                 return result;
+//             });
+//         }.property('results')
+//     });
 
-    App.JobController = Ember.ObjectController.extend({
-        browsers: function () {
-            var task = this.get('tasks')[0];
+//     App.JobRoute = Ember.Route.extend({
+//         model: function (params) {
+//             return $.getJSON('/jobs/' + params.job_id);
+//         },
+//         actions: {
+//             openModal: function (modalName, errors) {
+//                 this.controller.set('errors', errors);
+//                 return this.render(modalName, {
+//                     into: 'application',
+//                     outlet: 'modal'
+//                 });
+//             },
+//             closeModal: function () {
+//                 this.disconnectOutlet({
+//                     outlet: 'modal',
+//                     parentView: 'application'
+//                 });
+//             }
+//         }
+//     });
 
-            if (!task) return [];
+//     App.Job = DS.Model.extend({
+//         description: DS.attr('string'),
+//         created: DS.attr('number'),
+//         results: DS.attr('raw')
+//     });
 
-            return task.results;
-        }.property('tasks'),
+//     App.JobController = Ember.ObjectController.extend({
+//         browsers: function () {
+//             var task = this.get('tasks')[0];
 
-        parsedTasks: function () {
-            var tasks = this.get('tasks'),
-                that = this;
+//             if (!task) return [];
 
-            function parseResult(result) {
-                var status,
-                    icon;
+//             return task.results;
+//         }.property('tasks'),
 
-                icon = result.status === 0 ? 'time' :
-                    result.status === 1 ? 'refresh' :
-                    result.status === 2 ? 'ok' : 'remove';
+//         parsedTasks: function () {
+//             var tasks = this.get('tasks'),
+//                 that = this;
 
-                status = result.status === 2 ? 'success' :
-                    result.status === 3 ? 'danger' : 'info';
+//             function parseResult(result) {
+//                 var status,
+//                     icon;
 
-                result.statusCss = status + ' bg-' + status + ' text-' + status;
-                result.iconCss = 'glyphicon-' + icon;
+//                 icon = result.status === 0 ? 'time' :
+//                     result.status === 1 ? 'refresh' :
+//                     result.status === 2 ? 'ok' : 'remove';
 
-                return result;
-            }
+//                 status = result.status === 2 ? 'success' :
+//                     result.status === 3 ? 'danger' : 'info';
 
-            return tasks
-                .map(function (task) {
-                    task.results = task.results
-                        .map(parseResult);
+//                 result.statusCss = status + ' bg-' + status + ' text-' + status;
+//                 result.iconCss = 'glyphicon-' + icon;
 
-                    return task;
-                });
-        }.property('tasks'),
+//                 return result;
+//             }
 
-        errors: null
-    });
+//             return tasks
+//                 .map(function (task) {
+//                     task.results = task.results
+//                         .map(parseResult);
 
-    App.JobErrorsModalView = Ember.View.extend({
-        name: 'job-errors-modal',
-        layoutName: 'modal',
-        templateName: 'job-errors',
-        isVisible: true
-    });
+//                     return task;
+//                 });
+//         }.property('tasks'),
 
-})(Ember, App, Ember.$);
+//         errors: null
+//     });
+
+//     App.JobErrorsModalView = Ember.View.extend({
+//         name: 'job-errors-modal',
+//         layoutName: 'modal',
+//         templateName: 'job-errors',
+//         isVisible: true
+//     });
+
+// })(Ember, App, Ember.$);
