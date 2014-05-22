@@ -12,29 +12,17 @@
         },
         socket;
 
-    function clone(src) {
-        var output,
-            prop;
-
-        if (src === null || typeof src !== 'object') return src;
-
-        output = {};
-
-        for (prop in src) output[prop] = clone(src[prop]);
-
-        return output;
-    }
-
     function Bender(socket) {
-        var testFrame = document.getElementById('context'),
+        var contextEl = document.getElementById('context'),
             testTimeout = null,
             testWindow = null,
             runs = 0,
             that = this;
 
-        this.assert = null;
         this.running = false;
         this.results = null;
+
+        this.runAsChild = true;
 
         function clearTestTimeout() {
             if (testTimeout) clearTimeout(testTimeout);
@@ -57,8 +45,7 @@
         };
 
         this.result = function (result) {
-            // workaround for IE8 and popup issues
-            if (isIE) result = clone(result);
+            result = JSON.parse(result);
 
             if (!result.success) this.results.success = false;
 
@@ -67,7 +54,9 @@
             resetTestTimeout();
         };
 
-        this.next = function (id) {
+        this.run = function (id) {
+            var frame;
+
             if (typeof id == 'string') {
                 runs++;
 
@@ -82,64 +71,75 @@
                         testWindow = window.open(id, 'bendertest');
                     }
                 } else {
-                    testFrame.src = id;
+                    if ((frame = contextEl.getElementsByTagName('iframe')[0])) {
+                        frame.src = 'about:blank';
+                        contextEl.removeChild(frame);
+                    }
+
+                    frame = document.createElement('iframe');
+                    frame.className = 'context-frame';
+                    frame.src = id;
+                    contextEl.appendChild(frame);
                 }
 
                 resetTestTimeout();
-            } else {
-                this.complete();
             }
         };
 
+        this.next = this.complete = function () {
+            var frame;
 
-        this.complete = function () {
             clearTestTimeout();
             socket.emit('complete', this.results);
             
-            if (!isIE) testFrame.src = 'about:blank';
+            if (!isIE) {
+                frame = contextEl.getElementsByTagName('iframe')[0];
+
+                if (frame) {
+                    frame.src = 'about:blank';
+                    contextEl.removeChild(frame);
+                }
+            }
 
             this.running = false;
             this.results = null;
             socket.emit('fetch');
         };
 
-        // this will be overriden by a framework adapter
-        this.start = this.complete;
-
         this.log = function () {
             socket.emit('log', Array.prototype.join.call(arguments, ' '));
         };
 
-        this.setup = function (context, steal) {
-            context.bender = this;
+    // override logs and alerts
+    // TODO move to clients code if needed
+    //     this.setup = function (context, steal) {
+    //         if (steal) context.onerror = this.error;
 
-            if (steal) context.onerror = this.error;
+    //         function stealLogs() {
+    //             var commands = ['log', 'info', 'warn', 'debug', 'error'],
+    //                 replace = function(command) {
+    //                     var old = context.console[command];
 
-            function stealLogs() {
-                var commands = ['log', 'info', 'warn', 'debug', 'error'],
-                    replace = function(command) {
-                        var old = context.console[command];
+    //                     context.console[command] = function () {
+    //                         that.log(arguments);
+    //                         if (old) Function.prototype.apply.call(old, context.console, arguments);
+    //                     };
+    //                 },
+    //                 i;
 
-                        context.console[command] = function () {
-                            that.log(arguments);
-                            if (old) Function.prototype.apply.call(old, context.console, arguments);
-                        };
-                    },
-                    i;
+    //             context.console = context.console || {};
 
-                context.console = context.console || {};
+    //             for (i = 0; i < commands.length; i++) {
+    //                 replace(commands[i]);
+    //             }
 
-                for (i = 0; i < commands.length; i++) {
-                    replace(commands[i]);
-                }
+    //             context.alert = function (msg) {
+    //                 that.log(msg);
+    //             };
+    //         }
 
-                context.alert = function (msg) {
-                    that.log(msg);
-                };
-            }
-
-            if (steal) stealLogs();
-        };
+    //         if (steal) stealLogs();
+    //     };
 
         // handle socket run message
         socket.on('run', function (data) {
@@ -149,7 +149,7 @@
             that.results = data;
             that.running = true;
 
-            that.next(data.id);
+            that.run(data.id);
         });
     }
 

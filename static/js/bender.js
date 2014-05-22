@@ -2,13 +2,15 @@
     var isIE = navigator.userAgent.match(/msie (\d+)/i);
 
     function Bender() {
-        var testFrame = document.getElementById('context'),
+        var contextEl = document.getElementById('context'),
             testWindow = null,
             runs = 0;
 
         this.handlers = {};
         this.current = null;
         this.suite = null;
+
+        this.runAsChild = true;
 
         this.emit = function (name) {
             var handlers = this.handlers[name],
@@ -35,19 +37,18 @@
         };
 
         // stubbed for compatibility
-        this.result = function () {};
-
-        this.log = function () {
-            console.log.apply(console, arguments);
-        };
+        this.log = this.result = function () {};
 
         this.next = function (summary) {
-            var id;
+            var id,
+                frame,
+                parsed;
 
-            if (typeof summary == 'object' && summary !== null) {
-                summary.id = this.current;
-                summary.success = summary.failed === 0;
-                this.emit('update', summary);
+            if (summary) {
+                parsed = JSON.parse(summary);
+                parsed.id = this.current;
+                parsed.success = parsed.failed === 0;
+                this.emit('update', parsed);
             }
 
             this.current = this.suite.shift();
@@ -69,7 +70,15 @@
                         testWindow = window.open(id, 'bendertest');
                     }
                 } else {
-                    testFrame.src = id;
+                    if ((frame = contextEl.getElementsByTagName('iframe')[0])) {
+                        frame.src = 'about:blank';
+                        contextEl.removeChild(frame);
+                    }
+
+                    frame = document.createElement('iframe');
+                    frame.className = 'context-frame';
+                    frame.src = id;
+                    contextEl.appendChild(frame);
                 }
             } else {
                 this.complete();
@@ -77,10 +86,21 @@
         };
 
         this.complete = function () {
+            var frame;
             this.emit('complete');
 
+            this.suite = [];
+            this.current = null;
+
             if (isIE && testWindow) testWindow.close();
-            else testFrame.src = 'about:blank';
+            else {
+                frame = contextEl.getElementsByTagName('iframe')[0];
+
+                if (frame) {
+                    frame.src = 'about:blank';
+                    contextEl.removeChild(frame);
+                }
+            }
         };
 
         this.run = function (tests) {
@@ -88,18 +108,7 @@
             this.next();
         };
 
-        // this will be overriden by a framework adapter
-        this.start = this.complete;
-
-        this.stop = function () {
-            this.suite = [];
-            this.complete();
-        };
-
-        this.setup = function (context) {
-            context.bender = this;
-            context.onerror = this.error;
-        };
+        this.stop = this.complete;
     }
 
     window.bender = new Bender();

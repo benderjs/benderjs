@@ -76,7 +76,7 @@
         tags: DS.attr('string'),
 
         singleUrl: function () {
-            return '/single/' + this.get('id');
+            return '/tests/' + this.get('id');
         }.property('id'),
 
         resultCss: function () {
