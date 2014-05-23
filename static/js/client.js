@@ -32,7 +32,8 @@
         resultsEl.appendChild(resEl);
     }
 
-    var bender,
+    var launcher = opener || parent,
+        bender,
         init;
 
     function Bender() {
@@ -51,18 +52,18 @@
         this.start = this.next = this.complete = function () {};
     }
 
-    if (parent && parent.bender && parent.bender.runAsChild) {
+    if (launcher && launcher.bender && launcher.bender.runAsChild) {
         bender = {
             result: function (result) {
-                parent.bender.result(JSON.stringify(result));
+                launcher.bender.result(JSON.stringify(result));
             },
             next: function (result) {
-                parent.bender.next(JSON.stringify(result));
+                launcher.bender.next(JSON.stringify(result));
             }
         };
 
         window.error = function (error) {
-            parent.bender.error(JSON.stringify(error));
+            launcher.bender.error(JSON.stringify(error));
         };
 
         init = function () {
