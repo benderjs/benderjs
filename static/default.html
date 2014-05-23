@@ -3,22 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Untitled</title>
-    <script>
-    (function () {
-        var bender = (opener || parent).bender;
-
-        if (bender) {
-            bender.setup(window/*, true */);
-
-            // extracted from bender.setup to support IE8 and popups
-            function init() { bender.start(); }
-
-            if (window.addEventListener) window.addEventListener('load', init, false);
-            else if (window.attachEvent) window.attachEvent('onload', init);
-            else window['onload'] = init;
-        }
-    })();
-    </script>
+    <link rel="stylesheet" href="/css/client.css">
+    <script src="/js/client.js"></script>
 </head>
 <body>
 </body>

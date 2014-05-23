@@ -1,0 +1,61 @@
+.results {
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    font-size: 14px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.results li {
+    margin: .5em;
+    padding: .5em;
+}
+
+.results p {
+    margin: .25em 0;
+}
+
+.results .ok {
+    background: #dff0d8;
+    background: rgba(223, 240, 216, 0.7);
+}
+
+.results .ok:hover {
+    background: #dff0d8;
+}
+
+.results .ok strong {
+    color: #090;
+}
+
+.results .warn {
+    background: #fcf8e3;
+    background: rgba(252, 248, 227, 0.7);
+}
+
+.results .warn:hover {
+    background: #fcf8e3;
+}
+
+.results .warn strong {
+    color: #960;
+}
+
+.results .fail {
+    background: #f2dede;
+    background: rgba(242, 222, 222, 0.7);
+}
+
+.results .fail:hover {
+    background: #f2dede;
+}
+
+.results .fail strong {
+    color: #900;
+}

@@ -1,4 +1,4 @@
-(function (window, undefined) {
+(function () {
     var resultsEl = document.createElement('div');
 
     resultsEl.className = 'results';
@@ -32,6 +32,9 @@
         resultsEl.appendChild(resEl);
     }
 
+    var bender,
+        init;
+
     function Bender() {
         this.error = function () {
             console.error.apply(console, arguments);
@@ -45,19 +48,37 @@
             console.log.apply(console, arguments);
         };
 
-        // stubbed for compability
-        // this might be overriden by a framework adapter
-        this.start = this.next = this.complete = this.setup = function () {};
+        this.start = this.next = this.complete = function () {};
     }
 
-    window.bender = new Bender();
+    if (parent && parent.bender && parent.bender.runAsChild) {
+        bender = {
+            result: function (result) {
+                parent.bender.result(JSON.stringify(result));
+            },
+            next: function (result) {
+                parent.bender.next(JSON.stringify(result));
+            }
+        };
 
-    function init() {
-        document.body.appendChild(resultsEl);
+        window.error = function (error) {
+            parent.bender.error(JSON.stringify(error));
+        };
+
+        init = function () {
+            bender.start();
+        };
+    } else {
+        bender = new Bender();
+        init = function () {
+            document.body.appendChild(resultsEl);
+            bender.start();
+        };
     }
+
+    window.bender = bender;
 
     if (window.addEventListener) window.addEventListener('load', init, false);
     else if (window.attachEvent) window.attachEvent('onload', init);
     else window['onload'] = init;
-
-})(this);
+})();
