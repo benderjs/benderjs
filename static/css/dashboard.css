@@ -12,11 +12,13 @@ th:first-child {
     white-space: nowrap;
 }
 
-.tests th {
-    width: 1px;
+table.tests {
+    table-layout: fixed;
 }
 
-.tests td {
+table.tests td {
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -30,6 +32,7 @@ th:last-child {
     white-space: normal;
 }
 
+.header,
 .content {
     margin: 1em 0;
 }
@@ -50,7 +53,6 @@ th:last-child {
 
 .filter-form {
     text-align: right;
-    margin-bottom: 1em;
 }
 
 .filter-form ul {
@@ -69,8 +71,8 @@ th:last-child {
     display: inline-block;
 }
 
-.tests input[type="checkbox"] {
-    margin: 0 .5em;
+.tests .result {
+    margin-left: .5em;
 }
 
 .context-frame {
@@ -84,9 +86,8 @@ th:last-child {
 }
 
 .test-status {
-    height: 34px;
-    padding: 6px 12px;
-    line-height: 22px;
+    margin: 0;
+    line-height: 34px;
     font-size: 18px;
     color: #555;
 }

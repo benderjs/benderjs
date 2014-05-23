@@ -22,12 +22,15 @@
             </div>
         </div>
     </nav>
+
     <div class="container">
-        <ul class="nav nav-tabs nav-justified" role="navigation">
-            <li><a href="#tests">Tests</a></li>
-            <li><a href="#jobs">Jobs</a></li>
-            <li><a href="#browsers">Browsers</a></li>
-        </ul>
+        <div id="tabs">
+            <!-- <ul class="nav nav-tabs nav-justified" role="navigation">
+                <li><a href="#tests">Tests</a></li>
+                <li><a href="#jobs">Jobs</a></li>
+                <li><a href="#browsers">Browsers</a></li>
+            </ul>-->
+        </div>
         <div class="header" id="header">
             <!-- place for subpage header -->
         </div>
@@ -36,43 +39,22 @@
         </div>
     </div>
 
-    <script type="text/x-dot-template" id="tests">
-    <div class="row">
-        <div class="col-md-6">
-            <p class="test-status">
-                <strong class="passed">0</strong> passed /
-                <strong class="failed">0</strong> failed in
-                <strong class="time">0h 00m 00s 000ms</strong> -
-                <strong class="percent">0</strong>%
-            </p>
-        </div>
-        <div class="col-md-6">
-            <div class="form-inline filter-form" role="form">
-                <div class="form-group input-append btn-group">
-                    <input type="text" class="form-control tag-filter" name="filter" data-toggle="dropdown" placeholder="Filter tags">
-                    <span class="glyphicon glyphicon-remove clear-filter"></span>
-                    <ul class="dropdown-menu">
-                        <li><a>Sample</a></li>
-                    </ul>
-                </div>
-                <button type="button" class="btn btn-primary run-button">
-                <span class="glyphicon glyphicon-play"></span> Run selected
-                </button>
-                <button type="button" class="btn btn-default create-button">
-                <span class="glyphicon glyphicon-file"></span> Create a job
-                </button>
-            </div>
-        </div>
-    </div>
 
+
+    <script type="text/x-dot-template" id="tab-view">
+        <a href="#<%= url %>" title="<%= text %>"><%= text %>
+    </script>
+
+
+    <script type="text/x-dot-template" id="tests">
     <div class="panel panel-default">
         <table class="table table-hover tests">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Group</th>
-                    <th>Tags</th>
-                    <th></th>
+                    <th class="col-md-3">ID</th>
+                    <th class="col-md-2">Group</th>
+                    <th class="col-md-3">Tags</th>
+                    <th class="col-md-4"></th>
                 </tr>
             </thead>
             <tbody>
@@ -84,14 +66,46 @@
     <tr><td colspan="5">No tests matching specified tags</td></tr>
     -->
 
+
     <script type="text/x-dot-template" id="test">
-    <td><a href="single/<%= id %>"><%= id %></a></td>
-    <td><%= group %></td>
-    <td><%= tags %></td>
-    <td><span class="glyphicon"></span><span class="status"></span></td>
+    <td><a href="/tests/<%= id %>" title="<%= id %>"><%= id %></a></td>
+    <td><span title="<%= group %>"><%= group %></span></td>
+    <td title="<%= tags %>"><%= tags %></td>
+    <td><span class="glyphicon"></span><span class="result"><%= result %></span></td>
     </script>
 
 
+    <script type="text/x-dot-template" id="test-status">
+    <div class="col-md-6">
+        <p class="test-status">
+            <strong class="passed"><%= passed %></strong> passed /
+            <strong class="failed"><%= failed %></strong> failed in
+            <strong class="time"><%= timeText %></strong> -
+            <strong class="percent"><%= percent %></strong>%
+        </p>
+    </div>
+    <div class="col-md-6">
+        <div class="form-inline filter-form" role="form">
+            <div class="form-group input-append btn-group">
+                <input type="text" class="form-control tag-filter" name="filter"
+                <% if (running) { %>disabled="disabled"<% } %> data-toggle="dropdown" placeholder="Filter tags" size="35">
+                <span class="glyphicon glyphicon-remove clear-filter"></span>
+                <ul class="dropdown-menu">
+                    <% _.each(tags, function (tag) { %>
+                    <li><a><%= tag %></a></li>
+                    <% }) %>
+                </ul>
+            </div>
+            <button type="button" class="btn btn-primary run-button">
+                <span class="glyphicon glyphicon-<% if (running) { %>stop<% } else { %>play<% } %>"></span>
+                <% if (running) { %>Stop tests <% } else { %>Run tests<% } %>
+            </button>
+            <button type="button" <% if (running) { %>disabled="disabled"<% } %> class="btn btn-default create-button">
+                <span class="glyphicon glyphicon-file"></span> Create a job
+            </button>
+        </div>
+    </div>
+    </script>
 
 
 
