@@ -264,9 +264,13 @@ App.module('Tests', function (Tests, App, Backbone) {
         },
 
         getIds: function () {
-            return this.map(function (test) {
-                return test.get('id');
-            });
+            return this
+                .filter(function (test) {
+                    return test.get('visible');
+                })
+                .map(function (test) {
+                    return test.get('id');
+                });
         },
 
         update: function (data) {
