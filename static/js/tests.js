@@ -1,26 +1,19 @@
 App.module('Tests', function (Tests, App, Backbone) {
 
+    /**
+     * Tests Router
+     */
     Tests.Router = Marionette.AppRouter.extend({
+        name: 'tests',
+
         appRoutes: {
             'tests': 'listTests'
         }
     });
 
-    function timeToText(ms) {
-        var h, m, s;
-
-        s = Math.floor(ms / 1000);
-        ms %= 1000;
-        m = Math.floor(s / 60);
-        s %= 60;
-        h = Math.floor(m / 60);
-        m %= 60;
-
-        return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' +
-            (s < 10 ? '0' : '') + s + 's ' +
-            (ms < 10 ? '00' : ms < 100 ? '0' : '') + ms + 'ms';
-    }
-
+    /**
+     * Tests status model
+     */
     Tests.testStatus = new (Backbone.Model.extend({
         defaults: {
             passed: 0,
@@ -30,6 +23,21 @@ App.module('Tests', function (Tests, App, Backbone) {
             total: 0,
             tags: [],
             running: false
+        },
+
+        timeToText: function (ms) {
+            var h, m, s;
+
+            s = Math.floor(ms / 1000);
+            ms %= 1000;
+            m = Math.floor(s / 60);
+            s %= 60;
+            h = Math.floor(m / 60);
+            m %= 60;
+
+            return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' +
+                (s < 10 ? '0' : '') + s + 's ' +
+                (ms < 10 ? '00' : ms < 100 ? '0' : '') + ms + 'ms';
         },
 
         increment: function (name, value) {
@@ -51,7 +59,8 @@ App.module('Tests', function (Tests, App, Backbone) {
 
         toJSON: function () {
             var json = _.clone(this.attributes);
-            json.timeText = timeToText(json.time);
+
+            json.timeText = this.timeToText(json.time);
             json.percent = json.total > 0 ?
                 Math.ceil(json.completed / json.total * 100) : 0;
 
@@ -68,8 +77,11 @@ App.module('Tests', function (Tests, App, Backbone) {
         }
     }))();
 
-    Tests.TestStatusView = Backbone.Marionette.ItemView.extend({
-        template: '#test-status',
+    /**
+     * Tests header view
+     */
+    Tests.TestHeaderView = Backbone.Marionette.ItemView.extend({
+        template: '#test-header',
         className: 'row',
 
         ui: {
@@ -107,6 +119,7 @@ App.module('Tests', function (Tests, App, Backbone) {
         },
 
         createJob: function () {
+            // TODO to be moved to jobs tab?
             console.log('create job');
         },
 
@@ -133,6 +146,9 @@ App.module('Tests', function (Tests, App, Backbone) {
         }
     });
 
+    /**
+     * Test model
+     */
     Tests.Test = Backbone.Model.extend({
         defaults: {
             id: '',
@@ -143,48 +159,40 @@ App.module('Tests', function (Tests, App, Backbone) {
         }
     });
 
-    Tests.filteredList = new (Backbone.Collection.extend({
-        getIds: function () {
-            return this.map(function (test) {
-                return test.get('id');
-            });
+    /**
+     * Test view
+     */
+    Tests.TestView = Backbone.Marionette.ItemView.extend({
+        template: '#test',
+        tagName: 'tr',
+
+        ui: {
+            icon: '.glyphicon',
+            result: '.result'
         },
 
-        update: function (data) {
-            var model;
-
-            if (typeof data == 'string') {
-                model = this.get(data);
-
-                if (model) model.set('result', 'Running...');
-            } else if (typeof data == 'object' && data !== null) {
-                model = this.get(data.id);
-                if (model) {
-                    model
-                        .set('result', this.buildResult(data))
-                        .set('status', data.success ? 'success' : 'danger');
-                }
-            }
+        initialize: function () {
+            this.listenTo(this.model, 'change', this.updateStatus);
         },
 
-        buildResult: function (data) {
-            var result = [];
+        updateStatus: function () {
+            var model = this.model.toJSON();
 
-            result.push(data.passed, 'passed', '/');
-            result.push(data.failed, 'failed');
-            if (data.ignored) result.push('/', data.ignored, 'ignored');
-            result.push('in', data.duration + 'ms');
+            this.el.className = model.status ?
+                model.status + ' bg-' + model.status + ' text-' + model.status :
+                '';
 
-            return result.join(' ');
-        },
+            this.ui.icon[0].className = 'glyphicon' + (model.status ?
+                ' glyphicon-' + (model.status === 'success' ? 'ok' : 'remove') :
+                '');
 
-        clearResults: function () {
-            this.each(function (test) {
-                test.set('result', '').set('status', '');
-            });
+            this.ui.result.text(model.result);
         }
-    }))();
+    });
 
+    /**
+     * Tests collection
+     */
     Tests.testsList = new (Backbone.Collection.extend({
         model: Tests.Test,
         url: '/tests',
@@ -252,44 +260,61 @@ App.module('Tests', function (Tests, App, Backbone) {
         }
     }))();
 
-    Tests.TestView = Backbone.Marionette.ItemView.extend({
-        template: '#test',
-        tagName: 'tr',
-
-        ui: {
-            icon: '.glyphicon',
-            result: '.result'
+    /**
+     * Filtered tests collection
+     */
+    Tests.filteredList = new (Backbone.Collection.extend({
+        getIds: function () {
+            return this.map(function (test) {
+                return test.get('id');
+            });
         },
 
-        initialize: function () {
-            this.listenTo(this.model, 'change', this.updateStatus);
+        update: function (data) {
+            var model;
+
+            if (typeof data == 'string') {
+                model = this.get(data);
+
+                if (model) model.set('result', 'Running...');
+            } else if (typeof data == 'object' && data !== null) {
+                model = this.get(data.id);
+                if (model) {
+                    model
+                        .set('result', this.buildResult(data))
+                        .set('status', data.success ? 'success' : 'danger');
+                }
+            }
         },
 
-        updateStatus: function () {
-            var model = this.model.toJSON();
+        buildResult: function (data) {
+            var result = [];
 
-            this.el.className = model.status ?
-                model.status + ' bg-' + model.status + ' text-' + model.status :
-                '';
+            result.push(data.passed, 'passed', '/');
+            result.push(data.failed, 'failed');
+            if (data.ignored) result.push('/', data.ignored, 'ignored');
+            result.push('in', data.duration + 'ms');
 
-            this.ui.icon[0].className = 'glyphicon' + (model.status ?
-                ' glyphicon-' + (model.status === 'success' ? 'ok' : 'remove') :
-                '');
+            return result.join(' ');
+        },
 
-            this.ui.result.text(model.result);
+        clearResults: function () {
+            this.each(function (test) {
+                test.set('result', '').set('status', '');
+            });
         }
-    });
+    }))();
 
+    /**
+     * Test list view
+     */
     Tests.TestsListView = Backbone.Marionette.CompositeView.extend({
         template: '#tests',
         itemView: Tests.TestView,
 
         appendHtml: function (collView, itemView) {
-            if (collView.isBuffering) {
-                collView.elBuffer.appendChild(itemView.el);
-            } else {
-                collView.$('tbody').append(itemView.el);
-            }
+            if (collView.isBuffering) collView.elBuffer.appendChild(itemView.el);
+            else collView.$('tbody').append(itemView.el);
         },
 
         appendBuffer: function (collView, buffer) {
@@ -297,14 +322,13 @@ App.module('Tests', function (Tests, App, Backbone) {
         }
     });
 
-    Tests.on('tests:list', function () {
-        App.navigate('tests');
-        Tests.Controller.listTests();
-    });
-
-    Tests.Controller = {
+    /**
+     * Tests controller
+     * @type {Object}
+     */
+    Tests.controller = {
         listTests: function () {
-            App.header.show(new Tests.TestStatusView({
+            App.header.show(new Tests.TestHeaderView({
                 model: Tests.testStatus
             }));
 
@@ -320,9 +344,19 @@ App.module('Tests', function (Tests, App, Backbone) {
         }
     };
 
+    /**
+     * Add initialzier for tests module
+     */
     Tests.addInitializer(function () {
+        // create router instance
         new Tests.Router({
-            controller: Tests.Controller
+            controller: Tests.controller
+        });
+
+        // attach event listeners
+        Tests.on('tests:list', function () {
+            App.navigate('tests');
+            Tests.controller.listTests();
         });
 
         bender.on('update', function (data) {

@@ -25,11 +25,7 @@
 
     <div class="container">
         <div id="tabs">
-            <!-- <ul class="nav nav-tabs nav-justified" role="navigation">
-                <li><a href="#tests">Tests</a></li>
-                <li><a href="#jobs">Jobs</a></li>
-                <li><a href="#browsers">Browsers</a></li>
-            </ul>-->
+            <!-- place for tab navigation -->
         </div>
         <div class="header" id="header">
             <!-- place for subpage header -->
@@ -39,10 +35,14 @@
         </div>
     </div>
 
+    <div class="footer">
+        
+    </div>
+
 
 
     <script type="text/x-dot-template" id="tab-view">
-        <a href="#<%= url %>" title="<%= text %>"><%= text %>
+        <a href="#<%= id %>" title="<%= text %>"><%= text %>
     </script>
 
 
@@ -75,7 +75,7 @@
     </script>
 
 
-    <script type="text/x-dot-template" id="test-status">
+    <script type="text/x-dot-template" id="test-header">
     <div class="col-md-6">
         <p class="test-status">
             <strong class="passed"><%= passed %></strong> passed /
@@ -100,22 +100,18 @@
                 <span class="glyphicon glyphicon-<% if (running) { %>stop<% } else { %>play<% } %>"></span>
                 <% if (running) { %>Stop tests <% } else { %>Run tests<% } %>
             </button>
-            <button type="button" <% if (running) { %>disabled="disabled"<% } %> class="btn btn-default create-button">
-                <span class="glyphicon glyphicon-file"></span> Create a job
-            </button>
         </div>
     </div>
     </script>
 
 
+    <script type="text/x-dot-template" id="jobs-header">
+    <button type="button" <% if (running) { %>disabled="disabled"<% } %> class="btn btn-default create-button">
+        <span class="glyphicon glyphicon-file"></span> Create a job
+    </button>
+    </script>
 
-
-
-
-
-
-
-
+    
     <script type="text/x-dot-template" id="jobs">
     <div class="panel panel-default">
         {{#if length}}
@@ -153,6 +149,10 @@
         </td>
     </tr>
     </script>
+
+
+
+
 
     <script type="text/x-dot-template" id="job">
     <h4><small>Job:</small> {{id}} <small>created {{moment time=created}}</small></h4>

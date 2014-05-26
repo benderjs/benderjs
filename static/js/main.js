@@ -1,5 +1,14 @@
-var App = new Backbone.Marionette.Application();
+/**
+ * Marionette Application
+ */
+var App = new Backbone.Marionette.Application(),
+    tabs = [
+        { text: 'Tests', id: 'tests', active: false },
+        { text: 'Jobs', id: 'jobs', active: false },
+        { text: 'Browsers', id: 'browsers', active: false },
+    ];
 
+// add main layout regions
 App.addRegions({
     socketStatus: '#socket-status',
     tabs: '#tabs',
@@ -8,48 +17,82 @@ App.addRegions({
     // TODO add dialog/modal region
 });
 
+/**
+ * Navigate to a route
+ * @param {String}  route             Route to navigate to
+ * @param {Object}  [options]         Backbone.history.navigate options
+ * @param {Boolean} [options.trigger] Force triggering route event
+ * @param {Boolean} [options.replace] Replace current route with new one instead of adding another record in the history
+ * 
+ */
 App.navigate = function (route, options) {
-    options = options || {};
+    options = options || { trigger: true };
 
     Backbone.history.navigate(route, options);
 };
 
+/**
+ * Get current route
+ * @return {String}
+ */
 App.getCurrentRoute = function () {
     return Backbone.history.fragment;
 };
 
-App.on('initialize:after', function () {
-    Backbone.history.start();
-    if (this.getCurrentRoute() === '') App.Tests.trigger('tests:list');
-});
+/**
+ * Tabs collection
+ */
+App.tabsList = new (Backbone.Collection.extend({
+    activateTab: function (name) {
+        var next = this.get(name);
 
-var tabs = [
-    { text: 'Tests', url: 'tests', active: false },
-    { text: 'Jobs', url: 'jobs', active: false },
-    { text: 'Browsers', url: 'browsers', active: false },
-];
+        this.each(function (tab) {
+            tab.set('active', false);
+        });
 
-App.tabsList = new Backbone.Collection(tabs);
+        if (next) next.set('active', true);
+    }
+}))(tabs);
 
+/**
+ * Single tab view
+ */
 App.TabView = Backbone.Marionette.ItemView.extend({
     template: '#tab-view',
-    tagName: 'li'
+    tagName: 'li',
+
+    initialize: function () {
+        this.listenTo(this.model, 'change', this.changeState);
+    },
+
+    changeState: function () {
+        this.el.className = this.model.get('active') ? 'active' : '';
+    }
 });
 
+/**
+ * Tabs list view
+ */
 App.TabListView = Backbone.Marionette.CollectionView.extend({
     itemView: App.TabView,
     tagName: 'ul',
     className: 'nav nav-tabs nav-justified'
 });
 
+/**
+ * Add initializer for application
+ */
 App.addInitializer(function () {
     App.tabs.show(new App.TabListView({
         collection: App.tabsList
     }));
+
+    Backbone.history.on('route', function (router) {
+        if (router.name) App.tabsList.activateTab(router.name);
+    });
 });
 
-// <ul class="nav nav-tabs nav-justified" role="navigation">
-//     <li><a href="#tests">Tests</a></li>
-//     <li><a href="#jobs">Jobs</a></li>
-//     <li><a href="#browsers">Browsers</a></li>
-// </ul>
+App.on('initialize:after', function () {
+    Backbone.history.start();
+    if (this.getCurrentRoute() === '') App.Tests.trigger('tests:list');
+});
