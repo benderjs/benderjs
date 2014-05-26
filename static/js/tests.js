@@ -25,27 +25,19 @@ App.module('Tests', function (Tests, App, Backbone) {
             running: false
         },
 
-        timeToText: function (ms) {
-            var h, m, s;
-
-            s = Math.floor(ms / 1000);
-            ms %= 1000;
-            m = Math.floor(s / 60);
-            s %= 60;
-            h = Math.floor(m / 60);
-            m %= 60;
-
-            return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' +
-                (s < 10 ? '0' : '') + s + 's ' +
-                (ms < 10 ? '00' : ms < 100 ? '0' : '') + ms + 'ms';
-        },
-
         increment: function (name, value) {
             this.set(name, this.get(name) + value);
         },
 
         reset: function () {
-            this.set(this.defaults);
+            this.set({
+                passed: 0,
+                failed: 0,
+                time: 0,
+                completed: 0,
+                total: 0,
+                running: false
+            });
         },
 
         update: function (data) {
@@ -55,16 +47,6 @@ App.module('Tests', function (Tests, App, Backbone) {
                 this.increment('time', data.duration);
                 this.increment('completed', 1);
             }
-        },
-
-        toJSON: function () {
-            var json = _.clone(this.attributes);
-
-            json.timeText = this.timeToText(json.time);
-            json.percent = json.total > 0 ?
-                Math.ceil(json.completed / json.total * 100) : 0;
-
-            return json;
         },
 
         start: function (total) {
@@ -86,17 +68,37 @@ App.module('Tests', function (Tests, App, Backbone) {
 
         ui: {
             'run': '.run-button',
-            'create': '.create-button',
             'filter': '.tag-filter',
             'clear': '.clear-filter'
         },
 
         events: {
             'click @ui.run': 'runTests',
-            'click @ui.create': 'createJob',
             'click @ui.clear': 'clearFilter',
             'change @ui.filter': 'filterTags',
             'click .dropdown-menu a': 'addFilter'
+        },
+
+        templateHelpers: {
+            timeToText: function (ms) {
+                var h, m, s;
+
+                s = Math.floor(ms / 1000);
+                ms %= 1000;
+                m = Math.floor(s / 60);
+                s %= 60;
+                h = Math.floor(m / 60);
+                m %= 60;
+
+                return (h ? (h + 'h ') : '') +
+                    (m ? ((m < 10 ? '0' : '') + m + 'm ') : '') +
+                    (s ? ((s < 10 ? '0' : '') + s + 's ') : '') +
+                    (ms < 10 ? '00' : ms < 100 ? '0' : '') + ms + 'ms';
+            },
+
+            getPercent: function (completed, total) {
+                return (total > 0 ? Math.ceil(completed / total * 100) : 0) + '%';
+            }
         },
 
         initialize: function () {
@@ -107,20 +109,14 @@ App.module('Tests', function (Tests, App, Backbone) {
             var ids;
 
             if (!this.model.get('running')) {
-                Tests.filteredList.clearResults();
-
-                ids = Tests.filteredList.getIds();
+                Tests.testsList.clearResults();
+                ids = Tests.testsList.getIds();
                 this.model.start(ids.length);
                 bender.run(ids);
             } else {
                 bender.stop();
                 this.model.stop();
             }
-        },
-
-        createJob: function () {
-            // TODO to be moved to jobs tab?
-            console.log('create job');
         },
 
         addFilter: function (event) {
@@ -138,7 +134,7 @@ App.module('Tests', function (Tests, App, Backbone) {
 
             this.ui.clear.css('display', filter ? 'inline-block' : 'none');
 
-            Tests.filteredList.reset(Tests.testsList.filterTests(filter));
+            Tests.testsList.filterTests(filter);
         },
 
         clearFilter: function () {
@@ -155,7 +151,8 @@ App.module('Tests', function (Tests, App, Backbone) {
             group: '',
             tags: '',
             result: '',
-            status: ''
+            status: '',
+            visible: true
         }
     });
 
@@ -177,6 +174,8 @@ App.module('Tests', function (Tests, App, Backbone) {
 
         updateStatus: function () {
             var model = this.model.toJSON();
+
+            this.$el[model.visible ? 'show' : 'hide']();
 
             this.el.className = model.status ?
                 model.status + ' bg-' + model.status + ' text-' + model.status :
@@ -225,10 +224,14 @@ App.module('Tests', function (Tests, App, Backbone) {
         filterTests: function (filter) {
             var includes = [],
                 excludes = [],
-                filtered,
                 tags;
 
-            if (!filter) return this.toJSON();
+
+            this.each(function (test) {
+                test.set('visible', true);
+            });
+
+            if (!filter) return;
             
             tags = filter.split(/\s+/);
 
@@ -237,7 +240,7 @@ App.module('Tests', function (Tests, App, Backbone) {
                 else if (tag) includes.push(tag);
             });
 
-            filtered = this.filter(function (test) {
+            this.each(function (test) {
                 var tags = test.get('tags').split(', '),
                     result = true;
 
@@ -253,17 +256,10 @@ App.module('Tests', function (Tests, App, Backbone) {
                     });
                 }
 
-                return result;
+                test.set('visible', result);
             });
+        },
 
-            return filtered;
-        }
-    }))();
-
-    /**
-     * Filtered tests collection
-     */
-    Tests.filteredList = new (Backbone.Collection.extend({
         getIds: function () {
             return this.map(function (test) {
                 return test.get('id');
@@ -308,18 +304,9 @@ App.module('Tests', function (Tests, App, Backbone) {
     /**
      * Test list view
      */
-    Tests.TestsListView = Backbone.Marionette.CompositeView.extend({
+    Tests.TestsListView = App.TableView.extend({
         template: '#tests',
-        itemView: Tests.TestView,
-
-        appendHtml: function (collView, itemView) {
-            if (collView.isBuffering) collView.elBuffer.appendChild(itemView.el);
-            else collView.$('tbody').append(itemView.el);
-        },
-
-        appendBuffer: function (collView, buffer) {
-            collView.$('tbody').append(buffer);
-        }
+        itemView: Tests.TestView
     });
 
     /**
@@ -333,14 +320,10 @@ App.module('Tests', function (Tests, App, Backbone) {
             }));
 
             App.content.show(new Tests.TestsListView({
-                collection: Tests.filteredList
+                collection: Tests.testsList
             }));
-
-            Tests.testsList.fetch({
-                success: function () {
-                    Tests.filteredList.reset(Tests.testsList.filterTests());
-                }
-            });
+            
+            Tests.testsList.fetch();
         }
     };
 
@@ -349,7 +332,7 @@ App.module('Tests', function (Tests, App, Backbone) {
      */
     Tests.addInitializer(function () {
         // create router instance
-        new Tests.Router({
+        Tests.router = new Tests.Router({
             controller: Tests.controller
         });
 
@@ -361,7 +344,7 @@ App.module('Tests', function (Tests, App, Backbone) {
 
         bender.on('update', function (data) {
             Tests.testStatus.update(data);
-            Tests.filteredList.update(data);
+            Tests.testsList.update(data);
         });
 
         bender.on('complete', function () {

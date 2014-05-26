@@ -36,9 +36,7 @@
     </div>
 
     <div class="footer">
-        
     </div>
-
 
 
     <script type="text/x-dot-template" id="tab-view">
@@ -47,24 +45,19 @@
 
 
     <script type="text/x-dot-template" id="tests">
-    <div class="panel panel-default">
-        <table class="table table-hover tests">
-            <thead>
-                <tr>
-                    <th class="col-md-3">ID</th>
-                    <th class="col-md-2">Group</th>
-                    <th class="col-md-3">Tags</th>
-                    <th class="col-md-4"></th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
+    <table class="table table-hover tests">
+        <thead>
+            <tr>
+                <th class="col-md-3">ID</th>
+                <th class="col-md-2">Group</th>
+                <th class="col-md-3">Tags</th>
+                <th class="col-md-4"></th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
     </script>
-    <!-- markup for no tests
-    <tr><td colspan="5">No tests matching specified tags</td></tr>
-    -->
 
 
     <script type="text/x-dot-template" id="test">
@@ -80,15 +73,15 @@
         <p class="test-status">
             <strong class="passed"><%= passed %></strong> passed /
             <strong class="failed"><%= failed %></strong> failed in
-            <strong class="time"><%= timeText %></strong> -
-            <strong class="percent"><%= percent %></strong>%
+            <strong class="time"><%= timeToText(time) %></strong> -
+            <strong class="percent"><%= getPercent(completed, total) %></strong>
         </p>
     </div>
     <div class="col-md-6">
         <div class="form-inline filter-form" role="form">
             <div class="form-group input-append btn-group">
                 <input type="text" class="form-control tag-filter" name="filter"
-                <% if (running) { %>disabled="disabled"<% } %> data-toggle="dropdown" placeholder="Filter tags" size="35">
+                <%= running ? 'disabled="disabled"' : '' %> data-toggle="dropdown" placeholder="Filter tags" size="35">
                 <span class="glyphicon glyphicon-remove clear-filter"></span>
                 <ul class="dropdown-menu">
                     <% _.each(tags, function (tag) { %>
@@ -97,57 +90,51 @@
                 </ul>
             </div>
             <button type="button" class="btn btn-primary run-button">
-                <span class="glyphicon glyphicon-<% if (running) { %>stop<% } else { %>play<% } %>"></span>
-                <% if (running) { %>Stop tests <% } else { %>Run tests<% } %>
+                <span class="glyphicon glyphicon-<%= running ? 'stop' : 'play' %>"></span>
+                <%= running ? 'Stop tests' : 'Run tests' %>
             </button>
         </div>
     </div>
     </script>
 
-
+    
     <script type="text/x-dot-template" id="jobs-header">
-    <button type="button" <% if (running) { %>disabled="disabled"<% } %> class="btn btn-default create-button">
-        <span class="glyphicon glyphicon-file"></span> Create a job
-    </button>
+    <div class="col-md-12">
+        <button type="button" class="btn btn-primary create-button">
+            <span class="glyphicon glyphicon-file"></span> Create a job
+        </button>
+    </div>
     </script>
 
     
     <script type="text/x-dot-template" id="jobs">
-    <div class="panel panel-default">
-        {{#if length}}
-        <table class="table table-hover jobs">
-            <thead>
-                <tr>
-                    <th class="col-md-2">ID</th>
-                    <th class="col-md-2">Description</th>
-                    <th class="col-md-1">Created</th>
-                    <th>Results</th>
-                </tr>
-            </thead>
-            <tbody>
-            {{#each}}{{partial "job"}}{{/each}}
-            </tbody>
-        </table>
-        {{else}}
-        <div class="panel-body">No jobs available</div>
-        {{/if}}
-    </div>
+    <table class="table table-hover jobs">
+        <thead>
+            <tr>
+                <th class="col-md-2">ID</th>
+                <th class="col-md-2">Description</th>
+                <th class="col-md-1">Created</th>
+                <th>Results</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
     </script>
 
-    <script type="text/x-dot-template" id="job">
-    <tr>
-        <td>{{#link-to 'job' id}}{{id}}{{/link-to}}</td>
-        <td>{{description}}</td>
-        <td><small>{{moment time=created}}</small></td>
-        <td>
-            {{#each parsedResults}}
-            <div {{bind-attr class=":browser name statusCss"}}>
-                <span {{bind-attr class=":glyphicon iconCss"}}></span>
-                <small>{{#if version}}{{version}}{{else}}-{{/if}}</small>
-            </div>
-            {{/each}}
-        </td>
-    </tr>
+
+    <script type="text/x-dot-template" id="job-row">
+    <td><a href="#jobs/<%= id %>"><%= id %></a></td>
+    <td><%= description %></td>
+    <td><small><%= getTime(created) %></small></td>
+    <td>
+        <% _.each(results, function (result) { %>
+        <div class="browser <%= result.name %> <%= getResultStyle(result) %>">
+            <span class="glyphicon <%= getIcon(result) %>"></span>
+            <small><%= result.version ? result.version : '-' %></small>
+        </div>
+        <% }) %>
+    </td>
     </script>
 
 
@@ -191,56 +178,43 @@
     </div>
     </script>
 
+
     <script type="text/x-dot-template" id="browsers">
-    <div class="panel panel-default">
-    {{#if length}}
-        <table class="table table-hover table-condensed browsers">
-            <thead>
-                <tr>
-                    <th class="col-md-2">Browser</th>
-                    <th class="col-md-4">ID</th>
-                    <th class="col-md-3">UA</th>
-                    <th class="col-md-2">Address</th>
-                    <th class="col-md-1">Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each}}
-                <tr>
-                    <th {{bind-attr class=":browser name"}}>{{id}}</th>
-                    <th colspan="4"></th>
-                </tr>
-                {{#if clients.length}}
-                {{#each clients}}{{partial "client"}}{{/each}}
-                {{else}}
-                <tr>
-                    <td></td><td>-</td><td>-</td><td>-</td><td>-</td>
-                </tr>
-                {{/if}}
-                {{/each}}
-            </tbody>
-        </table>
-    {{else}}
-        <div class="panel-body">No browsers connected</div>
-    {{/if}}
-    </div>
+    <table class="table table-hover table-condensed browsers">
+        <thead>
+            <tr>
+                <th class="col-md-2">Browser</th>
+                <th class="col-md-4">ID</th>
+                <th class="col-md-3">UA</th>
+                <th class="col-md-2">Address</th>
+                <th class="col-md-1">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
     </script>
 
-    <script type="text/x-dot-template" id="client">
-    <tr>
-        <td></td>
-        <td>{{id}}</td>
-        <td>{{ua}}</td>
-        <td>{{addr}}</td>
-        <td>
-            {{#if ready}}
-                {{label type="success" text="ready"}}
-            {{else}}
-                {{label type="warning" text="busy"}}
-            {{/if}}
-        </td>
-    </tr>
+
+    <script type="text/x-dot-template" id="browser">
+    <th class="browser <%= name %>"><%= id %></th>
+    <th colspan="4"></th>
     </script>
+
+    
+    <script type="text/x-dot-template" id="client">
+    <td></td>
+    <td><%= client.id %></td>
+    <td><%= client.ua %></td>
+    <td><%= client.addr >%</td>
+    <td>
+        <span class="label label-<%= client.ready 'success' : 'warning' %>">
+        <%= client.ready ? 'ready' : 'busy' %>
+        </span>
+    </td>
+    </script>
+
+
     
     <script type="text/x-dot-template" id="modal">
     <div class="modal">

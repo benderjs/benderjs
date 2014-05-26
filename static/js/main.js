@@ -96,3 +96,17 @@ App.on('initialize:after', function () {
     Backbone.history.start();
     if (this.getCurrentRoute() === '') App.Tests.trigger('tests:list');
 });
+
+
+App.TableView = Backbone.Marionette.CompositeView.extend({
+    className: 'panel panel-default',
+
+    appendHtml: function (collView, itemView) {
+        if (collView.isBuffering) collView.elBuffer.appendChild(itemView.el);
+        else collView.$('tbody').append(itemView.el);
+    },
+
+    appendBuffer: function (collView, buffer) {
+        collView.$('tbody').append(buffer);
+    }
+});
