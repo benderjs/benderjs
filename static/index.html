@@ -201,6 +201,7 @@
             </tr>
         </thead>
         <tbody>
+
         </tbody>
     </table>
     </script>
@@ -217,16 +218,20 @@
     </script>
 
     
-    <script type="text/x-dot-template" id="client">
-    <td></td>
-    <td><%= client.id %></td>
-    <td><%= client.ua %></td>
-    <td><%= client.addr >%</td>
-    <td>
-        <span class="label label-<%= client.ready 'success' : 'warning' %>">
-        <%= client.ready ? 'ready' : 'busy' %>
-        </span>
-    </td>
+    <script type="text/x-dot-template" id="clients">
+    <% _.each(models, function (client) { %>
+    <tr>
+        <td></td>
+        <td><%= client.id %></td>
+        <td><%= client.ua %></td>
+        <td><%= client.addr >%</td>
+        <td>
+            <span class="label label-<%= client.ready 'success' : 'warning' %>">
+            <%= client.ready ? 'ready' : 'busy' %>
+            </span>
+        </td>
+    </tr>
+    <% }) %>
     </script>
 
 

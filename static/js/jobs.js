@@ -1,118 +1,133 @@
 App.module('Jobs', function (Jobs, App, Backbone) {
+    
+    /**
+     * Router for Jobs module
+     */
+    Jobs.Router = Marionette.AppRouter.extend({
+        name: 'jobs',
 
+        appRoutes: {
+            'jobs': 'listJobs'
+        }
+    });
+
+    /**
+     * Job model
+     */
+    Jobs.Job = Backbone.Model.extend({
+        defaults: {
+            description: '',
+            created: 0,
+            results: []
+        }
+    });
+
+    /**
+     * Job table row view
+     */
+    Jobs.JobRowView = Backbone.Marionette.ItemView.extend({
+        template: '#job-row',
+        tagName: 'tr',
+
+        templateHelpers: {
+            getTime: function (timestamp) {
+                return moment(timestamp).fromNow();
+            },
+
+            getResultStyle: function (result) {
+                var status = result.status === 2 ? 'success' :
+                    result.status === 3 ? 'danger' : 'info';
+
+                return status + ' bg-' + status + ' text-' + status;
+            },
+
+            getIcon: function (result) {
+                return 'glyphicon-' + (result.status === 0 ? 'time' :
+                    result.status === 1 ? 'refresh' :
+                    result.status === 2 ? 'ok' :
+                    'remove');
+            }
+        }
+    });
+
+    /**
+     * Job collection
+     */
+    Jobs.jobsList = new (Backbone.Collection.extend({
+        model: Jobs.Job,
+        url: '/jobs',
+
+        parse: function (response) {
+            return response.job;
+        }
+    }))();
+
+    /**
+     * Jobs tab header view
+     */
+    Jobs.JobsHeaderView = Backbone.Marionette.ItemView.extend({
+        template: '#jobs-header',
+        className: 'row',
+
+        ui: {
+            'create': '.create-button',
+        },
+
+        events: {
+            'click @ui.create': 'createJob',
+        },
+
+        createJob: function () {
+            // TODO
+            console.log('create job');
+        }
+    });
+
+    /**
+     * Jobs list view
+     */
+    Jobs.JobsListView = App.TableView.extend({
+        template: '#jobs',
+        itemView: Jobs.JobRowView,
+        emptyView: Jobs.NoJobsView
+    });
+
+    /**
+     * Empty jobs list view
+     */
+    Jobs.NoJobsView = Backbone.Marionette.ItemView.extend({
+      template: '#no-jobs',
+      tagName: 'tr'
+    });
+
+    /**
+     * Controller for Jobs module
+     * @type {Object}
+     */
+    Jobs.controller = {
+        listJobs: function () {
+            App.header.show(new Jobs.JobsHeaderView());
+
+            App.content.show(new Jobs.JobsListView({
+                collection: Jobs.jobsList
+            }));
+
+            Jobs.jobsList.fetch();
+        }
+    };
+
+    /**
+     * Add Jobs module initializer
+     */
+    Jobs.addInitializer(function () {
+        Jobs.router = new Jobs.Router({
+            controller: Jobs.controller
+        });
+
+        Jobs.on('tests:list', function () {
+            App.navigate('jobs');
+            Jobs.controller.listJobs();
+        });
+
+    });
 });
-
-// (function (Ember, App, $) {
-
-//     App.JobsRoute = Ember.Route.extend({
-//         model: function () {
-//             return this.store.find('job');
-//         }
-//     });
-
-//     App.JobsController = Ember.ArrayController.extend({
-//         itemController: 'job-row',
-//         sortProperties: ['created'],
-//         sortAscending: false
-//     });
-
-//     App.JobRowController = Ember.ObjectController.extend({
-//         parsedResults: function () {
-//             var results = this.get('results');
-
-//             return results.map(function (result) {
-//                 var status,
-//                     icon;
-
-//                 icon = result.status === 0 ? 'time' :
-//                     result.status === 1 ? 'refresh' :
-//                     result.status === 2 ? 'ok' : 'remove';
-
-//                 status = result.status === 2 ? 'success' :
-//                     result.status === 3 ? 'danger' : 'info';
-
-//                 result.statusCss = status + ' bg-' + status + ' text-' + status;
-//                 result.iconCss = 'glyphicon-' + icon;
-
-//                 return result;
-//             });
-//         }.property('results')
-//     });
-
-//     App.JobRoute = Ember.Route.extend({
-//         model: function (params) {
-//             return $.getJSON('/jobs/' + params.job_id);
-//         },
-//         actions: {
-//             openModal: function (modalName, errors) {
-//                 this.controller.set('errors', errors);
-//                 return this.render(modalName, {
-//                     into: 'application',
-//                     outlet: 'modal'
-//                 });
-//             },
-//             closeModal: function () {
-//                 this.disconnectOutlet({
-//                     outlet: 'modal',
-//                     parentView: 'application'
-//                 });
-//             }
-//         }
-//     });
-
-//     App.Job = DS.Model.extend({
-//         description: DS.attr('string'),
-//         created: DS.attr('number'),
-//         results: DS.attr('raw')
-//     });
-
-//     App.JobController = Ember.ObjectController.extend({
-//         browsers: function () {
-//             var task = this.get('tasks')[0];
-
-//             if (!task) return [];
-
-//             return task.results;
-//         }.property('tasks'),
-
-//         parsedTasks: function () {
-//             var tasks = this.get('tasks'),
-//                 that = this;
-
-//             function parseResult(result) {
-//                 var status,
-//                     icon;
-
-//                 icon = result.status === 0 ? 'time' :
-//                     result.status === 1 ? 'refresh' :
-//                     result.status === 2 ? 'ok' : 'remove';
-
-//                 status = result.status === 2 ? 'success' :
-//                     result.status === 3 ? 'danger' : 'info';
-
-//                 result.statusCss = status + ' bg-' + status + ' text-' + status;
-//                 result.iconCss = 'glyphicon-' + icon;
-
-//                 return result;
-//             }
-
-//             return tasks
-//                 .map(function (task) {
-//                     task.results = task.results
-//                         .map(parseResult);
-
-//                     return task;
-//                 });
-//         }.property('tasks'),
-
-//         errors: null
-//     });
-
-//     App.JobErrorsModalView = Ember.View.extend({
-//         name: 'job-errors-modal',
-//         layoutName: 'modal',
-//         templateName: 'job-errors',
-//         isVisible: true
-//     });
-
-// })(Ember, App, Ember.$);
