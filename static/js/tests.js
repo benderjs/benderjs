@@ -106,7 +106,8 @@ App.module('Tests', function (Tests, App, Backbone) {
         },
 
         runTests: function () {
-            var ids;
+            var ids,
+                current;
 
             if (!this.model.get('running')) {
                 Tests.testsList.clearResults();
@@ -114,6 +115,8 @@ App.module('Tests', function (Tests, App, Backbone) {
                 this.model.start(ids.length);
                 bender.run(ids);
             } else {
+                current = Tests.testsList.get(bender.current);
+                current.set('result', '');
                 bender.stop();
                 this.model.stop();
             }
@@ -301,12 +304,18 @@ App.module('Tests', function (Tests, App, Backbone) {
         }
     }))();
 
+    Tests.NoTestsView = Backbone.Marionette.ItemView.extend({
+      template: '#no-tests',
+      tagName: 'tr'
+    });
+
     /**
      * Test list view
      */
     Tests.TestsListView = App.TableView.extend({
         template: '#tests',
-        itemView: Tests.TestView
+        itemView: Tests.TestView,
+        emptyView: Tests.NoTestsView
     });
 
     /**
