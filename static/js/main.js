@@ -35,6 +35,13 @@ App.getCurrentRoute = function () {
 };
 
 /**
+ * Alias for history.back
+ */
+App.back = function () {
+    Backbone.history.history.back();
+};
+
+/**
  * Tab model
  */
 App.Tab = Backbone.Model.extend({
@@ -143,13 +150,5 @@ App.on('initialize:after', function () {
 
 App.TableView = Backbone.Marionette.CompositeView.extend({
     className: 'panel panel-default',
-
-    appendHtml: function (collView, itemView) {
-        if (collView.isBuffering) collView.elBuffer.appendChild(itemView.el);
-        else collView.$('tbody').append(itemView.el);
-    },
-
-    appendBuffer: function (collView, buffer) {
-        collView.$('tbody').append(buffer);
-    }
+    itemViewContainer: 'tbody'
 });

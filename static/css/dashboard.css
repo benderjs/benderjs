@@ -139,6 +139,10 @@ th:last-child {
     font-size: 1.25em;
 }
 
+.jobs .clickable {
+    cursor: pointer;
+}
+
 .jobs .browser .glyphicon,
 .jobs .browser small {
     float: left; 

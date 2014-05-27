@@ -113,7 +113,6 @@
             </div>
             <button type="button" class="btn btn-primary run-button">
                 <span class="glyphicon glyphicon-<%= running ? 'stop' : 'play' %>"></span>
-                <%= running ? 'Stop tests' : 'Run tests' %>
             </button>
         </div>
     </div>
@@ -129,7 +128,7 @@
     </div>
     </script>
 
-    
+
     <!-- template for jobs table -->
     <script type="text/html" id="jobs">
     <table class="table table-hover jobs">
@@ -182,7 +181,6 @@
             </tr>
         </thead>
         <tbody>
-
         </tbody>
     </table>
     </script>
@@ -193,7 +191,7 @@
     <td colspan="5">No browsers found. Check your configuration file</td>
     </script>
 
-    
+
     <!-- template for a single browser row -->
     <script type="text/html" id="browser">
     <% if (header) { %>
@@ -213,15 +211,26 @@
     </script>
 
 
-    <!-- template for a single job page -->
+    <!-- template for a job details page -->
     <script type="text/html" id="job">
     <div class="row">
         <div class="col-md-6">
             <h4><small>Job:</small> <%= id %> <small>created <%= getTime(created) %></small></h4>
             <h4><small>Description:</small> <%= description ? description : '-' %></h4>
         </div>
-        <div class="col-md-6">
-
+        <div class="col-md-6 text-right">
+            <button type="button" class="btn btn-sm btn-primary back-button">
+                <span class="glyphicon glyphicon-arrow-left"></span> Back
+            </button>
+            <button type="button" title="Edit" class="btn btn-sm btn-default edit-button">
+                <span class="glyphicon glyphicon-edit"></span>
+            </button>
+            <button type="button" title="Remove" class="btn btn-sm btn-danger remove-button">
+                <span class="glyphicon glyphicon-remove"></span>
+            </button>
+            <button type="button" title="Restart" class="btn btn-sm btn-success restart-button">
+                <span class="glyphicon glyphicon-play"></span>
+            </button>
         </div>
     </div>
     <div class="panel panel-default">
@@ -239,26 +248,23 @@
                 </tr>
             </thead>
             <tbody>
-            <% _.each(tasks, function (task) { %>
-                <tr>
-                    <td><span title="<%= task.id %>"><%= task.id %></span></td>
-                    <td>
-                        <% _.each(task.results, function (result) { %>
-                            <% if (result.errors) { %><a><% } %>
-                            <div class="result <%= getResultStyle(result) %>">
-                                <span class="glyphicon <%= getIcon(result) %>"></span>
-                            </div>
-                            <% if (result.errors) { %></a><% } %>
-                        <% }) %>
-                    </td>
-                </tr>
-            <% }) %>
             </tbody>
         </table>
     </div>
     </script>
 
 
+    <!-- template for a single task row -->
+    <script type="text/html" id="task">
+        <td><span title="<%= id %>"><%= id %></span></td>
+        <td>
+            <% _.each(results, function (result) { %>
+                <div class="result <%= getResultStyle(result) %> <% if (result.errors) { %>clickable<% } %>">
+                    <span class="glyphicon <%= getIcon(result) %>"></span>
+                </div>
+            <% }) %>
+        </td>
+    </script>
 
 
 

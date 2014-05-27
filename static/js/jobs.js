@@ -7,14 +7,39 @@ App.module('Jobs', function (Jobs, App, Backbone) {
         name: 'jobs',
 
         appRoutes: {
-            'jobs': 'listJobs'
+            'jobs': 'listJobs',
+            'jobs/:id': 'showJob'
         }
     });
 
     /**
-     * Job model
+     * Helpers used in underscore templates
+     * @type {Object}
      */
-    Jobs.Job = Backbone.Model.extend({
+    Jobs.templateHelpers = {
+        getTime: function (timestamp) {
+            return moment(timestamp).fromNow();
+        },
+
+        getResultStyle: function (result) {
+            var status = result.status === 2 ? 'success' :
+                result.status === 3 ? 'danger' : 'info';
+
+            return status + ' bg-' + status + ' text-' + status;
+        },
+
+        getIcon: function (result) {
+            return 'glyphicon-' + (result.status === 0 ? 'time' :
+                result.status === 1 ? 'refresh' :
+                result.status === 2 ? 'ok' :
+                'remove');
+        }
+    };
+
+    /**
+     * Job row model
+     */
+    Jobs.JobRow = Backbone.Model.extend({
         defaults: {
             description: '',
             created: 0,
@@ -28,37 +53,21 @@ App.module('Jobs', function (Jobs, App, Backbone) {
     Jobs.JobRowView = Backbone.Marionette.ItemView.extend({
         template: '#job-row',
         tagName: 'tr',
-
-        templateHelpers: {
-            getTime: function (timestamp) {
-                return moment(timestamp).fromNow();
-            },
-
-            getResultStyle: function (result) {
-                var status = result.status === 2 ? 'success' :
-                    result.status === 3 ? 'danger' : 'info';
-
-                return status + ' bg-' + status + ' text-' + status;
-            },
-
-            getIcon: function (result) {
-                return 'glyphicon-' + (result.status === 0 ? 'time' :
-                    result.status === 1 ? 'refresh' :
-                    result.status === 2 ? 'ok' :
-                    'remove');
-            }
-        }
+        templateHelpers: Jobs.templateHelpers
     });
 
     /**
      * Job collection
      */
     Jobs.jobsList = new (Backbone.Collection.extend({
-        model: Jobs.Job,
+        model: Jobs.JobRow,
         url: '/jobs',
 
         parse: function (response) {
-            return response.job;
+            return response.job.sort(function (a, b) {
+                return a.created < b.created ? 1 :
+                    a.created > b.created ? -1 : 0;
+            });
         }
     }))();
 
@@ -70,11 +79,11 @@ App.module('Jobs', function (Jobs, App, Backbone) {
         className: 'row',
 
         ui: {
-            'create': '.create-button',
+            'create': '.create-button'
         },
 
         events: {
-            'click @ui.create': 'createJob',
+            'click @ui.create': 'createJob'
         },
 
         createJob: function () {
@@ -89,7 +98,11 @@ App.module('Jobs', function (Jobs, App, Backbone) {
     Jobs.JobsListView = App.TableView.extend({
         template: '#jobs',
         itemView: Jobs.JobRowView,
-        emptyView: Jobs.NoJobsView
+        emptyView: Jobs.NoJobsView,
+
+        initialize: function () {
+            this.collection.fetch();
+        }
     });
 
     /**
@@ -100,6 +113,84 @@ App.module('Jobs', function (Jobs, App, Backbone) {
       tagName: 'tr'
     });
 
+
+    /**
+     * Job details model
+     */
+    Jobs.Job = Backbone.Model.extend({
+        defaults: {
+            id: '',
+            description: '',
+            created: 0,
+            browsers: [],
+            tasks: []
+        },
+
+        urlRoot: '/jobs/',
+
+        parse: function (data) {
+            data.browsers = _.map(data.tasks[0].results, function (result) {
+                return {
+                    name: result.name,
+                    version: result.version
+                };
+            });
+
+            return data;
+        }
+    });
+
+    /**
+     * Task row view
+     */
+    Jobs.TaskView = Backbone.Marionette.ItemView.extend({
+        template: '#task',
+        tagName: 'tr',
+        templateHelpers: Jobs.templateHelpers,
+
+        events: {
+            'click .clickable': 'showError'
+        },
+
+        showError: function (event) {
+            var elem = $(event.currentTarget),
+                result = this.model.get('results')[elem.index()];
+
+            if (result && result.errors) console.log('showError', result.errors);
+        }
+    });
+
+
+    /**
+     * Job details view
+     */
+    Jobs.JobView = App.TableView.extend({
+        template: '#job',
+        className: '',
+        templateHelpers: Jobs.templateHelpers,
+        itemView: Jobs.TaskView,
+
+        events: {
+            'click .back-button': 'goBack'
+        },
+
+        initialize: function () {
+            var that = this;
+
+            this.collection = new Backbone.Collection();
+
+            this.model.fetch().done(function () {
+                that.collection.reset(that.model.get('tasks'));
+            });
+
+            this.listenTo(this.model, 'change', this.render);
+        },
+
+        goBack: function () {
+            App.back();
+        }
+    });
+
     /**
      * Controller for Jobs module
      * @type {Object}
@@ -107,12 +198,18 @@ App.module('Jobs', function (Jobs, App, Backbone) {
     Jobs.controller = {
         listJobs: function () {
             App.header.show(new Jobs.JobsHeaderView());
-
             App.content.show(new Jobs.JobsListView({
                 collection: Jobs.jobsList
             }));
+        },
 
-            Jobs.jobsList.fetch();
+        showJob: function (id) {
+            App.header.close();
+            App.content.show(new Jobs.JobView({
+                model: new Jobs.Job({
+                    id: id
+                })
+            }));
         }
     };
 
