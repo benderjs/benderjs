@@ -76,6 +76,7 @@ App.module('Tests', function (Tests, App, Backbone) {
         events: {
             'click @ui.run': 'runTests',
             'click @ui.clear': 'clearFilter',
+            'change @ui.filter': 'updateFilter',
             'click .dropdown-menu a': 'addFilter'
         },
 
@@ -121,6 +122,10 @@ App.module('Tests', function (Tests, App, Backbone) {
                 bender.stop();
                 this.model.stop();
             }
+        },
+
+        updateFilter: function () {
+            this.model.set('filter', this.ui.filter.val().trim());
         },
 
         addFilter: function (event) {
