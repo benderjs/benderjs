@@ -270,7 +270,7 @@ App.module('Tests', function (Tests, App, Backbone) {
                 }
 
                 if (excludes.length) {
-                    result = !_.any(tags, function (tag) {
+                    result = result && !_.any(tags, function (tag) {
                         return excludes.indexOf(tag) > -1;
                     });
                 }
