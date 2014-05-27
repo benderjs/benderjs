@@ -1,12 +1,7 @@
 /**
  * Marionette Application
  */
-var App = new Backbone.Marionette.Application(),
-    tabs = [
-        { text: 'Tests', id: 'tests', active: false },
-        { text: 'Jobs', id: 'jobs', active: false },
-        { text: 'Browsers', id: 'browsers', active: false },
-    ];
+var App = new Backbone.Marionette.Application();
 
 // add main layout regions
 App.addRegions({
@@ -40,9 +35,23 @@ App.getCurrentRoute = function () {
 };
 
 /**
+ * Tab model
+ */
+App.Tab = Backbone.Model.extend({
+    defaults: {
+        id: '',
+        label: '',
+        active: false,
+        disabled: false
+    }
+});
+
+/**
  * Tabs collection
  */
 App.tabsList = new (Backbone.Collection.extend({
+    model: App.Tab,
+
     initialize: function () {
         App.vent.on('tests:start', this.disableTabs, this);
         App.vent.on('tests:stop', this.enableTabs, this);
@@ -69,13 +78,17 @@ App.tabsList = new (Backbone.Collection.extend({
             tab.set('disabled', false);
         });
     }
-}))(tabs);
+}))([
+    { label: 'Tests', id: 'tests' },
+    { label: 'Jobs', id: 'jobs' },
+    { label: 'Browsers', id: 'browsers' }
+]);
 
 /**
  * Single tab view
  */
 App.TabView = Backbone.Marionette.ItemView.extend({
-    template: '#tab-view',
+    template: '#tab',
     tagName: 'li',
 
     events: {
