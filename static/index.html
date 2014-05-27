@@ -3,8 +3,18 @@
 <head>
     <meta charset="utf-8">
     <title>Bender Dashboard</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
     <link rel="stylesheet" href="/css/bootstrap.css">
     <link rel="stylesheet" href="/css/dashboard.css">
+
+    <!--[if lt IE 9]>
+    <script type='text/javascript' src="/js/libs/css3-mediaqueries.js"></script>
+    <script type='text/javascript' src="/js/libs/html5shiv.min.js"></script>
+    <script type='text/javascript' src="/js/libs/es5-shim.min.js"></script>
+    <script type='text/javascript' src="/js/libs/respond.min.js"></script>
+    <![endif]-->
 </head>
 <body>
     <div id="context">
@@ -40,13 +50,13 @@
 
 
     <!-- template for a single tab -->
-    <script type="text/x-dot-template" id="tab-view">
-        <a title="<%= text %>"><%= text %>
+    <script type="text/html" id="tab">
+        <a title="<%= label %>"><%= label %></a>
     </script>
 
 
     <!-- template for tests table -->
-    <script type="text/x-dot-template" id="tests">
+    <script type="text/html" id="tests">
     <table class="table table-hover tests">
         <thead>
             <tr>
@@ -63,13 +73,13 @@
 
 
     <!-- template for empty tests table -->
-    <script type="text/x-dot-template" id="no-tests">
+    <script type="text/html" id="no-tests">
     <td colspan="4">No tests found. Check your configuration file</td>
     </script>
 
 
     <!-- template for a single test row -->
-    <script type="text/x-dot-template" id="test">
+    <script type="text/html" id="test">
     <td><a href="/tests/<%= id %>" title="<%= id %>"><%= id %></a></td>
     <td><span title="<%= group %>"><%= group %></span></td>
     <td title="<%= tags %>"><%= tags %></td>
@@ -78,7 +88,7 @@
 
 
     <!-- template for tests tab header -->
-    <script type="text/x-dot-template" id="test-header">
+    <script type="text/html" id="test-header">
     <div class="col-md-6">
         <p class="test-status">
             <strong class="passed"><%= passed %></strong> passed /
@@ -111,7 +121,7 @@
 
 
     <!-- template for jobs tab header -->    
-    <script type="text/x-dot-template" id="jobs-header">
+    <script type="text/html" id="jobs-header">
     <div class="col-md-12">
         <button type="button" class="btn btn-primary create-button">
             <span class="glyphicon glyphicon-file"></span> Create a job
@@ -121,7 +131,7 @@
 
     
     <!-- template for jobs table -->
-    <script type="text/x-dot-template" id="jobs">
+    <script type="text/html" id="jobs">
     <table class="table table-hover jobs">
         <thead>
             <tr>
@@ -138,13 +148,13 @@
 
 
     <!-- template for empty jobs table -->
-    <script type="text/x-dot-template" id="no-jobs">
+    <script type="text/html" id="no-jobs">
     <td colspan="4">No jobs found.</td>
     </script>
 
 
     <!-- template for a single job row -->
-    <script type="text/x-dot-template" id="job-row">
+    <script type="text/html" id="job-row">
     <td><a href="#jobs/<%= id %>"><%= id %></a></td>
     <td><%= description %></td>
     <td><small><%= getTime(created) %></small></td>
@@ -160,7 +170,7 @@
 
 
     <!-- template for browsers table -->
-    <script type="text/x-dot-template" id="browsers">
+    <script type="text/html" id="browsers">
     <table class="table table-hover table-condensed browsers">
         <thead>
             <tr>
@@ -179,13 +189,13 @@
 
 
     <!-- template for empty browsers table -->
-    <script type="text/x-dot-template" id="no-browsers">
+    <script type="text/html" id="no-browsers">
     <td colspan="5">No browsers found. Check your configuration file</td>
     </script>
 
     
     <!-- template for a single browser row -->
-    <script type="text/x-dot-template" id="browser">
+    <script type="text/html" id="browser">
     <% if (header) { %>
         <th class="browser <%= name %>"><%= id %></th>
         <th colspan="4"></th>
@@ -204,9 +214,16 @@
 
 
     <!-- template for a single job page -->
-    <script type="text/x-dot-template" id="job">
-    <h4><small>Job:</small> <%= id %> <small>created <%= getTime(created) %></small></h4>
-    <h4><small>Description:</small> <%= description ? description : '-' %></h4>
+    <script type="text/html" id="job">
+    <div class="row">
+        <div class="col-md-6">
+            <h4><small>Job:</small> <%= id %> <small>created <%= getTime(created) %></small></h4>
+            <h4><small>Description:</small> <%= description ? description : '-' %></h4>
+        </div>
+        <div class="col-md-6">
+
+        </div>
+    </div>
     <div class="panel panel-default">
         <table class="table table-hover jobs">
             <thead>
@@ -215,37 +232,39 @@
                     <th>
                         <% _.each(browsers, function (browser) { %>
                         <div class="browser <%= browser.name %>">
-                            <small><%= version ? version : '-' %></small>
+                            <small><%= browser.version ? browser.version : '-' %></small>
                         </div>
                         <% }) %>
                     </th>
                 </tr>
             </thead>
             <tbody>
+            <% _.each(tasks, function (task) { %>
+                <tr>
+                    <td><span title="<%= task.id %>"><%= task.id %></span></td>
+                    <td>
+                        <% _.each(task.results, function (result) { %>
+                            <% if (result.errors) { %><a><% } %>
+                            <div class="result <%= getResultStyle(result) %>">
+                                <span class="glyphicon <%= getIcon(result) %>"></span>
+                            </div>
+                            <% if (result.errors) { %></a><% } %>
+                        <% }) %>
+                    </td>
+                </tr>
+            <% }) %>
             </tbody>
         </table>
     </div>
     </script>
 
 
-    <!-- template for a single job's task row -->
-    <script type="text/x-dot-template" id="task">
-    <tr>
-        <td><%= id %></td>
-        <td>
-            <% _.each(results, function (result) { %>
-                <% if (result.errors) %><a><% } %>
-                <div class="result statusCss">
-                    <span class="glyphicon iconCss"></span>
-                </div>
-                <% if (result.errors) %></a><% } %>
-            <% }) %>
-        </td>
-    </tr>
-    </script>
 
 
-    <script type="text/x-dot-template" id="modal">
+
+
+
+    <script type="text/html" id="modal">
     <div class="modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -256,7 +275,7 @@
     <div class="modal-backdrop fade in"></div>
     </script>
 
-    <script type="text/x-dot-template" id="create-job">
+    <script type="text/html" id="create-job">
     <div class="modal-header">
         <button type="button" class="close" {{action "closeCreateJob"}} {{bind-attr disabled=isCreating}}>&times;</button>
         <h4 class="modal-title">Create a job</h4>
@@ -285,7 +304,7 @@
     </div>
     </script>
     
-    <script type="text/x-dot-template" id="job-errors">
+    <script type="text/html" id="job-errors">
     <div class="modal-header">
         <button type="button" class="close" {{action "closeModal"}}>&times;</button>
         <h4 class="modal-title">Error details</h4>
@@ -303,12 +322,12 @@
     </div>
     </script>
 
-    <script type="text/x-dot-template" id="error404">
+    <script type="text/html" id="error404">
     <h4>Error 404</h4>
     <h5>Page not found</h5>
     </script>
 
-    <script type="text/x-dot-template" id="error">
+    <script type="text/html" id="error">
     <h4>Error</h4>
     <h5>Unknown error occured</h5>
     </script>

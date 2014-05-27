@@ -16,7 +16,7 @@ table.tests {
     table-layout: fixed;
 }
 
-table.tests td {
+table.table td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
