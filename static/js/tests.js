@@ -26,6 +26,10 @@ App.module('Tests', function (Tests, App, Backbone) {
             running: false
         },
 
+        initialize: function () {
+            App.vent.on('tests:stop', this.stop, this);
+        },
+
         increment: function (name, value) {
             this.set(name, this.get(name) + value);
         },
@@ -108,17 +112,16 @@ App.module('Tests', function (Tests, App, Backbone) {
         },
 
         runTests: function () {
-            var ids,
-                current;
+            var ids;
 
             if (!this.model.get('running')) {
-                Tests.testsList.clearResults();
+                App.vent.trigger('tests:start');
+
                 ids = Tests.testsList.getIds();
                 this.model.start(ids.length);
                 bender.run(ids);
             } else {
-                current = Tests.testsList.get(bender.current);
-                current.set('result', '');
+                App.vent.trigger('tests:stop');
                 bender.stop();
                 this.model.stop();
             }
@@ -206,6 +209,8 @@ App.module('Tests', function (Tests, App, Backbone) {
 
         initialize: function () {
             App.vent.on('tests:filter', this.filterTests, this);
+            App.vent.on('tests:start', this.clearResults, this);
+            App.vent.on('tests:stop', this.clearCurrentResult, this);
         },
 
         parse: function (response) {
@@ -310,6 +315,11 @@ App.module('Tests', function (Tests, App, Backbone) {
             return result.join(' ');
         },
 
+        clearCurrentResult: function () {
+            var current = Tests.testsList.get(bender.current);
+            if (current) current.set('result', '');
+        },
+
         clearResults: function () {
             this.each(function (test) {
                 test.set('result', '').set('status', '');
@@ -370,7 +380,7 @@ App.module('Tests', function (Tests, App, Backbone) {
         });
 
         bender.on('complete', function () {
-            Tests.testStatus.stop();
+            App.vent.trigger('tests:stop');
         });
     });
 });

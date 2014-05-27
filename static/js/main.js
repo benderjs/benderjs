@@ -43,6 +43,11 @@ App.getCurrentRoute = function () {
  * Tabs collection
  */
 App.tabsList = new (Backbone.Collection.extend({
+    initialize: function () {
+        App.vent.on('tests:start', this.disableTabs, this);
+        App.vent.on('tests:stop', this.enableTabs, this);
+    },
+
     activateTab: function (name) {
         var next = this.get(name);
 
@@ -51,6 +56,18 @@ App.tabsList = new (Backbone.Collection.extend({
         });
 
         if (next) next.set('active', true);
+    },
+
+    disableTabs: function () {
+        this.each(function (tab) {
+            tab.set('disabled', true);
+        });
+    },
+
+    enableTabs: function () {
+        this.each(function (tab) {
+            tab.set('disabled', false);
+        });
     }
 }))(tabs);
 
@@ -61,12 +78,25 @@ App.TabView = Backbone.Marionette.ItemView.extend({
     template: '#tab-view',
     tagName: 'li',
 
+    events: {
+        'click a': 'navigate'
+    },
+
     initialize: function () {
         this.listenTo(this.model, 'change', this.changeState);
     },
 
+    navigate: function () {
+        var model = this.model.toJSON();
+
+        if (!model.active && !model.disabled) App.navigate(model.id);
+    },
+
     changeState: function () {
-        this.el.className = this.model.get('active') ? 'active' : '';
+        var model = this.model.toJSON();
+
+        this.el.className = (model.active ? 'active ' : ' ') +
+            (model.disabled ? 'disabled' : '');
     }
 });
 
