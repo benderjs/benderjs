@@ -51,7 +51,7 @@
                 <th class="col-md-3">ID</th>
                 <th class="col-md-2">Group</th>
                 <th class="col-md-3">Tags</th>
-                <th class="col-md-4"></th>
+                <th class="col-md-4">Status</th>
             </tr>
         </thead>
         <tbody>
@@ -86,8 +86,10 @@
         <div class="form-inline filter-form" role="form">
             <div class="form-group input-append btn-group">
                 <input type="text" class="form-control tag-filter" name="filter"
-                <%= running ? 'disabled="disabled"' : '' %> data-toggle="dropdown" placeholder="Filter tags" size="35">
-                <span class="glyphicon glyphicon-remove clear-filter"></span>
+                <%= running ? 'disabled="disabled"' : '' %> data-toggle="dropdown"
+                    placeholder="Filter tags" size="35" value="<%= filter %>" />
+                <span class="glyphicon glyphicon-remove clear-filter"
+                    <%= filter.length ? 'style="display: inline-block"' : '' %> ></span>
                 <ul class="dropdown-menu">
                     <% _.each(tags, function (tag) { %>
                     <li><a><%= tag %></a></li>

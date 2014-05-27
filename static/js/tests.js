@@ -22,6 +22,7 @@ App.module('Tests', function (Tests, App, Backbone) {
             completed: 0,
             total: 0,
             tags: [],
+            filter: '',
             running: false
         },
 
@@ -75,7 +76,6 @@ App.module('Tests', function (Tests, App, Backbone) {
         events: {
             'click @ui.run': 'runTests',
             'click @ui.clear': 'clearFilter',
-            'change @ui.filter': 'filterTags',
             'click .dropdown-menu a': 'addFilter'
         },
 
@@ -103,6 +103,7 @@ App.module('Tests', function (Tests, App, Backbone) {
 
         initialize: function () {
             this.listenTo(this.model, 'change', this.render);
+            this.listenTo(this.model, 'change', this.filterTags);
         },
 
         runTests: function () {
@@ -124,24 +125,23 @@ App.module('Tests', function (Tests, App, Backbone) {
 
         addFilter: function (event) {
             var tag = $(event.target).text(),
-                filter = this.ui.filter,
-                tags = filter.val().split(/\s+/);
+                tags = this.ui.filter.val().split(/\s+/);
 
             if (tags.indexOf(tag) === -1) tags.push(tag);
 
-            filter.val(tags.join(' ')).change();
+            this.model.set('filter', tags.join(' ').trim());
         },
 
         filterTags: function () {
-            var filter = this.ui.filter.val();
+            var filter = this.model.get('filter');
 
             this.ui.clear.css('display', filter ? 'inline-block' : 'none');
 
-            Tests.testsList.filterTests(filter);
+            App.vent.trigger('tests:filter', filter);
         },
 
         clearFilter: function () {
-            this.ui.filter.val('').change();
+            if (!this.model.get('running')) this.model.set('filter', '');
         }
     });
 
@@ -198,6 +198,10 @@ App.module('Tests', function (Tests, App, Backbone) {
     Tests.testsList = new (Backbone.Collection.extend({
         model: Tests.Test,
         url: '/tests',
+
+        initialize: function () {
+            App.vent.on('tests:filter', this.filterTests, this);
+        },
 
         parse: function (response) {
             this.getTags(response.test);
