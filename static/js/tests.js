@@ -180,7 +180,11 @@ App.module('Tests', function (Tests, App, Backbone) {
         },
 
         initialize: function () {
-            this.listenTo(this.model, 'change', this.updateStatus);
+            this.listenTo(this.model, 'change', this.render);
+        },
+
+        onRender: function () {
+            this.updateStatus();
         },
 
         updateStatus: function () {
@@ -195,8 +199,6 @@ App.module('Tests', function (Tests, App, Backbone) {
             this.ui.icon[0].className = 'glyphicon' + (model.status ?
                 ' glyphicon-' + (model.status === 'success' ? 'ok' : 'remove') :
                 '');
-
-            this.ui.result.text(model.result);
         }
     });
 
