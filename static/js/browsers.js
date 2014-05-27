@@ -69,11 +69,9 @@ App.module('Browsers', function (Browsers, App, Backbone) {
         parseBrowsers: function (data) {
             var result = [],
                 browser,
-                clients,
-                i,
-                j;
+                clients;
 
-            for (i = 0; i < data.length; i++) {
+            _.each(data, function (browser) {
                 browser = data[i];
                 browser.header = true;
 
@@ -82,10 +80,10 @@ App.module('Browsers', function (Browsers, App, Backbone) {
 
                 result.push(browser);
 
-                for (j = 0; j < clients.length; j++) {
-                    result.push(clients[j]);
-                }
-            }
+                _.each(clients, function (client) {
+                    result.push(client);
+                });
+            });
 
             return result;
         },
