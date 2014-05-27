@@ -8,6 +8,7 @@
 </head>
 <body>
     <div id="context">
+        <!-- place for a test iframe -->
     </div>
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
@@ -22,20 +23,19 @@
             </div>
         </div>
     </nav>
-
     <div class="container">
         <div id="tabs">
-            <!-- place for tab navigation -->
+            <!-- place for a tab navigation -->
         </div>
         <div class="header" id="header">
-            <!-- place for subpage header -->
+            <!-- place for a subpage header -->
         </div>
         <div class="content" id="content">
-            <!-- place for subpage content -->
+            <!-- place for a subpage content -->
         </div>
     </div>
-
     <div class="footer">
+        <!-- place for a footer -->
     </div>
 
 
@@ -150,6 +150,53 @@
     </script>
 
 
+    <script type="text/x-dot-template" id="browsers">
+    <table class="table table-hover table-condensed browsers">
+        <thead>
+            <tr>
+                <th class="col-md-2">Browser</th>
+                <th class="col-md-4">ID</th>
+                <th class="col-md-3">UA</th>
+                <th class="col-md-2">Address</th>
+                <th class="col-md-1">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+    </script>
+
+
+    <script type="text/x-dot-template" id="no-browsers">
+    <td colspan="5">No browsers found. Check your configuration file</td>
+    </script>
+
+    
+    <script type="text/x-dot-template" id="browser">
+    <% if (header) { %>
+        <th class="browser <%= name %>"><%= id %></th>
+        <th colspan="4"></th>
+    <% } else { %>
+        <td></td>
+        <td><%= id %></td>
+        <td><%= ua %></td>
+        <td><%= addr %></td>
+        <td>
+            <span class="label label-<%= ready ? 'success' : 'warning' %>">
+                <%= ready ? 'ready' : 'busy' %>
+            </span>
+        </td>
+    <% } %>
+    </script>
+
+
+
+
+
+
+
+
 
 
 
@@ -191,53 +238,6 @@
     </script>
 
 
-    <script type="text/x-dot-template" id="browsers">
-    <table class="table table-hover table-condensed browsers">
-        <thead>
-            <tr>
-                <th class="col-md-2">Browser</th>
-                <th class="col-md-4">ID</th>
-                <th class="col-md-3">UA</th>
-                <th class="col-md-2">Address</th>
-                <th class="col-md-1">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-
-        </tbody>
-    </table>
-    </script>
-
-
-    <script type="text/x-dot-template" id="no-browsers">
-    <td colspan="5">No browsers found. Check your configuration file</td>
-    </script>
-
-
-    <script type="text/x-dot-template" id="browser">
-    <th class="browser <%= name %>"><%= id %></th>
-    <th colspan="4"></th>
-    </script>
-
-    
-    <script type="text/x-dot-template" id="clients">
-    <% _.each(models, function (client) { %>
-    <tr>
-        <td></td>
-        <td><%= client.id %></td>
-        <td><%= client.ua %></td>
-        <td><%= client.addr >%</td>
-        <td>
-            <span class="label label-<%= client.ready 'success' : 'warning' %>">
-            <%= client.ready ? 'ready' : 'busy' %>
-            </span>
-        </td>
-    </tr>
-    <% }) %>
-    </script>
-
-
-    
     <script type="text/x-dot-template" id="modal">
     <div class="modal">
         <div class="modal-dialog">

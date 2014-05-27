@@ -1,5 +1,8 @@
 App.module('Browsers', function (Browsers, App, Backbone) {
     
+    /**
+     * Router for Browsers module
+     */
     Browsers.Router = Marionette.AppRouter.extend({
         name: 'browsers',
 
@@ -8,51 +11,52 @@ App.module('Browsers', function (Browsers, App, Backbone) {
         }
     });
 
-    Browsers.Client = Backbone.Model.extend({
-        defaults: {
-            id: '',
-            name: '',
-            addr: '',
-            ready: true
-        }
-    });
-
-    Browsers.ClientView = Backbone.Marionette.ItemView.extend({
-        template: '#client',
-        tagName: 'tr'
-    });
-
-    Browsers.ClientsList = Backbone.Collection.extend({
-        model: Browsers.Client
-    });
-
-    Browsers.ClientsListView = Backbone.Marionette.ItemView.extend({
-        template: '#clients'
-    });
-
+    /**
+     * Browser model
+     */
     Browsers.Browser = Backbone.Model.extend({
         defaults: {
             id: '',
             name: '',
+            addr: '',
+            ua: '',
             version: '',
-            clients: []
+            ready: true,
+            header: false
         }
     });
 
+    /**
+     * Browser view
+     */
     Browsers.BrowserView = Backbone.Marionette.ItemView.extend({
         template: '#browser',
-        tagName: 'tr'
+        tagName: 'tr',
+
+        initialize: function () {
+            this.listenTo(this.model, 'change', this.render);
+        }
     });
 
+    /**
+     * Browser collection
+     */
     Browsers.browsersList = new (Backbone.Collection.extend({
         model: Browsers.Browser
     }))();
 
+    /**
+     * Browser list vieq
+     */
     Browsers.BrowsersListView = App.TableView.extend({
         template: '#browsers',
         itemView: Browsers.BrowserView
     });
 
+    /**
+     * Browser module controller
+     * @type {Object}
+     */
     Browsers.controller = {
         show: function () {
             App.header.close();
@@ -62,8 +66,32 @@ App.module('Browsers', function (Browsers, App, Backbone) {
             }));
         },
 
+        parseBrowsers: function (data) {
+            var result = [],
+                browser,
+                clients,
+                i,
+                j;
+
+            for (i = 0; i < data.length; i++) {
+                browser = data[i];
+                browser.header = true;
+
+                clients = browser.clients;
+                delete browser.clients;
+
+                result.push(browser);
+
+                for (j = 0; j < clients.length; j++) {
+                    result.push(clients[j]);
+                }
+            }
+
+            return result;
+        },
+
         updateBrowsers: function (data) {
-            Browsers.browsersList.set(data);
+            Browsers.browsersList.reset(Browsers.controller.parseBrowsers(data));
         },
 
         clearBrowsers: function () {
@@ -71,11 +99,15 @@ App.module('Browsers', function (Browsers, App, Backbone) {
         },
 
         updateClient: function (data) {
-            // TODO
-            console.log('update client', data);
+            var client = Browsers.browsersList.get(data.id);
+
+            if (client) client.set(data);
         }
     };
 
+    /**
+     * Add Browser module initializer
+     */
     Browsers.addInitializer(function () {
         var controller = Browsers.controller;
 
@@ -88,29 +120,3 @@ App.module('Browsers', function (Browsers, App, Backbone) {
         App.Sockets.on('disconnect', controller.clearBrowsers);
     });
 });
-// (function (Ember, App) {
-
-//     App.BrowsersController = Ember.ArrayController.extend({
-//         clients: function () {
-//             return this.get('content')
-//                 .reduce(function (result, current) {
-//                     return result.concat(current.clients);
-//                 }, []);
-//         }.property('content'),
-
-//         sockets: {
-//             'browsers:update': function (data) {
-//                 this.set('content', data);
-//             },
-//             'client:update': function (data) {
-//                 var client = this.get('clients').findBy('id', data.id);
-
-//                 if (client) Ember.setProperties(client, data);
-//             },
-//             disconnect: function () {
-//                 this.get('content').clear();
-//             }
-//         }
-//     });
-
-// })(Ember, App);
