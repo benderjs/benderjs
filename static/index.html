@@ -39,11 +39,13 @@
     </div>
 
 
+    <!-- template for a single tab -->
     <script type="text/x-dot-template" id="tab-view">
         <a title="<%= text %>"><%= text %>
     </script>
 
 
+    <!-- template for tests table -->
     <script type="text/x-dot-template" id="tests">
     <table class="table table-hover tests">
         <thead>
@@ -60,11 +62,13 @@
     </script>
 
 
+    <!-- template for empty tests table -->
     <script type="text/x-dot-template" id="no-tests">
     <td colspan="4">No tests found. Check your configuration file</td>
     </script>
 
 
+    <!-- template for a single test row -->
     <script type="text/x-dot-template" id="test">
     <td><a href="/tests/<%= id %>" title="<%= id %>"><%= id %></a></td>
     <td><span title="<%= group %>"><%= group %></span></td>
@@ -73,6 +77,7 @@
     </script>
 
 
+    <!-- template for tests tab header -->
     <script type="text/x-dot-template" id="test-header">
     <div class="col-md-6">
         <p class="test-status">
@@ -104,7 +109,8 @@
     </div>
     </script>
 
-    
+
+    <!-- template for jobs tab header -->    
     <script type="text/x-dot-template" id="jobs-header">
     <div class="col-md-12">
         <button type="button" class="btn btn-primary create-button">
@@ -114,6 +120,7 @@
     </script>
 
     
+    <!-- template for jobs table -->
     <script type="text/x-dot-template" id="jobs">
     <table class="table table-hover jobs">
         <thead>
@@ -130,11 +137,13 @@
     </script>
 
 
+    <!-- template for empty jobs table -->
     <script type="text/x-dot-template" id="no-jobs">
     <td colspan="4">No jobs found.</td>
     </script>
 
 
+    <!-- template for a single job row -->
     <script type="text/x-dot-template" id="job-row">
     <td><a href="#jobs/<%= id %>"><%= id %></a></td>
     <td><%= description %></td>
@@ -150,6 +159,7 @@
     </script>
 
 
+    <!-- template for browsers table -->
     <script type="text/x-dot-template" id="browsers">
     <table class="table table-hover table-condensed browsers">
         <thead>
@@ -168,11 +178,13 @@
     </script>
 
 
+    <!-- template for empty browsers table -->
     <script type="text/x-dot-template" id="no-browsers">
     <td colspan="5">No browsers found. Check your configuration file</td>
     </script>
 
     
+    <!-- template for a single browser row -->
     <script type="text/x-dot-template" id="browser">
     <% if (header) { %>
         <th class="browser <%= name %>"><%= id %></th>
@@ -191,50 +203,45 @@
     </script>
 
 
-
-
-
-
-
-
-
-
-
+    <!-- template for a single job page -->
     <script type="text/x-dot-template" id="job">
-    <h4><small>Job:</small> {{id}} <small>created {{moment time=created}}</small></h4>
-    <h4><small>Description:</small> {{#if description}}{{description}}{{else}}-{{/if}}</h4>
+    <h4><small>Job:</small> <%= id %> <small>created <%= getTime(created) %></small></h4>
+    <h4><small>Description:</small> <%= description ? description : '-' %></h4>
     <div class="panel panel-default">
         <table class="table table-hover jobs">
             <thead>
                 <tr>
                     <th class="col-md-3">Test ID</th>
                     <th>
-                        {{#each browsers}}
-                        <div {{bind-attr class=":browser name"}}>
-                            <small>{{#if version}}{{version}}{{else}}-{{/if}}</small>
+                        <% _.each(browsers, function (browser) { %>
+                        <div class="browser <%= browser.name %>">
+                            <small><%= version ? version : '-' %></small>
                         </div>
-                        {{/each}}
+                        <% }) %>
                     </th>
                 </tr>
             </thead>
             <tbody>
-            {{#each parsedTasks}}
-                <tr>
-                    <td>{{id}}</td>
-                    <td>
-                        {{#each results}}
-                            {{#if errors}}<a {{action "openModal" "jobErrorsModal" errors}}>{{/if}}
-                            <div {{bind-attr class=":result statusCss"}}>
-                                <span {{bind-attr class=":glyphicon iconCss"}}></span>
-                            </div>
-                            {{#if errors}}</a>{{/if}}
-                        {{/each}}
-                    </td>
-                </tr>
-            {{/each}}
             </tbody>
         </table>
     </div>
+    </script>
+
+
+    <!-- template for a single job's task row -->
+    <script type="text/x-dot-template" id="task">
+    <tr>
+        <td><%= id %></td>
+        <td>
+            <% _.each(results, function (result) { %>
+                <% if (result.errors) %><a><% } %>
+                <div class="result statusCss">
+                    <span class="glyphicon iconCss"></span>
+                </div>
+                <% if (result.errors) %></a><% } %>
+            <% }) %>
+        </td>
+    </tr>
     </script>
 
 

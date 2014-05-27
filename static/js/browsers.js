@@ -72,7 +72,6 @@ App.module('Browsers', function (Browsers, App, Backbone) {
                 clients;
 
             _.each(data, function (browser) {
-                browser = data[i];
                 browser.header = true;
 
                 clients = browser.clients;
