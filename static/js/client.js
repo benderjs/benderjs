@@ -1,85 +1,91 @@
-(function () {
-    var resultsEl = document.createElement('div');
+( function() {
+	var resultsEl = document.createElement( 'div' );
 
-    resultsEl.className = 'results';
+	resultsEl.className = 'results';
 
-    function escapeTags(str) {
-        var replacements = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;'
-        };
+	function escapeTags( str ) {
+		var replacements = {
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;'
+		};
 
-        return str.replace(/[&<>]/g, function (item) {
-            return replacements[item] || item;
-        });
-    }
+		return str.replace( /[&<>]/g, function( item ) {
+			return replacements[ item ] || item;
+		} );
+	}
 
-    function addResult(result) {
-        var resEl = document.createElement('li'),
-            res = [
-                    '<p>', result.module, ' - ', result.name,
-                    '<strong> ', result.success ? result.ignored ?
-                        'IGNORED' : 'PASSED' : 'FAILED', '</strong></p>'
-                ],
-            i;
+	function addResult( result ) {
+		var resEl = document.createElement( 'li' ),
+			res = [
+				'<p>', result.module, ' - ', result.name,
+				'<strong> ', result.success ? result.ignored ?
+				'IGNORED' : 'PASSED' : 'FAILED', '</strong></p>'
+			],
+			i;
 
-        if (!result.success) res.push('<pre>', escapeTags(result.error), '</pre>');
+		if ( !result.success ) {
+			res.push( '<pre>', escapeTags( result.error ), '</pre>' );
+		}
 
-        resEl.className = result.success ? result.ignored ? 'warn' : 'ok' : 'fail';
-        resEl.innerHTML = res.join('');
+		resEl.className = result.success ? result.ignored ? 'warn' : 'ok' : 'fail';
+		resEl.innerHTML = res.join( '' );
 
-        resultsEl.appendChild(resEl);
-    }
+		resultsEl.appendChild( resEl );
+	}
 
-    var launcher = opener || parent,
-        bender,
-        init;
+	var launcher = opener || parent,
+		bender,
+		init;
 
-    function Bender() {
-        this.error = function () {
-            console.error.apply(console, arguments);
-        };
+	function Bender() {
+		this.error = function() {
+			console.error.apply( console, arguments );
+		};
 
-        this.result = function (result) {
-            addResult(result);
-        };
+		this.result = function( result ) {
+			addResult( result );
+		};
 
-        this.log = function () {
-            console.log.apply(console, arguments);
-        };
+		this.log = function() {
+			console.log.apply( console, arguments );
+		};
 
-        this.start = this.next = this.complete = function () {};
-    }
+		this.start = this.next = this.complete = function() {};
+	}
 
-    if (launcher && launcher.bender && launcher.bender.runAsChild) {
-        bender = {
-            result: function (result) {
-                launcher.bender.result(JSON.stringify(result));
-            },
-            next: function (result) {
-                launcher.bender.next(JSON.stringify(result));
-            }
-        };
+	if ( launcher && launcher.bender && launcher.bender.runAsChild ) {
+		bender = {
+			result: function( result ) {
+				launcher.bender.result( JSON.stringify( result ) );
+			},
+			next: function( result ) {
+				launcher.bender.next( JSON.stringify( result ) );
+			}
+		};
 
-        window.error = function (error) {
-            launcher.bender.error(JSON.stringify(error));
-        };
+		window.error = function( error ) {
+			launcher.bender.error( JSON.stringify( error ) );
+		};
 
-        init = function () {
-            bender.start();
-        };
-    } else {
-        bender = new Bender();
-        init = function () {
-            document.body.appendChild(resultsEl);
-            bender.start();
-        };
-    }
+		init = function() {
+			bender.start();
+		};
+	} else {
+		bender = new Bender();
+		init = function() {
+			document.body.appendChild( resultsEl );
+			bender.start();
+		};
+	}
 
-    window.bender = bender;
+	window.bender = bender;
 
-    if (window.addEventListener) window.addEventListener('load', init, false);
-    else if (window.attachEvent) window.attachEvent('onload', init);
-    else window['onload'] = init;
-})();
+	if ( window.addEventListener ) {
+		window.addEventListener( 'load', init, false );
+	} else if ( window.attachEvent ) {
+		window.attachEvent( 'onload', init );
+	} else {
+		window.onload = init;
+	}
+} )();

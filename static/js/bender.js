@@ -1,115 +1,122 @@
-(function (window) {
-    var isIE = navigator.userAgent.match(/msie (\d+)/i);
+( function( window ) {
+	var isIE = navigator.userAgent.match( /msie (\d+)/i );
 
-    function Bender() {
-        var contextEl = document.getElementById('context'),
-            testWindow = null,
-            runs = 0;
+	function Bender() {
+		var contextEl = document.getElementById( 'context' ),
+			testWindow = null,
+			runs = 0;
 
-        this.handlers = {};
-        this.current = null;
-        this.suite = null;
+		this.handlers = {};
+		this.current = null;
+		this.suite = null;
 
-        this.runAsChild = true;
+		this.runAsChild = true;
 
-        this.emit = function (name) {
-            var handlers = this.handlers[name],
-                args = Array.prototype.slice.call(arguments, 1),
-                i;
+		this.emit = function( name ) {
+			var handlers = this.handlers[ name ],
+				args = Array.prototype.slice.call( arguments, 1 ),
+				i;
 
-            if (!handlers || !handlers.length) return;
+			if ( !handlers || !handlers.length ) {
+				return;
+			}
 
-            for (i = 0; i < handlers.length; i++) handlers[i].apply(this, args);
-        };
+			for ( i = 0; i < handlers.length; i++ ) {
+				handlers[ i ].apply( this, args );
+			}
+		};
 
-        this.on = function (name, callback) {
-            if (typeof name !== 'string' || typeof callback != 'function') {
-                throw new Error('Invalid arguments specified');
-            }
+		this.on = function( name, callback ) {
+			if ( typeof name !== 'string' || typeof callback != 'function' ) {
+				throw new Error( 'Invalid arguments specified' );
+			}
 
-            if (!this.handlers[name]) this.handlers[name] = [];
+			if ( !this.handlers[ name ] ) {
+				this.handlers[ name ] = [];
+			}
 
-            this.handlers[name].push(callback);
-        };
+			this.handlers[ name ].push( callback );
+		};
 
-        this.error = function () {
-            console.error.apply(console, arguments);
-        };
+		this.error = function() {
+			console.error.apply( console, arguments );
+		};
 
-        // stubbed for compatibility
-        this.log = this.result = function () {};
+		// stubbed for compatibility
+		this.log = this.result = function() {};
 
-        this.next = function (summary) {
-            var id,
-                frame,
-                parsed;
+		this.next = function( summary ) {
+			var id,
+				frame,
+				parsed;
 
-            if (summary) {
-                parsed = JSON.parse(summary);
-                parsed.id = this.current;
-                parsed.success = parsed.failed === 0;
-                this.emit('update', parsed);
-            }
+			if ( summary ) {
+				parsed = JSON.parse( summary );
+				parsed.id = this.current;
+				parsed.success = parsed.failed === 0;
+				this.emit( 'update', parsed );
+			}
 
-            this.current = this.suite.shift();
+			this.current = this.suite.shift();
 
-            if (this.current) {
-                id = '/tests/' + this.current;
-                runs++;
+			if ( this.current ) {
+				id = '/tests/' + this.current;
+				runs++;
 
-                this.emit('update', this.current);
+				this.emit( 'update', this.current );
 
-                if (isIE) {
-                    if (runs >= 20 && testWindow) {
-                        testWindow.close();
-                        setTimeout(function () {
-                            runs = 0;
-                            window.open(id, 'bendertest');
-                        }, 300);
-                    } else {
-                        testWindow = window.open(id, 'bendertest');
-                    }
-                } else {
-                    if ((frame = contextEl.getElementsByTagName('iframe')[0])) {
-                        frame.src = 'about:blank';
-                        contextEl.removeChild(frame);
-                    }
+				if ( isIE ) {
+					if ( runs >= 20 && testWindow ) {
+						testWindow.close();
+						setTimeout( function() {
+							runs = 0;
+							window.open( id, 'bendertest' );
+						}, 300 );
+					} else {
+						testWindow = window.open( id, 'bendertest' );
+					}
+				} else {
+					if ( ( frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ] ) ) {
+						frame.src = 'about:blank';
+						contextEl.removeChild( frame );
+					}
 
-                    frame = document.createElement('iframe');
-                    frame.className = 'context-frame';
-                    frame.src = id;
-                    contextEl.appendChild(frame);
-                }
-            } else {
-                this.complete();
-            }
-        };
+					frame = document.createElement( 'iframe' );
+					frame.className = 'context-frame';
+					frame.src = id;
+					contextEl.appendChild( frame );
+				}
+			} else {
+				this.complete();
+			}
+		};
 
-        this.complete = function () {
-            var frame;
-            this.emit('complete');
+		this.complete = function() {
+			var frame;
+			this.emit( 'complete' );
 
-            this.suite = [];
-            this.current = null;
+			this.suite = [];
+			this.current = null;
 
-            if (isIE && testWindow) testWindow.close();
-            else {
-                frame = contextEl.getElementsByTagName('iframe')[0];
+			if ( isIE && testWindow ) {
+				testWindow.close();
+			} else {
+				frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ];
 
-                if (frame) {
-                    frame.src = 'about:blank';
-                    contextEl.removeChild(frame);
-                }
-            }
-        };
+				if ( frame ) {
+					frame.src = 'about:blank';
+					contextEl.removeChild( frame );
+				}
+			}
+		};
 
-        this.run = function (tests) {
-            this.suite = tests;
-            this.next();
-        };
+		this.run = function( tests ) {
+			this.suite = tests;
+			this.next();
+		};
 
-        this.stop = this.complete;
-    }
+		this.stop = this.complete;
+	}
 
-    window.bender = new Bender();
-})(this);
+	window.bender = new Bender();
+} )( this );

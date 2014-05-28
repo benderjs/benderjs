@@ -11,64 +11,64 @@
 //     }),
 // << nodetime analytics code
 
-var argParser = require('nomnom'),
-    path = require('path'),
-    fs = require('fs'),
-    when = require('when'),
-    whenCb = require('when/callbacks'),
-    whenFs = require('when/node').liftAll(fs),
-    broadway = require('broadway'),
-    forever = require('forever'),
+var argParser = require( 'nomnom' ),
+	path = require( 'path' ),
+	fs = require( 'fs' ),
+	when = require( 'when' ),
+	whenCb = require( 'when/callbacks' ),
+	whenFs = require( 'when/node' ).liftAll( fs ),
+	broadway = require( 'broadway' ),
+	forever = require( 'forever' ),
 
-    dir = '../lib/',
+	dir = '../lib/',
 
-    applications = require(dir + 'applications'),
-    browsers = require(dir + 'browsers'),
-    cache = require(dir + 'cache'),
-    conf = require(dir + 'config'),
-    constants = require(dir + 'constants'),
-    jobs = require(dir + 'jobs'),
-    middleware = require(dir + 'middleware'),
-    pagebuilders = require(dir + 'pagebuilders'),
-    plugins = require(dir + 'plugins'),
-    reporters = require(dir + 'reporters'),
-    server = require(dir + 'server'),
-    sockets = require(dir + 'sockets'),
-    template = require(dir + 'template'),
-    testbuilders = require(dir + 'testbuilders'),
-    tests = require(dir + 'tests'),
-    utils = require(dir + 'utils'),
+	applications = require( dir + 'applications' ),
+	browsers = require( dir + 'browsers' ),
+	cache = require( dir + 'cache' ),
+	conf = require( dir + 'config' ),
+	constants = require( dir + 'constants' ),
+	jobs = require( dir + 'jobs' ),
+	middleware = require( dir + 'middleware' ),
+	pagebuilders = require( dir + 'pagebuilders' ),
+	plugins = require( dir + 'plugins' ),
+	reporters = require( dir + 'reporters' ),
+	server = require( dir + 'server' ),
+	sockets = require( dir + 'sockets' ),
+	template = require( dir + 'template' ),
+	testbuilders = require( dir + 'testbuilders' ),
+	tests = require( dir + 'tests' ),
+	utils = require( dir + 'utils' ),
 
-    log = require(dir + 'logger').create('cli');
+	log = require( dir + 'logger' ).create( 'cli' );
 
-argParser.command('init')
-    .callback(initialize)
-    .help('Initialize Bender.js for this directory');
+argParser.command( 'init' )
+	.callback( initialize )
+	.help( 'Initialize Bender.js for this directory' );
 
-argParser.command('server')
-    .callback(handleServer)
-    .option('port', {
-        abbr: 'p',
-        default: constants.PORT,
-        help: 'Port on which the server will run'
-    })
-    .option('hostname', {
-        abbr: 'H', // YEAH... should be "h" but it's reserved for nomnom's help
-        default: constants.HOSTNAME,
-        help: 'Hostname used to run server'
-    })
-    .option('config', {
-        abbr: 'c',
-        default: constants.CONFIG_NAME,
-        help: 'Alternative path to Bender.js configuration file'
-    })
-    .help('Start Bender.js server');
+argParser.command( 'server' )
+	.callback( handleServer )
+	.option( 'port', {
+		abbr: 'p',
+		default: constants.PORT,
+		help: 'Port on which the server will run'
+	} )
+	.option( 'hostname', {
+		abbr: 'H', // YEAH... should be "h" but it's reserved for nomnom's help
+		default: constants.HOSTNAME,
+		help: 'Hostname used to run server'
+	} )
+	.option( 'config', {
+		abbr: 'c',
+		default: constants.CONFIG_NAME,
+		help: 'Alternative path to Bender.js configuration file'
+	} )
+	.help( 'Start Bender.js server' );
 
-argParser.command('version')
-    .callback(function () {
-        log.info('Bender.js v%s', constants.VERSION);
-    })
-    .help('Print Bender.js version');
+argParser.command( 'version' )
+	.callback( function() {
+		log.info( 'Bender.js v%s', constants.VERSION );
+	} )
+	.help( 'Print Bender.js version' );
 
 argParser.parse();
 
@@ -76,205 +76,221 @@ argParser.parse();
  * Handle server command line
  * @param {Object} options Command line options
  */
-function handleServer(options) {
-    switch (options[1]) {
-        case 'start':
-            getMeta(function (meta) {
-                if (meta) log.info('Bender server is already running');
-                else startDaemon();
-            });
-            break;
+function handleServer( options ) {
+	switch ( options[ 1 ] ) {
+		case 'start':
+			getMeta( function( meta ) {
+				if ( meta ) {
+					log.info( 'Bender server is already running' );
+				} else {
+					startDaemon();
+				}
+			} );
+			break;
 
-        case 'stop':
-            forever.stop(__filename)
-                .on('stop', function () {
-                    log.info('Bender server stopped successfully');
-                })
-                .on('error', function () {
-                    log.error('Bender server not running or user not authorized to stop it');
-                });
-            break;
+		case 'stop':
+			forever.stop( __filename )
+				.on( 'stop', function() {
+					log.info( 'Bender server stopped successfully' );
+				} )
+				.on( 'error', function() {
+					log.error( 'Bender server not running or user not authorized to stop it' );
+				} );
+			break;
 
-        case 'restart':
-            getMeta(function (meta) {
-                if (meta) {
-                    forever.stop(__filename)
-                        .on('stop', function () {
-                            log.info('Bender server stopped successfully');
-                            startDaemon();
-                        });
-                } else {
-                    startDaemon();
-                }
-            });
-            break;
+		case 'restart':
+			getMeta( function( meta ) {
+				if ( meta ) {
+					forever.stop( __filename )
+						.on( 'stop', function() {
+							log.info( 'Bender server stopped successfully' );
+							startDaemon();
+						} );
+				} else {
+					startDaemon();
+				}
+			} );
+			break;
 
-        case 'status':
-            getMeta(function (meta) {
-                if (meta) log.info('Bender server is running since ' + new Date(meta.ctime));
-                else log.error('Bender server is not running or user not authorized to see the status');
-            });
-            break;
+		case 'status':
+			getMeta( function( meta ) {
+				if ( meta ) {
+					log.info( 'Bender server is running since ' + new Date( meta.ctime ) );
+				} else {
+					log.error( 'Bender server is not running or user not authorized to see the status' );
+				}
+			} );
+			break;
 
-        case 'run':
-            startServer(options);
-            break;
+		case 'run':
+			startServer( options );
+			break;
 
-        default: // TODO improve this help part / include in cli help
-            log.info('Use server start, stop, restart or status commands');
-    }
+		default: // TODO improve this help part / include in cli help
+			log.info( 'Use server start, stop, restart or status commands' );
+	}
 }
 
 /**
  * Get child process metadata
  * @param  {Function} callback Function called when done
  */
-function getMeta(callback) {
-    forever.list(false, function (err, list) {
-        if (err || !list) return callback(null);
+function getMeta( callback ) {
+	forever.list( false, function( err, list ) {
+		if ( err || !list ) {
+			return callback( null );
+		}
 
-        list.some(function (meta) {
-            if (meta.file === __filename) {
-                callback(meta);
-                return true;
-            }
-        });
-    });
+		list.some( function( meta ) {
+			if ( meta.file === __filename ) {
+				callback( meta );
+				return true;
+			}
+		} );
+	} );
 }
 
 /**
  * Restart this script as a deamon
  */
 function startDaemon() {
-    var opts, child;
+	var opts, child;
 
-    opts = process.argv.slice(2);
-    opts[1] = 'run';
+	opts = process.argv.slice( 2 );
+	opts[ 1 ] = 'run';
 
-    child = forever.startDaemon(__filename, {
-        max: 3,
-        silent: false,
-        outFile: 'bender-out.log',
-        errFile: 'bender-err.log',
-        options: opts
-    });
+	child = forever.startDaemon( __filename, {
+		max: 3,
+		silent: false,
+		outFile: 'bender-out.log',
+		errFile: 'bender-err.log',
+		options: opts
+	} );
 
-    child.on('error', function (err) {
-        log.error('child process error', err);
-    });
+	child.on( 'error', function( err ) {
+		log.error( 'child process error', err );
+	} );
 
-    child.on('exit', function () {
-        log.error('child process exit after 3 retries');
-    });
+	child.on( 'exit', function() {
+		log.error( 'child process exit after 3 retries' );
+	} );
 
-    log.info('Bender server started successfully');
+	log.info( 'Bender server started successfully' );
 }
 
 /**
  * Start bender server
  * @param  {Object} options Command line options
  */
-function startServer(options) {
-    var bender = new broadway.App({ delimeter: ':' }),
-        modules = [
-            utils, applications, testbuilders, pagebuilders, middleware,
-            browsers, cache, template, constants, tests, jobs, sockets,
-            server, reporters, plugins
-        ];
+function startServer( options ) {
+	var bender = new broadway.App( {
+			delimeter: ':'
+		} ),
+		modules = [
+			utils, applications, testbuilders, pagebuilders, middleware,
+			browsers, cache, template, constants, tests, jobs, sockets,
+			server, reporters, plugins
+		];
 
-    bender.use(conf, {
-        path: path.resolve(process.cwd(), options.config)
-    });
+	bender.use( conf, {
+		path: path.resolve( process.cwd(), options.config )
+	} );
 
-    modules.forEach(function (module) { bender.use(module); });
+	modules.forEach( function( module ) {
+		bender.use( module );
+	} );
 
-    bender.init(function (err) {
-        if (err) {
-            log.error(err);
-            process.exit(1);
-        }
+	bender.init( function( err ) {
+		if ( err ) {
+			log.error( err );
+			process.exit( 1 );
+		}
 
-        bender.server
-            .create()
-            .listen(
-                options.port,
-                options.hostname,
-                function () {
-                    log.info(
-                        'Bender.js v%s Server started at http://%s:%s',
-                        constants.VERSION,
-                        options.hostname,
-                        options.port
-                    );
-                }
-            );
-    });
+		bender.server
+			.create()
+			.listen(
+				options.port,
+				options.hostname,
+				function() {
+					log.info(
+						'Bender.js v%s Server started at http://%s:%s',
+						constants.VERSION,
+						options.hostname,
+						options.port
+					);
+				}
+		);
+	} );
 }
 
 /**
  * Initialize Bender in current directory
  */
 function initialize() {
-    var defaultConfig = buildDefaultConfig();
+	var defaultConfig = buildDefaultConfig();
 
-    // build default configuration file from schema
-    function buildDefaultConfig() {
-        var schema = require('../lib/config-schema.js'),
-            example = ['/**', ' * Bender configuration file', ' * '],
-            props = schema.properties;
+	// build default configuration file from schema
+	function buildDefaultConfig() {
+		var schema = require( '../lib/config-schema.js' ),
+			example = [ '/**', ' * Bender configuration file', ' * ' ],
+			props = schema.properties;
 
-        // create documentation for config option
-        function addParam(name) {
-            var type = props[name].type;
+		// create documentation for config option
+		function addParam( name ) {
+			var type = props[ name ].type;
 
-            type = type.charAt(0).toUpperCase() + type.slice(1);
+			type = type.charAt( 0 ).toUpperCase() + type.slice( 1 );
 
-            example.push(' * @param {' + type + '}\t' + name +
-                (name.length < 8 ? '\t\t' : '\t') + props[name].description);
-        }
+			example.push( ' * @param {' + type + '}\t' + name +
+				( name.length < 8 ? '\t\t' : '\t' ) + props[ name ].description );
+		}
 
-        Object.keys(props).forEach(addParam);
+		Object.keys( props ).forEach( addParam );
 
-        example.push(
-            ' */', 'var config = {', '\t// put your configuration here',
-            '};', 'module.exports = config;'
-        );
+		example.push(
+			' */', 'var config = {', '\t// put your configuration here',
+			'};', 'module.exports = config;'
+		);
 
-        return example.join('\n');
-    }
+		return example.join( '\n' );
+	}
 
-    // create Bender configuration file with default content
-    function createConfig(file) {
-        return whenCb
-            .call(fs.exists, file)
-            .then(function (exists) {
-                if (!exists) return whenFs.writeFile(file, defaultConfig);
-            });
-    }
+	// create Bender configuration file with default content
+	function createConfig( file ) {
+		return whenCb
+			.call( fs.exists, file )
+			.then( function( exists ) {
+				if ( !exists ) {
+					return whenFs.writeFile( file, defaultConfig );
+				}
+			} );
+	}
 
-    // create a directory for Bender's resources
-    function createBenderDir() {
-        return whenCb
-            .call(fs.exists, '.bender/')
-            .then(function (exists) {
-                if (!exists) return whenFs.mkdir('.bender/');
-            });
-    }
+	// create a directory for Bender's resources
+	function createBenderDir() {
+		return whenCb
+			.call( fs.exists, '.bender/' )
+			.then( function( exists ) {
+				if ( !exists ) {
+					return whenFs.mkdir( '.bender/' );
+				}
+			} );
+	}
 
-    createBenderDir()
-        .then(function () {
-            return createConfig('.bender/bender.js');
-        })
-        .then(function () {
-            return createConfig('bender.js');
-        })
-        .then(function () {
-            log.info('Created Bender configuration files');
-        }, function (err) {
-            log.error('Error while initializing Bender', err);
-        })
-        // TODO remove after disabling nodetime
-        .finally(function () {
-            precess.exit(1);
-        });
+	createBenderDir()
+		.then( function() {
+			return createConfig( '.bender/bender.js' );
+		} )
+		.then( function() {
+			return createConfig( 'bender.js' );
+		} )
+		.then( function() {
+			log.info( 'Created Bender configuration files' );
+		}, function( err ) {
+			log.error( 'Error while initializing Bender', err );
+		} )
+	// TODO remove after disabling nodetime
+	.finally( function() {
+		precess.exit( 1 );
+	} );
 }
