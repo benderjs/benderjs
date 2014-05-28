@@ -7,12 +7,7 @@ a {
     font-weight: bold;
 }
 
-td:first-child,
-th:first-child {
-    white-space: nowrap;
-}
-
-table.tests {
+table.table {
     table-layout: fixed;
 }
 

@@ -63,10 +63,21 @@ App.module( 'Jobs', function ( Jobs, App, Backbone ) {
         model: Jobs.JobRow,
         url: '/jobs',
 
+        comparator: function ( first, second ) {
+            first = first.attributes.created;
+            second = second.attributes.created;
+
+            return first < second ? 1 :
+                first > second ? -1 : 0;
+        },
+
         parse: function ( response ) {
-            return response.job.sort( function ( a, b ) {
-                return a.created < b.created ? 1 :
-                    a.created > b.created ? -1 : 0;
+            return response.job.sort( function ( first, second ) {
+                first = first.created;
+                second = second.created;
+
+                return first < second ? 1 :
+                    first > second ? -1 : 0;
             } );
         }
     } ) )();
@@ -83,12 +94,15 @@ App.module( 'Jobs', function ( Jobs, App, Backbone ) {
         },
 
         events: {
-            'click @ui.create': 'createJob'
+            'click @ui.create': 'showCreateJob'
         },
 
-        createJob: function () {
-            // TODO
-            console.log( 'create job' );
+        showCreateJob: function () {
+            App.modal.show(
+                new Jobs.CreateJobView( {
+                    model: new Jobs.NewJob()
+                } )
+            );
         }
     } );
 
@@ -102,6 +116,27 @@ App.module( 'Jobs', function ( Jobs, App, Backbone ) {
 
         initialize: function () {
             this.collection.fetch();
+        },
+
+        appendHtml: function ( collectionView, itemView, index ) {
+            var childrenContainer,
+                children;
+
+            if ( collectionView.isBuffering ) {
+                collectionView._bufferedChildren.push( itemView );
+            }
+
+            childrenContainer = collectionView.isBuffering ?
+                $( collectionView.elBuffer ) :
+                this.getItemViewContainer( collectionView );
+
+            children = childrenContainer.children();
+
+            if ( children.size() <= index ) {
+                childrenContainer.append( itemView.el );
+            } else {
+                children.eq( index ).before( itemView.el );
+            }
         }
     } );
 
@@ -141,6 +176,34 @@ App.module( 'Jobs', function ( Jobs, App, Backbone ) {
     } );
 
     /**
+     * New job model
+     */
+    Jobs.NewJob = Backbone.Model.extend( {
+        defaults: {
+            browsers: [],
+            description: '',
+            tests: []
+        },
+
+        initialize: function () {
+            this.set( 'tests', App.Tests.testsList.getIds() );
+            // this.set(
+            //     'browsers',
+            //     App.Browsers.browsersList.map( function ( browser ) {
+            //         return browser.get( 'id' );
+            //     } )
+            // );
+        },
+
+        validate: function ( attrs ) {
+            if ( !attrs.browsers.length ) return 'no browsers specified';
+            if ( !attrs.tests.length ) return 'no tests specified';
+        },
+
+        urlRoot: '/jobs'
+    } );
+
+    /**
      * Task row view
      */
     Jobs.TaskView = Backbone.Marionette.ItemView.extend( {
@@ -168,7 +231,6 @@ App.module( 'Jobs', function ( Jobs, App, Backbone ) {
                 );
         }
     } );
-
 
     /**
      * Job details view
@@ -200,20 +262,83 @@ App.module( 'Jobs', function ( Jobs, App, Backbone ) {
         }
     } );
 
-    Jobs.TaskErrorsView = Backbone.Marionette.ItemView.extend( {
-        template: '#task-errors',
-        className: 'modal-content',
-
-        onRender: function () {
-            this.$el.wrap( '<div class="modal-dialog"></div>' );
-            this.$el = this.$el.parent();
-            this.setElement( this.$el );
-        }
+    /**
+     * Task errors view
+     */
+    Jobs.TaskErrorsView = App.Common.ModalView.extend( {
+        template: '#task-errors'
     } );
 
-    Jobs.CreateJobView = Backbone.Marionette.ItemView.extend( {
+    /**
+     * Create a job view
+     */
+    Jobs.CreateJobView = App.Common.ModalView.extend( {
         template: '#create-job',
-        className: 'modal-dialog'
+
+        ui: {
+            'browsers': '.job-browsers',
+            'description': '.job-description'
+        },
+
+        events: {
+            'change .job-browsers': 'updateBrowsers',
+            'click .dropdown-menu a': 'addBrowser',
+            'click .create-button': 'createJob'
+        },
+
+        initialize: function () {
+            this.listenTo( this.model, 'change', this.updateUI );
+            this.listenTo( this.model, 'invalid', this.showError );
+            this.listenTo( this.model, 'sync', this.handleCreate );
+        },
+
+        updateUI: function () {
+            var model = this.model.toJSON();
+
+            this.ui.browsers.val( model.browsers.join( ' ' ) );
+            this.ui.description.val( model.description );
+        },
+
+        showError: function ( model, error ) {
+            // TODO show notification
+            console.log( 'invalid job -', error );
+        },
+
+        handleCreate: function () {
+            this.close();
+            Jobs.jobsList.fetch();
+        },
+
+        updateBrowsers: function () {
+            var browsers = $( event.target ).val().split( /\s+/ );
+
+            this.model.set( 'browsers', _.uniq( browsers ) );
+        },
+
+        addBrowser: function () {
+            var name = $( event.target ).text(),
+                browsers = this.model.get( 'browsers' );
+
+            if ( browsers.indexOf( name ) === -1 ) {
+                browsers = browsers.concat( name );
+                this.model.set( 'browsers', browsers );
+            }
+        },
+
+        createJob: function () {
+            var that = this;
+
+            if ( !this.model.get( 'tests' ).length ) {
+                App.Tests.testsList.fetch( {
+                    success: function () {
+                        that.model.set( 'tests', App.Tests.testsList.getIds() );
+                        that.model.save();
+                    }
+                } );
+            } else {
+                this.model.save();
+            }
+        }
     } );
 
     /**

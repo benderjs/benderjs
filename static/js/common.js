@@ -16,6 +16,7 @@ App.module( 'Common', function ( Common, App, Backbone ) {
         className: 'modal-content',
 
         onRender: function () {
+            this.undelegateEvents();
             this.$el.wrap( '<div class="modal-dialog"></div>' );
             this.$el = this.$el.parent();
             this.setElement( this.$el );
