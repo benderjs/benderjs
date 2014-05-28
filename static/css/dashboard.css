@@ -208,10 +208,6 @@ th:last-child {
     white-space: nowrap;
 }
 
-.modal {
-    display: block;
-}
-
 button .loader {
     display: none;
     position: relative;

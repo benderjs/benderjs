@@ -44,6 +44,9 @@
             <!-- place for a subpage content -->
         </div>
     </div>
+    <div class="modal fade" id="modal">
+        <!-- place for a dialog modal -->
+    </div>
     <div class="footer">
         <!-- place for a footer -->
     </div>
@@ -267,72 +270,66 @@
     </script>
 
 
-
-
-
-    <script type="text/html" id="modal">
-    <div class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                {{yield}}
+    <!-- template for create a job modal -->
+    <script type="text/html" id="create-job">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" class="close">&times;</button>
+            <h4 class="modal-title">Create a job</h4>
+        </div>
+        <div class="modal-body">
+            <div class="form-group input-append btn-group">
+                <label for="job-description">Browsers</label>
+                <input type="text" class="form-control job-browsers" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value="<%= jobBrowsers %>">
+                <ul class="dropdown-menu">
+                    <% _.each(browsers, function (browser) {
+                        <li><a><%= browser.id %></a></li>
+                    <% }) %>
+                </ul>
+            </div>
+            <div class="form-group">
+                <label for="job-description">Job description <span>(optional)</span></label>
+                <input type="text" class="form-control job-description" name="job-description" placeholder="Enter job description" value="<%= description %>">
             </div>
         </div>
-    </div>
-    <div class="modal-backdrop fade in"></div>
-    </script>
-
-    <script type="text/html" id="create-job">
-    <div class="modal-header">
-        <button type="button" class="close" {{action "closeCreateJob"}} {{bind-attr disabled=isCreating}}>&times;</button>
-        <h4 class="modal-title">Create a job</h4>
-    </div>
-    <div class="modal-body">
-        <div class="form-group input-append btn-group">
-            <label for="job-description">Browsers</label>
-            {{input type="text" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value=newJob.browsersText}}
-            <ul class="dropdown-menu">
-                {{#each controllers.browsers.content}}
-                    <li><a {{action "addBrowser" id}}>{{id}}</a></li>
-                {{/each}}
-            </ul>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary create-button">
+                Create <span class="loader"></span>
+            </button>
         </div>
-        <div class="form-group">
-            <label for="job-description">Job description <span>(optional)</span></label>
-            {{input type="text" class="form-control" name="job-description" placeholder="Enter job description" value=newJob.description}}
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" {{action "closeCreateJob"}} {{bind-attr disabled=isCreating}}>Cancel</button>
-        <button type="button" class="btn btn-primary" {{action "createJob"}} {{bind-attr disabled=isCreating}}>
-            Create
-            <span class="loader"></span>
-        </button>
-    </div>
-    </script>
-    
-    <script type="text/html" id="job-errors">
-    <div class="modal-header">
-        <button type="button" class="close" {{action "closeModal"}}>&times;</button>
-        <h4 class="modal-title">Error details</h4>
-    </div>
-    <div class="modal-body">
-    {{#each errors}}
-        <p>
-            <strong>{{name}}</strong><br>
-            <pre>{{error}}</pre>
-        </p>
-    {{/each}}
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" {{action "closeModal"}}>Cancel</button>
     </div>
     </script>
 
+
+    <!-- template for task errors modal -->
+    <script type="text/html" id="task-errors">
+        <div class="modal-header">
+            <button type="button" data-dismiss="modal" class="close">&times;</button>
+            <h4 class="modal-title">Error details for <%= id %></h4>
+        </div>
+        <div class="modal-body">
+        <% _.each(errors, function (error) { %>
+            <p>
+                <strong><%= error.name %></strong><br>
+                <pre><%- error.error %></pre>
+            </p>
+        <% }) %>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        </div>
+    </script>
+
+
+    <!-- template for error 404 page -->
     <script type="text/html" id="error404">
     <h4>Error 404</h4>
     <h5>Page not found</h5>
     </script>
 
+
+    <!-- template for unknown error page -->
     <script type="text/html" id="error">
     <h4>Error</h4>
     <h5>Unknown error occured</h5>
@@ -350,6 +347,8 @@
     <script src="/js/bender.js"></script>
 
     <script src="/js/main.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/tabs.js"></script>
     <script src="/js/sockets.js"></script>
     <script src="/js/tests.js"></script>
     <script src="/js/jobs.js"></script>
