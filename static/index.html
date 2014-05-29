@@ -37,14 +37,17 @@
         <div id="tabs">
             <!-- place for a tab navigation -->
         </div>
-        <div class="header" id="header">
+        <div id="header" class="header">
             <!-- place for a subpage header -->
         </div>
-        <div class="content" id="content">
+        <div id="content" class="content">
             <!-- place for a subpage content -->
         </div>
     </div>
-    <div class="modal fade" id="modal">
+    <div id="modal" class="modal fade">
+        <!-- place for a dialog modal -->
+    </div>
+    <div id="alerts" class="alerts">
         <!-- place for a dialog modal -->
     </div>
     <div class="footer">
@@ -122,7 +125,7 @@
     </script>
 
 
-    <!-- template for jobs tab header -->    
+    <!-- template for jobs tab header -->
     <script type="text/html" id="jobs-header">
     <div class="col-md-12">
         <button type="button" class="btn btn-primary create-button">
@@ -151,7 +154,7 @@
 
     <!-- template for empty jobs table -->
     <script type="text/html" id="no-jobs">
-    <td colspan="4">No jobs found.</td>
+    <td colspan="4" class="empty">No jobs found.</td>
     </script>
 
 
@@ -332,7 +335,14 @@
     <h4>Error</h4>
     <h5>Unknown error occured</h5>
     </script>
-    
+
+
+	<!-- template for an alert -->
+    <script type="text/html" id="alert">
+    <strong><%= title %></strong> <%= message %>
+    </script>
+
+
     <script src="/socket.io/socket.io.js"></script>
 
     <script src="/js/libs/jquery-1.10.2.js"></script>
@@ -347,6 +357,7 @@
     <script src="/js/main.js"></script>
     <script src="/js/common.js"></script>
     <script src="/js/tabs.js"></script>
+    <script src="/js/alerts.js"></script>
     <script src="/js/sockets.js"></script>
     <script src="/js/tests.js"></script>
     <script src="/js/jobs.js"></script>

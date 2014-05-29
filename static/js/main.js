@@ -68,7 +68,8 @@ App.addRegions( {
 	tabs: '#tabs',
 	header: '#header',
 	content: '#content',
-	modal: App.ModalRegion
+	modal: App.ModalRegion,
+	alerts: '#alerts'
 } );
 
 App.on( 'initialize:after', function() {

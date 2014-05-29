@@ -115,9 +115,18 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			var ids;
 
 			if ( !this.model.get( 'running' ) ) {
+				ids = Tests.testsList.getIds();
+
+				if ( !ids.length ) {
+					return App.Alerts.Manager.add(
+						'danger',
+						'There are no tests to run, aborting.',
+						'Error:'
+					);
+				}
+
 				App.vent.trigger( 'tests:start' );
 
-				ids = Tests.testsList.getIds();
 				this.model.start( ids.length );
 				bender.run( ids );
 			} else {

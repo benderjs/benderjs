@@ -107,6 +107,14 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	} );
 
 	/**
+	 * Empty jobs list view
+	 */
+	Jobs.NoJobsView = Backbone.Marionette.ItemView.extend( {
+		template: '#no-jobs',
+		tagName: 'tr'
+	} );
+
+	/**
 	 * Jobs list view
 	 */
 	Jobs.JobsListView = App.Common.TableView.extend( {
@@ -139,15 +147,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			}
 		}
 	} );
-
-	/**
-	 * Empty jobs list view
-	 */
-	Jobs.NoJobsView = Backbone.Marionette.ItemView.extend( {
-		template: '#no-jobs',
-		tagName: 'tr'
-	} );
-
 
 	/**
 	 * Job details model
@@ -197,10 +196,10 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		validate: function( attrs ) {
 			if ( !attrs.browsers.length ) {
-				return 'no browsers specified';
+				return 'No browsers specified for the job';
 			}
 			if ( !attrs.tests.length ) {
-				return 'no tests specified';
+				return 'No tests specified for the job';
 			}
 		},
 
@@ -305,11 +304,15 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		showError: function( model, error ) {
-			// TODO show notification
-			console.log( 'invalid job -', error );
+			App.Alerts.Manager.add( 'danger', error, 'Error:' );
 		},
 
-		handleCreate: function() {
+		handleCreate: function( model ) {
+			App.Alerts.Manager.add(
+				'success',
+				'New job added with ID: <a href="/#jobs/' + model.id + '">' + model.id + '</a>.',
+				'Success!'
+			);
 			this.close();
 			Jobs.jobsList.fetch();
 		},
