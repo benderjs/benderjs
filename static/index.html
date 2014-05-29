@@ -284,7 +284,7 @@
     <div class="modal-body">
         <div class="form-group input-append btn-group">
             <label for="job-browsers">Browsers</label>
-            <input type="text" class="form-control job-browsers" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value="<%= browsers.join(' ') %>">
+            <input type="text" id="job-browsers" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value="<%= browsers.join(' ') %>">
             <ul class="dropdown-menu">
                 <% _.each(App.Browsers.browsersList.models, function (browser) { %>
                     <li><a><%= browser.id %></a></li>
@@ -293,7 +293,7 @@
         </div>
         <div class="form-group">
             <label for="job-description">Job description <span>(optional)</span></label>
-            <input type="text" class="form-control job-description" name="job-description" placeholder="Enter job description" value="<%= description %>">
+            <input type="text" id="job-description" class="form-control" name="job-description" placeholder="Enter job description" value="<%= description %>">
         </div>
     </div>
     <div class="modal-footer">

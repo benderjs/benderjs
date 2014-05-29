@@ -280,8 +280,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		template: '#create-job',
 
 		ui: {
-			'browsers': '.job-browsers',
-			'description': '.job-description'
+			'browsers': '#job-browsers',
+			'description': '#job-description'
 		},
 
 		events: {
@@ -323,11 +323,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.model.set( 'browsers', _.uniq( browsers ) );
 		},
 
-		addBrowser: function() {
-			var name = $( event.target ).text(),
-				browsers = this.model.get( 'browsers' );
+		addBrowser: function( event ) {
+			var browsers = this.model.get( 'browsers' ),
+				name = $( event.target ).text().trim();
 
-			if ( browsers.indexOf( name ) === -1 ) {
+			if ( name && browsers.indexOf( name ) === -1 ) {
 				browsers = browsers.concat( name );
 				this.model.set( 'browsers', browsers );
 			}
