@@ -3,6 +3,7 @@
  * @module App.Sockets
  */
 App.module( 'Sockets', function( Sockets, App, Backbone ) {
+	'use strict';
 
 	Sockets.status = new( Backbone.Model.extend( {
 		defaults: {

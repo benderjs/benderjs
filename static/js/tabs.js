@@ -1,4 +1,5 @@
 App.module( 'Tabs', function( Tabs, App, Backbone ) {
+	'use strict';
 
 	/**
 	 * Tab model

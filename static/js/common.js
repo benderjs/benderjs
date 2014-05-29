@@ -1,4 +1,6 @@
 App.module( 'Common', function( Common, App, Backbone ) {
+	'use strict';
+
 	/**
 	 * Table view used for displaying collections in bootstrap styled tables
 	 * @extends {Backbone.Marionette.CompositeView}

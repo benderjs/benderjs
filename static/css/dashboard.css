@@ -112,13 +112,12 @@ th:last-child {
     padding-bottom: 11px;
 }
 
-.jobs td:last-child,
-.jobs th:last-child {
+.jobs .results {
     padding-top: 0;
     padding-bottom: 0;
 }
 
-.jobs .empty:last-child {
+.jobs .empty {
 	padding: 8px;
 }
 
@@ -183,10 +182,6 @@ th:last-child {
     background-image: url('../images/logos/safari_32x32.png');
 }
 
-.btn-group {
-    display: block;
-}
-
 .alert-wrapper {
     z-index: 1060;
     position: fixed;
@@ -223,4 +218,8 @@ button .loader {
 
 button:disabled .loader {
     display: inline-block;
+}
+
+.job-browsers-group {
+	display: block;
 }

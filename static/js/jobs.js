@@ -1,4 +1,5 @@
 App.module( 'Jobs', function( Jobs, App, Backbone ) {
+	'use strict';
 
 	/**
 	 * Router for Jobs module

@@ -1,4 +1,5 @@
 App.module( 'Browsers', function( Browsers, App, Backbone ) {
+	'use strict';
 
 	/**
 	 * Router for Browsers module

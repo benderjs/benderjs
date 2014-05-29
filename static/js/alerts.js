@@ -1,4 +1,5 @@
 App.module( 'Alerts', function( Alerts, App, Backbone ) {
+	'use strict';
 
 	Alerts.TIMEOUT = 3000;
 

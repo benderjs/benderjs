@@ -1,374 +1,383 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Bender Dashboard</title>
+	<meta charset="utf-8">
+	<title>Bender Dashboard</title>
 
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <link rel="stylesheet" href="/css/bootstrap.css">
-    <link rel="stylesheet" href="/css/dashboard.css">
+	<link rel="stylesheet" href="/css/bootstrap.css">
+	<link rel="stylesheet" href="/css/dashboard.css">
 
-    <!--[if lt IE 9]>
-    <script type='text/javascript' src="/js/libs/css3-mediaqueries.js"></script>
-    <script type='text/javascript' src="/js/libs/html5shiv.min.js"></script>
-    <script type='text/javascript' src="/js/libs/es5-shim.min.js"></script>
-    <script type='text/javascript' src="/js/libs/respond.min.js"></script>
-    <![endif]-->
+	<!--[if lt IE 9]>
+	<script type='text/javascript' src="/js/libs/css3-mediaqueries.js"></script>
+	<script type='text/javascript' src="/js/libs/html5shiv.min.js"></script>
+	<script type='text/javascript' src="/js/libs/es5-shim.min.js"></script>
+	<script type='text/javascript' src="/js/libs/respond.min.js"></script>
+	<![endif]-->
 </head>
 <body>
-    <div id="context">
-        <!-- place for a test iframe -->
-    </div>
-    <nav class="navbar navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <a class="navbar-brand app-title" href="#">Bender Dashboard</a>
-                <p class="navbar-text" id="socket-status"></p>
-            </div>
-            <div class="navbar-right">
-                <a class="btn btn-default navbar-btn" href="/capture" title="Capture browser">
-                    <span class="glyphicon glyphicon-download"></span> Capture browser
-                </a>
-            </div>
-        </div>
-        <div class="container">
-        <div id="tabs">
-            <!-- place for a tab navigation -->
-        </div>
-    </div>
-    </nav>
-    <div class="container">
-    	<div id="header" class="header">
-            <!-- place for a subpage header -->
-        </div>
-        <div id="content" class="content">
-            <!-- place for a subpage content -->
-        </div>
-    </div>
-    <div id="modal" class="modal fade">
-        <!-- place for a dialog modal -->
-    </div>
-    <div id="alerts" class="alerts">
-        <!-- place for a dialog modal -->
-    </div>
-    <div class="footer">
-        <!-- place for a footer -->
-    </div>
+	<div id="context">
+		<!-- place for a test iframe -->
+	</div>
+	<nav class="navbar navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand app-title" href="#">Bender Dashboard</a>
+				<p class="navbar-text" id="socket-status"></p>
+			</div>
+			<div class="navbar-right">
+				<a class="btn btn-default navbar-btn" href="/capture" title="Capture browser">
+					<span class="glyphicon glyphicon-download"></span> Capture browser
+				</a>
+			</div>
+		</div>
+		<div class="container">
+		<div id="tabs">
+			<!-- place for a tab navigation -->
+		</div>
+	</div>
+	</nav>
+	<div class="container">
+		<div id="header" class="header">
+			<!-- place for a subpage header -->
+		</div>
+		<div id="content" class="content">
+			<!-- place for a subpage content -->
+		</div>
+	</div>
+	<div id="modal" class="modal fade">
+		<!-- place for a dialog modal -->
+	</div>
+	<div id="alerts" class="alerts">
+		<!-- place for a dialog modal -->
+	</div>
+	<div class="footer">
+		<!-- place for a footer -->
+	</div>
 
 
-    <!-- template for a single tab -->
-    <script type="text/html" id="tab">
-        <a title="<%= label %>"><%= label %></a>
-    </script>
+	<!-- template for a single tab -->
+	<script type="text/html" id="tab">
+		<a title="<%= label %>"><%= label %></a>
+	</script>
 
 
-    <!-- template for tests table -->
-    <script type="text/html" id="tests">
-    <table class="table table-hover tests">
-        <thead>
-            <tr>
-                <th class="col-md-3">ID</th>
-                <th class="col-md-2">Group</th>
-                <th class="col-md-3">Tags</th>
-                <th class="col-md-4">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    </script>
+	<!-- template for tests table -->
+	<script type="text/html" id="tests">
+	<table class="table table-hover tests">
+		<thead>
+			<tr>
+				<th class="col-md-3">ID</th>
+				<th class="col-md-2">Group</th>
+				<th class="col-md-3">Tags</th>
+				<th class="col-md-4">Status</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	</script>
 
 
-    <!-- template for empty tests table -->
-    <script type="text/html" id="no-tests">
-    <td colspan="4">No tests found. Check your configuration file</td>
-    </script>
+	<!-- template for empty tests table -->
+	<script type="text/html" id="no-tests">
+	<td colspan="4">No tests found. Check your configuration file</td>
+	</script>
 
 
-    <!-- template for a single test row -->
-    <script type="text/html" id="test">
-    <td><a href="/tests/<%= id %>" title="<%= id %>"><%= id %></a></td>
-    <td><span title="<%= group %>"><%= group %></span></td>
-    <td title="<%= tags %>"><%= tags %></td>
-    <td><span class="glyphicon"></span><span class="result"><%= result %></span></td>
-    </script>
+	<!-- template for a single test row -->
+	<script type="text/html" id="test">
+	<td><a href="/tests/<%= id %>" title="<%= id %>"><%= id %></a></td>
+	<td><span title="<%= group %>"><%= group %></span></td>
+	<td title="<%= tags %>"><%= tags %></td>
+	<td><span class="glyphicon"></span><span class="result"><%= result %></span></td>
+	</script>
 
 
-    <!-- template for tests tab header -->
-    <script type="text/html" id="test-header">
-    <div class="col-md-6">
-        <p class="test-status">
-            <strong class="passed"><%= passed %></strong> passed /
-            <strong class="failed"><%= failed %></strong> failed in
-            <strong class="time"><%= timeToText(time) %></strong> -
-            <strong class="percent"><%= getPercent(completed, total) %></strong>
-        </p>
-    </div>
-    <div class="col-md-6">
-        <div class="form-inline filter-form" role="form">
-            <div class="form-group input-append btn-group">
-                <input type="text" class="form-control tag-filter" name="filter"
-                <%= running ? 'disabled="disabled"' : '' %> data-toggle="dropdown"
-                    placeholder="Filter tags" size="35" value="<%= filter %>" />
-                <span class="glyphicon glyphicon-remove clear-filter"
-                    <%= filter.length ? 'style="display: inline-block"' : '' %> ></span>
-                <ul class="dropdown-menu">
-                    <% _.each(tags, function (tag) { %>
-                    <li><a><%= tag %></a></li>
-                    <% }) %>
-                </ul>
-            </div>
-            <button type="button" class="btn btn-primary run-button">
-                <span class="glyphicon glyphicon-<%= running ? 'stop' : 'play' %>"></span>
-            </button>
-        </div>
-    </div>
-    </script>
+	<!-- template for tests tab header -->
+	<script type="text/html" id="test-header">
+	<div class="col-md-6">
+		<p class="test-status">
+			<strong class="passed"><%= passed %></strong> passed /
+			<strong class="failed"><%= failed %></strong> failed in
+			<strong class="time"><%= timeToText(time) %></strong> -
+			<strong class="percent"><%= getPercent(completed, total) %></strong>
+		</p>
+	</div>
+	<div class="col-md-6">
+		<div class="form-inline filter-form" role="form">
+			<div class="btn-group" data-toggle="buttons">
+			  <label class="btn btn-primary">
+				<input type="radio" name="options" id="all" checked> All
+			  </label>
+			  <label class="btn btn-danger">
+				<input type="radio" name="options" id="failed"> Failed
+			  </label>
+			</div>
+
+			<div class="form-group input-append btn-group">
+				<input type="text" class="form-control tag-filter" name="filter"
+				<%= running ? 'disabled="disabled"' : '' %> data-toggle="dropdown"
+					placeholder="Filter tags" size="35" value="<%= filter %>" />
+				<span class="glyphicon glyphicon-remove clear-filter"
+					<%= filter.length ? 'style="display: inline-block"' : '' %> ></span>
+				<ul class="dropdown-menu">
+					<% _.each(tags, function (tag) { %>
+					<li><a><%= tag %></a></li>
+					<% }) %>
+				</ul>
+			</div>
+			<button type="button" class="btn btn-primary run-button">
+				<span class="glyphicon glyphicon-<%= running ? 'stop' : 'play' %>"></span>
+			</button>
+		</div>
+	</div>
+	</script>
 
 
-    <!-- template for jobs tab header -->
-    <script type="text/html" id="jobs-header">
-    <div class="col-md-12">
-        <button type="button" class="btn btn-primary create-button">
-            <span class="glyphicon glyphicon-file"></span> Create a job
-        </button>
-    </div>
-    </script>
+	<!-- template for jobs tab header -->
+	<script type="text/html" id="jobs-header">
+	<div class="col-md-12">
+		<button type="button" class="btn btn-primary create-button">
+			<span class="glyphicon glyphicon-file"></span> Create a job
+		</button>
+	</div>
+	</script>
 
 
-    <!-- template for jobs table -->
-    <script type="text/html" id="jobs">
-    <table class="table table-hover jobs">
-        <thead>
-            <tr>
-                <th class="col-md-1">ID</th>
-                <th class="col-md-2">Description</th>
-                <th class="col-md-2">Created</th>
-                <th class="col-md-7">Results</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    </script>
+	<!-- template for jobs table -->
+	<script type="text/html" id="jobs">
+	<table class="table table-hover jobs">
+		<thead>
+			<tr>
+				<th class="col-md-1">ID</th>
+				<th class="col-md-2">Description</th>
+				<th class="col-md-2">Created</th>
+				<th class="col-md-7">Results</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	</script>
 
 
-    <!-- template for empty jobs table -->
-    <script type="text/html" id="no-jobs">
-    <td colspan="4" class="empty">No jobs found.</td>
-    </script>
+	<!-- template for empty jobs table -->
+	<script type="text/html" id="no-jobs">
+	<td colspan="4" class="empty">No jobs found.</td>
+	</script>
 
 
-    <!-- template for a single job row -->
-    <script type="text/html" id="job-row">
-    <td><a href="#jobs/<%= id %>"><%= id %></a></td>
-    <td><%= description %></td>
-    <td><small><%= getTime(created) %></small></td>
-    <td>
-        <% _.each(results, function (result) { %>
-        <div class="browser <%= result.name %> <%= getResultStyle(result) %>">
-            <span class="glyphicon <%= getIcon(result) %>"></span>
-            <small><%= result.version ? result.version : '-' %></small>
-        </div>
-        <% }) %>
-    </td>
-    </script>
+	<!-- template for a single job row -->
+	<script type="text/html" id="job-row">
+	<td><a href="#jobs/<%= id %>"><%= id %></a></td>
+	<td><%= description %></td>
+	<td><small><%= getTime(created) %></small></td>
+	<td class="results">
+		<% _.each(results, function (result) { %>
+		<div class="browser <%= result.name %> <%= getResultStyle(result) %>">
+			<span class="glyphicon <%= getIcon(result) %>"></span>
+			<small><%= result.version ? result.version : '-' %></small>
+		</div>
+		<% }) %>
+	</td>
+	</script>
 
 
-    <!-- template for browsers table -->
-    <script type="text/html" id="browsers">
-    <table class="table table-hover table-condensed browsers">
-        <thead>
-            <tr>
-                <th class="col-md-2">Browser</th>
-                <th class="col-md-4">ID</th>
-                <th class="col-md-3">UA</th>
-                <th class="col-md-2">Address</th>
-                <th class="col-md-1">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    </script>
+	<!-- template for browsers table -->
+	<script type="text/html" id="browsers">
+	<table class="table table-hover table-condensed browsers">
+		<thead>
+			<tr>
+				<th class="col-md-2">Browser</th>
+				<th class="col-md-4">ID</th>
+				<th class="col-md-3">UA</th>
+				<th class="col-md-2">Address</th>
+				<th class="col-md-1">Status</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	</script>
 
 
-    <!-- template for empty browsers table -->
-    <script type="text/html" id="no-browsers">
-    <td colspan="5">No browsers found. Check your configuration file</td>
-    </script>
+	<!-- template for empty browsers table -->
+	<script type="text/html" id="no-browsers">
+	<td colspan="5">No browsers found. Check your configuration file</td>
+	</script>
 
 
-    <!-- template for a single browser row -->
-    <script type="text/html" id="browser">
-    <% if (header) { %>
-        <th class="browser <%= name %>"><%= id %></th>
-        <th colspan="4"></th>
-    <% } else { %>
-        <td></td>
-        <td><%= id %></td>
-        <td><%= ua %></td>
-        <td><%= addr %></td>
-        <td>
-            <span class="label label-<%= ready ? 'success' : 'warning' %>">
-                <%= ready ? 'ready' : 'busy' %>
-            </span>
-        </td>
-    <% } %>
-    </script>
+	<!-- template for a single browser row -->
+	<script type="text/html" id="browser">
+	<% if (header) { %>
+		<th class="browser <%= name %>"><%= id %></th>
+		<th colspan="4"></th>
+	<% } else { %>
+		<td></td>
+		<td><%= id %></td>
+		<td><%= ua %></td>
+		<td><%= addr %></td>
+		<td>
+			<span class="label label-<%= ready ? 'success' : 'warning' %>">
+				<%= ready ? 'ready' : 'busy' %>
+			</span>
+		</td>
+	<% } %>
+	</script>
 
 
-    <!-- template for a job details page -->
-    <script type="text/html" id="job">
-    <div class="row">
-        <div class="col-md-6">
-            <h4><small>Job:</small> <%= id %> <small>created <%= getTime(created) %></small></h4>
-            <h4><small>Description:</small> <%= description ? description : '-' %></h4>
-        </div>
-        <div class="col-md-6 text-right">
-            <button type="button" class="btn btn-sm btn-primary back-button">
-                <span class="glyphicon glyphicon-arrow-left"></span> Back
-            </button>
-            <button type="button" title="Edit" class="btn btn-sm btn-default edit-button">
-                <span class="glyphicon glyphicon-edit"></span>
-            </button>
-            <button type="button" title="Remove" class="btn btn-sm btn-danger remove-button">
-                <span class="glyphicon glyphicon-remove"></span>
-            </button>
-            <button type="button" title="Restart" class="btn btn-sm btn-success restart-button">
-                <span class="glyphicon glyphicon-play"></span>
-            </button>
-        </div>
-    </div>
-    <div class="panel panel-default">
-        <table class="table table-hover jobs">
-            <thead>
-                <tr>
-                    <th class="col-md-3">Test ID</th>
-                    <th>
-                        <% _.each(browsers, function (browser) { %>
-                        <div class="browser <%= browser.name %>">
-                            <small><%= browser.version ? browser.version : '-' %></small>
-                        </div>
-                        <% }) %>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-    </script>
+	<!-- template for a job details page -->
+	<script type="text/html" id="job">
+	<div class="row">
+		<div class="col-md-6">
+			<h4><small>Job:</small> <%= id %> <small>created <%= getTime(created) %></small></h4>
+			<h4><small>Description:</small> <%= description ? description : '-' %></h4>
+		</div>
+		<div class="col-md-6 text-right">
+			<button type="button" class="btn btn-sm btn-primary back-button">
+				<span class="glyphicon glyphicon-arrow-left"></span> Back
+			</button>
+			<button type="button" title="Edit" class="btn btn-sm btn-default edit-button">
+				<span class="glyphicon glyphicon-edit"></span>
+			</button>
+			<button type="button" title="Remove" class="btn btn-sm btn-danger remove-button">
+				<span class="glyphicon glyphicon-remove"></span>
+			</button>
+			<button type="button" title="Restart" class="btn btn-sm btn-success restart-button">
+				<span class="glyphicon glyphicon-play"></span>
+			</button>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<table class="table table-hover jobs">
+			<thead>
+				<tr>
+					<th class="col-md-3">Test ID</th>
+					<th>
+						<% _.each(browsers, function (browser) { %>
+						<div class="browser <%= browser.name %>">
+							<small><%= browser.version ? browser.version : '-' %></small>
+						</div>
+						<% }) %>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+	</script>
 
 
-    <!-- template for a single task row -->
-    <script type="text/html" id="task">
-        <td><span title="<%= id %>"><%= id %></span></td>
-        <td>
-            <% _.each(results, function (result) { %>
-                <div class="result <%= getResultStyle(result) %> <% if (result.errors) { %>clickable<% } %>">
-                    <span class="glyphicon <%= getIcon(result) %>"></span>
-                </div>
-            <% }) %>
-        </td>
-    </script>
+	<!-- template for a single task row -->
+	<script type="text/html" id="task">
+		<td><span title="<%= id %>"><%= id %></span></td>
+		<td class="results">
+			<% _.each(results, function (result) { %>
+				<div class="result <%= getResultStyle(result) %> <% if (result.errors) { %>clickable<% } %>">
+					<span class="glyphicon <%= getIcon(result) %>"></span>
+				</div>
+			<% }) %>
+		</td>
+	</script>
 
 
-    <!-- template for create a job modal -->
-    <script type="text/html" id="create-job">
-    <div class="modal-header">
-        <button type="button" data-dismiss="modal" class="close">&times;</button>
-        <h4 class="modal-title">Create a job</h4>
-    </div>
-    <div class="modal-body">
-        <div class="form-group input-append btn-group">
-            <label for="job-browsers">Browsers</label>
-            <input type="text" id="job-browsers" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value="<%= browsers.join(' ') %>">
-            <ul class="dropdown-menu">
-                <% _.each(App.Browsers.browsersList.models, function (browser) { %>
-                    <li><a><%= browser.id %></a></li>
-                <% }) %>
-            </ul>
-        </div>
-        <div class="form-group">
-            <label for="job-description">Job description <span>(optional)</span></label>
-            <input type="text" id="job-description" class="form-control" name="job-description" placeholder="Enter job description" value="<%= description %>">
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary create-button">
-            Create <span class="loader"></span>
-        </button>
-    </div>
-    </script>
+	<!-- template for create a job modal -->
+	<script type="text/html" id="create-job">
+	<div class="modal-header">
+		<button type="button" data-dismiss="modal" class="close">&times;</button>
+		<h4 class="modal-title">Create a job</h4>
+	</div>
+	<div class="modal-body">
+		<div class="form-group input-append btn-group job-browsers-group">
+			<label for="job-browsers">Browsers</label>
+			<input type="text" id="job-browsers" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value="<%= browsers.join(' ') %>">
+			<ul class="dropdown-menu">
+				<% _.each(App.Browsers.browsersList.models, function (browser) { %>
+					<li><a><%= browser.id %></a></li>
+				<% }) %>
+			</ul>
+		</div>
+		<div class="form-group">
+			<label for="job-description">Job description <span>(optional)</span></label>
+			<input type="text" id="job-description" class="form-control" name="job-description" placeholder="Enter job description" value="<%= description %>">
+		</div>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+		<button type="button" class="btn btn-primary create-button">
+			Create <span class="loader"></span>
+		</button>
+	</div>
+	</script>
 
 
-    <!-- template for task errors modal -->
-    <script type="text/html" id="task-errors">
-    <div class="modal-header">
-        <button type="button" data-dismiss="modal" class="close">&times;</button>
-        <h4 class="modal-title">Error details for <%= id %></h4>
-    </div>
-    <div class="modal-body">
-    <% _.each(errors, function (error) { %>
-        <p>
-            <strong><%= error.name %></strong><br>
-            <pre><%- error.error %></pre>
-        </p>
-    <% }) %>
-    </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-    </div>
-    </script>
+	<!-- template for task errors modal -->
+	<script type="text/html" id="task-errors">
+	<div class="modal-header">
+		<button type="button" data-dismiss="modal" class="close">&times;</button>
+		<h4 class="modal-title">Error details for <%= id %></h4>
+	</div>
+	<div class="modal-body">
+	<% _.each(errors, function (error) { %>
+		<p>
+			<strong><%= error.name %></strong><br>
+			<pre><%- error.error %></pre>
+		</p>
+	<% }) %>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	</div>
+	</script>
 
 
-    <!-- template for error 404 page -->
-    <script type="text/html" id="error404">
-    <h4>Error 404</h4>
-    <h5>Page not found</h5>
-    </script>
+	<!-- template for error 404 page -->
+	<script type="text/html" id="error404">
+	<h4>Error 404</h4>
+	<h5>Page not found</h5>
+	</script>
 
 
-    <!-- template for unknown error page -->
-    <script type="text/html" id="error">
-    <h4>Error</h4>
-    <h5>Unknown error occured</h5>
-    </script>
+	<!-- template for unknown error page -->
+	<script type="text/html" id="error">
+	<h4>Error</h4>
+	<h5>Unknown error occured</h5>
+	</script>
 
 
 	<!-- template for an alert -->
-    <script type="text/html" id="alert">
-    <strong><%= title %></strong> <%= message %>
-    </script>
+	<script type="text/html" id="alert">
+	<strong><%= title %></strong> <%= message %>
+	</script>
 
 
-    <script src="/socket.io/socket.io.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
 
-    <script src="/js/libs/jquery-1.10.2.js"></script>
-    <script src="/js/libs/underscore.js"></script>
-    <script src="/js/libs/moment.min.js"></script>
-    <script src="/js/libs/backbone.js"></script>
-    <script src="/js/libs/backbone.marionette.js"></script>
-    <script src="/js/libs/bootstrap.js"></script>
+	<script src="/js/libs/jquery-1.10.2.js"></script>
+	<script src="/js/libs/underscore.js"></script>
+	<script src="/js/libs/moment.min.js"></script>
+	<script src="/js/libs/backbone.js"></script>
+	<script src="/js/libs/backbone.marionette.js"></script>
+	<script src="/js/libs/bootstrap.js"></script>
 
-    <script src="/js/bender.js"></script>
+	<script src="/js/bender.js"></script>
 
-    <script src="/js/main.js"></script>
-    <script src="/js/common.js"></script>
-    <script src="/js/tabs.js"></script>
-    <script src="/js/alerts.js"></script>
-    <script src="/js/sockets.js"></script>
-    <script src="/js/tests.js"></script>
-    <script src="/js/jobs.js"></script>
-    <script src="/js/browsers.js"></script>
+	<script src="/js/main.js"></script>
+	<script src="/js/common.js"></script>
+	<script src="/js/tabs.js"></script>
+	<script src="/js/alerts.js"></script>
+	<script src="/js/sockets.js"></script>
+	<script src="/js/tests.js"></script>
+	<script src="/js/jobs.js"></script>
+	<script src="/js/browsers.js"></script>
 
-    <script>
-        $(function () {
-            App.start();
-        });
-    </script>
+	<script>
+		$(function () {
+			App.start();
+		});
+	</script>
 </body>
 </html>
