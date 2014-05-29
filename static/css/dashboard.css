@@ -1,5 +1,5 @@
 body {
-    padding-top: 70px;
+    padding-top: 92px;
 }
 
 a {
@@ -30,6 +30,10 @@ th:last-child {
 .header,
 .content {
     margin: 1em 0;
+}
+
+.navbar {
+	background: #fff;
 }
 
 .app-title {
