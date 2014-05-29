@@ -63,6 +63,6 @@
 	"safeContextKeyword": [ "that", "bender" ],
 	"requireDotNotation": true,
 	"disallowYodaConditions": true,
-	"requireLeftStickedOperators": [","],
-	"requireRightStickedOperators": ["!"]
+	"requireLeftStickedOperators": [ "," ],
+	"requireRightStickedOperators": [ "!" ]
 }
