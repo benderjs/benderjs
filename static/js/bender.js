@@ -1,4 +1,6 @@
 ( function( window ) {
+	'use strict';
+
 	var isIE = navigator.userAgent.match( /msie (\d+)/i );
 
 	function Bender() {
@@ -38,12 +40,18 @@
 			this.handlers[ name ].push( callback );
 		};
 
-		this.error = function() {
-			console.error.apply( console, arguments );
+		this.error = function( error ) {
+			console.error( JSON.parse( error ) );
+		};
+
+		this.log = function( message ) {
+			console.log( message );
 		};
 
 		// stubbed for compatibility
-		this.log = this.result = function() {};
+		this.result = function() {
+			console.log( arguments );
+		};
 
 		this.next = function( summary ) {
 			var id,
@@ -108,6 +116,18 @@
 					contextEl.removeChild( frame );
 				}
 			}
+		};
+
+		this.ignore = function( result ) {
+			result = JSON.parse( result );
+
+			result.passed = 0;
+			result.failed = 0;
+			result.ignored = 1;
+			result.duration = 0;
+			result.id = this.current;
+
+			this.next( JSON.stringify( result ) );
 		};
 
 		this.run = function( tests ) {

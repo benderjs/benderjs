@@ -1,4 +1,5 @@
 App.module( 'Tests', function( Tests, App, Backbone ) {
+	'use strict';
 
 	/**
 	 * Tests Router
@@ -210,7 +211,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				'';
 
 			this.ui.icon[ 0 ].className = 'glyphicon' + ( model.status ?
-				' glyphicon-' + ( model.status === 'success' ? 'ok' : 'remove' ) :
+				' glyphicon-' + ( model.status === 'success' ? 'ok' :
+					model.status === 'warning' ? 'forward' : 'remove' ) :
 				'' );
 		}
 	} );
@@ -308,7 +310,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		update: function( data ) {
-			var model;
+			var model,
+				ignored;
 
 			if ( typeof data == 'string' ) {
 				model = this.get( data );
@@ -319,9 +322,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} else if ( typeof data == 'object' && data !== null ) {
 				model = this.get( data.id );
 				if ( model ) {
+					ignored = data.passed === 0 && data.failed === 0 && data.ignored > 0;
+
 					model
 						.set( 'result', this.buildResult( data ) )
-						.set( 'status', data.success ? 'success' : 'danger' );
+						.set( 'status', data.success ? ignored ? 'warning' : 'success' : 'danger' );
 				}
 			}
 		},

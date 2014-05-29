@@ -1,7 +1,9 @@
 ( function() {
+	'use strict';
+
 	var statusEl = document.getElementById( 'status' ),
 		isIE = navigator.userAgent.match( /msie (\d+)/i ),
-		oldIE = isIE && isIE[ 1 ] < 9,
+		oldIE = isIE && Number( isIE[ 1 ] < 9 ),
 		fetchInterval = null,
 		states = {
 			CONNECT: 0,
@@ -47,7 +49,7 @@
 		}
 
 		this.error = function( error ) {
-			socket.emit( 'error', error );
+			socket.emit( 'error', JSON.parse( error ) );
 		};
 
 		this.result = function( result ) {
@@ -92,6 +94,11 @@
 
 				resetTestTimeout();
 			}
+		};
+
+		this.ignore = function( result ) {
+			this.results.success = false;
+			this.complete();
 		};
 
 		this.next = this.complete = function() {

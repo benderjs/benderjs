@@ -1,5 +1,11 @@
 ( function() {
-	var resultsEl = document.createElement( 'div' );
+	'use strict';
+
+	var resultsEl = document.createElement( 'div' ),
+		isIE = navigator.userAgent.match( /msie (\d+)/i ),
+		isOldIE = isIE && Number( isIE[ 1 ] ) < 9,
+		testId = window.location.pathname
+		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' );
 
 	resultsEl.className = 'results';
 
@@ -39,19 +45,35 @@
 		init;
 
 	function Bender() {
-		this.error = function() {
-			console.error.apply( console, arguments );
-		};
-
 		this.result = function( result ) {
 			addResult( result );
 		};
 
-		this.log = function() {
-			console.log.apply( console, arguments );
+		this.log = function( mesasge ) {
+			console.log( message );
+		};
+
+		this.ignore = function( result ) {
+			var resEl = document.createElement( 'li' );
+
+			resEl.className = 'warn';
+			resEl.innerHTML = '<p><strong>IGNORED</strong> Tests in <strong>' +
+				result.module + '</strong> were ignored for current browser\'s version</p>';
+
+			resultsEl.appendChild( resEl );
 		};
 
 		this.start = this.next = this.complete = function() {};
+	}
+
+	function start() {
+		if ( bender.ignoreOldIE && isOldIE ) {
+			bender.ignore( {
+				module: testId
+			} );
+		} else {
+			bender.start();
+		}
 	}
 
 	if ( launcher && launcher.bender && launcher.bender.runAsChild ) {
@@ -61,6 +83,12 @@
 			},
 			next: function( result ) {
 				launcher.bender.next( JSON.stringify( result ) );
+			},
+			ignore: function( result ) {
+				launcher.bender.ignore( JSON.stringify( result ) );
+			},
+			log: function( message ) {
+				launcher.bender.log( message );
 			}
 		};
 
@@ -68,17 +96,16 @@
 			launcher.bender.error( JSON.stringify( error ) );
 		};
 
-		init = function() {
-			bender.start();
-		};
+		init = start;
 	} else {
 		bender = new Bender();
 		init = function() {
 			document.body.appendChild( resultsEl );
-			bender.start();
+			start();
 		};
 	}
 
+	window.alert = bender.log;
 	window.bender = bender;
 
 	if ( window.addEventListener ) {
