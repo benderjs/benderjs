@@ -49,8 +49,12 @@
 		};
 
 		// stubbed for compatibility
-		this.result = function() {
-			console.log( arguments );
+		this.result = function( result ) {
+			result = JSON.parse( result );
+
+			if ( !result.success ) {
+				console.log( result );
+			}
 		};
 
 		this.next = function( summary ) {
