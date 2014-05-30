@@ -1,7 +1,8 @@
 ( function( window ) {
 	'use strict';
 
-	var isIE = navigator.userAgent.match( /msie (\d+)/i );
+	var isIE = navigator.userAgent.match( /msie (\d+)/i ),
+		supportsConsole = !!( window.console && window.console.log );
 
 	function Bender() {
 		var contextEl = document.getElementById( 'context' ),
@@ -41,18 +42,22 @@
 		};
 
 		this.error = function( error ) {
-			console.error( JSON.parse( error ) );
+			if ( supportsConsole ) {
+				console.error( JSON.parse( error ) );
+			}
 		};
 
 		this.log = function( message ) {
-			console.log( message );
+			if ( supportsConsole ) {
+				console.log( message );
+			}
 		};
 
 		// stubbed for compatibility
 		this.result = function( result ) {
 			result = JSON.parse( result );
 
-			if ( !result.success ) {
+			if ( !result.success && supportsConsole ) {
 				console.log( result );
 			}
 		};
