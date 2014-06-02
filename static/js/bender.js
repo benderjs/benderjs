@@ -43,7 +43,7 @@
 
 		this.error = function( error ) {
 			if ( supportsConsole ) {
-				console.error( JSON.parse( error ) );
+				console.log( JSON.parse( error ) );
 			}
 		};
 
@@ -54,13 +54,7 @@
 		};
 
 		// stubbed for compatibility
-		this.result = function( result ) {
-			result = JSON.parse( result );
-
-			if ( !result.success && supportsConsole ) {
-				console.log( result );
-			}
-		};
+		this.result = function() {};
 
 		this.next = function( summary ) {
 			var id,

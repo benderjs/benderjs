@@ -66,6 +66,12 @@
 			resultsEl.appendChild( resEl );
 		};
 
+		this.error = function( error ) {
+			if ( supportsConsole ) {
+				console.log( error.stack ? error.stack : error );
+			}
+		};
+
 		this.start = this.next = this.complete = function() {};
 	}
 
@@ -92,6 +98,9 @@
 			},
 			log: function( message ) {
 				launcher.bender.log( message );
+			},
+			error: function( error ) {
+				launcher.bender.error( JSON.stringify( error.stack ? error.stack : error ) );
 			}
 		};
 
