@@ -105,7 +105,7 @@
 		};
 
 		window.error = function( error ) {
-			launcher.bender.error( JSON.stringify( error ) );
+			launcher.bender.error( JSON.stringify( error.stack ? error.stack : error ) );
 		};
 
 		init = start;
