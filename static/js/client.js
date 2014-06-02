@@ -5,7 +5,8 @@
 		isIE = navigator.userAgent.match( /msie (\d+)/i ),
 		isOldIE = isIE && Number( isIE[ 1 ] ) < 9,
 		testId = window.location.pathname
-		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' );
+		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
+		supportsConsole = !!( window.console && window.console.log );
 
 	resultsEl.className = 'results';
 
@@ -49,8 +50,10 @@
 			addResult( result );
 		};
 
-		this.log = function( mesasge ) {
-			console.log( message );
+		this.log = function( message ) {
+			if ( supportsConsole ) {
+				console.log( message );
+			}
 		};
 
 		this.ignore = function( result ) {
