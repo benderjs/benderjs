@@ -1,7 +1,7 @@
 ( function( window ) {
 	'use strict';
 
-	var isIE = navigator.userAgent.match( /msie (\d+)/i ),
+	var isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1,
 		supportsConsole = !!( window.console && window.console.log );
 
 	function Bender() {

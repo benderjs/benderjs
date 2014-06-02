@@ -2,8 +2,9 @@
 	'use strict';
 
 	var resultsEl = document.createElement( 'div' ),
-		isIE = navigator.userAgent.match( /msie (\d+)/i ),
-		isOldIE = isIE && Number( isIE[ 1 ] ) < 9,
+		isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1,
+		ieVersion = navigator.userAgent.match( /msie (\d+)/i ),
+		isOldIE = isIE && ieVersion && Number( isIE[ 1 ] ) < 9,
 		testId = window.location.pathname
 		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
 		supportsConsole = !!( window.console && window.console.log );

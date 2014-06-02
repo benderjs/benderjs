@@ -2,8 +2,7 @@
 	'use strict';
 
 	var statusEl = document.getElementById( 'status' ),
-		isIE = navigator.userAgent.match( /msie (\d+)/i ),
-		oldIE = isIE && Number( isIE[ 1 ] < 9 ),
+		isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1,
 		fetchInterval = null,
 		states = {
 			CONNECT: 0,
