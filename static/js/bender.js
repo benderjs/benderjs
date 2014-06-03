@@ -81,7 +81,7 @@
 						testWindow.close();
 						setTimeout( function() {
 							runs = 0;
-							window.open( id, 'bendertest' );
+							testWindow = window.open( id, 'bendertest' );
 						}, 300 );
 					} else {
 						if ( !testWindow ) {
