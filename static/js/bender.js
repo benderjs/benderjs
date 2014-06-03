@@ -71,7 +71,7 @@
 			this.current = this.suite.shift();
 
 			if ( this.current ) {
-				id = '/tests/' + this.current;
+				id = '/' + this.current;
 				runs++;
 
 				this.emit( 'update', this.current );
@@ -84,7 +84,11 @@
 							window.open( id, 'bendertest' );
 						}, 300 );
 					} else {
-						testWindow = window.open( id, 'bendertest' );
+						if ( !testWindow ) {
+							testWindow = window.open( id, 'bendertest' );
+						} else {
+							testWindow.location.href = id;
+						}
 					}
 				} else {
 					if ( ( frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ] ) ) {
