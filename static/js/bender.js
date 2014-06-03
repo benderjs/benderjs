@@ -115,6 +115,7 @@
 
 			if ( isIE && testWindow ) {
 				testWindow.close();
+				testWindow = null;
 			} else {
 				frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ];
 
