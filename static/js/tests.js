@@ -82,6 +82,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			'click @ui.run': 'runTests',
 			'click @ui.clear': 'clearFilter',
 			'change @ui.filter': 'updateFilter',
+			'keyup @ui.filter': 'handleKeys',
 			'click .dropdown-menu a': 'addFilter'
 		},
 
@@ -152,6 +153,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.model.set( 'filter', tags.join( ' ' ).trim() );
 		},
 
+		handleKeys: function( event ) {
+			if ( event.which === 13 ) {
+				this.updateFilter();
+			}
+		},
+
 		filterTags: function() {
 			var filter = this.model.get( 'filter' );
 
@@ -194,11 +201,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
-		},
-
-		onRender: function() {
-			this.updateStatus();
+			this.listenTo( this.model, 'change', this.updateStatus );
 		},
 
 		updateStatus: function() {
@@ -214,6 +217,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				' glyphicon-' + ( model.status === 'success' ? 'ok' :
 					model.status === 'warning' ? 'forward' : 'remove' ) :
 				'' );
+
+			this.ui.result.text( model.result );
 		}
 	} );
 
@@ -263,6 +268,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			this.each( function( test ) {
 				test.set( 'visible', true );
+				// test.attributes.visible = true;
 			} );
 
 			if ( !filter ) {
@@ -295,7 +301,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					} );
 				}
 
-				test.set( 'visible', result );
+				if ( !result ) {
+					test.set( 'visible', result );
+				}
 			} );
 		},
 
