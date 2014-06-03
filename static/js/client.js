@@ -86,7 +86,7 @@
 		}
 	}
 
-	if ( launcher && launcher.bender && launcher.bender.runAsChild ) {
+	if ( launcher && launcher.bender && launcher.bender.runAsChild && window.location.hash === '#child' ) {
 		bender = {
 			result: function( result ) {
 				launcher.bender.result( JSON.stringify( result ) );

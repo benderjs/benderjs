@@ -71,7 +71,7 @@
 			this.current = this.suite.shift();
 
 			if ( this.current ) {
-				id = '/' + this.current;
+				id = '/' + this.current + '#child';
 				runs++;
 
 				this.emit( 'update', this.current );

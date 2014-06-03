@@ -69,6 +69,8 @@
 			if ( typeof id == 'string' ) {
 				runs++;
 
+				id += '#child';
+
 				if ( isIE ) {
 					if ( runs >= 20 && testWindow ) {
 						testWindow.close();
