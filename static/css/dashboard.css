@@ -58,6 +58,10 @@ th:last-child {
     text-align: left;
 }
 
+.tag-filter {
+	padding-left: 25px;
+}
+
 .clear-filter {
     margin-left: -25px;
     cursor: pointer;

@@ -20,6 +20,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			passed: 0,
 			failed: 0,
 			time: 0,
+			start: 0,
 			completed: 0,
 			total: 0,
 			tags: [],
@@ -40,6 +41,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				passed: 0,
 				failed: 0,
 				time: 0,
+				start: +new Date(),
 				completed: 0,
 				total: 0,
 				running: false
@@ -50,7 +52,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			if ( typeof data == 'object' && data !== null ) {
 				this.increment( 'passed', data.passed );
 				this.increment( 'failed', data.failed );
-				this.increment( 'time', data.duration );
+				this.set( 'time', new Date() - this.get( 'start' ) );
 				this.increment( 'completed', 1 );
 			}
 		},
