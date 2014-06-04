@@ -76,10 +76,18 @@
 	} );
 
 	App.on( 'initialize:after', function() {
+		App.$body = $( 'body' );
+		App.$navbar = $( '.navbar' );
+
 		Backbone.history.start();
+
 		if ( this.getCurrentRoute() === '' ) {
 			App.Tests.trigger( 'tests:list' );
 		}
+
+		Backbone.history.on( 'route', function( router ) {
+			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+		} );
 	} );
 
 } )( this );
