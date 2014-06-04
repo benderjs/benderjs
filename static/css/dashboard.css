@@ -58,20 +58,9 @@ th:last-child {
     text-align: left;
 }
 
-.tag-filter {
-	padding-left: 25px;
-}
-
-.clear-filter {
-    margin-left: -25px;
-    cursor: pointer;
-    color: #999;
-    margin-right: 7px;
-    display: none;
-}
-
-.clear-filter.visible {
-    display: inline-block;
+.run-button {
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
 .tests .result {

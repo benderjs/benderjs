@@ -7,6 +7,8 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
 	<link rel="stylesheet" href="/css/bootstrap.css">
+	<link rel="stylesheet" href="/css/chosen.css">
+	<link rel="stylesheet" href="/css/chosen-bootstrap.css">
 	<link rel="stylesheet" href="/css/dashboard.css">
 
 	<!--[if lt IE 9]>
@@ -119,16 +121,12 @@
 			-->
 
 			<div class="form-group input-append btn-group">
-				<input type="text" class="form-control tag-filter" name="filter"
-				<%= running ? 'disabled="disabled"' : '' %> data-toggle="dropdown"
-					placeholder="Filter tags" size="35" value="<%= filter %>" />
-				<span class="glyphicon glyphicon-remove clear-filter"
-					<%= filter.length ? 'style="display: inline-block"' : '' %> ></span>
-				<ul class="dropdown-menu">
+				<select data-placeholder="Filter tests..." multiple
+				class="tag-filter form-control" <%= running ? 'disabled="disabled"' : '' %>>
 					<% _.each(tags, function (tag) { %>
-					<li><a><%= tag %></a></li>
+					<option value="<%= tag %>" <%= filter.indexOf(tag) > -1 ? 'selected' : '' %>><%= tag %></option>
 					<% }) %>
-				</ul>
+				</select>
 			</div>
 			<button type="button" class="btn btn-primary run-button">
 				<span class="glyphicon glyphicon-<%= running ? 'stop' : 'play' %>"></span>
@@ -364,6 +362,7 @@
 	<script src="/js/libs/backbone.js"></script>
 	<script src="/js/libs/backbone.marionette.js"></script>
 	<script src="/js/libs/bootstrap.js"></script>
+	<script src="/js/libs/chosen.jquery.js"></script>
 
 	<script src="/js/bender.js"></script>
 

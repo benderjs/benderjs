@@ -24,7 +24,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			completed: 0,
 			total: 0,
 			tags: [],
-			filter: '',
+			filter: [],
 			running: false
 		},
 
@@ -82,10 +82,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		events: {
 			'click @ui.run': 'runTests',
-			'click @ui.clear': 'clearFilter',
-			'change @ui.filter': 'updateFilter',
-			'keyup @ui.filter': 'handleKeys',
-			'click .dropdown-menu a': 'addFilter'
+			'change @ui.filter': 'updateFilter'
 		},
 
 		templateHelpers: {
@@ -112,7 +109,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
-			this.listenTo( this.model, 'change', this.filterTags );
+		},
+
+		onRender: function() {
+			this.ui.filter.chosen( {
+				width: '300px'
+			} );
 		},
 
 		runTests: function() {
@@ -140,39 +142,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 		},
 
-		updateFilter: function() {
-			this.model.set( 'filter', this.ui.filter.val().trim() );
-		},
-
-		addFilter: function( event ) {
-			var tag = $( event.target ).text(),
-				tags = this.ui.filter.val().split( /\s+/ );
-
-			if ( tags.indexOf( tag ) === -1 ) {
-				tags.push( tag );
-			}
-
-			this.model.set( 'filter', tags.join( ' ' ).trim() );
-		},
-
-		handleKeys: function( event ) {
-			if ( event.which === 13 ) {
-				this.updateFilter();
-			}
-		},
-
-		filterTags: function() {
+		updateFilter: function( event, params ) {
 			var filter = this.model.get( 'filter' );
 
-			this.ui.clear.css( 'display', filter ? 'inline-block' : 'none' );
-
-			App.vent.trigger( 'tests:filter', filter );
-		},
-
-		clearFilter: function() {
-			if ( !this.model.get( 'running' ) ) {
-				this.model.set( 'filter', '' );
+			if ( params.selected ) {
+				filter.push( params.selected );
+			} else if ( params.deselected ) {
+				filter.splice( filter.indexOf( params.deselected ), 1 );
 			}
+
+			this.model.set( 'filter', filter );
+			App.vent.trigger( 'tests:filter', this.model.get( 'filter' ) );
 		}
 	} );
 
@@ -264,22 +244,18 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		filterTests: function( filter ) {
 			var includes = [],
-				excludes = [],
-				tags;
+				excludes = [];
 
 
 			this.each( function( test ) {
 				test.set( 'visible', true );
-				// test.attributes.visible = true;
 			} );
 
 			if ( !filter ) {
 				return;
 			}
 
-			tags = filter.split( /\s+/ );
-
-			_.each( tags, function( tag ) {
+			_.each( filter, function( tag ) {
 				if ( tag.charAt( 0 ) === '-' ) {
 					excludes.push( tag.slice( 1 ) );
 				} else if ( tag ) {
