@@ -62,8 +62,7 @@ th:last-child {
 }
 
 .run-button {
-	padding-top: 10px;
-	padding-bottom: 10px;
+	vertical-align: top;
 }
 
 .tests .result {

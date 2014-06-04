@@ -94,7 +94,7 @@ select.form-control + .chosen-container-multi .chosen-choices {
 	display: block;
 	width: 100%;
 	min-height: 34px;
-	padding: 6px;
+	padding: 2px 2px 0 2px;
 	font-size: 14px;
 	line-height: 1.428571429;
 	color: #555;
@@ -114,12 +114,13 @@ select.form-control + .chosen-container-multi .chosen-choices {
 select.form-control + .chosen-container-multi .chosen-choices li.search-field input[type="text"] {
 	height: auto;
 	padding: 5px 0;
+	text-indent: 6px;
 }
 
 select.form-control + .chosen-container-multi .chosen-choices li.search-choice {
 	background-image: none;
 	padding: 3px 24px 3px 5px;
-	margin: 0 6px 0 0;
+	margin: 0 2px 2px 0;
 	font-size: 14px;
 	font-weight: normal;
 	line-height: 1.428571429;
