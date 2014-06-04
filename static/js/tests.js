@@ -203,6 +203,24 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				'' );
 
 			this.ui.result.text( model.result );
+
+			// scroll window to make result visible if needed
+			if ( model.result ) {
+				var top = this.$el.offset().top,
+					bottom = top + this.$el.height(),
+					$window = $( window ),
+					scroll = $( window ).scrollTop(),
+					height = $window.height();
+
+
+				// item is hidden at the bottom
+				if ( scroll + height < bottom ) {
+					$window.scrollTop( bottom - height );
+					// item is hidden at the top
+				} else if ( scroll + App.$navbar.height() > top ) {
+					$( window ).scrollTop( top - App.$navbar.height() - 1 );
+				}
+			}
 		}
 	} );
 
