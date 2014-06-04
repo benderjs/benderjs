@@ -48,6 +48,9 @@
 
 	function Bender() {
 		this.result = function( result ) {
+			if ( !result.success && supportsConsole ) {
+				console.log( result );
+			}
 			addResult( result );
 		};
 
