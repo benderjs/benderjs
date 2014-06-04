@@ -1,17 +1,13 @@
 #!/usr/bin/env node
 
-'use strict';
-
 /**
+ * Copyright (c) 2014, CKSource - Frederico Knabben. All rights reserved.
+ * Licensed under the terms of the MIT License (see LICENSE.md).
+ *
  * @file Bender command line interface
  */
 
-// nodetime analytics code >>
-// var nt = require('nodetime').profile({
-//         accountKey: 'fa285297454b5d8a2a12e2686fc17c0a102a8c85',
-//         appName: 'Bender'
-//     }),
-// << nodetime analytics code
+'use strict';
 
 var argParser = require( 'nomnom' ),
 	path = require( 'path' ),
