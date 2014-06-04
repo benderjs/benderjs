@@ -57,3 +57,12 @@
 .results .fail strong {
     color: #900;
 }
+
+.results .info {
+	background: #d9edf7;
+    background: rgba(217, 237, 247, 0.7);
+}
+
+.results .info strong {
+	color: #069;
+}

@@ -73,7 +73,20 @@
 			}
 		};
 
-		this.start = this.next = this.complete = function() {};
+		this.next = function( result ) {
+			var resEl = document.createElement( 'li' );
+
+			resEl.className = 'info';
+			resEl.innerHTML = '<p><strong>Testing Done:</strong> ' +
+				result.passed + ' passed, ' + result.failed + ' failed' +
+				( result.ignored ? result.ignored + ', ignored ' : ' ' ) +
+				'in ' + result.duration + 'ms</p>';
+
+			resultsEl.appendChild( resEl );
+		};
+
+		this.start = this.complete = function() {};
+
 	}
 
 	function start() {
