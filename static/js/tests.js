@@ -113,8 +113,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		onRender: function() {
 			this.ui.filter.chosen( {
-				width: '300px'
+				width: '350px'
 			} );
+
+			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
 		},
 
 		runTests: function() {
