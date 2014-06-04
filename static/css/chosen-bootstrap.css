@@ -1,6 +1,6 @@
-/**
- * Based on: https://gist.github.com/koenpunt/6424137
- */
+/*
+Based on: https://gist.github.com/koenpunt/6424137
+*/
 select.form-control + .chosen-container-single .chosen-single {
 	display: block;
 	width: 100%;

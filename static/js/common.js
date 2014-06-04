@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2014, CKSource - Frederico Knabben. All rights reserved.
+ * Licensed under the terms of the MIT License (see LICENSE.md).
+ *
+ * @module App.Common
+ */
+
 App.module( 'Common', function( Common, App, Backbone ) {
 	'use strict';
 

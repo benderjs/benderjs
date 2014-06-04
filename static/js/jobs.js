@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2014, CKSource - Frederico Knabben. All rights reserved.
+ * Licensed under the terms of the MIT License (see LICENSE.md).
+ *
+ * @module App.Jobs
+ */
+
 App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	'use strict';
 
