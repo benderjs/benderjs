@@ -49,7 +49,7 @@
 	function Bender() {
 		this.result = function( result ) {
 			if ( !result.success && supportsConsole ) {
-				console.log( result );
+				console.log( result.module + ' FAILED\n' + result.error );
 			}
 			addResult( result );
 		};
