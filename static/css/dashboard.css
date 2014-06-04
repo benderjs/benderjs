@@ -1,5 +1,5 @@
 body {
-    padding-top: 92px;
+    padding-top: 163px;
 }
 
 a {
@@ -27,9 +27,12 @@ th:last-child {
     white-space: normal;
 }
 
-.header,
-.content {
+.header {
     margin: 1em 0;
+}
+
+.content {
+    margin: 0 0 1em;
 }
 
 .navbar {

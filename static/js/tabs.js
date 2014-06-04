@@ -100,6 +100,9 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 	} );
 
 	Tabs.addInitializer( function() {
+		var $body = $( 'body' ),
+			$navbar = $( '.navbar' );
+
 		App.tabs.show( new Tabs.TabListView( {
 			collection: Tabs.tabsList
 		} ) );
@@ -108,6 +111,8 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 			if ( router.name ) {
 				Tabs.tabsList.activateTab( router.name );
 			}
+
+			$body.css( 'paddingTop', $navbar.height() + 1 + 'px' );
 		} );
 	} );
 } );
