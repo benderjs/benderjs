@@ -275,7 +275,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 
 	<!-- template for a single task row -->
 	<script type="text/html" id="task">
-		<td><span title="<%= id %>"><%= id %></span></td>
+		<td><a href="/jobs/<%= jobId %>/tests/<%= id %>" title="<%= id %>"><%= id %></a></td>
 		<td class="results">
 			<% _.each(results, function (result) { %>
 				<div class="result <%= getResultStyle(result) %> <% if (result.errors) { %>clickable<% } %>">
@@ -366,6 +366,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<script src="/js/libs/bootstrap.js"></script>
 	<script src="/js/libs/chosen.jquery.js"></script>
 
+	<script src="/js/bender-config.js"></script>
 	<script src="/js/bender.js"></script>
 
 	<script src="/js/main.js"></script>
