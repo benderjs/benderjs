@@ -58,8 +58,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		update: function( data ) {
 			if ( typeof data == 'object' && data !== null ) {
-				this.increment( 'passed', data.passed );
-				this.increment( 'failed', data.failed );
+				this.increment( 'passed', data.passed || 0 );
+				this.increment( 'failed', data.failed || 0 );
 				this.set( 'time', new Date() - this.get( 'start' ) );
 				this.increment( 'completed', 1 );
 			}
