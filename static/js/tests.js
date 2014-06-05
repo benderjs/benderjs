@@ -211,6 +211,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.listenTo( this.model, 'change', this.updateStatus );
 		},
 
+		onRender: function() {
+			this.updateStatus();
+		},
+
 		updateStatus: function() {
 			var model = this.model.toJSON();
 
