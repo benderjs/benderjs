@@ -87,7 +87,7 @@
 			resEl.className = 'info';
 			resEl.innerHTML = '<p><strong>Testing Done:</strong> ' +
 				result.passed + ' passed, ' + result.failed + ' failed' +
-				( result.ignored ? result.ignored + ', ignored ' : ' ' ) +
+				( result.ignored ? ', ' + result.ignored + ' ignored ' : ' ' ) +
 				'in ' + result.duration + 'ms</p>';
 
 			resultsEl.appendChild( resEl );
