@@ -13,14 +13,43 @@
 
 	function Bender() {
 		var contextEl = document.getElementById( 'context' ),
-			testWindow = null,
-			runs = 0;
+			that = this,
+			runs = 0,
+			testTimeout,
+			testWindow;
 
 		this.handlers = {};
 		this.current = null;
 		this.suite = null;
 
 		this.runAsChild = true;
+
+		function clearTestTimeout() {
+			if ( testTimeout ) {
+				clearTimeout( testTimeout );
+			}
+		}
+
+		function resetTestTimeout() {
+			if ( !BENDER_CONFIG && !BENDER_CONFIG.testTimeout ) {
+				return;
+			}
+
+			clearTestTimeout();
+
+			testTimeout = setTimeout( function() {
+				console.log( 'broken test timeout' );
+
+				var result = {
+					id: that.current,
+					success: false,
+					broken: true
+				};
+
+				that.next( JSON.stringify( result ) );
+
+			}, BENDER_CONFIG.testTimeout );
+		}
 
 		this.emit = function( name ) {
 			var handlers = this.handlers[ name ],
@@ -61,7 +90,9 @@
 		};
 
 		// stubbed for compatibility
-		this.result = function() {};
+		this.result = function() {
+			resetTestTimeout();
+		};
 
 		this.next = function( summary ) {
 			var id,
@@ -71,7 +102,7 @@
 			if ( summary ) {
 				parsed = JSON.parse( summary );
 				parsed.id = this.current;
-				parsed.success = parsed.failed === 0;
+				parsed.success = parsed.success || ( parsed.failed === 0 );
 				this.emit( 'update', parsed );
 			}
 
@@ -94,7 +125,11 @@
 						if ( !testWindow ) {
 							testWindow = window.open( id, 'bendertest' );
 						} else {
-							testWindow.location.href = id;
+							if ( id === testWindow.location.href.split( testWindow.location.host )[ 1 ] ) {
+								testWindow.location.reload();
+							} else {
+								testWindow.location.href = id;
+							}
 						}
 					}
 				} else {
@@ -108,6 +143,8 @@
 					frame.src = id;
 					contextEl.appendChild( frame );
 				}
+
+				resetTestTimeout();
 			} else {
 				this.complete();
 			}
@@ -131,15 +168,15 @@
 					contextEl.removeChild( frame );
 				}
 			}
+
+			clearTestTimeout();
 		};
 
 		this.ignore = function( result ) {
 			result = JSON.parse( result );
 
-			result.passed = 0;
-			result.failed = 0;
-			result.ignored = 1;
-			result.duration = 0;
+			result.ignored = true;
+			result.success = true;
 			result.id = this.current;
 
 			this.next( JSON.stringify( result ) );

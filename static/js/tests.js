@@ -352,7 +352,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} else if ( typeof data == 'object' && data !== null ) {
 				model = this.get( data.id );
 				if ( model ) {
-					ignored = data.passed === 0 && data.failed === 0 && data.ignored > 0;
+					ignored = data.ignored === true;
 
 					model
 						.set( 'result', this.buildResult( data ) )
@@ -364,12 +364,21 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		buildResult: function( data ) {
 			var result = [];
 
-			result.push( data.passed, 'passed', '/' );
-			result.push( data.failed, 'failed' );
-			if ( data.ignored ) {
-				result.push( '/', data.ignored, 'ignored' );
+			// test was executed
+			if ( data.ignored !== true & !data.broken ) {
+				result.push( data.passed, 'passed', '/' );
+				result.push( data.failed, 'failed' );
+				if ( data.ignored ) {
+					result.push( '/', data.ignored, 'ignored' );
+				}
+				result.push( 'in', data.duration + 'ms' );
+				// test was ignored as a whole
+			} else if ( data.ignored === true ) {
+				result.push( 'IGNORED' );
+				// test was marked as broken
+			} else if ( data.broken ) {
+				result.push( 'BROKEN' );
 			}
-			result.push( 'in', data.duration + 'ms' );
 
 			return result.join( ' ' );
 		},
