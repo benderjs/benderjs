@@ -74,6 +74,14 @@ th:last-child {
     margin-left: .5em;
 }
 
+.tests-failed .test {
+	display: none !important;
+}
+
+.tests-failed .danger {
+	display: table-row !important;
+}
+
 .context-frame {
     position: fixed;
     top: 0;

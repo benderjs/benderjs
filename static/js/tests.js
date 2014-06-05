@@ -32,7 +32,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			total: 0,
 			tags: [],
 			filter: [],
-			running: false
+			running: false,
+			onlyFailed: false
 		},
 
 		initialize: function() {
@@ -84,12 +85,15 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		ui: {
 			'run': '.run-button',
 			'filter': '.tag-filter',
-			'clear': '.clear-filter'
+			'clear': '.clear-filter',
+			'all': '#all',
+			'failed': '#failed'
 		},
 
 		events: {
 			'click @ui.run': 'runTests',
-			'change @ui.filter': 'updateFilter'
+			'change @ui.filter': 'updateFilter',
+			'change #all, #failed': 'filterFailed'
 		},
 
 		templateHelpers: {
@@ -120,7 +124,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		onRender: function() {
 			this.ui.filter.chosen( {
-				width: '350px'
+				width: '400px'
 			} );
 
 			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
@@ -161,7 +165,18 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 
 			this.model.set( 'filter', filter );
-			App.vent.trigger( 'tests:filter', this.model.get( 'filter' ) );
+			App.vent.trigger( 'tests:filter', filter );
+		},
+
+		filterFailed: function() {
+			if ( this.ui.all.is( ':checked' ) ) {
+				this.model.set( 'onlyFailed', false );
+				$( '.tests' ).removeClass( 'tests-failed' );
+			} else if ( this.ui.failed.is( ':checked' ) ) {
+				this.model.set( 'onlyFailed', true );
+				$( '.tests' ).addClass( 'tests-failed' );
+			}
+
 		}
 	} );
 
@@ -185,6 +200,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	Tests.TestView = Backbone.Marionette.ItemView.extend( {
 		template: '#test',
 		tagName: 'tr',
+		className: 'test',
 
 		ui: {
 			icon: '.glyphicon',
@@ -198,11 +214,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		updateStatus: function() {
 			var model = this.model.toJSON();
 
-			this.$el[ model.visible ? 'show' : 'hide' ]();
-
-			this.el.className = model.status ?
-				model.status + ' bg-' + model.status + ' text-' + model.status :
-				'';
+			this.el.className = 'test ' +
+				( model.status ? model.status + ' bg-' + model.status + ' text-' + model.status : '' ) +
+				( model.visible ? '' : ' hidden' );
 
 			this.ui.icon[ 0 ].className = 'glyphicon' + ( model.status ?
 				' glyphicon-' + ( model.status === 'success' ? 'ok' :
@@ -382,7 +396,19 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	Tests.TestsListView = App.Common.TableView.extend( {
 		template: '#tests',
 		itemView: Tests.TestView,
-		emptyView: Tests.NoTestsView
+		emptyView: Tests.NoTestsView,
+
+		onRender: function() {
+			var status = Tests.testStatus.toJSON();
+
+			if ( status.onlyFailed ) {
+				this.$el.find( '.tests' ).addClass( 'tests-failed' );
+			}
+
+			if ( status.filter.length ) {
+				this.collection.filterTests( status.filter );
+			}
+		}
 	} );
 
 	/**
