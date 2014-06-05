@@ -15,7 +15,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		name: 'tests',
 
 		appRoutes: {
-			'tests': 'listTests'
+			'tests': 'listTests',
+			'tests/*filters': 'listTests'
 		}
 	} );
 
@@ -126,6 +127,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.ui.filter.chosen( {
 				width: '400px'
 			} );
+
+			App.navigate( 'tests/' + this.model.get( 'filter' ).join( ',' ), {
+				trigger: false
+			} );
 		},
 
 		runTests: function() {
@@ -164,6 +169,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			this.model.set( 'filter', filter );
 			App.vent.trigger( 'tests:filter', filter );
+			App.navigate( 'tests/' + filter.join( ',' ), {
+				trigger: false
+			} );
 			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
 		},
 
@@ -290,12 +298,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			var includes = [],
 				excludes = [];
 
-
-			this.each( function( test ) {
-				test.set( 'visible', true );
-			} );
-
+			// show all
 			if ( !filter ) {
+				this.each( function( test ) {
+					test.set( 'visible', true );
+				} );
+
 				return;
 			}
 
@@ -323,9 +331,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					} );
 				}
 
-				if ( !result ) {
-					test.set( 'visible', result );
-				}
+				test.set( 'visible', result );
 			} );
 		},
 
@@ -418,7 +424,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 
 			if ( status.filter.length ) {
-				this.collection.filterTests( status.filter );
+				App.vent.trigger( 'tests:filter', status.filter );
 			}
 		}
 	} );
@@ -428,7 +434,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	 * @type {Object}
 	 */
 	Tests.controller = {
-		listTests: function() {
+		listTests: function( filter ) {
+			if ( filter ) {
+				Tests.testStatus.set( 'filter', filter.split( ',' ) );
+			}
+
 			App.header.show( new Tests.TestHeaderView( {
 				model: Tests.testStatus
 			} ) );
@@ -437,7 +447,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				collection: Tests.testsList
 			} ) );
 
-			Tests.testsList.fetch();
+			Tests.testsList.fetch().done( function() {
+				Tests.testsList.filterTests( Tests.testStatus.get( 'filter' ) );
+			} );
 		}
 	};
 
