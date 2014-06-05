@@ -126,8 +126,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.ui.filter.chosen( {
 				width: '400px'
 			} );
-
-			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
 		},
 
 		runTests: function() {
@@ -166,6 +164,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			this.model.set( 'filter', filter );
 			App.vent.trigger( 'tests:filter', filter );
+			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
 		},
 
 		filterFailed: function() {
