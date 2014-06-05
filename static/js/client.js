@@ -54,7 +54,7 @@
 	function Bender() {
 		this.result = function( result ) {
 			if ( !result.success && supportsConsole ) {
-				console.log( result.module + ' FAILED\n' + result.error );
+				console.log( result.module + ' - ' + result.name + ' FAILED\n' + result.error );
 			}
 			addResult( result );
 		};
