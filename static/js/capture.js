@@ -22,10 +22,10 @@
 
 	function Bender( socket ) {
 		var contextEl = document.getElementById( 'context' ),
-			testTimeout = null,
-			testWindow = null,
+			that = this,
 			runs = 0,
-			that = this;
+			testTimeout,
+			testWindow;
 
 		this.running = false;
 		this.results = null;
@@ -49,6 +49,7 @@
 				// reload the page if frozen
 				if ( testWindow ) {
 					testWindow.close();
+					testWindow = null;
 				}
 				window.location.reload();
 			}, BENDER_CONFIG.testTimeout );
@@ -83,10 +84,18 @@
 						testWindow.close();
 						setTimeout( function() {
 							runs = 0;
-							window.open( id, 'bendertest' );
+							testWindow = window.open( id, 'bendertest' );
 						}, 300 );
 					} else {
-						testWindow = window.open( id, 'bendertest' );
+						if ( !testWindow ) {
+							testWindow = window.open( id, 'bendertest' );
+						} else {
+							if ( id === testWindow.location.href.split( testWindow.location.host )[ 1 ] ) {
+								testWindow.location.reload();
+							} else {
+								testWindow.location.href = id;
+							}
+						}
 					}
 				} else {
 					if ( ( frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ] ) ) {
@@ -113,6 +122,7 @@
 			var frame;
 
 			clearTestTimeout();
+
 			socket.emit( 'complete', this.results );
 
 			if ( !isIE ) {
@@ -126,6 +136,7 @@
 
 			this.running = false;
 			this.results = null;
+
 			socket.emit( 'fetch' );
 		};
 
@@ -133,36 +144,21 @@
 			socket.emit( 'log', Array.prototype.join.call( arguments, ' ' ) );
 		};
 
-		// override logs and alerts
-		// TODO move to clients code if needed
-		//     this.setup = function (context, steal) {
-		//         if (steal) context.onerror = this.error;
-
-		//         function stealLogs() {
-		//             var commands = ['log', 'info', 'warn', 'debug', 'error'],
-		//                 replace = function(command) {
-		//                     var old = context.console[command];
-
-		//                     context.console[command] = function () {
-		//                         that.log(arguments);
-		//                         if (old) Function.prototype.apply.call(old, context.console, arguments);
-		//                     };
-		//                 },
-		//                 i;
-
-		//             context.console = context.console || {};
-
-		//             for (i = 0; i < commands.length; i++) {
-		//                 replace(commands[i]);
-		//             }
-
-		//             context.alert = function (msg) {
-		//                 that.log(msg);
-		//             };
-		//         }
-
-		//         if (steal) stealLogs();
-		//     };
+		this.stop = function() {
+			// close everything on disconnect
+			if ( this.running ) {
+				this.running = false;
+				if ( isIE && testWindow ) {
+					testWindow.close();
+					testWindow = null;
+				} else {
+					if ( ( frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ] ) ) {
+						frame.src = 'about:blank';
+						contextEl.removeChild( frame );
+					}
+				}
+			}
+		};
 
 		// handle socket run message
 		socket.on( 'run', function( data ) {
@@ -188,6 +184,8 @@
 		if ( fetchInterval ) {
 			clearInterval( fetchInterval );
 		}
+
+		bender.stop();
 	}
 
 	function setStatus( status ) {
