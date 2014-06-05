@@ -39,7 +39,7 @@
 		}
 
 		function resetTestTimeout() {
-			if ( !BENDER_TEST_TIMEOUT ) {
+			if ( !BENDER_CONFIG && !BENDER_CONFIG.testTimeout ) {
 				return;
 			}
 
@@ -51,7 +51,7 @@
 					testWindow.close();
 				}
 				window.location.reload();
-			}, BENDER_TEST_TIMEOUT );
+			}, BENDER_CONFIG.testTimeout );
 		}
 
 		this.error = function( error ) {

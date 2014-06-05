@@ -139,6 +139,8 @@
 		};
 	}
 
+	bender.config = BENDER_CONFIG;
+
 	window.alert = bender.log;
 	window.bender = bender;
 
