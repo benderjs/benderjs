@@ -87,7 +87,6 @@
 		App.$navbar = $( '.navbar' );
 
 		App.content.on( 'show', function() {
-			console.log( 'show' );
 			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
 		} );
 	} );
