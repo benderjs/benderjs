@@ -6,15 +6,48 @@
 ( function() {
 	'use strict';
 
-	var resultsEl = document.createElement( 'div' ),
-		isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1,
+	var isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1,
 		ieVersion = navigator.userAgent.match( /msie (\d+)/i ),
 		isOldIE = isIE && ieVersion && Number( ieVersion[ 1 ] ) < 9,
 		testId = window.location.pathname
 		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
-		supportsConsole = !!( window.console && window.console.log );
+		supportsConsole = !!( window.console && window.console.log ),
+		resultsEl;
 
-	resultsEl.className = 'results';
+
+	function prepareResultsEl() {
+		resultsEl = document.createElement( 'div' );
+		resultsEl.className = 'results';
+
+		function handleClick( event ) {
+			var target;
+
+			event = event || window.event;
+
+			event.preventDefault();
+
+			target = event.target || event.srcElement;
+
+			if ( target.tagName !== 'A' ) {
+				return;
+			}
+
+			if ( target.className === 'single' || target.className === 'all' ) {
+				window.location = target.href;
+				window.location.reload();
+			}
+		}
+
+		if ( resultsEl.addEventListener ) {
+			resultsEl.addEventListener( 'click', handleClick, false );
+		} else if ( resultsEl.attachEvent ) {
+			resultsEl.attachEvent( 'onclick', handleClick );
+		} else {
+			resultsEl.onclick = handleClick;
+		}
+
+		document.body.appendChild( resultsEl );
+	}
 
 	function escapeTags( str ) {
 		var replacements = {
@@ -32,8 +65,11 @@
 		var resEl = document.createElement( 'li' ),
 			res = [
 				'<p>', result.module, ' - ', result.name,
-				'<strong> ', result.success ? result.ignored ?
-				'IGNORED' : 'PASSED' : 'FAILED', '</strong></p>'
+				' <strong>',
+				result.success ? result.ignored ? 'IGNORED' : 'PASSED' : 'FAILED',
+				'</strong>',
+				' <a href="#' + encodeURIComponent( result.name ) + '" class="single">#</a>',
+				'</p>'
 			],
 			i;
 
@@ -88,7 +124,8 @@
 			resEl.innerHTML = '<p><strong>Testing Done:</strong> ' +
 				result.passed + ' passed, ' + result.failed + ' failed' +
 				( result.ignored ? ', ' + result.ignored + ' ignored ' : ' ' ) +
-				'in ' + result.duration + 'ms</p>';
+				'in ' + result.duration + 'ms ' +
+				'<a href="#" class="all">all</a>' + '</p>';
 
 			resultsEl.appendChild( resEl );
 		};
@@ -134,7 +171,7 @@
 	} else {
 		bender = new Bender();
 		init = function() {
-			document.body.appendChild( resultsEl );
+			prepareResultsEl();
 			start();
 		};
 	}
