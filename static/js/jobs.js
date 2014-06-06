@@ -91,30 +91,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	} ) )();
 
 	/**
-	 * Jobs tab header view
-	 */
-	Jobs.JobsHeaderView = Backbone.Marionette.ItemView.extend( {
-		template: '#jobs-header',
-		className: 'row',
-
-		ui: {
-			'create': '.create-button'
-		},
-
-		events: {
-			'click @ui.create': 'showCreateJob'
-		},
-
-		showCreateJob: function() {
-			App.modal.show(
-				new Jobs.CreateJobView( {
-					model: new Jobs.NewJob()
-				} )
-			);
-		}
-	} );
-
-	/**
 	 * Empty jobs list view
 	 */
 	Jobs.NoJobsView = Backbone.Marionette.ItemView.extend( {
@@ -165,6 +141,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			description: '',
 			created: 0,
 			browsers: [],
+			filter: [],
 			tasks: []
 		},
 
@@ -180,38 +157,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 			return data;
 		}
-	} );
-
-	/**
-	 * New job model
-	 */
-	Jobs.NewJob = Backbone.Model.extend( {
-		defaults: {
-			browsers: [],
-			description: '',
-			tests: []
-		},
-
-		initialize: function() {
-			this.set( 'tests', App.Tests.testsList.getIds() );
-			// this.set(
-			//     'browsers',
-			//     App.Browsers.browsersList.map( function ( browser ) {
-			//         return browser.get( 'id' );
-			//     } )
-			// );
-		},
-
-		validate: function( attrs ) {
-			if ( !attrs.browsers.length ) {
-				return 'No browsers specified for the job';
-			}
-			if ( !attrs.tests.length ) {
-				return 'No tests specified for the job';
-			}
-		},
-
-		urlRoot: '/jobs'
 	} );
 
 	/**
@@ -282,88 +227,12 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	} );
 
 	/**
-	 * Create a job view
-	 */
-	Jobs.CreateJobView = App.Common.ModalView.extend( {
-		template: '#create-job',
-
-		ui: {
-			'browsers': '#job-browsers',
-			'description': '#job-description'
-		},
-
-		events: {
-			'change .job-browsers': 'updateBrowsers',
-			'click .dropdown-menu a': 'addBrowser',
-			'click .create-button': 'createJob'
-		},
-
-		initialize: function() {
-			this.listenTo( this.model, 'change', this.updateUI );
-			this.listenTo( this.model, 'invalid', this.showError );
-			this.listenTo( this.model, 'sync', this.handleCreate );
-		},
-
-		updateUI: function() {
-			var model = this.model.toJSON();
-
-			this.ui.browsers.val( model.browsers.join( ' ' ) );
-			this.ui.description.val( model.description );
-		},
-
-		showError: function( model, error ) {
-			App.Alerts.Manager.add( 'danger', error, 'Error:' );
-		},
-
-		handleCreate: function( model ) {
-			App.Alerts.Manager.add(
-				'success',
-				'New job added with ID: <a href="/#jobs/' + model.id + '">' + model.id + '</a>.',
-				'Success!'
-			);
-			this.close();
-			Jobs.jobsList.fetch();
-		},
-
-		updateBrowsers: function() {
-			var browsers = $( event.target ).val().split( /\s+/ );
-
-			this.model.set( 'browsers', _.uniq( browsers ) );
-		},
-
-		addBrowser: function( event ) {
-			var browsers = this.model.get( 'browsers' ),
-				name = $( event.target ).text().trim();
-
-			if ( name && browsers.indexOf( name ) === -1 ) {
-				browsers = browsers.concat( name );
-				this.model.set( 'browsers', browsers );
-			}
-		},
-
-		createJob: function() {
-			var that = this;
-
-			if ( !this.model.get( 'tests' ).length ) {
-				App.Tests.testsList.fetch( {
-					success: function() {
-						that.model.set( 'tests', App.Tests.testsList.getIds() );
-						that.model.save();
-					}
-				} );
-			} else {
-				this.model.save();
-			}
-		}
-	} );
-
-	/**
 	 * Controller for Jobs module
 	 * @type {Object}
 	 */
 	Jobs.controller = {
 		listJobs: function() {
-			App.header.show( new Jobs.JobsHeaderView() );
+			App.header.close();
 			App.content.show( new Jobs.JobsListView( {
 				collection: Jobs.jobsList
 			} ) );

@@ -163,6 +163,10 @@ th:last-child {
     line-height: 16px;
 }
 
+table tr th.job-browsers {
+	padding: 0 8px;
+}
+
 .chrome {
     background-image: url('../images/logos/chrome_32x32.png');
 }
@@ -231,4 +235,24 @@ button:disabled .loader {
 
 .job-browsers-group {
 	display: block;
+}
+
+.filters {
+	margin: 0;
+}
+
+.filter {
+	display: inline-block;
+	padding: 2px 4px;
+	margin: 0 2px 2px 0;
+	font-size: 12px;
+	font-weight: normal;
+	line-height: 1.5;
+	text-align: center;
+	white-space: nowrap;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	color: #333;
+	background-color: #fff;
+	border-color: #ccc;
 }

@@ -81,19 +81,23 @@
 		alerts: '#alerts'
 	} );
 
-	App.on( 'initialize:after', function() {
+	// adjust body padding to match header height each time the content is changed
+	App.addInitializer( function() {
 		App.$body = $( 'body' );
 		App.$navbar = $( '.navbar' );
 
+		App.content.on( 'show', function() {
+			console.log( 'show' );
+			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+		} );
+	} );
+
+	App.on( 'initialize:after', function() {
 		Backbone.history.start();
 
 		if ( this.getCurrentRoute() === '' ) {
 			App.Tests.trigger( 'tests:list' );
 		}
-
-		Backbone.history.on( 'route', function( router ) {
-			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
-		} );
 	} );
 
 } )( this );

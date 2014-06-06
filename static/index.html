@@ -33,7 +33,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 				<p class="navbar-text" id="socket-status"></p>
 			</div>
 			<div class="navbar-right">
-				<a class="btn btn-default navbar-btn" href="/capture" title="Capture browser">
+				<a class="btn btn-default navbar-btn btn-sm" href="/capture" title="Capture browser">
 					<span class="glyphicon glyphicon-download"></span> Capture browser
 				</a>
 			</div>
@@ -114,10 +114,10 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<div class="col-md-6">
 		<div class="form-inline filter-form" role="form">
 			<div class="btn-group" data-toggle="buttons">
-			  <label class="btn btn-primary <%= onlyFailed ? '' : 'active' %>" title="Show all tests">
+			  <label class="btn btn-primary btn-sm <%= onlyFailed ? '' : 'active' %>" title="Show all tests">
 				<input type="radio" name="show-mode" id="all" <%= onlyFailed ? '' : 'checked' %>> All
 			  </label>
-			  <label class="btn btn-danger <%= onlyFailed ? 'active' : '' %>" title="Show failed tests">
+			  <label class="btn btn-danger btn-sm <%= onlyFailed ? 'active' : '' %>" title="Show failed tests">
 				<input type="radio" name="show-mode" id="failed" <%= onlyFailed ? 'checked' : '' %>> Failed
 			  </label>
 			</div>
@@ -130,20 +130,13 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 					<% }) %>
 				</select>
 			</div>
-			<button type="button" class="btn btn-primary run-button">
+			<button type="button" class="btn btn-primary btn-sm run-button">
 				<span class="glyphicon glyphicon-<%= running ? 'stop' : 'play' %>"></span>
 			</button>
+			<button type="button" class="btn btn-primary btn-sm create-button">
+				<span class="glyphicon glyphicon-file"></span> Create a job
+			</button>
 		</div>
-	</div>
-	</script>
-
-
-	<!-- template for jobs tab header -->
-	<script type="text/html" id="jobs-header">
-	<div class="col-md-12">
-		<button type="button" class="btn btn-primary create-button">
-			<span class="glyphicon glyphicon-file"></span> Create a job
-		</button>
 	</div>
 	</script>
 
@@ -235,7 +228,6 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<div class="row">
 		<div class="col-md-6">
 			<h4><small>Job:</small> <%= id %> <small>created <%= getTime(created) %></small></h4>
-			<h4><small>Description:</small> <%= description ? description : '-' %></h4>
 		</div>
 		<div class="col-md-6 text-right">
 			<button type="button" class="btn btn-sm btn-primary back-button">
@@ -252,12 +244,28 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 			</button>
 		</div>
 	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<h4><small>Description:</small> <%= description ? description : '-' %></h4>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<h4><small>Filters:</small>
+				<% if (filter.length) { _.each(filter, function (item) { %>
+					<span class="filter"><%= item %></span>
+				<% }) } else { %>
+					-
+				<% } %>
+			</h4>
+		</div>
+	</div>
 	<div class="panel panel-default">
 		<table class="table table-hover jobs">
 			<thead>
 				<tr>
 					<th class="col-md-3">Test ID</th>
-					<th>
+					<th class="col-md-9 job-browsers">
 						<% _.each(browsers, function (browser) { %>
 						<div class="browser <%= browser.name %>">
 							<small><%= browser.version ? browser.version : '-' %></small>
@@ -305,6 +313,16 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<div class="form-group">
 			<label for="job-description">Job description <span>(optional)</span></label>
 			<input type="text" id="job-description" class="form-control" name="job-description" placeholder="Enter job description" value="<%= description %>">
+		</div>
+		<div class="form-group filters">
+			<p><strong>Filters</strong></p>
+			<p class="filters">
+				<% if (filter.length) { _.each(filter, function (item) { %>
+					<span class="filter"><%= item %></span>
+				<% }) } else { %>
+					none
+				<% } %>
+			</p>
 		</div>
 	</div>
 	<div class="modal-footer">
