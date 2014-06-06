@@ -38,7 +38,12 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 	Sockets.addInitializer( function() {
 		var socketUrl = 'http://' + window.location.hostname + ':' +
 			window.location.port + '/dashboard',
-			socket = io.connect( socketUrl ),
+			options = {
+				'reconnection delay': 2000,
+				'reconnection limit': 2000,
+				'max reconnection attempts': Infinity
+			},
+			socket = io.connect( socketUrl, options ),
 			$emit = socket.$emit;
 
 		// override socket.io $emit to make module triggering socket events
