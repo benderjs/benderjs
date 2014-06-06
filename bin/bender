@@ -14,9 +14,11 @@ var argParser = require( 'nomnom' ),
 	fs = require( 'fs' ),
 	when = require( 'when' ),
 	whenCb = require( 'when/callbacks' ),
-	whenFs = require( 'when/node' ).liftAll( fs ),
+	whenNode = require( 'when/node' ),
+	whenFs = whenNode.liftAll( fs ),
 	broadway = require( 'broadway' ),
 	forever = require( 'forever' ),
+	rimraf = require( 'rimraf' ),
 
 	dir = '../lib/',
 
@@ -42,6 +44,10 @@ var argParser = require( 'nomnom' ),
 argParser.command( 'init' )
 	.callback( initialize )
 	.help( 'Initialize Bender.js for this directory' );
+
+argParser.command( 'clean' )
+	.callback( clean )
+	.help( 'Clean all Bender.js local files except the configuration' );
 
 argParser.command( 'server' )
 	.callback( handleServer )
@@ -264,7 +270,7 @@ function initialize() {
 			} );
 	}
 
-	// create a directory for Bender's resources
+	// create a directory for Bender local resources
 	function createBenderDir() {
 		return whenCb
 			.call( fs.exists, '.bender/' )
@@ -289,6 +295,25 @@ function initialize() {
 		} )
 	// TODO remove after disabling nodetime
 	.finally( function() {
-		precess.exit( 1 );
+		process.exit( 1 );
 	} );
+}
+
+/**
+ * Remove all files from .bender/ directory except bender.js configuration file
+ */
+function clean() {
+	function remove( file ) {
+		return file === 'bender.js' ?
+			when.resolve() :
+			whenNode.call( rimraf, path.join( '.bender/', file ) );
+	}
+
+	whenFs.readdir( '.bender/' )
+		.then( function( files ) {
+			return when.map( files, remove );
+		} )
+		.done( function() {
+			log.info( 'Cleaned Bender local files' );
+		} );
 }
