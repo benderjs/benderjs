@@ -314,6 +314,6 @@ function clean() {
 			return when.map( files, remove );
 		} )
 		.done( function() {
-			log.info( 'Cleaned Bender local files' );
+			log.info( 'Removed Bender local files' );
 		} );
 }
