@@ -485,7 +485,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		events: {
-			'change .job-browsers': 'updateBrowsers',
+			'change #job-browsers': 'updateBrowsers',
 			'click .dropdown-menu a': 'addBrowser',
 			'click .create-button': 'createJob'
 		},
@@ -524,9 +524,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		addBrowser: function( event ) {
 			var browsers = this.model.get( 'browsers' ),
-				name = $( event.target ).text().trim();
+				name = $( event.target ).text().trim(),
+				pattern = new RegExp( '(?:^|,)' + name + '(?:,|$)', 'i' );
 
-			if ( name && browsers.indexOf( name ) === -1 ) {
+			if ( name && !pattern.test( browsers.join( ',' ) ) ) {
 				browsers = browsers.concat( name );
 				this.model.set( 'browsers', browsers );
 			}
