@@ -24,7 +24,11 @@
 
 			event = event || window.event;
 
-			event.preventDefault();
+			if ( event.preventDefault ) {
+				event.preventDefault();
+			} else {
+				event.returnValue = false;
+			}
 
 			target = event.target || event.srcElement;
 
