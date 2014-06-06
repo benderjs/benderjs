@@ -306,7 +306,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 			<input type="text" id="job-browsers" class="form-control" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value="<%= browsers.join(' ') %>">
 			<ul class="dropdown-menu">
 				<% _.each(App.Browsers.browsersList.models, function (browser) { %>
-					<li><a><%= browser.id %></a></li>
+					<% if (browser.attributes.header) { %><li><a><%= browser.id %></a></li><% } %>
 				<% }) %>
 			</ul>
 		</div>
