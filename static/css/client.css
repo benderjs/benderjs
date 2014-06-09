@@ -3,71 +3,158 @@ Copyright (c) 2014, CKSource - Frederico Knabben. All rights reserved.
 Licensed under the terms of the MIT License (see LICENSE.md).
 */
 
+@font-face {
+	font-family: 'icomoon';
+	src:url('../fonts/icomoon.eot?-fg1qcw');
+	src:url('../fonts/icomoon.eot?#iefix-fg1qcw') format('embedded-opentype'),
+		url('../fonts/icomoon.woff?-fg1qcw') format('woff'),
+		url('../fonts/icomoon.ttf?-fg1qcw') format('truetype'),
+		url('../fonts/icomoon.svg?-fg1qcw#icomoon') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+}
+
+.icon,
+.btn {
+	font-family: 'icomoon';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	font-size: 16px;
+	text-transform: none;
+	margin-right: 10px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .results {
     font-family: 'Arial', 'Helvetica', sans-serif;
     font-size: 14px;
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     width: 100%;
     list-style-type: none;
     margin: 0;
-    padding: 0;
+    padding: 61px 0 0;
 }
 
-.results li {
-    margin: .5em;
-    padding: .5em;
+.result {
+    margin: 0 10px 10px;
+    padding: 10px;
+    border-radius: 3px;
 }
 
 .results p {
-    margin: .25em 0;
+    margin: 5px 0;
+    color: #777;
 }
 
-.results .ok {
+.results a {
+	color: #000;
+}
+
+.summary {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	margin: 0;
+	height: 50px;
+	line-height: 50px;
+	padding: 0 10px;
+	background: #f8f8f8;
+	border-bottom: 1px solid #e7e7e7;
+}
+
+.summary p {
+	margin: 0;
+	float: left;
+}
+
+.btn {
+	display: block;
+	float: right;
+	margin: 10px 0 0 10px;
+	width: 28px;
+	height: 28px;
+	line-height: 28px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	text-align: center;
+	text-decoration: none;
+	background: #fff;
+}
+
+.btn:hover {
+	background: #ebebeb;
+	border-color: #adadad;
+}
+
+.all:before {
+	content: '\e604';
+}
+
+.collapse:before {
+	content: '\e601';
+}
+
+.expand:before {
+	content: '\e600';
+}
+
+.ok {
     background: #dff0d8;
-    background: rgba(223, 240, 216, 0.7);
+    border: 1px solid #9c9;
 }
 
-.results .ok:hover {
-    background: #dff0d8;
-}
-
-.results .ok strong {
+.ok .icon:before {
+	content: '\e603';
     color: #090;
 }
 
-.results .warn {
+.warn {
     background: #fcf8e3;
-    background: rgba(252, 248, 227, 0.7);
+    border: 1px solid #cc9;
 }
 
-.results .warn:hover {
-    background: #fcf8e3;
-}
-
-.results .warn strong {
+.warn .icon:before {
+	content: '\e605';
     color: #960;
 }
 
-.results .fail {
+.fail {
     background: #f2dede;
-    background: rgba(242, 222, 222, 0.7);
+    border: 1px solid #c99;
 }
 
-.results .fail:hover {
-    background: #f2dede;
-}
-
-.results .fail strong {
+.fail .icon:before {
+	content: '\e602';
     color: #900;
+    font-size: 14px;
 }
 
-.results .info {
-	background: #d9edf7;
-    background: rgba(217, 237, 247, 0.7);
+.collapsed {
+	width: auto;
 }
 
-.results .info strong {
-	color: #069;
+.collapsed .summary {
+	left: auto;
+	border-left: 1px solid #e7e7e7;
+}
+
+.collapsed .summary p,
+.collapsed .all,
+.collapsed .result {
+	display: none;
+}
+
+.collapsed .btn {
+	margin-left: 0;
 }

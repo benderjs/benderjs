@@ -12,15 +12,50 @@
 		testId = window.location.pathname
 		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
 		supportsConsole = !!( window.console && window.console.log ),
-		resultsEl;
+		launcher = opener || parent,
+		resultsEl,
+		statusEl,
+		bender,
+		init;
 
+	function loadStyles( callback ) {
+		var link = document.createElement( 'link' );
+
+		link.rel = 'stylesheet';
+		link.href = '/css/client.css';
+		link.onload = callback;
+
+		document.getElementsByTagName( 'head' )[ '0' ].appendChild( link );
+	}
 
 	function prepareResultsEl() {
+		var summaryEl = document.createElement( 'div' ),
+			collapseEl = document.createElement( 'a' ),
+			allEl = document.createElement( 'a' );
+
+		summaryEl.className = 'summary';
+
+		collapseEl.href = '#';
+		collapseEl.className = 'btn collapse';
+		collapseEl.title = 'Collapse the results';
+		summaryEl.appendChild( collapseEl );
+
+		allEl.href = '#';
+		allEl.className = 'btn all';
+		allEl.title = 'Run all tests';
+		summaryEl.appendChild( allEl );
+
+		statusEl = document.createElement( 'p' );
+		statusEl.innerHTML = '<strong>Running...</strong>';
+		summaryEl.appendChild( statusEl );
+
 		resultsEl = document.createElement( 'div' );
 		resultsEl.className = 'results';
+		resultsEl.appendChild( summaryEl );
 
 		function handleClick( event ) {
-			var target;
+			var target,
+				isCollapsed;
 
 			event = event || window.event;
 
@@ -36,7 +71,14 @@
 				return;
 			}
 
-			if ( target.className === 'single' || target.className === 'all' ) {
+			if ( target === collapseEl ) {
+				isCollapsed = ( resultsEl.className + '' ).indexOf( 'collapsed' ) > -1;
+
+				resultsEl.className = 'results' + ( isCollapsed ? '' : ' collapsed' );
+
+				collapseEl.className = 'btn ' + ( isCollapsed ? 'collapse' : 'expand' );
+				collapseEl.title = ( isCollapsed ? 'Collapse' : 'Expand' ) + ' the results';
+			} else {
 				window.location = target.href;
 				window.location.reload();
 			}
@@ -66,13 +108,14 @@
 	}
 
 	function addResult( result ) {
-		var resEl = document.createElement( 'li' ),
+		var resEl = document.createElement( 'div' ),
 			res = [
-				'<p>', result.module, ' - ', result.name,
-				' <strong>',
-				result.success ? result.ignored ? 'IGNORED' : 'PASSED' : 'FAILED',
-				'</strong>',
-				' <a href="#' + encodeURIComponent( result.name ) + '" class="single">#</a>',
+				'<p>',
+				'<span class="icon ',
+				result.success ? result.ignored ? 'ignored' : 'passed' : 'failed',
+				'"></span>',
+				result.module, ' - ',
+				'<a href="#' + encodeURIComponent( result.name ) + '" class="single">' + result.name + '</a>',
 				'</p>'
 			],
 			i;
@@ -81,15 +124,11 @@
 			res.push( '<pre>', escapeTags( result.error ), '</pre>' );
 		}
 
-		resEl.className = result.success ? result.ignored ? 'warn' : 'ok' : 'fail';
+		resEl.className = 'result ' + ( result.success ? result.ignored ? 'warn' : 'ok' : 'fail' );
 		resEl.innerHTML = res.join( '' );
 
 		resultsEl.appendChild( resEl );
 	}
-
-	var launcher = opener || parent,
-		bender,
-		init;
 
 	function Bender() {
 		this.result = function( result ) {
@@ -106,13 +145,15 @@
 		};
 
 		this.ignore = function( result ) {
-			var resEl = document.createElement( 'li' );
+			var resEl = document.createElement( 'div' );
 
 			resEl.className = 'warn';
-			resEl.innerHTML = '<p><strong>IGNORED</strong> Tests in <strong>' +
+			resEl.innerHTML = '<p><span class="icon ignored"></span>Tests in <strong>' +
 				result.module + '</strong> were ignored for current browser\'s version</p>';
 
 			resultsEl.appendChild( resEl );
+
+			statusEl.innerHTML = '<strong>Ignored</strong>';
 		};
 
 		this.error = function( error ) {
@@ -122,16 +163,10 @@
 		};
 
 		this.next = function( result ) {
-			var resEl = document.createElement( 'li' );
-
-			resEl.className = 'info';
-			resEl.innerHTML = '<p><strong>Testing Done:</strong> ' +
+			statusEl.innerHTML = '<strong>Testing Done:</strong> ' +
 				result.passed + ' passed, ' + result.failed + ' failed' +
 				( result.ignored ? ', ' + result.ignored + ' ignored ' : ' ' ) +
-				'in ' + result.duration + 'ms ' +
-				'<a href="#" class="all">all</a>' + '</p>';
-
-			resultsEl.appendChild( resEl );
+				'in ' + result.duration + 'ms';
 		};
 
 		this.start = this.complete = function() {};
@@ -174,9 +209,12 @@
 		init = start;
 	} else {
 		bender = new Bender();
+
 		init = function() {
-			prepareResultsEl();
-			start();
+			loadStyles( function() {
+				prepareResultsEl();
+				start();
+			} );
 		};
 	}
 
