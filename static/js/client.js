@@ -183,6 +183,16 @@
 		}
 	}
 
+	function setup() {
+		bender.config = BENDER_CONFIG;
+		bender.regressions = bender.testData && bender.config.tests[ bender.testData.group ].regressions;
+
+		loadStyles( function() {
+			prepareResultsEl();
+			start();
+		} );
+	}
+
 	if ( launcher && launcher.bender && launcher.bender.runAsChild && window.location.hash === '#child' ) {
 		bender = {
 			result: function( result ) {
@@ -210,15 +220,8 @@
 	} else {
 		bender = new Bender();
 
-		init = function() {
-			loadStyles( function() {
-				prepareResultsEl();
-				start();
-			} );
-		};
+		init = setup;
 	}
-
-	bender.config = BENDER_CONFIG;
 
 	window.alert = bender.log;
 	window.bender = bender;
