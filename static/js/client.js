@@ -13,6 +13,7 @@
 		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
 		supportsConsole = !!( window.console && window.console.log ),
 		launcher = opener || parent,
+		collapseEl,
 		resultsEl,
 		statusEl,
 		bender,
@@ -30,8 +31,9 @@
 
 	function prepareResultsEl() {
 		var summaryEl = document.createElement( 'div' ),
-			collapseEl = document.createElement( 'a' ),
 			allEl = document.createElement( 'a' );
+
+		collapseEl = document.createElement( 'a' );
 
 		summaryEl.className = 'summary';
 
@@ -53,9 +55,17 @@
 		resultsEl.className = 'results';
 		resultsEl.appendChild( summaryEl );
 
+
+		if ( bender.testData.ui === 'none' ) {
+			resultsEl.style.display = 'none';
+		} else if ( bender.testData.ui === 'collapsed' ) {
+			resultsEl.className = 'results collapsed';
+			collapseEl.className = 'btn expand';
+			collapseEl.title = 'Expand the results';
+		}
+
 		function handleClick( event ) {
-			var target,
-				isCollapsed;
+			var target;
 
 			event = event || window.event;
 
@@ -72,12 +82,7 @@
 			}
 
 			if ( target === collapseEl ) {
-				isCollapsed = ( resultsEl.className + '' ).indexOf( 'collapsed' ) > -1;
-
-				resultsEl.className = 'results' + ( isCollapsed ? '' : ' collapsed' );
-
-				collapseEl.className = 'btn ' + ( isCollapsed ? 'collapse' : 'expand' );
-				collapseEl.title = ( isCollapsed ? 'Collapse' : 'Expand' ) + ' the results';
+				handleCollapse();
 			} else {
 				window.location = target.href;
 				window.location.reload();
@@ -93,6 +98,30 @@
 		}
 
 		document.body.appendChild( resultsEl );
+	}
+
+	function isCollapsed() {
+		return ( resultsEl.className + '' ).indexOf( 'collapsed' ) > -1;
+	}
+
+	function handleCollapse() {
+		var collapsed = isCollapsed();
+
+		resultsEl.className = 'results' + ( collapsed ? '' : ' collapsed' );
+		collapseEl.className = 'btn ' + ( collapsed ? 'collapse' : 'expand' );
+		collapseEl.title = ( collapsed ? 'Collapse' : 'Expand' ) + ' the results';
+	}
+
+	function expandUI() {
+		// nothing is shown
+		if ( bender.testData.ui === 'none' ) {
+			resultsEl.style.display = '';
+			// results are collapsed
+		} else if ( bender.testData.ui === 'collapsed' && isCollapsed() ) {
+			resultsEl.className = 'results';
+			collapseEl.className = 'btn collapse';
+			collapseEl.title = 'Collapse the results';
+		}
 	}
 
 	function escapeTags( str ) {
@@ -154,6 +183,8 @@
 			resultsEl.appendChild( resEl );
 
 			statusEl.innerHTML = '<strong>Ignored</strong>';
+
+			expandUI();
 		};
 
 		this.error = function( error ) {
@@ -167,6 +198,8 @@
 				result.passed + ' passed, ' + result.failed + ' failed' +
 				( result.ignored ? ', ' + result.ignored + ' ignored ' : ' ' ) +
 				'in ' + result.duration + 'ms';
+
+			expandUI();
 		};
 
 		this.start = this.complete = function() {};
