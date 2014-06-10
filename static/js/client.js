@@ -21,14 +21,12 @@
 
 	/**
 	 * Load additional stylesheet needed for single test runs
-	 * @param  {Function} callback Function called on stylesheet's load event
 	 */
-	function loadStyles( callback ) {
+	function loadStyles() {
 		var link = document.createElement( 'link' );
 
 		link.rel = 'stylesheet';
 		link.href = '/css/client.css';
-		link.onload = callback;
 
 		document.getElementsByTagName( 'head' )[ '0' ].appendChild( link );
 	}
@@ -292,6 +290,8 @@
 				launcher.bender.error(
 					JSON.stringify( error.stack ? error.stack : error.error ? error.error.stack : error )
 				);
+
+				return true;
 			}
 		};
 
@@ -302,13 +302,12 @@
 	} else {
 		bender = new Bender();
 
-		init = function() {
-			setup();
+		loadStyles();
 
-			loadStyles( function() {
-				prepareResultsEl();
-				start();
-			} );
+		init = function() {
+			prepareResultsEl();
+			setup();
+			start();
 		};
 	}
 
