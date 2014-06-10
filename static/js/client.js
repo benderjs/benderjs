@@ -219,8 +219,23 @@
 		};
 
 		this.error = function( error ) {
-			if ( supportsConsole ) {
-				console.log( error.stack ? error.stack : error );
+			var resEl = document.createElement( 'div' );
+
+			resEl.className = 'result fail';
+			resEl.innerHTML = '<p><span class="icon failed"></span>Error' +
+				( error.methodName ? ( ' in ' + error.methodName ) : '' ) +
+				( '<pre>' + escapeTags( error.error ? error.error.message : error.message ) + '</pre>' ) +
+				'</p>';
+
+			resultsEl.appendChild( resEl );
+
+			if ( error.error ) {
+				throw ( error.error );
+			} else {
+				if ( supportsConsole ) {
+					console.log( error.stack ? error.stack : error.error ? error.error : error );
+				}
+				throw new Error( 'stopped on error' );
 			}
 		};
 
@@ -274,13 +289,13 @@
 				launcher.bender.log( message );
 			},
 			error: function( error ) {
-				launcher.bender.error( JSON.stringify( error.stack ? error.stack : error ) );
+				launcher.bender.error(
+					JSON.stringify( error.stack ? error.stack : error.error ? error.error.stack : error )
+				);
 			}
 		};
 
-		window.error = function( error ) {
-			launcher.bender.error( JSON.stringify( error.stack ? error.stack : error ) );
-		};
+		window.onerror = bender.error;
 
 		init = start;
 		// standalone run, local instance of Bender and additional CSS is needed
