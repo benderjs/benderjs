@@ -19,6 +19,10 @@
 		bender,
 		init;
 
+	/**
+	 * Load additional stylesheet needed for single test runs
+	 * @param  {Function} callback Function called on stylesheet's load event
+	 */
 	function loadStyles( callback ) {
 		var link = document.createElement( 'link' );
 
@@ -29,43 +33,56 @@
 		document.getElementsByTagName( 'head' )[ '0' ].appendChild( link );
 	}
 
+	/**
+	 * Prepare UI elements used in single test runs.
+	 */
 	function prepareResultsEl() {
-		var summaryEl = document.createElement( 'div' ),
-			allEl = document.createElement( 'a' );
+		var summaryEl,
+			allEl;
 
-		collapseEl = document.createElement( 'a' );
-
+		// summary box that sticks to the top of the window
+		summaryEl = document.createElement( 'div' );
 		summaryEl.className = 'summary';
 
+		// collapse results button
+		collapseEl = document.createElement( 'a' );
 		collapseEl.href = '#';
 		collapseEl.className = 'btn collapse';
 		collapseEl.title = 'Collapse the results';
 		summaryEl.appendChild( collapseEl );
 
+		// run all tests button
+		allEl = document.createElement( 'a' );
 		allEl.href = '#';
 		allEl.className = 'btn all';
 		allEl.title = 'Run all tests';
 		summaryEl.appendChild( allEl );
 
+		// test status located in summary box
 		statusEl = document.createElement( 'p' );
 		statusEl.innerHTML = '<strong>Running...</strong>';
 		summaryEl.appendChild( statusEl );
 
+		// test results box
 		resultsEl = document.createElement( 'div' );
 		resultsEl.className = 'results';
 		resultsEl.appendChild( summaryEl );
 
-
+		// handle bender-ui directive
+		// hide all results till the end of the tests
 		if ( bender.testData.ui === 'none' ) {
 			resultsEl.style.display = 'none';
+			// collapse the results
 		} else if ( bender.testData.ui === 'collapsed' ) {
 			resultsEl.className = 'results collapsed';
 			collapseEl.className = 'btn expand';
 			collapseEl.title = 'Expand the results';
 		}
 
+		// handle all clicks in results box
 		function handleClick( event ) {
-			var target;
+			var target,
+				collapsed;
 
 			event = event || window.event;
 
@@ -82,7 +99,9 @@
 			}
 
 			if ( target === collapseEl ) {
-				handleCollapse();
+				resultsEl.className = 'results' + ( collapsed ? '' : ' collapsed' );
+				collapseEl.className = 'btn ' + ( collapsed ? 'collapse' : 'expand' );
+				collapseEl.title = ( collapsed ? 'Collapse' : 'Expand' ) + ' the results';
 			} else {
 				window.location = target.href;
 				window.location.reload();
@@ -100,18 +119,17 @@
 		document.body.appendChild( resultsEl );
 	}
 
+	/**
+	 * Check if the results box is collapsed
+	 * @return {Boolean}
+	 */
 	function isCollapsed() {
 		return ( resultsEl.className + '' ).indexOf( 'collapsed' ) > -1;
 	}
 
-	function handleCollapse() {
-		var collapsed = isCollapsed();
-
-		resultsEl.className = 'results' + ( collapsed ? '' : ' collapsed' );
-		collapseEl.className = 'btn ' + ( collapsed ? 'collapse' : 'expand' );
-		collapseEl.title = ( collapsed ? 'Collapse' : 'Expand' ) + ' the results';
-	}
-
+	/**
+	 * Expand single test UI if it was hidden or collapsed before
+	 */
 	function expandUI() {
 		// nothing is shown
 		if ( bender.testData.ui === 'none' ) {
@@ -124,6 +142,11 @@
 		}
 	}
 
+	/**
+	 * Escape &, > and < characters to HTML entities
+	 * @param  {String} str String to escape
+	 * @return {String}
+	 */
 	function escapeTags( str ) {
 		var replacements = {
 			'&': '&amp;',
@@ -136,6 +159,10 @@
 		} );
 	}
 
+	/**
+	 * Add a result to the results box
+	 * @param {Object} result Result object received from assertion library
+	 */
 	function addResult( result ) {
 		var resEl = document.createElement( 'div' ),
 			res = [
@@ -159,6 +186,10 @@
 		resultsEl.appendChild( resEl );
 	}
 
+	/**
+	 * Local Bender class
+	 * @constructor
+	 */
 	function Bender() {
 		this.result = function( result ) {
 			if ( !result.success && supportsConsole ) {
@@ -206,6 +237,9 @@
 
 	}
 
+	/**
+	 * Check for ignored tests and handle test start
+	 */
 	function start() {
 		if ( bender.ignoreOldIE && isOldIE ) {
 			bender.ignore( {
@@ -216,16 +250,15 @@
 		}
 	}
 
+	/**
+	 * Setup Bender configuration
+	 */
 	function setup() {
 		bender.config = BENDER_CONFIG;
 		bender.regressions = bender.testData && bender.config.tests[ bender.testData.group ].regressions;
-
-		loadStyles( function() {
-			prepareResultsEl();
-			start();
-		} );
 	}
 
+	// test file is running in a popup or iframe, bender will be a proxy to parent window
 	if ( launcher && launcher.bender && launcher.bender.runAsChild && window.location.hash === '#child' ) {
 		bender = {
 			result: function( result ) {
@@ -250,10 +283,18 @@
 		};
 
 		init = start;
+		// standalone run, local instance of Bender and additional CSS is needed
 	} else {
 		bender = new Bender();
 
-		init = setup;
+		init = function() {
+			setup();
+
+			loadStyles( function() {
+				prepareResultsEl();
+				start();
+			} );
+		};
 	}
 
 	window.alert = bender.log;
