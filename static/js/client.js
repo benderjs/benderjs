@@ -263,14 +263,6 @@
 		}
 	}
 
-	/**
-	 * Setup Bender configuration
-	 */
-	function setup() {
-		bender.config = BENDER_CONFIG;
-		bender.regressions = bender.testData && bender.config.tests[ bender.testData.group ].regressions;
-	}
-
 	// test file is running in a popup or iframe, bender will be a proxy to parent window
 	if ( launcher && launcher.bender && launcher.bender.runAsChild && window.location.hash === '#child' ) {
 		bender = {
@@ -306,10 +298,11 @@
 
 		init = function() {
 			prepareResultsEl();
-			setup();
 			start();
 		};
 	}
+
+	bender.config = BENDER_CONFIG;
 
 	window.alert = bender.log;
 	window.bender = bender;
