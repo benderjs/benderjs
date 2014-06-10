@@ -38,8 +38,6 @@
 			clearTestTimeout();
 
 			testTimeout = setTimeout( function() {
-				console.log( 'broken test timeout' );
-
 				var result = {
 					id: that.current,
 					success: false,
@@ -102,7 +100,7 @@
 			if ( summary ) {
 				parsed = JSON.parse( summary );
 				parsed.id = this.current;
-				parsed.success = parsed.success || ( parsed.failed === 0 );
+				parsed.success = parsed.success || ( parsed.failed === 0 && parsed.errors === 0 );
 				this.emit( 'update', parsed );
 			}
 
