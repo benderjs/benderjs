@@ -217,23 +217,24 @@
 		};
 
 		this.error = function( error ) {
-			var resEl = document.createElement( 'div' );
-
-			resEl.className = 'result fail';
-			resEl.innerHTML = '<p><span class="icon failed"></span>Error' +
-				( error.methodName ? ( ' in ' + error.methodName ) : '' ) +
-				( '<pre>' + escapeTags( error.error ? error.error.message : error.message ) + '</pre>' ) +
-				'</p>';
-
-			resultsEl.appendChild( resEl );
-
 			if ( error.error ) {
+				var resEl = document.createElement( 'div' );
+
+				resEl.className = 'result fail';
+				resEl.innerHTML = '<p><span class="icon failed"></span>Error' +
+					( error.methodName ? ( ' in ' + error.methodName ) : '' ) +
+					( '<pre>' + escapeTags( error.error ? error.error.message : error.message ) + '</pre>' ) +
+					'</p>';
+
+				resultsEl.appendChild( resEl );
+
+				bender.stopRunner();
+
 				throw ( error.error );
 			} else {
 				if ( supportsConsole ) {
 					console.log( error.stack ? error.stack : error.error ? error.error : error );
 				}
-				throw new Error( 'stopped on error' );
 			}
 		};
 
