@@ -481,13 +481,14 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		ui: {
 			'browsers': '#job-browsers',
-			'description': '#job-description'
+			'description': '#job-description',
+			'create': '.create-button'
 		},
 
 		events: {
 			'change #job-browsers': 'updateBrowsers',
 			'click .dropdown-menu a': 'addBrowser',
-			'click .create-button': 'createJob'
+			'click @ui.create': 'createJob'
 		},
 
 		initialize: function() {
@@ -504,6 +505,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		showError: function( model, error ) {
+			this.ui.create.prop( 'disabled', false );
 			App.Alerts.Manager.add( 'danger', error, 'Error:' );
 		},
 
@@ -513,11 +515,14 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				'New job added with ID: <a href="/#jobs/' + model.id + '">' + model.id + '</a>.',
 				'Success!'
 			);
+			this.ui.create.prop( 'disabled', false );
 			this.close();
 		},
 
 		updateBrowsers: function() {
-			var browsers = $( event.target ).val().trim().replace( /\s+/g, ' ' ).split( /\s+/ );
+			var browsers = $( event.target ).val().trim();
+
+			browsers = browsers.length ? browsers.replace( /\s+/g, ' ' ).split( /\s+/ ) : [];
 
 			this.model.set( 'browsers', _.uniq( browsers ) );
 		},
@@ -536,16 +541,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		createJob: function() {
 			var that = this;
 
-			if ( !this.model.get( 'tests' ).length ) {
-				App.Tests.testsList.fetch( {
-					success: function() {
-						that.model.set( 'tests', App.Tests.testsList.getIds() );
-						that.model.save();
-					}
-				} );
-			} else {
-				this.model.save();
-			}
+			this.ui.create.prop( 'disabled', true );
+			this.model.save();
 		}
 	} );
 
