@@ -517,7 +517,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		updateBrowsers: function() {
-			var browsers = $( event.target ).val().split( /\s+/ );
+			var browsers = $( event.target ).val().trim().replace( /\s+/g, ' ' ).split( /\s+/ );
 
 			this.model.set( 'browsers', _.uniq( browsers ) );
 		},
