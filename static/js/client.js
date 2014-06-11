@@ -97,6 +97,7 @@
 			}
 
 			if ( target === collapseEl ) {
+				collapsed = isCollapsed();
 				resultsEl.className = 'results' + ( collapsed ? '' : ' collapsed' );
 				collapseEl.className = 'btn ' + ( collapsed ? 'collapse' : 'expand' );
 				collapseEl.title = ( collapsed ? 'Collapse' : 'Expand' ) + ' the results';
