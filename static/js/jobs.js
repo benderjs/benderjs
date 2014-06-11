@@ -199,7 +199,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		itemView: Jobs.TaskView,
 
 		events: {
-			'click .back-button': 'goBack'
+			'click .back-button': 'goBack',
+			'click .remove-button': 'removeJob'
 		},
 
 		initialize: function() {
@@ -216,6 +217,28 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		goBack: function() {
 			App.back();
+		},
+
+		removeJob: function() {
+			this.model.destroy( {
+				success: function( model, response ) {
+					App.Alerts.Manager.add(
+						response.success ? 'success' : 'danger',
+						response.success ?
+						'Removed a job: <strong>' + model.id + '</strong>' :
+						response.error,
+						response.success ? 'Success!' : 'Error!'
+					);
+					App.back();
+				},
+				error: function( model, response ) {
+					App.Alerts.Manager.add(
+						'danger',
+						response.error || 'Error while removing a job',
+						'Error!'
+					);
+				}
+			} );
 		}
 	} );
 
