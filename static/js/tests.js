@@ -500,7 +500,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		addCaptured: function() {
-			var browsers = [];
+			var current = this.model.get( 'browsers' ),
+				browsers = [];
 
 			App.Browsers.browsersList.each( function( browser ) {
 				var clients = browser.get( 'clients' );
@@ -510,7 +511,22 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				}
 			} );
 
-			this.model.set( 'browsers', browsers );
+			function addBrowsers() {
+				var currentLower = _.map( current, function( browser ) {
+						return browser.toLowerCase();
+					} ),
+					result = [].concat( current );
+
+				_.each( browsers, function( browser ) {
+					if ( currentLower.indexOf( browser.toLowerCase() ) === -1 ) {
+						result.push( browser );
+					}
+				} );
+
+				return result;
+			}
+
+			this.model.set( 'browsers', current.length ? addBrowsers() : browsers );
 		},
 
 		showError: function( model, error ) {
