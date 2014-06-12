@@ -208,8 +208,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 			this.collection = new Backbone.Collection();
 
-			this.model.fetch().done( function() {
-				that.collection.reset( that.model.get( 'tasks' ) );
+			this.model.fetch( {
+				success: function() {
+					that.collection.reset( that.model.get( 'tasks' ) );
+				},
+				error: App.show404
 			} );
 
 			this.listenTo( this.model, 'change', this.render );

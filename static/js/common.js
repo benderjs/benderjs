@@ -31,4 +31,17 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			this.setElement( this.$el );
 		}
 	} );
+
+	/**
+	 * View for 404 error page
+	 * @extends {Backbone.Marionette.ItemView}
+	 */
+	Common.Error404View = Backbone.Marionette.ItemView.extend( {
+		template: '#error404'
+	} );
+
+	App.show404 = function() {
+		App.header.close();
+		App.content.show( new Common.Error404View() );
+	};
 } );

@@ -180,54 +180,14 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	</script>
 
 
-	<!-- template for browsers table -->
-	<script type="text/html" id="browsers">
-	<table class="table table-hover table-condensed browsers">
-		<thead>
-			<tr>
-				<th class="col-md-2">Browser</th>
-				<th class="col-md-4">ID</th>
-				<th class="col-md-3">UA</th>
-				<th class="col-md-2">Address</th>
-				<th class="col-md-1">Status</th>
-			</tr>
-		</thead>
-		<tbody>
-		</tbody>
-	</table>
-	</script>
-
-
-	<!-- template for empty browsers table -->
-	<script type="text/html" id="no-browsers">
-	<td colspan="5">No browsers found. Check your configuration file</td>
-	</script>
-
-
-	<!-- template for a single browser row -->
-	<script type="text/html" id="browser">
-	<% if (header) { %>
-		<th class="browser <%= name %>"><%= id %></th>
-		<th colspan="4"></th>
-	<% } else { %>
-		<td></td>
-		<td><%= id %></td>
-		<td><%= ua %></td>
-		<td><%= addr %></td>
-		<td>
-			<span class="label label-<%= ready ? 'success' : 'warning' %>">
-				<%= ready ? 'ready' : 'busy' %>
-			</span>
-		</td>
-	<% } %>
-	</script>
-
-
 	<!-- template for a job details page -->
 	<script type="text/html" id="job">
 	<div class="row">
 		<div class="col-md-6">
-			<h4><small>Job:</small> <%= id %> <small>created <%= getTime(created) %></small></h4>
+			<h4>
+				<small>Job:</small> <%= id %> <small>
+				<%= created ? 'created ' + getTime(created) : '' %></small>
+			</h4>
 		</div>
 		<div class="col-md-6 text-right">
 			<button type="button" class="btn btn-sm btn-primary back-button">
@@ -351,6 +311,49 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<div class="modal-footer">
 		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 	</div>
+	</script>
+
+
+	<!-- template for browsers table -->
+	<script type="text/html" id="browsers">
+	<table class="table table-hover table-condensed browsers">
+		<thead>
+			<tr>
+				<th class="col-md-2">Browser</th>
+				<th class="col-md-4">ID</th>
+				<th class="col-md-3">UA</th>
+				<th class="col-md-2">Address</th>
+				<th class="col-md-1">Status</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	</script>
+
+
+	<!-- template for empty browsers table -->
+	<script type="text/html" id="no-browsers">
+	<td colspan="5">No browsers found. Check your configuration file</td>
+	</script>
+
+
+	<!-- template for a single browser row -->
+	<script type="text/html" id="browser">
+	<% if (header) { %>
+		<th class="browser <%= name %>"><%= id %></th>
+		<th colspan="4"></th>
+	<% } else { %>
+		<td></td>
+		<td><%= id %></td>
+		<td><%= ua %></td>
+		<td><%= addr %></td>
+		<td>
+			<span class="label label-<%= ready ? 'success' : 'warning' %>">
+				<%= ready ? 'ready' : 'busy' %>
+			</span>
+		</td>
+	<% } %>
 	</script>
 
 
