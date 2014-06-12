@@ -256,3 +256,11 @@ button:disabled .loader {
 	background-color: #fff;
 	border-color: #ccc;
 }
+
+.modal-confirm {
+	font-size: 1.125em;
+}
+
+.modal-confirm .modal-footer {
+	margin: 0;
+}
