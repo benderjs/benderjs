@@ -223,24 +223,33 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		removeJob: function() {
-			this.model.destroy( {
-				success: function( model, response ) {
-					App.Alerts.Manager.add(
-						response.success ? 'success' : 'danger',
-						response.success ?
-						'Removed a job: <strong>' + model.id + '</strong>' :
-						response.error,
-						response.success ? 'Success!' : 'Error!'
-					);
-					App.back();
-				},
-				error: function( model, response ) {
-					App.Alerts.Manager.add(
-						'danger',
-						response.error || 'Error while removing a job',
-						'Error!'
-					);
-				}
+			var that = this;
+
+			function remove() {
+				that.model.destroy( {
+					success: function( model, response ) {
+						App.Alerts.Manager.add(
+							response.success ? 'success' : 'danger',
+							response.success ?
+							'Removed a job: <strong>' + model.id + '</strong>' :
+							response.error,
+							response.success ? 'Success!' : 'Error!'
+						);
+						App.back();
+					},
+					error: function( model, response ) {
+						App.Alerts.Manager.add(
+							'danger',
+							response.error || 'Error while removing a job',
+							'Error!'
+						);
+					}
+				} );
+			}
+
+			App.showConfirm( {
+				message: 'Remove this job?',
+				callback: remove
 			} );
 		}
 	} );
