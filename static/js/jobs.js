@@ -200,13 +200,18 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		events: {
 			'click .back-button': 'goBack',
-			'click .remove-button': 'removeJob'
+			'click .remove-button': 'removeJob',
+			'click .restart-button': 'restartJob'
 		},
 
 		initialize: function() {
-			var that = this;
-
 			this.collection = new Backbone.Collection();
+			this.listenTo( this.model, 'change', this.render );
+			this.update();
+		},
+
+		update: function() {
+			var that = this;
 
 			this.model.fetch( {
 				success: function() {
@@ -214,8 +219,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				},
 				error: App.show404
 			} );
-
-			this.listenTo( this.model, 'change', this.render );
 		},
 
 		goBack: function() {
@@ -231,7 +234,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 						App.Alerts.Manager.add(
 							response.success ? 'success' : 'danger',
 							response.success ?
-							'Removed a job: <strong>' + model.id + '</strong>' :
+							'Removed a job: <strong>' + response.id + '</strong>' :
 							response.error,
 							response.success ? 'Success!' : 'Error!'
 						);
@@ -240,7 +243,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					error: function( model, response ) {
 						App.Alerts.Manager.add(
 							'danger',
-							response.error || 'Error while removing a job',
+							response.error || 'Error while removing a job.',
 							'Error!'
 						);
 					}
@@ -248,8 +251,44 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			}
 
 			App.showConfirm( {
-				message: 'Remove this job?',
+				message: 'Do you want to remove this job?',
 				callback: remove
+			} );
+		},
+
+		restartJob: function() {
+			var that = this;
+
+			function restart() {
+				$.ajax( {
+					url: '/jobs/' + that.model.id + '/restart',
+					dataType: 'json',
+					success: function( response ) {
+						App.Alerts.Manager.add(
+							response.success ? 'success' : 'danger',
+							response.success ?
+							'Restarted a job: <strong>' + response.id + '</strong>' :
+							response.error,
+							response.success ? 'Success!' : 'Error!'
+						);
+
+						if ( response.success ) {
+							that.update();
+						}
+					},
+					error: function( response, status ) {
+						App.Alerts.Manager.add(
+							'danger',
+							status || 'Error while restarting a job.',
+							'Error!'
+						);
+					}
+				} );
+			}
+
+			App.showConfirm( {
+				message: 'Do you want to restart this job?',
+				callback: restart
 			} );
 		}
 	} );
