@@ -453,12 +453,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		initialize: function() {
 			this.set( 'tests', Tests.testsList.getIds() );
 			this.set( 'filter', Tests.testStatus.get( 'filter' ) );
-			// this.set(
-			//     'browsers',
-			//     App.Browsers.browsersList.map( function ( browser ) {
-			//         return browser.get( 'id' );
-			//     } )
-			// );
 		},
 
 		validate: function( attrs ) {
@@ -488,7 +482,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		events: {
 			'change #job-browsers': 'updateBrowsers',
 			'click .dropdown-menu a': 'addBrowser',
-			'click @ui.create': 'createJob'
+			'click @ui.create': 'createJob',
+			'click .add-captured-button': 'addCaptured'
 		},
 
 		initialize: function() {
@@ -502,6 +497,36 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			this.ui.browsers.val( model.browsers.join( ' ' ) );
 			this.ui.description.val( model.description );
+		},
+
+		addCaptured: function() {
+			var current = this.model.get( 'browsers' ),
+				browsers = [];
+
+			App.Browsers.browsersList.each( function( browser ) {
+				var clients = browser.get( 'clients' );
+
+				if ( clients && clients.length ) {
+					browsers.push( browser.id );
+				}
+			} );
+
+			function addBrowsers() {
+				var currentLower = _.map( current, function( browser ) {
+						return browser.toLowerCase();
+					} ),
+					result = [].concat( current );
+
+				_.each( browsers, function( browser ) {
+					if ( currentLower.indexOf( browser.toLowerCase() ) === -1 ) {
+						result.push( browser );
+					}
+				} );
+
+				return result;
+			}
+
+			this.model.set( 'browsers', current.length ? addBrowsers() : browsers );
 		},
 
 		showError: function( model, error ) {

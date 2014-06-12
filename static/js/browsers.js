@@ -83,8 +83,6 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 				browser.header = true;
 
 				clients = browser.clients;
-				delete browser.clients;
-
 				result.push( browser );
 
 				_.each( clients, function( client ) {

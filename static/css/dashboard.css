@@ -210,10 +210,18 @@ table tr th.job-browsers {
     cursor: pointer;
 }
 
-.form-group label span {
+.form-group label {
+	width: 100%;
+}
+
+.form-group label span:not(.glyphicon) {
     font-weight: normal;
     font-style: italic;
     color: #999;
+}
+
+.add-captured-button {
+	float: right;
 }
 
 .moment {
