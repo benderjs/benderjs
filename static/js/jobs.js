@@ -199,23 +199,97 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		itemView: Jobs.TaskView,
 
 		events: {
-			'click .back-button': 'goBack'
+			'click .back-button': 'goBack',
+			'click .remove-button': 'removeJob',
+			'click .restart-button': 'restartJob'
 		},
 
 		initialize: function() {
+			this.collection = new Backbone.Collection();
+			this.listenTo( this.model, 'change', this.render );
+			this.update();
+		},
+
+		update: function() {
 			var that = this;
 
-			this.collection = new Backbone.Collection();
-
-			this.model.fetch().done( function() {
-				that.collection.reset( that.model.get( 'tasks' ) );
+			this.model.fetch( {
+				success: function() {
+					that.collection.reset( that.model.get( 'tasks' ) );
+				},
+				error: App.show404
 			} );
-
-			this.listenTo( this.model, 'change', this.render );
 		},
 
 		goBack: function() {
 			App.back();
+		},
+
+		removeJob: function() {
+			var that = this;
+
+			function remove() {
+				that.model.destroy( {
+					success: function( model, response ) {
+						App.Alerts.Manager.add(
+							response.success ? 'success' : 'danger',
+							response.success ?
+							'Removed a job: <strong>' + response.id + '</strong>' :
+							response.error,
+							response.success ? 'Success!' : 'Error!'
+						);
+						App.back();
+					},
+					error: function( model, response ) {
+						App.Alerts.Manager.add(
+							'danger',
+							response.error || 'Error while removing a job.',
+							'Error!'
+						);
+					}
+				} );
+			}
+
+			App.showConfirm( {
+				message: 'Do you want to remove this job?',
+				callback: remove
+			} );
+		},
+
+		restartJob: function() {
+			var that = this;
+
+			function restart() {
+				$.ajax( {
+					url: '/jobs/' + that.model.id + '/restart',
+					dataType: 'json',
+					success: function( response ) {
+						App.Alerts.Manager.add(
+							response.success ? 'success' : 'danger',
+							response.success ?
+							'Restarted a job: <strong>' + response.id + '</strong>' :
+							response.error,
+							response.success ? 'Success!' : 'Error!'
+						);
+
+						if ( response.success ) {
+							that.update();
+						}
+					},
+					error: function( response, status ) {
+						App.Alerts.Manager.add(
+							'danger',
+							status || 'Error while restarting a job.',
+							'Error!'
+						);
+					}
+				} );
+			}
+
+			App.showConfirm( {
+				message: 'Do you want to restart this job?',
+				callback: restart
+			} );
 		}
 	} );
 
