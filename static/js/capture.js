@@ -25,7 +25,8 @@
 			that = this,
 			runs = 0,
 			testTimeout,
-			testWindow;
+			testWindow,
+			lastError;
 
 		this.running = false;
 		this.results = null;
@@ -56,7 +57,8 @@
 		}
 
 		this.error = function( error ) {
-			socket.emit( 'error', JSON.parse( error ) );
+			lastError = JSON.parse( error );
+			socket.emit( 'error', lastError );
 		};
 
 		this.result = function( result ) {
@@ -64,6 +66,11 @@
 
 			if ( !result.success ) {
 				this.results.success = false;
+
+				if ( lastError ) {
+					result.error += '\n\n' + lastError;
+					lastError = null;
+				}
 			}
 
 			this.results.results[ result.name ] = result;
