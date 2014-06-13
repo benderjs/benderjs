@@ -174,7 +174,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			if ( params.selected ) {
 				filter.push( params.selected );
 			} else if ( params.deselected ) {
-				filter.splice( filter.indexOf( params.deselected ), 1 );
+				filter.splice( _.indexOf( filter, params.deselected ), 1 );
 			}
 
 			this.model.set( 'filter', filter );
@@ -331,13 +331,13 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				if ( includes.length ) {
 					result = _.any( tags, function( tag ) {
-						return includes.indexOf( tag ) > -1;
+						return _.indexOf( includes, tag ) > -1;
 					} );
 				}
 
 				if ( excludes.length ) {
 					result = result && !_.any( tags, function( tag ) {
-						return excludes.indexOf( tag ) > -1;
+						return _.indexOf( excludes, tag ) > -1;
 					} );
 				}
 
@@ -346,13 +346,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		getIds: function() {
-			return this
-				.filter( function( test ) {
-					return test.get( 'visible' );
-				} )
-				.map( function( test ) {
-					return test.get( 'id' );
-				} );
+			return _.map( this.filter( function( test ) {
+				return test.get( 'visible' );
+			} ), function( test ) {
+				return test.get( 'id' );
+			} );
 		},
 
 		update: function( data ) {
@@ -545,7 +543,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		updateBrowsers: function() {
-			var browsers = $( event.target ).val().trim();
+			var browsers = $( event.target ).val().replace( /^\s+|\s+$/g, '' );
 
 			browsers = browsers.length ? browsers.replace( /\s+/g, ' ' ).split( /\s+/ ) : [];
 
@@ -554,7 +552,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		addBrowser: function( event ) {
 			var browsers = this.model.get( 'browsers' ),
-				name = $( event.target ).text().trim(),
+				name = $( event.target ).text().replace( /^\s+|\s+$/g, '' ),
 				pattern = new RegExp( '(?:^|,)' + name + '(?:,|$)', 'i' );
 
 			if ( name && !pattern.test( browsers.join( ',' ) ) ) {

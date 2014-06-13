@@ -120,7 +120,7 @@
 							testWindow = window.open( id, 'bendertest' );
 						}, 300 );
 					} else {
-						if ( !testWindow ) {
+						if ( !testWindow || testWindow.closed ) {
 							testWindow = window.open( id, 'bendertest' );
 						} else {
 							if ( id === testWindow.location.href.split( testWindow.location.host )[ 1 ] ) {
