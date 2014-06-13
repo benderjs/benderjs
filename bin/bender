@@ -24,7 +24,6 @@ var argParser = require( 'nomnom' ),
 
 	applications = require( dir + 'applications' ),
 	browsers = require( dir + 'browsers' ),
-	cache = require( dir + 'cache' ),
 	conf = require( dir + 'config' ),
 	constants = require( dir + 'constants' ),
 	jobs = require( dir + 'jobs' ),
@@ -192,7 +191,7 @@ function startServer( options ) {
 		} ),
 		modules = [
 			utils, applications, testbuilders, pagebuilders, middleware,
-			browsers, cache, template, constants, tests, jobs, sockets,
+			browsers, template, constants, tests, jobs, sockets,
 			server, reporters, plugins
 		];
 
