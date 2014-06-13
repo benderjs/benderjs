@@ -39,39 +39,24 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 		var socketUrl = 'http://' + window.location.hostname + ':' +
 			window.location.port + '/dashboard',
 			options = {
-				'reconnection delay': 2000,
-				'reconnection limit': 2000,
-				'max reconnection attempts': Infinity
+				reconnection: true,
+				reconnectionDelay: 2000,
+				reconnectionDelayMax: 2000
 			},
-			socket = io.connect( socketUrl, options ),
-			$emit = socket.$emit;
+			socket = io( socketUrl, options );
 
-		// override socket.io $emit to make module triggering socket events
-		socket.$emit = function() {
-			Sockets.trigger.apply( Sockets, arguments );
-			$emit.apply( socket, arguments );
-		};
+		Sockets.socket = socket;
 
 		// expose socket.io emit method
 		Sockets.emit = socket.emit;
 
-		Sockets.on( {
-			'connect': function() {
-				socket.emit( 'register' );
-				Sockets.status.setStatus( 'connected' );
-			},
-			'reconnect': function() {
-				Sockets.status.setStatus( 'reconnecting' );
-			},
-			'reconnecting': function() {
-				Sockets.status.setStatus( 'reconnecting' );
-			},
-			'reconnect_failed': function() {
-				Sockets.status.setStatus( 'disconnected' );
-			},
-			'disconnect': function() {
-				Sockets.status.setStatus( 'disconnected' );
-			}
+		socket.on( 'connect', function() {
+			socket.emit( 'register' );
+			Sockets.status.setStatus( 'connected' );
+		} );
+
+		socket.on( 'disconnect', function() {
+			Sockets.status.setStatus( 'disconnected' );
 		} );
 
 		App.socketStatus.show( new Sockets.StatusView( {

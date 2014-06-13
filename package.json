@@ -21,27 +21,27 @@
 	"license": "MIT",
 	"dependencies": {
 		"broadway": "~0.2.9",
-		"connect": "~2.14.3",
+		"connect": "~2.19.6",
 		"dom-combiner": "git://github.com/benderjs/dom-combiner.git",
-		"forever": "~0.10.11",
-		"glob": "~3.2.9",
+		"forever": "~0.11.1",
+		"glob": "~4.0.2",
 		"lodash": "~2.4.1",
 		"ncp": "git://github.com/gregpabian/ncp.git#follow-symlinks",
 		"nedb": "~0.10.5",
 		"node-uuid": "~1.4.1",
 		"node-watch": "0.3.4",
-		"nomnom": "~1.6.2",
-		"request": "~2.34.0",
-		"rimraf": "~2.2.6",
-		"send": "~0.2.0",
-		"socket.io": "~0.9.16",
+		"nomnom": "~1.7.0",
+		"request": "~2.36.0",
+		"rimraf": "~2.2.8",
+		"send": "~0.4.3",
+		"socket.io": "~1.0.4",
 		"tv4": "~1.0.18",
-		"useragent": "~2.0.7",
-		"when": "~3.0.1",
-		"winston": "~0.7.2"
+		"useragent": "~2.0.8",
+		"when": "~3.2.3",
+		"winston": "~0.7.3"
 	},
 	"devDependencies": {
-		"jsdoc": "~3.3.0-alpha5",
+		"jsdoc": "~3.3.0-alpha8",
 		"nodetime": "~0.8.15"
 	}
 }
