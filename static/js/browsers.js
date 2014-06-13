@@ -120,8 +120,8 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 			controller: controller
 		} );
 
-		App.Sockets.on( 'browsers:update', controller.updateBrowsers );
-		App.Sockets.on( 'client:update', controller.updateClient );
-		App.Sockets.on( 'disconnect', controller.clearBrowsers );
+		App.Sockets.socket.on( 'browsers:update', controller.updateBrowsers );
+		App.Sockets.socket.on( 'client:update', controller.updateClient );
+		App.Sockets.socket.on( 'disconnect', controller.clearBrowsers );
 	} );
 } );

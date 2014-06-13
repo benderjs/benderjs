@@ -13,10 +13,7 @@
 		fetchInterval = null,
 		states = {
 			CONNECT: 0,
-			RECONNECT: 1,
-			RECONNECT_FAIL: 2,
-			RECONNECTING: 3,
-			DISCONNECT: 4
+			DISCONNECT: 1
 		},
 		socket;
 
@@ -121,7 +118,8 @@
 		};
 
 		this.ignore = function( result ) {
-			this.results.success = false;
+			this.results.success = true;
+			this.results.ignored = true;
 			this.complete();
 		};
 
@@ -196,24 +194,17 @@
 	}
 
 	function setStatus( status ) {
-		var messages = [
-			'Connected', 'Reconnected', 'Failed to reconnect',
-			'Reconnecting in ', 'Disconnected'
-		];
-
 		return function( options ) {
-			statusEl.innerHTML = messages[ status ] + ( options ? options + 'ms...' : '' );
-			statusEl.className = status === states.CONNECT ? 'ok' :
-				( status === states.RECONNECT || status === states.RECONNECTING ) ? 'warn' :
-				( status === states.RECONNECT_FAIL || states.DISCONNECT ) ? 'fail' : '';
+			statusEl.innerHTML = status === states.CONNECT ? 'Connected' : 'Disconnected';
+			statusEl.className = status === states.CONNECT ? 'ok' : 'fail';
 		};
 	}
 
-	socket = io.connect(
+	socket = io(
 		'http://' + window.location.hostname + ':' + ( window.location.port || 80 ) + '/client', {
-			'reconnection delay': 2000,
-			'reconnection limit': 2000,
-			'max reconnection attempts': Infinity
+			reconnection: true,
+			reconnectionDelay: 2000,
+			reconnectionDelayMax: 2000
 		}
 	);
 
@@ -230,9 +221,6 @@
 
 
 		} )
-		.on( 'reconnect', setStatus( states.RECONNECT ) )
-		.on( 'reconnect_failed', setStatus( states.RECONNECT_FAIL ) )
-		.on( 'reconnecting', setStatus( states.RECONNECTING ) )
 		.on( 'disconnect', setStatus( states.DISCONNECT ) )
 		.on( 'disconnect', stopFetch );
 

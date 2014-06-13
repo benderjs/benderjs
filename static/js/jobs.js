@@ -31,7 +31,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		getResultStyle: function( result ) {
 			var status = result.status === 2 ? 'success' :
-				result.status === 3 ? 'danger' : 'info';
+				result.status === 3 ? 'danger' :
+				result.status === 4 ? 'warning' : 'info';
 
 			return status + ' bg-' + status + ' text-' + status;
 		},
@@ -40,7 +41,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			return 'glyphicon-' + ( result.status === 0 ? 'time' :
 				result.status === 1 ? 'refresh' :
 				result.status === 2 ? 'ok' :
-				'remove' );
+				result.status === 3 ? 'remove' :
+				'forward' );
 		}
 	};
 
