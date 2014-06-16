@@ -99,27 +99,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			'change #all, #failed': 'filterFailed'
 		},
 
-		templateHelpers: {
-			timeToText: function( ms ) {
-				var h, m, s;
-
-				s = Math.floor( ms / 1000 );
-				ms %= 1000;
-				m = Math.floor( s / 60 );
-				s %= 60;
-				h = Math.floor( m / 60 );
-				m %= 60;
-
-				return ( h ? ( h + 'h ' ) : '' ) +
-					( m ? ( ( m < 10 ? '0' : '' ) + m + 'm ' ) : '' ) +
-					( s ? ( ( s < 10 ? '0' : '' ) + s + 's ' ) : '' ) +
-					( ms < 10 ? '00' : ms < 100 ? '0' : '' ) + ms + 'ms';
-			},
-
-			getPercent: function( completed, total ) {
-				return ( total > 0 ? Math.ceil( completed / total * 100 ) : 0 ) + '%';
-			}
-		},
+		templateHelpers: App.Common.templateHelpers,
 
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
@@ -207,7 +187,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			tags: '',
 			result: '',
 			status: '',
-			visible: true
+			visible: true,
+			slow: false
 		}
 	} );
 
@@ -244,7 +225,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					model.status === 'warning' ? 'forward' : 'remove' ) :
 				'' );
 
-			this.ui.result.text( model.result );
+			if ( model.result && model.slow ) {
+				model.result = '<span class="glyphicon glyphicon-exclamation-sign" title="Slow test"></span> ' +
+					model.result;
+			}
+
+			this.ui.result.html( model.result );
 
 			// scroll window to make result visible if needed
 			if ( model.result ) {
@@ -371,6 +357,14 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					model
 						.set( 'result', this.buildResult( data ) )
 						.set( 'status', data.success ? ignored ? 'warning' : 'success' : 'danger' );
+
+					// mark slow tests
+					// average duration above the threshold
+					if ( ( Math.round( data.duration / data.total ) > bender.config.slowAvgThreshold ) ||
+						// total duration above the threshold
+						( data.duration > bender.config.slowThreshold ) ) {
+						model.set( 'slow', true );
+					}
 				}
 			}
 		},
@@ -406,7 +400,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		clearResults: function() {
 			this.each( function( test ) {
-				test.set( 'result', '' ).set( 'status', '' );
+				test
+					.set( 'result', '' )
+					.set( 'status', '' )
+					.set( 'slow', false );
 			} );
 		}
 	} ) )();
@@ -478,7 +475,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		events: {
-			'change #job-browsers': 'updateBrowsers',
+			'change @ui.browsers': 'updateBrowsers',
+			'change @ui.description': 'updateDescription',
 			'click .dropdown-menu a': 'addBrowser',
 			'click @ui.create': 'createJob',
 			'click .add-captured-button': 'addCaptured'
@@ -548,6 +546,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			browsers = browsers.length ? browsers.replace( /\s+/g, ' ' ).split( /\s+/ ) : [];
 
 			this.model.set( 'browsers', _.uniq( browsers ) );
+		},
+
+		updateDescription: function() {
+			var description = $( event.target ).val().replace( /^\s+|\s+$/g, '' );
+			this.model.set( 'description', description );
 		},
 
 		addBrowser: function( event ) {

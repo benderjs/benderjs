@@ -306,7 +306,12 @@
 
 	bender.config = BENDER_CONFIG;
 
-	window.alert = bender.log;
+	window.alert = function( msg ) {
+		throw {
+			message: 'window.alert: ' + msg
+		};
+	};
+
 	window.bender = bender;
 
 	if ( window.addEventListener ) {
