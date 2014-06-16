@@ -50,24 +50,22 @@
 		el: '#modal',
 
 		constructor: function() {
-			_.bindAll( this, 'getEl', 'showModal', 'hideModal' );
 			Backbone.Marionette.Region.prototype.constructor.apply( this, arguments );
-			this.on( 'show', this.showModal, this );
+
+			this.ensureEl();
+			this.$el.on( 'hidden.bs.modal', _.bind( this.close, this ) );
 		},
 
-		getEl: function( selector ) {
-			var $el = $( selector );
+		onShow: function( view ) {
+			view.once( 'close', _.bind( this.onClose, this ) );
 
-			$el.on( 'hidden', this.close );
-			return $el;
+			this.$el.modal( {
+				backdrop: 'static',
+				show: true
+			} );
 		},
 
-		showModal: function( view ) {
-			view.on( 'close', this.hideModal, this );
-			this.$el.modal( 'show' );
-		},
-
-		hideModal: function() {
+		onClose: function() {
 			this.$el.modal( 'hide' );
 		}
 	} );

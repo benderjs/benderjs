@@ -252,7 +252,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				} );
 			}
 
-			App.showConfirm( {
+			App.showConfirmPopup( {
 				message: 'Do you want to remove this job?',
 				callback: remove
 			} );
@@ -288,7 +288,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				} );
 			}
 
-			App.showConfirm( {
+			App.showConfirmPopup( {
 				message: 'Do you want to restart this job?',
 				callback: restart
 			} );

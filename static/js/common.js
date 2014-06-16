@@ -49,7 +49,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	 * @extends {Common.ModalView}
 	 */
 	Common.ConfirmView = Common.ModalView.extend( {
-		template: '#confirm',
+		template: '#modal-tmpl',
 		className: 'modal-content modal-confirm',
 
 		callback: null,
@@ -62,7 +62,9 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 		initialize: function( options ) {
 			this.model = new Backbone.Model( {
-				message: options.message || 'Are you sure?'
+				message: options.message || 'Are you sure?',
+				footer: true,
+				title: false
 			} );
 			this.callback = options.callback;
 		},
@@ -72,6 +74,20 @@ App.module( 'Common', function( Common, App, Backbone ) {
 				this.callback();
 			}
 			this.close();
+		}
+	} );
+
+	Common.DisconnectedView = Common.ModalView.extend( {
+		template: '#modal-tmpl',
+
+		name: 'disconnected-modal',
+
+		initialize: function() {
+			this.model = new Backbone.Model( {
+				message: 'You\'ve been disconnected from the server, reconnecting...',
+				footer: false,
+				title: false
+			} );
 		}
 	} );
 
@@ -89,9 +105,21 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	 * @param {String}   options.message  Modal message
 	 * @param {Function} options.callback Callback function executed on modal confirmation
 	 */
-	App.showConfirm = function( options ) {
+	App.showConfirmPopup = function( options ) {
 		App.modal.show(
 			new Common.ConfirmView( options )
 		);
+	};
+
+	App.showDisconnectedPopup = function() {
+		App.modal.show(
+			new Common.DisconnectedView()
+		);
+	};
+
+	App.hideDisconnectedPopup = function() {
+		if ( App.modal.currentView && App.modal.currentView.name === 'disconnected-modal' ) {
+			App.modal.close();
+		}
 	};
 } );
