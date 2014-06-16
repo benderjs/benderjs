@@ -459,6 +459,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		events: {
 			'change @ui.browsers': 'updateBrowsers',
+			'change @ui.description': 'updateDescription',
 			'click .dropdown-menu a': 'addBrowser',
 			'click @ui.create': 'createJob',
 			'click .add-captured-button': 'addCaptured'
@@ -528,6 +529,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			browsers = browsers.length ? browsers.replace( /\s+/g, ' ' ).split( /\s+/ ) : [];
 
 			this.model.set( 'browsers', _.uniq( browsers ) );
+		},
+
+		updateDescription: function() {
+			var description = $( event.target ).val().replace( /^\s+|\s+$/g, '' );
+			this.model.set( 'description', description );
 		},
 
 		addBrowser: function( event ) {

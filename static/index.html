@@ -165,8 +165,8 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 
 	<!-- template for a single job row -->
 	<script type="text/html" id="job-row">
-	<td><a href="#jobs/<%= id %>"><%= id %></a></td>
-	<td><%= description %></td>
+	<td><a href="#jobs/<%= id %>" title="<%= id %>"><%= id %></a></td>
+	<td><span title="<%= description %>"><%= description %></span></td>
 	<td><small><%= getTime(created) %></small></td>
 	<td class="results">
 		<% _.each(results, function (result) { %>
