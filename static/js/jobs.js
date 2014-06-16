@@ -141,15 +141,21 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.TaskView = Backbone.Marionette.ItemView.extend( {
 		template: '#task',
 		tagName: 'tr',
-		templateHelpers: App.Common.templateHelpers,
+		templateHelpers: _.extend( {
+			isSlow: function( result ) {
+				return result.duration && result.total &&
+					( Math.round( result.duration / result.total ) > bender.config.slowAvgThreshold ) ||
+					( result.duration > bender.config.slowThreshold );
+			}
+		}, App.Common.templateHelpers ),
 
 		events: {
 			'click .clickable': 'showError'
 		},
 
 		showError: function( event ) {
-			var elem = $( event.currentTarget ),
-				result = this.model.get( 'results' )[ elem.index() ];
+			var $elem = $( event.currentTarget ),
+				result = this.model.get( 'results' )[ $elem.index() ];
 
 			if ( result && result.errors ) {
 				App.modal.show(

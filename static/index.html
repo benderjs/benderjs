@@ -254,8 +254,11 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<td><a href="/jobs/<%= jobId %>/tests/<%= id %>" title="<%= id %>"><%= id %></a></td>
 		<td class="results">
 			<% _.each(results, function (result) { %>
-				<div class="result <%= getResultStyle(result) %> <% if (result.errors) { %>clickable<% } %>" title="<%= getResultMessage(result) %>">
+				<div class="result <%= getResultStyle(result) %><%= result.errors ? ' clickable' : '' %><%= isSlow(result) ? ' slow' : '' %>" title="<%= getResultMessage(result) %><%= isSlow(result) ? ', slow' : '' %>">
 					<span class="glyphicon <%= getIcon(result) %>"></span>
+					<% if (isSlow(result)) { %>
+					<span class="glyphicon glyphicon-exclamation-sign"></span>
+					<% } %>
 				</div>
 			<% }) %>
 		</td>
