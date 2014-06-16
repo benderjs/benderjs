@@ -9,6 +9,68 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	'use strict';
 
 	/**
+	 * Helpers used in underscore templates
+	 * @type {Object}
+	 */
+	Common.templateHelpers = {
+		getTime: function( timestamp ) {
+			return moment( timestamp ).fromNow();
+		},
+
+		getResultStyle: function( result ) {
+			var status = result.status === 2 ? 'success' :
+				result.status === 3 ? 'danger' :
+				result.status === 4 ? 'warning' : 'info';
+
+			return status + ' bg-' + status + ' text-' + status;
+		},
+
+		getResultMessage: function( result ) {
+			var message = [
+				'Waiting...',
+				'Pending...',
+				'Passed',
+				'Failed',
+				'Ignored'
+			][ result.status ] || 'Unknown';
+
+			if ( result.status === 2 || result.status === 3 ) {
+				message += ' in ' + ( result.duration ? this.timeToText( result.duration ) : '?ms' );
+			}
+
+			return message;
+		},
+
+		getIcon: function( result ) {
+			return 'glyphicon-' + ( result.status === 0 ? 'time' :
+				result.status === 1 ? 'refresh' :
+				result.status === 2 ? 'ok' :
+				result.status === 3 ? 'remove' :
+				'forward' );
+		},
+
+		timeToText: function( ms ) {
+			var h, m, s;
+
+			s = Math.floor( ms / 1000 );
+			ms %= 1000;
+			m = Math.floor( s / 60 );
+			s %= 60;
+			h = Math.floor( m / 60 );
+			m %= 60;
+
+			return ( h ? ( h + 'h ' ) : '' ) +
+				( m ? ( ( m < 10 ? '0' : '' ) + m + 'm ' ) : '' ) +
+				( s ? ( ( s < 10 ? '0' : '' ) + s + 's ' ) : '' ) +
+				( ms < 10 ? '00' : ms < 100 ? '0' : '' ) + ms + 'ms';
+		},
+
+		getPercent: function( completed, total ) {
+			return ( total > 0 ? Math.ceil( completed / total * 100 ) : 0 ) + '%';
+		}
+	};
+
+	/**
 	 * Table view used for displaying collections in bootstrap styled tables
 	 * @extends {Backbone.Marionette.CompositeView}
 	 */

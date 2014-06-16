@@ -170,7 +170,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<td><small><%= getTime(created) %></small></td>
 	<td class="results">
 		<% _.each(results, function (result) { %>
-		<div class="browser <%= result.name %> <%= getResultStyle(result) %>">
+		<div class="browser <%= result.name %> <%= getResultStyle(result) %>" title ="<%= getResultMessage(result) %>">
 			<span class="glyphicon <%= getIcon(result) %>"></span>
 			<small><%= result.version ? result.version : '-' %></small>
 		</div>
@@ -254,7 +254,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<td><a href="/jobs/<%= jobId %>/tests/<%= id %>" title="<%= id %>"><%= id %></a></td>
 		<td class="results">
 			<% _.each(results, function (result) { %>
-				<div class="result <%= getResultStyle(result) %> <% if (result.errors) { %>clickable<% } %>">
+				<div class="result <%= getResultStyle(result) %> <% if (result.errors) { %>clickable<% } %>" title="<%= getResultMessage(result) %>">
 					<span class="glyphicon <%= getIcon(result) %>"></span>
 				</div>
 			<% }) %>

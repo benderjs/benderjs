@@ -21,32 +21,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	} );
 
 	/**
-	 * Helpers used in underscore templates
-	 * @type {Object}
-	 */
-	Jobs.templateHelpers = {
-		getTime: function( timestamp ) {
-			return moment( timestamp ).fromNow();
-		},
-
-		getResultStyle: function( result ) {
-			var status = result.status === 2 ? 'success' :
-				result.status === 3 ? 'danger' :
-				result.status === 4 ? 'warning' : 'info';
-
-			return status + ' bg-' + status + ' text-' + status;
-		},
-
-		getIcon: function( result ) {
-			return 'glyphicon-' + ( result.status === 0 ? 'time' :
-				result.status === 1 ? 'refresh' :
-				result.status === 2 ? 'ok' :
-				result.status === 3 ? 'remove' :
-				'forward' );
-		}
-	};
-
-	/**
 	 * Job row model
 	 */
 	Jobs.JobRow = Backbone.Model.extend( {
@@ -63,7 +37,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.JobRowView = Backbone.Marionette.ItemView.extend( {
 		template: '#job-row',
 		tagName: 'tr',
-		templateHelpers: Jobs.templateHelpers
+		templateHelpers: App.Common.templateHelpers
 	} );
 
 	/**
@@ -167,7 +141,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.TaskView = Backbone.Marionette.ItemView.extend( {
 		template: '#task',
 		tagName: 'tr',
-		templateHelpers: Jobs.templateHelpers,
+		templateHelpers: App.Common.templateHelpers,
 
 		events: {
 			'click .clickable': 'showError'
@@ -197,7 +171,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.JobView = App.Common.TableView.extend( {
 		template: '#job',
 		className: '',
-		templateHelpers: Jobs.templateHelpers,
+		templateHelpers: App.Common.templateHelpers,
 		itemView: Jobs.TaskView,
 
 		events: {

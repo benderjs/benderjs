@@ -99,27 +99,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			'change #all, #failed': 'filterFailed'
 		},
 
-		templateHelpers: {
-			timeToText: function( ms ) {
-				var h, m, s;
-
-				s = Math.floor( ms / 1000 );
-				ms %= 1000;
-				m = Math.floor( s / 60 );
-				s %= 60;
-				h = Math.floor( m / 60 );
-				m %= 60;
-
-				return ( h ? ( h + 'h ' ) : '' ) +
-					( m ? ( ( m < 10 ? '0' : '' ) + m + 'm ' ) : '' ) +
-					( s ? ( ( s < 10 ? '0' : '' ) + s + 's ' ) : '' ) +
-					( ms < 10 ? '00' : ms < 100 ? '0' : '' ) + ms + 'ms';
-			},
-
-			getPercent: function( completed, total ) {
-				return ( total > 0 ? Math.ceil( completed / total * 100 ) : 0 ) + '%';
-			}
-		},
+		templateHelpers: App.Common.templateHelpers,
 
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
@@ -478,7 +458,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		events: {
-			'change #job-browsers': 'updateBrowsers',
+			'change @ui.browsers': 'updateBrowsers',
 			'click .dropdown-menu a': 'addBrowser',
 			'click @ui.create': 'createJob',
 			'click .add-captured-button': 'addCaptured'

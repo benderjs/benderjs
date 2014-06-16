@@ -120,13 +120,17 @@
 		this.ignore = function( result ) {
 			this.results.success = true;
 			this.results.ignored = true;
+			this.results.duration = 0;
 			this.complete();
 		};
 
-		this.next = this.complete = function() {
-			var frame;
+		this.next = this.complete = function( result ) {
+			var parsed = JSON.parse( result ),
+				frame;
 
 			clearTestTimeout();
+
+			this.results.duration = parsed.duration;
 
 			socket.emit( 'complete', this.results );
 
