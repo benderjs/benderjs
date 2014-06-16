@@ -187,7 +187,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			tags: '',
 			result: '',
 			status: '',
-			visible: true
+			visible: true,
+			slow: false
 		}
 	} );
 
@@ -224,7 +225,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					model.status === 'warning' ? 'forward' : 'remove' ) :
 				'' );
 
-			this.ui.result.text( model.result );
+			if ( model.result && model.slow ) {
+				model.result = '<span class="glyphicon glyphicon-exclamation-sign" title="Slow test"></span> ' +
+					model.result;
+			}
+
+			this.ui.result.html( model.result );
 
 			// scroll window to make result visible if needed
 			if ( model.result ) {
@@ -351,6 +357,14 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					model
 						.set( 'result', this.buildResult( data ) )
 						.set( 'status', data.success ? ignored ? 'warning' : 'success' : 'danger' );
+
+					// mark slow tests
+					// average duration above the threshold
+					if ( ( Math.round( data.duration / data.total ) > bender.config.slowAvgThreshold ) ||
+						// total duration above the threshold
+						( data.duration > bender.config.slowThreshold ) ) {
+						model.set( 'slow', true );
+					}
 				}
 			}
 		},
@@ -386,7 +400,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		clearResults: function() {
 			this.each( function( test ) {
-				test.set( 'result', '' ).set( 'status', '' );
+				test
+					.set( 'result', '' )
+					.set( 'status', '' )
+					.set( 'slow', false );
 			} );
 		}
 	} ) )();

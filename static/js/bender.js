@@ -21,8 +21,8 @@
 		this.handlers = {};
 		this.current = null;
 		this.suite = null;
-
 		this.runAsChild = true;
+		this.config = BENDER_CONFIG;
 
 		function clearTestTimeout() {
 			if ( testTimeout ) {
@@ -31,7 +31,7 @@
 		}
 
 		function resetTestTimeout() {
-			if ( !BENDER_CONFIG && !BENDER_CONFIG.testTimeout ) {
+			if ( !that.config || !that.config.testTimeout ) {
 				return;
 			}
 
@@ -46,7 +46,7 @@
 
 				that.next( JSON.stringify( result ) );
 
-			}, BENDER_CONFIG.testTimeout );
+			}, that.config.testTimeout );
 		}
 
 		this.emit = function( name ) {
