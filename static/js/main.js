@@ -64,7 +64,10 @@
 
 		showModal: function( view ) {
 			view.on( 'close', this.hideModal, this );
-			this.$el.modal( 'show' );
+			this.$el.modal( {
+				backdrop: 'static',
+				show: true
+			} );
 		},
 
 		hideModal: function() {

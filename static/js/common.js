@@ -144,6 +144,14 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	} );
 
 	/**
+	 * Test errors view
+	 */
+	App.Common.TestErrorsView = App.Common.ModalView.extend( {
+		template: '#test-errors'
+	} );
+
+
+	/**
 	 * Display the 'Error 404' page
 	 */
 	App.show404 = function() {

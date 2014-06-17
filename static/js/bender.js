@@ -24,6 +24,8 @@
 		this.runAsChild = true;
 		this.config = BENDER_CONFIG;
 
+		this.results = null;
+
 		function clearTestTimeout() {
 			if ( testTimeout ) {
 				clearTimeout( testTimeout );
@@ -88,7 +90,17 @@
 		};
 
 		// stubbed for compatibility
-		this.result = function() {
+		this.result = function( result ) {
+			var parsed = JSON.parse( result );
+
+			if ( !parsed.success ) {
+				if ( !this.results ) {
+					this.results = {};
+				}
+
+				this.results[ parsed.name ] = parsed;
+			}
+
 			resetTestTimeout();
 		};
 
@@ -101,7 +113,9 @@
 				parsed = JSON.parse( summary );
 				parsed.id = this.current;
 				parsed.success = parsed.success || ( parsed.failed === 0 && parsed.errors === 0 );
+				parsed.results = this.results;
 				this.emit( 'update', parsed );
+				this.results = null;
 			}
 
 			this.current = this.suite.shift();

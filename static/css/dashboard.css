@@ -71,6 +71,10 @@ th:last-child {
 	vertical-align: top;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 .tests .result {
     margin-left: .5em;
 }
@@ -81,6 +85,10 @@ th:last-child {
 
 .tests-failed .danger {
 	display: table-row !important;
+}
+
+.tests .clickable:hover {
+	text-decoration: underline;
 }
 
 .context-frame {
@@ -148,10 +156,6 @@ th:last-child {
 .jobs .result {
     width: 67px;
     font-size: 1.25em;
-}
-
-.jobs .clickable {
-    cursor: pointer;
 }
 
 .jobs .browser .glyphicon,

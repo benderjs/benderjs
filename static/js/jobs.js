@@ -153,7 +153,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 			if ( result && result.errors ) {
 				App.modal.show(
-					new Jobs.TaskErrorsView( {
+					new App.Common.TestErrorsView( {
 						model: new Backbone.Model(
 							_.extend( {
 								id: this.model.get( 'id' )
@@ -267,13 +267,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				callback: restart
 			} );
 		}
-	} );
-
-	/**
-	 * Task errors view
-	 */
-	Jobs.TaskErrorsView = App.Common.ModalView.extend( {
-		template: '#task-errors'
 	} );
 
 	/**
