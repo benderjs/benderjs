@@ -578,9 +578,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	 */
 	Tests.controller = {
 		listTests: function( filter ) {
-			if ( filter ) {
-				Tests.testStatus.set( 'filter', filter.split( ',' ) );
-			}
+			Tests.testStatus.set( 'filter', filter ? filter.split( ',' ) : [] );
 
 			App.header.show( new Tests.TestHeaderView( {
 				model: Tests.testStatus
