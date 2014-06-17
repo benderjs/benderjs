@@ -141,13 +141,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.TaskView = Backbone.Marionette.ItemView.extend( {
 		template: '#task',
 		tagName: 'tr',
-		templateHelpers: _.extend( {
-			isSlow: function( result ) {
-				return result.duration && result.total &&
-					( Math.round( result.duration / result.total ) > bender.config.slowAvgThreshold ) ||
-					( result.duration > bender.config.slowThreshold );
-			}
-		}, App.Common.templateHelpers ),
+		templateHelpers: App.Common.templateHelpers,
 
 		events: {
 			'click .clickable': 'showError'
@@ -159,7 +153,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 			if ( result && result.errors ) {
 				App.modal.show(
-					new Jobs.TaskErrorsView( {
+					new App.Common.TestErrorsView( {
 						model: new Backbone.Model(
 							_.extend( {
 								id: this.model.get( 'id' )
@@ -273,13 +267,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				callback: restart
 			} );
 		}
-	} );
-
-	/**
-	 * Task errors view
-	 */
-	Jobs.TaskErrorsView = App.Common.ModalView.extend( {
-		template: '#task-errors'
 	} );
 
 	/**

@@ -73,6 +73,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		stop: function() {
 			this.set( 'running', false );
+		},
+
+		parseFilter: function() {
+			var model = this.toJSON(),
+				existing;
+
+			existing = _.filter( model.filter, function( val, index ) {
+				return _.indexOf( model.tags, val ) > -1;
+			} );
+
+			this.set( 'filter', existing );
 		}
 	} ) )();
 
@@ -187,8 +198,18 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			tags: '',
 			result: '',
 			status: '',
+			errors: null,
 			visible: true,
 			slow: false
+		},
+
+		reset: function() {
+			this.set( {
+				result: '',
+				status: '',
+				errors: null,
+				slow: false
+			} );
 		}
 	} );
 
@@ -199,57 +220,66 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		template: '#test',
 		tagName: 'tr',
 		className: 'test',
+		templateHelpers: {
+			getIconStyle: function( status ) {
+				return 'glyphicon' + ( status ?
+					' glyphicon-' + ( status === 'success' ? 'ok' : status === 'warning' ? 'forward' : 'remove' ) :
+					'' );
+			}
+		},
 
-		ui: {
-			icon: '.glyphicon',
-			result: '.result'
+		events: {
+			'click .result': 'showErrors'
 		},
 
 		initialize: function() {
-			this.listenTo( this.model, 'change', this.updateStatus );
+			this.listenTo( this.model, 'change', this.render );
 		},
 
 		onRender: function() {
-			this.updateStatus();
-		},
-
-		updateStatus: function() {
 			var model = this.model.toJSON();
 
 			this.el.className = 'test ' +
 				( model.status ? model.status + ' bg-' + model.status + ' text-' + model.status : '' ) +
 				( model.visible ? '' : ' hidden' );
 
-			this.ui.icon[ 0 ].className = 'glyphicon' + ( model.status ?
-				' glyphicon-' + ( model.status === 'success' ? 'ok' :
-					model.status === 'warning' ? 'forward' : 'remove' ) :
-				'' );
-
-			if ( model.result && model.slow ) {
-				model.result = '<span class="glyphicon glyphicon-exclamation-sign" title="Slow test"></span> ' +
-					model.result;
-			}
-
-			this.ui.result.html( model.result );
-
 			// scroll window to make result visible if needed
 			if ( model.result ) {
-				var top = this.$el.offset().top,
-					bottom = top + this.$el.height(),
-					$window = $( window ),
-					scroll = $( window ).scrollTop(),
-					height = $window.height();
-
-
-				// item is hidden at the bottom
-				if ( scroll + height < bottom ) {
-					$window.scrollTop( bottom - height );
-					// item is hidden at the top
-				} else if ( scroll + App.$navbar.height() > top ) {
-					$( window ).scrollTop( top - App.$navbar.height() - 1 );
-				}
+				this.scrollTo();
 			}
+		},
+
+		scrollTo: function() {
+			var top = this.$el.offset().top,
+				bottom = top + this.$el.height(),
+				$window = $( window ),
+				scroll = $( window ).scrollTop(),
+				height = $window.height();
+
+
+			// item is hidden at the bottom
+			if ( scroll + height < bottom ) {
+				$window.scrollTop( bottom - height );
+				// item is hidden at the top
+			} else if ( scroll + App.$navbar.height() > top ) {
+				$( window ).scrollTop( top - App.$navbar.height() - 1 );
+			}
+		},
+
+		showErrors: function() {
+			var errors = this.model.get( 'errors' );
+
+			if ( !errors || !errors.length ) {
+				return;
+			}
+
+			App.modal.show(
+				new App.Common.TestErrorsView( {
+					model: this.model
+				} )
+			);
 		}
+
 	} );
 
 	/**
@@ -269,25 +299,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.getTags( response.test );
 
 			return response.test;
-		},
-
-		getTags: function( tests ) {
-			var tags = [],
-				negTags = [];
-
-			_.each( tests, function( test ) {
-				tags = tags.concat( test.tags );
-			} );
-
-			tags = _.uniq( tags ).sort();
-
-			negTags = _.map( tags, function( tag ) {
-				return '-' + tag;
-			} );
-
-			tags = tags.concat( negTags );
-
-			Tests.testStatus.set( 'tags', tags );
 		},
 
 		filterTests: function( filter ) {
@@ -331,64 +342,31 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 		},
 
+		getTags: function( tests ) {
+			var tags = [],
+				negTags = [];
+
+			_.each( tests, function( test ) {
+				tags = tags.concat( test.tags );
+			} );
+
+			tags = _.uniq( tags ).sort();
+
+			negTags = _.map( tags, function( tag ) {
+				return '-' + tag;
+			} );
+
+			tags = tags.concat( negTags );
+
+			Tests.testStatus.set( 'tags', tags );
+		},
+
 		getIds: function() {
 			return _.map( this.filter( function( test ) {
 				return test.get( 'visible' );
 			} ), function( test ) {
 				return test.get( 'id' );
 			} );
-		},
-
-		update: function( data ) {
-			var model,
-				ignored;
-
-			if ( typeof data == 'string' ) {
-				model = this.get( data );
-
-				if ( model ) {
-					model.set( 'result', 'Running...' );
-				}
-			} else if ( typeof data == 'object' && data !== null ) {
-				model = this.get( data.id );
-				if ( model ) {
-					ignored = data.ignored === true;
-
-					model
-						.set( 'result', this.buildResult( data ) )
-						.set( 'status', data.success ? ignored ? 'warning' : 'success' : 'danger' );
-
-					// mark slow tests
-					// average duration above the threshold
-					if ( ( Math.round( data.duration / data.total ) > bender.config.slowAvgThreshold ) ||
-						// total duration above the threshold
-						( data.duration > bender.config.slowThreshold ) ) {
-						model.set( 'slow', true );
-					}
-				}
-			}
-		},
-
-		buildResult: function( data ) {
-			var result = [];
-
-			// test was executed
-			if ( data.ignored !== true & !data.broken ) {
-				result.push( data.passed, 'passed', '/' );
-				result.push( data.failed, 'failed' );
-				if ( data.ignored ) {
-					result.push( '/', data.ignored, 'ignored' );
-				}
-				result.push( 'in', data.duration + 'ms' );
-				// test was ignored as a whole
-			} else if ( data.ignored === true ) {
-				result.push( 'IGNORED' );
-				// test was marked as broken
-			} else if ( data.broken ) {
-				result.push( 'BROKEN' );
-			}
-
-			return result.join( ' ' );
 		},
 
 		clearCurrentResult: function() {
@@ -400,10 +378,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		clearResults: function() {
 			this.each( function( test ) {
-				test
-					.set( 'result', '' )
-					.set( 'status', '' )
-					.set( 'slow', false );
+				test.reset();
 			} );
 		}
 	} ) )();
@@ -578,9 +553,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	 */
 	Tests.controller = {
 		listTests: function( filter ) {
-			if ( filter ) {
-				Tests.testStatus.set( 'filter', filter.split( ',' ) );
-			}
+			Tests.testStatus.set( 'filter', filter ? filter.split( ',' ) : [] );
 
 			App.header.show( new Tests.TestHeaderView( {
 				model: Tests.testStatus
@@ -591,8 +564,79 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} ) );
 
 			Tests.testsList.fetch().done( function() {
+				Tests.testStatus.parseFilter();
 				Tests.testsList.filterTests( Tests.testStatus.get( 'filter' ) );
 			} );
+		},
+
+		updateStatus: function( data ) {
+			var model;
+
+			function buildResult( data ) {
+				var result = [];
+
+				// test was executed
+				if ( data.ignored !== true & !data.broken ) {
+					result.push( data.passed, 'passed', '/' );
+					result.push( data.failed, 'failed' );
+					if ( data.ignored ) {
+						result.push( '/', data.ignored, 'ignored' );
+					}
+					result.push( 'in', data.duration + 'ms' );
+					// test was ignored as a whole
+				} else if ( data.ignored === true ) {
+					result.push( 'IGNORED' );
+					// test was marked as broken
+				} else if ( data.broken ) {
+					result.push( 'BROKEN' );
+				}
+
+				return result.join( ' ' );
+			}
+
+			function getErrors( data ) {
+				var errors = [];
+
+				_.each( data.results, function( result, name ) {
+					if ( !result.error ) {
+						return;
+					}
+
+					errors.push( {
+						name: name,
+						error: result.error
+					} );
+				} );
+
+				return errors.length ? errors : null;
+			}
+
+			if ( typeof data == 'string' ) {
+				model = Tests.testsList.get( data );
+
+				if ( model ) {
+					model.set( 'result', 'Running...' );
+				}
+			} else if ( typeof data == 'object' && data !== null ) {
+				model = Tests.testsList.get( data.id );
+
+				if ( model ) {
+					model
+						.set( 'result', buildResult( data ) )
+						.set( 'errors', getErrors( data ) )
+						.set( 'status', data.success ? data.ignored === true ? 'warning' : 'success' : 'danger' );
+
+					// mark slow tests
+					// average duration above the threshold
+					if ( ( Math.round( data.duration / data.total ) > bender.config.slowAvgThreshold ) ||
+						// total duration above the threshold
+						( data.duration > bender.config.slowThreshold ) ) {
+						model.set( 'slow', true );
+					}
+				}
+			}
+
+			Tests.testStatus.update( data );
 		}
 	};
 
@@ -611,10 +655,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			Tests.controller.listTests();
 		} );
 
-		bender.on( 'update', function( data ) {
-			Tests.testStatus.update( data );
-			Tests.testsList.update( data );
-		} );
+		bender.on( 'update', Tests.controller.updateStatus );
 
 		bender.on( 'complete', function() {
 			App.vent.trigger( 'tests:stop' );

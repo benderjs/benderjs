@@ -221,8 +221,17 @@ function startServer( options ) {
 						options.hostname,
 						options.port
 					);
+				} )
+			.on( 'error', function( e ) {
+				if ( e.code === 'EADDRINUSE' ) {
+					log.error(
+						'Address http://%s:%s in use. Please try running Bender on a different port.',
+						options.hostname,
+						options.port
+					);
+					process.exit( 1 );
 				}
-		);
+			} );
 	} );
 }
 
