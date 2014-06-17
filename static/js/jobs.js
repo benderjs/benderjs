@@ -141,13 +141,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.TaskView = Backbone.Marionette.ItemView.extend( {
 		template: '#task',
 		tagName: 'tr',
-		templateHelpers: _.extend( {
-			isSlow: function( result ) {
-				return result.duration && result.total &&
-					( Math.round( result.duration / result.total ) > bender.config.slowAvgThreshold ) ||
-					( result.duration > bender.config.slowThreshold );
-			}
-		}, App.Common.templateHelpers ),
+		templateHelpers: App.Common.templateHelpers,
 
 		events: {
 			'click .clickable': 'showError'

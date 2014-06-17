@@ -67,6 +67,12 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 		getPercent: function( completed, total ) {
 			return ( total > 0 ? Math.ceil( completed / total * 100 ) : 0 ) + '%';
+		},
+
+		isSlow: function( result ) {
+			return result.duration && result.total &&
+				( Math.round( result.duration / result.total ) > bender.config.slowAvgThreshold ) ||
+				( result.duration > bender.config.slowThreshold );
 		}
 	};
 
