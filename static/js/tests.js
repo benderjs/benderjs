@@ -73,6 +73,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		stop: function() {
 			this.set( 'running', false );
+		},
+
+		parseFilter: function() {
+			var model = this.toJSON(),
+				existing;
+
+			existing = _.filter( model.filter, function( val, index ) {
+				return _.indexOf( model.tags, val ) > -1;
+			} );
+
+			this.set( 'filter', existing );
 		}
 	} ) )();
 
@@ -589,6 +600,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} ) );
 
 			Tests.testsList.fetch().done( function() {
+				Tests.testStatus.parseFilter();
 				Tests.testsList.filterTests( Tests.testStatus.get( 'filter' ) );
 			} );
 		}
