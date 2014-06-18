@@ -44,6 +44,15 @@ th:last-child {
 	background: #fff;
 }
 
+.navbar-header,
+.navbar-text {
+	float: left;
+}
+
+.navbar-right {
+	float: right;
+}
+
 .app-title {
     font-size: 20px;
     font-weight: bold;

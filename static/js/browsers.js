@@ -54,7 +54,7 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	} ) )();
 
 	/**
-	 * Browser list vieq
+	 * Browser list view
 	 */
 	Browsers.BrowsersListView = App.Common.TableView.extend( {
 		template: '#browsers',
@@ -94,7 +94,7 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 		},
 
 		updateBrowsers: function( data ) {
-			Browsers.browsersList.reset( Browsers.controller.parseBrowsers( data ) );
+			Browsers.browsersList.set( Browsers.controller.parseBrowsers( data ) );
 		},
 
 		clearBrowsers: function() {
