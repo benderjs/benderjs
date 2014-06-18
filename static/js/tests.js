@@ -444,8 +444,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		template: '#create-job',
 
 		ui: {
-			'browsers': '#job-browsers',
-			'description': '#job-description',
+			'browsers': '.job-browsers',
+			'description': '.job-description',
 			'create': '.create-button'
 		},
 

@@ -123,15 +123,10 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		urlRoot: '/jobs/',
 
-		parse: function( data ) {
-			data.browsers = _.map( data.tasks[ 0 ].results, function( result ) {
-				return {
-					name: result.name,
-					version: result.version
-				};
-			} );
-
-			return data;
+		validate: function( attrs ) {
+			if ( !attrs.browsers.length ) {
+				return 'No browsers specified for the job';
+			}
 		}
 	} );
 
@@ -177,24 +172,20 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		events: {
 			'click .back-button': 'goBack',
 			'click .remove-button': 'removeJob',
-			'click .restart-button': 'restartJob'
+			'click .restart-button': 'restartJob',
+			'click .edit-button': 'editJob',
 		},
 
 		initialize: function() {
 			this.collection = new Backbone.Collection();
-			this.listenTo( this.model, 'change', this.render );
-			this.update();
+			this.listenTo( this.model, 'sync', this.update );
+			this.listenTo( this.model, 'error', App.show404 );
+			this.model.fetch();
 		},
 
 		update: function() {
-			var that = this;
-
-			this.model.fetch( {
-				success: function() {
-					that.collection.reset( that.model.get( 'tasks' ) );
-				},
-				error: App.show404
-			} );
+			this.collection.reset( this.model.get( 'tasks' ) );
+			this.render();
 		},
 
 		goBack: function() {
@@ -249,7 +240,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 						);
 
 						if ( response.success ) {
-							that.update();
+							that.model.fetch();
 						}
 					},
 					error: function( response, status ) {
@@ -266,6 +257,127 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				message: 'Do you want to restart this job?',
 				callback: restart
 			} );
+		},
+
+		editJob: function() {
+			App.modal.show(
+				new Jobs.EditJobView( {
+					model: this.model
+				} )
+			);
+		}
+	} );
+
+	/**
+	 * Edit job view
+	 */
+	Jobs.EditJobView = App.Common.ModalView.extend( {
+		template: '#edit-job',
+
+		ui: {
+			'browsers': '.job-browsers',
+			'description': '.job-description',
+			'save': '.save-button'
+		},
+
+		events: {
+			'click .dropdown-menu a': 'addBrowser',
+			'click @ui.save': 'saveJob',
+			'click .add-captured-button': 'addCaptured'
+		},
+
+		templateHelpers: {
+			getBrowsers: function( browsers ) {
+				return _.map( browsers, function( browser ) {
+					return browser.name + ( browser.version || '' );
+				} ).join( ' ' );
+			}
+		},
+
+		initialize: function() {
+			this.listenTo( this.model, 'invalid', this.showError );
+			this.listenTo( this.model, 'sync', this.handleSave );
+		},
+
+		addBrowser: function( event ) {
+			var browsers = this.ui.browsers.val().replace( /^\s+|\s+$/g, '' ).split( /\s+/ ),
+				name = $( event.target ).text().replace( /^\s+|\s+$/g, '' ),
+				pattern = new RegExp( '(?:^|,)' + name + '(?:,|$)', 'i' );
+
+			if ( name && !pattern.test( browsers.join( ',' ) ) ) {
+				browsers = browsers.concat( name );
+
+				this.ui.browsers.val( browsers.join( ' ' ) );
+			}
+		},
+
+		addCaptured: function() {
+			var current = this.ui.browsers.val().replace( /^\s+|\s+$/g, '' ).split( /\s+/ ),
+				captured = [];
+
+			App.Browsers.browsersList.each( function( browser ) {
+				var clients = browser.get( 'clients' );
+
+				if ( clients && clients.length ) {
+					captured.push( browser.id );
+				}
+			} );
+
+			// add captured browsers omitting those already included
+			function addBrowsers() {
+				var currentLower = _.map( current, function( browser ) {
+						return browser.toLowerCase();
+					} ),
+					result = [].concat( current );
+
+				_.each( captured, function( browser ) {
+					if ( currentLower.indexOf( browser.toLowerCase() ) === -1 ) {
+						result.push( browser );
+					}
+				} );
+
+				return result;
+			}
+
+			this.ui.browsers.val( ( current.length ? addBrowsers() : captured ).join( ' ' ) );
+		},
+
+		showError: function( model, error ) {
+			this.ui.save.prop( 'disabled', false );
+			App.Alerts.Manager.add( 'danger', error, 'Error:' );
+		},
+
+		handleSave: function() {
+			App.Alerts.Manager.add(
+				'success',
+				'Job saved.',
+				'Success!'
+			);
+			this.ui.save.prop( 'disabled', false );
+			this.close();
+			this.model.fetch();
+		},
+
+		saveJob: function() {
+			var browsers = this.ui.browsers.val().replace( /^\s+|\s+$/g, '' ),
+				description = this.ui.description.val().replace( /^\s+|\s+$/g, '' );
+
+			// build browser object from a string
+			function prepareBrowser( browser ) {
+				var match = /^([a-z]+)(\d*)/i.exec( browser );
+
+				return match ? {
+					name: match[ 1 ].toLowerCase(),
+					version: match[ 2 ] || 0
+				} : browser;
+			}
+
+			browsers = browsers.length ? browsers.split( /\s+/ ) : [];
+			this.model.set( 'browsers', _.map( _.uniq( browsers ), prepareBrowser ) );
+			this.model.set( 'description', description );
+
+			this.ui.save.prop( 'disabled', true );
+			this.model.save();
 		}
 	} );
 
