@@ -195,7 +195,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		defaults: {
 			id: '',
 			group: '',
-			tags: '',
+			tags: [],
 			result: '',
 			status: '',
 			errors: null,
@@ -323,7 +323,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 
 			this.each( function( test ) {
-				var tags = test.get( 'tags' ).split( ', ' ),
+				var tags = test.get( 'tags' ),
 					result = true;
 
 				if ( includes.length ) {
@@ -347,7 +347,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				negTags = [];
 
 			_.each( tests, function( test ) {
-				tags = tags.concat( test.tags.split( ', ' ) );
+				tags = tags.concat( test.tags );
 			} );
 
 			tags = _.uniq( tags ).sort();

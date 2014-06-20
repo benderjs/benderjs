@@ -95,7 +95,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<script type="text/html" id="test">
 	<td><a href="/<%= id %>" title="<%= id %>"><%= id %></a></td>
 	<td><span title="<%= group %>"><%= group %></span></td>
-	<td title="<%= tags %>"><%= tags %></td>
+	<td title="<%= tags.join(', ') %>"><%= tags.join(', ') %></td>
 	<td>
 		<span class="<%= getIconStyle(status) %>"></span>
 		<% if (slow) { %>
