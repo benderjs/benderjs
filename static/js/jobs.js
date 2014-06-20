@@ -258,7 +258,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 						);
 
 						if ( response.success ) {
-							that.model.fetch();
+							that.model.fetch( {
+								force: true
+							} );
 						}
 					},
 					error: function( response, status ) {
@@ -377,7 +379,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			);
 			this.ui.save.prop( 'disabled', false );
 			this.close();
-			this.model.fetch();
+			this.model.fetch( {
+				force: true
+			} );
 		},
 
 		saveJob: function() {

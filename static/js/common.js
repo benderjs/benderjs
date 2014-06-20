@@ -198,7 +198,13 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			}, this ), this.fetchDelay );
 		},
 
-		fetch: function() {
+		fetch: function( options ) {
+			options = options || {};
+
+			if ( options.force ) {
+				return this.oldFetch.call( this, options );
+			}
+
 			if ( ( this.isFetching || this.lastFetch + this.fetchDelay > +new Date() ) &&
 				!this.deferredFetch ) {
 				this.deferFetch();
@@ -210,7 +216,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 			this.isFetching = true;
 
-			return this.oldFetch.apply( this, arguments );
+			return this.oldFetch.call( this, options );
 		},
 	};
 
