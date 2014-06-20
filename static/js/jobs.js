@@ -43,28 +43,32 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	/**
 	 * Job collection
 	 */
-	Jobs.jobsList = new( Backbone.Collection.extend( {
-		model: Jobs.JobRow,
-		url: '/jobs',
+	Jobs.jobsList = new( Backbone.Collection.extend(
+		_.extend( {}, App.Common.DeferredFetchMixin, {
+			model: Jobs.JobRow,
+			url: '/jobs',
 
-		comparator: function( first, second ) {
-			first = first.attributes.created;
-			second = second.attributes.created;
-
-			return first < second ? 1 :
-				first > second ? -1 : 0;
-		},
-
-		parse: function( response ) {
-			return response.job.sort( function( first, second ) {
-				first = first.created;
-				second = second.created;
+			comparator: function( first, second ) {
+				first = first.attributes.created;
+				second = second.attributes.created;
 
 				return first < second ? 1 :
 					first > second ? -1 : 0;
-			} );
-		}
-	} ) )();
+			},
+
+			oldFetch: Backbone.Collection.prototype.fetch,
+
+			parse: function( response ) {
+				return response.job.sort( function( first, second ) {
+					first = first.created;
+					second = second.created;
+
+					return first < second ? 1 :
+						first > second ? -1 : 0;
+				} );
+			}
+		} )
+	) )();
 
 	/**
 	 * Empty jobs list view
@@ -83,6 +87,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		emptyView: Jobs.NoJobsView,
 
 		initialize: function() {
+			this.listenTo( this.collection, 'change', this.render );
+			this.listenTo( Jobs.controller, 'job:update', _.bind( function() {
+				this.collection.fetch();
+			}, this ) );
+
 			this.collection.fetch();
 		},
 
@@ -111,7 +120,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	/**
 	 * Job details model
 	 */
-	Jobs.Job = Backbone.Model.extend( {
+	Jobs.Job = Backbone.Model.extend( _.extend( {}, App.Common.DeferredFetchMixin, {
 		defaults: {
 			id: '',
 			description: '',
@@ -123,12 +132,14 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		urlRoot: '/jobs/',
 
+		oldFetch: Backbone.Model.prototype.fetch,
+
 		validate: function( attrs ) {
 			if ( !attrs.browsers.length ) {
 				return 'No browsers specified for the job';
 			}
 		}
-	} );
+	} ) );
 
 	/**
 	 * Task row view
@@ -178,8 +189,15 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		initialize: function() {
 			this.collection = new Backbone.Collection();
-			this.listenTo( this.model, 'sync', this.update );
+
+			this.listenTo( this.model, 'change', this.update );
 			this.listenTo( this.model, 'error', App.show404 );
+			this.listenTo( Jobs.controller, 'job:update', function( jobId ) {
+				if ( jobId === this.model.id ) {
+					this.model.fetch();
+				}
+			} );
+
 			this.model.fetch();
 		},
 
@@ -299,8 +317,12 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.listenTo( this.model, 'sync', this.handleSave );
 		},
 
+		getBrowsersArray: function() {
+			return _.compact( this.ui.browsers.val().replace( /^\s+|\s+$/g, '' ).split( /\s+/ ) );
+		},
+
 		addBrowser: function( event ) {
-			var browsers = this.ui.browsers.val().replace( /^\s+|\s+$/g, '' ).split( /\s+/ ),
+			var browsers = this.getBrowsersArray(),
 				name = $( event.target ).text().replace( /^\s+|\s+$/g, '' ),
 				pattern = new RegExp( '(?:^|,)' + name + '(?:,|$)', 'i' );
 
@@ -312,7 +334,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		addCaptured: function() {
-			var current = this.ui.browsers.val().replace( /^\s+|\s+$/g, '' ).split( /\s+/ ),
+			var current = this.getBrowsersArray(),
 				captured = [];
 
 			App.Browsers.browsersList.each( function( browser ) {
@@ -359,7 +381,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		saveJob: function() {
-			var browsers = this.ui.browsers.val().replace( /^\s+|\s+$/g, '' ),
+			var browsers = this.getBrowsersArray(),
 				description = this.ui.description.val().replace( /^\s+|\s+$/g, '' );
 
 			// build browser object from a string
@@ -372,12 +394,12 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				} : browser;
 			}
 
-			browsers = browsers.length ? browsers.split( /\s+/ ) : [];
-			this.model.set( 'browsers', _.map( _.uniq( browsers ), prepareBrowser ) );
-			this.model.set( 'description', description );
-
 			this.ui.save.prop( 'disabled', true );
-			this.model.save();
+
+			this.model
+				.set( 'browsers', _.map( _.uniq( browsers ), prepareBrowser ) )
+				.set( 'description', description )
+				.save();
 		}
 	} );
 
@@ -385,7 +407,13 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	 * Controller for Jobs module
 	 * @type {Object}
 	 */
-	Jobs.controller = {
+	Jobs.Controller = Backbone.Marionette.Controller.extend( {
+		initialize: function() {
+			App.Sockets.socket.on( 'job:update', _.bind( function( jobId ) {
+				this.trigger( 'job:update', jobId );
+			}, this ) );
+		},
+
 		listJobs: function() {
 			App.header.close();
 			App.content.show( new Jobs.JobsListView( {
@@ -401,20 +429,16 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				} )
 			} ) );
 		}
-	};
+	} );
 
 	/**
 	 * Add Jobs module initializer
 	 */
 	Jobs.addInitializer( function() {
+		Jobs.controller = new Jobs.Controller();
+
 		Jobs.router = new Jobs.Router( {
 			controller: Jobs.controller
 		} );
-
-		Jobs.on( 'tests:list', function() {
-			App.navigate( 'jobs' );
-			Jobs.controller.listJobs();
-		} );
-
 	} );
 } );

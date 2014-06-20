@@ -146,10 +146,57 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	/**
 	 * Test errors view
 	 */
-	App.Common.TestErrorsView = App.Common.ModalView.extend( {
+	Common.TestErrorsView = App.Common.ModalView.extend( {
 		template: '#test-errors'
 	} );
 
+	/**
+	 * Deferred fetch API mixin. This will defer fetching the model/collection
+	 * for specified delay to reduce the amount of requests to the server.
+	 * Plase override oldFetch value accordingly.
+	 * @type {Object}
+	 */
+	Common.DeferredFetchMixin = {
+		isFetching: false,
+		deferredFetch: false,
+		fetchDelay: 5000, // TODO adjust
+		lastFetch: 0,
+
+		oldFetch: function() {},
+
+		initialize: function() {
+			this.on( 'sync error', function() {
+				this.isFetching = false;
+				this.lastFetch = +new Date();
+			}, this );
+		},
+
+		deferFetch: function() {
+			if ( this.deferredFetch ) {
+				clearTimeout( this.deferredFetch );
+			}
+
+			this.deferredFetch = setTimeout( _.bind( function() {
+				this.deferredFetch = null;
+				this.fetch();
+			}, this ), this.fetchDelay );
+		},
+
+		fetch: function() {
+			if ( ( this.isFetching || this.lastFetch + this.fetchDelay > +new Date() ) &&
+				!this.deferredFetch ) {
+				this.deferFetch();
+			}
+
+			if ( this.deferredFetch ) {
+				return false;
+			}
+
+			this.isFetching = true;
+
+			return this.oldFetch.apply( this, arguments );
+		},
+	};
 
 	/**
 	 * Display the 'Error 404' page
