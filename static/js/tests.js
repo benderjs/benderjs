@@ -195,7 +195,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		defaults: {
 			id: '',
 			group: '',
-			tags: '',
+			tags: [],
 			result: '',
 			status: '',
 			errors: null,
