@@ -1,4 +1,9 @@
-/*jshint -W030 */ /* removes annoying warning caused by some of Chai's assertions */
+/**
+ * @file Tests for common Collection class
+ */
+
+/*jshint -W030 */
+/* removes annoying warning caused by some of Chai's assertions */
 
 var Collection = require( '../lib/collection' ),
 	EventEmitter = require( 'events' ).EventEmitter,
