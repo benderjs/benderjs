@@ -164,7 +164,21 @@ th:last-child {
 
 .jobs .result {
     width: 67px;
-    font-size: 1.25em;
+}
+
+.jobs .result span {
+	font-size: 1.5em;
+	line-height: 42px;
+	top: 0;
+}
+
+.jobs .result small {
+	float: right;
+	clear: right;
+	width: 20px;
+	height: 16px;
+	line-height: 16px;
+	margin-top: 3px;
 }
 
 .jobs .browser .glyphicon,
