@@ -1,3 +1,4 @@
-node_modules/*
-*.sublime*
-out/*
+*.sublime
+node_modules
+coverage
+out

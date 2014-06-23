@@ -2,10 +2,15 @@
 	"name": "benderjs",
 	"version": "0.0.12",
 	"description": "The anti-human approach to JavaScript testing",
-	"keywords": [ "test", "unit", "cli", "JavaScript" ],
+	"keywords": [
+		"test",
+		"unit",
+		"cli",
+		"JavaScript"
+	],
 	"homepage": "http://benderjs.com/",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "istanbul test node_modules/.bin/mocha -- --reporter list --check-leaks --recursive"
 	},
 	"bin": {
 		"bender": "./bin/bender"
@@ -40,7 +45,9 @@
 		"winston": "~0.7.3"
 	},
 	"devDependencies": {
+		"istanbul": "~0.2.11",
 		"jsdoc": "~3.3.0-alpha8",
+		"mocha": "~1.20.1",
 		"nodetime": "~0.8.15"
 	}
 }
