@@ -10,7 +10,7 @@
 	],
 	"homepage": "http://benderjs.com/",
 	"scripts": {
-		"test": "istanbul test node_modules/.bin/mocha -- --reporter list --check-leaks --recursive"
+		"test": "istanbul test node_modules/.bin/_mocha -- --reporter list --check-leaks --recursive"
 	},
 	"bin": {
 		"bender": "./bin/bender"
@@ -45,9 +45,10 @@
 		"winston": "~0.7.3"
 	},
 	"devDependencies": {
-		"istanbul": "~0.2.11",
-		"jsdoc": "~3.3.0-alpha8",
-		"mocha": "~1.20.1",
-		"nodetime": "~0.8.15"
+		"chai": "*",
+		"istanbul": "*",
+		"jsdoc": "*",
+		"mocha": "*",
+		"nodetime": "*"
 	}
 }
