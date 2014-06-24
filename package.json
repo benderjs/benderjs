@@ -10,7 +10,7 @@
 	],
 	"homepage": "http://benderjs.com/",
 	"scripts": {
-		"test": "istanbul test node_modules/.bin/_mocha -- --reporter list --check-leaks --recursive"
+		"test": "istanbul test node_modules/mocha/bin/_mocha -- --reporter list --check-leaks --recursive"
 	},
 	"bin": {
 		"bender": "./bin/bender"
