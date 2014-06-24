@@ -10,6 +10,7 @@
 
 var Collection = require( '../lib/collection' ),
 	EventEmitter = require( 'events' ).EventEmitter,
+	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect;
 
 describe( 'Collection', function() {
@@ -42,17 +43,13 @@ describe( 'Collection', function() {
 		expect( col.get() ).to.contain( item1 );
 	} );
 
-	it( 'should trigger a "change" event while adding an item', function( done ) {
-		var col = new Collection();
-
-		col.on( 'change', function handleChange( items ) {
-			expect( items ).to.be.not.empty;
-			expect( items ).to.contain( item1 );
-			col.removeListener( 'change', handleChange );
-			done();
-		} );
+	it( 'should trigger a "change" event while adding an item', function() {
+		var col = new Collection(),
+			spy = sinon.spy( col, 'emit' );
 
 		col.add( 'item1', item1 );
+
+		expect( spy.calledWith( 'change' ) ).to.be.true;
 	} );
 
 	it( 'should return an item', function() {
@@ -101,22 +98,21 @@ describe( 'Collection', function() {
 
 		col.add( 'item1', item1 );
 		expect( col.get( 'item1' ) ).to.exist;
+
 		col.remove( 'item1' );
 		expect( col.get( 'item1' ) ).to.not.exist;
-
 		expect( col.remove( 'item1' ) ).to.be.false;
 	} );
 
-	it( 'should trigger a "change" event while removing an item', function( done ) {
-		var col = new Collection();
+	it( 'should trigger a "change" event while removing an item', function() {
+		var col = new Collection(),
+			spy = sinon.spy( col, 'emit' );
 
 		col.add( 'item1', item1 );
-		col.on( 'change', function handleChange( items ) {
-			expect( items ).to.be.empty;
-			col.removeListener( 'change', handleChange );
-			done();
-		} );
 		col.remove( 'item1' );
+
+		expect( spy.calledWith( 'change' ) ).to.be.true;
+		expect( spy.calledTwice ).to.be.true;
 	} );
 
 	it( 'should execute callback on every collection item', function() {
