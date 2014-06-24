@@ -49,6 +49,8 @@
 		"istanbul": "*",
 		"jsdoc": "*",
 		"mocha": "*",
-		"nodetime": "*"
+		"nodetime": "*",
+		"rewire": "*",
+		"sinon": "*"
 	}
 }
