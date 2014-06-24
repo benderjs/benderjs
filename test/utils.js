@@ -118,13 +118,11 @@ describe( 'Utils', function() {
 				fs.exists( dir, function( exists ) {
 					expect( exists ).to.be.true;
 
-					// rimraf( path.normalize( 'test/fixtures/utils/' ), function() {
+					rimraf( path.normalize( 'test/fixtures/utils/' ), function() {
 						done();
-					// } );
+					} );
 				} );
 			};
-
-		console.log(dir);
 
 		bender.utils.mkdirp( dir, callback );
 	} );
@@ -142,9 +140,9 @@ describe( 'Utils', function() {
 	} );
 
 	it( 'should not try to create invalid path', function( done ) {
-		var dir = path.normalize( '*:?><"|' ),
+		var dir = '<^>!@#$%^&*()_+-=\0',
 			spy = sinon.spy( bender.utils, 'mkdirp' ),
-			callback = function(error) {
+			callback = function( error ) {
 				expect( error ).to.exist;
 				bender.utils.mkdirp.restore();
 				done();
