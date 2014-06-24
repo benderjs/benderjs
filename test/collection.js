@@ -2,8 +2,11 @@
  * @file Tests for common Collection class
  */
 
+/*global describe, it */
 /*jshint -W030 */
 /* removes annoying warning caused by some of Chai's assertions */
+
+'use strict';
 
 var Collection = require( '../lib/collection' ),
 	EventEmitter = require( 'events' ).EventEmitter,
@@ -42,9 +45,10 @@ describe( 'Collection', function() {
 	it( 'should trigger a "change" event while adding an item', function( done ) {
 		var col = new Collection();
 
-		col.on( 'change', function( items ) {
+		col.on( 'change', function handleChange( items ) {
 			expect( items ).to.be.not.empty;
 			expect( items ).to.contain( item1 );
+			col.removeListener( 'change', handleChange );
 			done();
 		} );
 
@@ -66,12 +70,30 @@ describe( 'Collection', function() {
 
 		col.add( 'item1', item1 );
 		col.add( 'item2', item2 );
+		col.add( 'item3', item3 );
 
-		result = col.get( [ 'item1', 'item2' ] );
+		result = col.get( [ 'item1', 'item3' ] );
 		expect( result ).to.be.instanceof( Array );
 		expect( result ).to.have.length( 2 );
 		expect( result ).to.contain( item1 );
+		expect( result ).to.contain( item3 );
+	} );
+
+	it( 'should return all items when no argument is passed to .get() function', function() {
+		var col = new Collection(),
+			result;
+
+		col.add( 'item1', item1 );
+		col.add( 'item2', item2 );
+		col.add( 'item3', item3 );
+
+		result = col.get();
+
+		expect( result ).to.be.instanceof( Array );
+		expect( result ).to.have.length( 3 );
+		expect( result ).to.contain( item1 );
 		expect( result ).to.contain( item2 );
+		expect( result ).to.contain( item3 );
 	} );
 
 	it( 'should remove an item', function() {
@@ -89,8 +111,9 @@ describe( 'Collection', function() {
 		var col = new Collection();
 
 		col.add( 'item1', item1 );
-		col.on( 'change', function( items ) {
+		col.on( 'change', function handleChange( items ) {
 			expect( items ).to.be.empty;
+			col.removeListener( 'change', handleChange );
 			done();
 		} );
 		col.remove( 'item1' );
