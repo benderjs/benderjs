@@ -13,6 +13,7 @@ var mocks = require( './mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	fs = require( 'fs' ),
+	path = require( 'path' ),
 	rimraf = require( 'rimraf' ),
 	utils = rewire( '../lib/utils' );
 
@@ -112,22 +113,22 @@ describe( 'Utils', function() {
 	} );
 
 	it( 'should create directory recursively', function( done ) {
-		var path = 'test/fixtures/utils/test/',
+		var dir = path.normalize( 'test/fixtures/utils/test/' ),
 			callback = function() {
-				fs.exists( path, function( exists ) {
+				fs.exists( dir, function( exists ) {
 					expect( exists ).to.be.true;
 
-					rimraf( 'test/fixtures/utils/', function() {
+					rimraf( path.normalize( 'test/fixtures/utils/' ), function() {
 						done();
 					} );
 				} );
 			};
 
-		bender.utils.mkdirp( path, callback );
+		bender.utils.mkdirp( dir, callback );
 	} );
 
 	it( 'should not try to create existing path', function( done ) {
-		var path = '/',
+		var dir = path.normalize( '/' ),
 			spy = sinon.spy( bender.utils, 'mkdirp' ),
 			callback = function() {
 				expect( spy.calledThrice ).to.be.true;
@@ -135,11 +136,11 @@ describe( 'Utils', function() {
 				done();
 			};
 
-		bender.utils.mkdirp( path, callback );
+		bender.utils.mkdirp( dir, callback );
 	} );
 
 	it( 'should not try to create invalid path', function( done ) {
-		var path = '/unknown.js',
+		var dir = path.normalize( '/unknown.js' ),
 			spy = sinon.spy( bender.utils, 'mkdirp' ),
 			callback = function() {
 				expect( spy.calledTwice ).to.be.true;
@@ -147,7 +148,7 @@ describe( 'Utils', function() {
 				done();
 			};
 
-		bender.utils.mkdirp( path, callback );
+		bender.utils.mkdirp( dir, callback );
 	} );
 
 } );
