@@ -2,7 +2,7 @@
  * @file Tests for Config module
  */
 
-/*global describe, it */
+/*global describe, it, before, after */
 /*jshint -W030 */
 /* removes annoying warning caused by some of Chai's assertions */
 
@@ -16,12 +16,16 @@ var mocks = require( './mocks' ),
 	config = rewire( '../lib/config' ),
 	testDir = path.resolve( 'test/fixtures/' );
 
-config.__set__( 'process.cwd', function() {
-	return testDir;
-} );
-config.__set__( 'log', mocks.logger );
-
 describe( 'Config', function() {
+	var oldCwd = process.cwd;
+
+	before( function() {
+		config.__set__( 'process.cwd', function() {
+			return testDir;
+		} );
+		config.__set__( 'log', mocks.logger );
+	} );
+
 	it( 'should load valid configuration file', function() {
 		var bender = mocks.getBender();
 
@@ -107,5 +111,9 @@ describe( 'Config', function() {
 		expect( bender.conf.plugins ).to.have.length( 2 );
 		expect( bender.conf.assertion ).to.equal( 'qunit' );
 		expect( bender.conf.testTimeout ).to.equal( 60000 );
+	} );
+
+	after( function() {
+		config.__set__( 'process.cwd', oldCwd );
 	} );
 } );
