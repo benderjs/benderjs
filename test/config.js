@@ -19,17 +19,12 @@ var mocks = require( './mocks' ),
 config.__set__( 'process.cwd', function() {
 	return testDir;
 } );
-
-config.__set__( 'log.error', function( args ) {
-	return Array.prototype.join.apply( args, ' ' );
-} );
-
-var error = config.__get__( 'log.error' );
+config.__set__( 'log', mocks.logger );
 
 describe( 'Config', function() {
-	var bender = mocks.getBender();
-
 	it( 'should load valid configuration file', function() {
+		var bender = mocks.getBender();
+
 		bender.use( config, {
 			path: path.resolve( 'config-valid.js' )
 		} );
@@ -38,7 +33,8 @@ describe( 'Config', function() {
 	} );
 
 	it( 'should report missing configuration file', function() {
-		var exit = sinon.stub( process, 'exit' );
+		var exit = sinon.stub( process, 'exit' ),
+			bender = mocks.getBender();
 
 		exit.throws();
 
@@ -51,8 +47,28 @@ describe( 'Config', function() {
 		process.exit.restore();
 	} );
 
+	it( 'should not report missing global configuration file', function() {
+		var exit = sinon.stub( process, 'exit' ),
+			bender = mocks.getBender();
+
+		config.__set__( 'process.env.HOME', path.resolve( 'test/fixtures/home/' ) );
+
+		exit.throws();
+
+		expect( function() {
+			bender.use( config, {
+				path: path.resolve( 'config-valid.js' )
+			} );
+		} ).to.not.throw();
+
+		process.exit.restore();
+	} );
+
 	it( 'should report invalid configuration file', function() {
-		var exit = sinon.stub( process, 'exit' );
+		var exit = sinon.stub( process, 'exit' ),
+			bender = mocks.getBender();
+
+		config.__set__( 'process.env.HOME', '' );
 
 		exit.throws();
 
@@ -66,7 +82,8 @@ describe( 'Config', function() {
 	} );
 
 	it( 'should report non-module configuration file', function() {
-		var exit = sinon.stub( process, 'exit' );
+		var exit = sinon.stub( process, 'exit' ),
+			bender = mocks.getBender();
 
 		exit.throws();
 
@@ -77,5 +94,18 @@ describe( 'Config', function() {
 		} ).to.throw();
 
 		process.exit.restore();
+	} );
+
+	it( 'should merge configuration files', function() {
+		var bender = mocks.getBender();
+
+		bender.use( config, {
+			path: path.resolve( 'config-valid.js' )
+		} );
+
+		expect( bender.conf.plugins ).to.exist;
+		expect( bender.conf.plugins ).to.have.length( 2 );
+		expect( bender.conf.assertion ).to.equal( 'qunit' );
+		expect( bender.conf.testTimeout ).to.equal( 60000 );
 	} );
 } );
