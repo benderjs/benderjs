@@ -46,6 +46,7 @@
 	},
 	"devDependencies": {
 		"chai": "*",
+		"chai-as-promised": "*",
 		"istanbul": "*",
 		"jsdoc": "*",
 		"mocha": "*",
