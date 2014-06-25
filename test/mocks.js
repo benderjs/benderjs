@@ -4,15 +4,30 @@
 
 'use strict';
 
-var moduleMocks;
+var moduleMocks,
+	when = require( 'when' ),
+	chai = require( "chai" ),
+	chaiAsPromised = require( 'chai-as-promised' );
+
+chai.use( chaiAsPromised );
 
 function nop() {}
 
 moduleMocks = {
+	applications: function( bender ) {
+		bender.applications = {};
+
+		bender.applications.apps = {};
+
+		bender.applications.findOne = function( name, value ) {
+
+		};
+	},
 	conf: function( bender ) {
 		bender.conf = {
 			applications: {
 				test: {
+					url: 'test/',
 					path: 'test/fixtures/apps/',
 					files: [
 						'test.js',
@@ -21,6 +36,7 @@ moduleMocks = {
 				},
 
 				test2: {
+					url: 'test2/',
 					proxy: 'http://localhost/',
 					files: [
 						'test.js',
@@ -29,14 +45,58 @@ moduleMocks = {
 				}
 			},
 
-			browsers: [ 'Chrome', 'Firefox', 'Opera' ]
+			browsers: [ 'Chrome', 'Firefox', 'Opera' ],
+
+			tests: {
+				'Test': {
+					basePath: 'test/fixtures/tests/',
+					paths: [
+						'test/'
+					]
+				}
+			}
 		};
 	},
 
 	utils: function( bender ) {
 		bender.checkDeps = nop;
 
-		bender.utils = {};
+		bender.utils = {
+			mkdirp: function( path, callback ) {
+				callback();
+			}
+		};
+	},
+
+	tests: function( bender ) {
+		var tests = [ {
+			id: 'tests/test/1',
+			js: 'tests/test/1.js',
+			tags: [ 'foo', 'bar', 'baz' ],
+			assertion: 'yui',
+			applications: [ 'test', 'test2' ],
+			group: 'Test'
+		}, {
+			id: 'tests/test/2',
+			js: 'tests/test/2.js',
+			tags: [ 'foo', 'bar', 'baz' ],
+			assertion: 'yui',
+			applications: [ 'test' ],
+			group: 'Test'
+		}, {
+			id: 'tests/test/3',
+			js: 'tests/test/3.js',
+			tags: [ 'foo', 'bar', 'baz' ],
+			assertion: 'yui',
+			applications: [ 'test' ],
+			group: 'Test'
+		} ];
+
+		bender.tests = {};
+
+		bender.tests.list = function() {
+			return when.resolve( tests );
+		};
 	}
 };
 
