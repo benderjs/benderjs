@@ -61,8 +61,8 @@ describe( 'Utils', function() {
 
 	it( 'should render JSON in a response', function() {
 		var obj = {
-				"foo": true,
-				"bar": "baz"
+				'foo': true,
+				'bar': 'baz'
 			},
 			res = {
 				writeHead: function() {},

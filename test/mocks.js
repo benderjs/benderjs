@@ -6,7 +6,7 @@
 
 var moduleMocks,
 	when = require( 'when' ),
-	chai = require( "chai" ),
+	chai = require( 'chai' ),
 	chaiAsPromised = require( 'chai-as-promised' );
 
 chai.use( chaiAsPromised );

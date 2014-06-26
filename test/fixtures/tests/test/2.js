@@ -1,11 +1,9 @@
 /* bender-tags: foo, bar, baz */
 
-if ( !global.bender ) {
-	return;
+if ( global.bender ) {
+	bender.test( {
+		'test foo': function() {
+			bender.assert.areSame( true, true, 'test' );
+		}
+	} );
 }
-
-bender.test( {
-	'test foo': function() {
-		bender.assert.areSame( true, true, 'test' );
-	}
-} );

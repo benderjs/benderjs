@@ -1,7 +1,9 @@
 {
 	"excludeFiles": [
 		"node_modules/*",
-		"static/js/libs/*"
+		"static/js/libs/*",
+		"coverage/*",
+		"out/*"
 	],
 
 	"requireCurlyBraces": [
