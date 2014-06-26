@@ -16,12 +16,6 @@ function nop() {}
 moduleMocks = {
 	applications: function( bender ) {
 		bender.applications = {};
-
-		bender.applications.apps = {};
-
-		bender.applications.findOne = function( name, value ) {
-
-		};
 	},
 	conf: function( bender ) {
 		bender.conf = {
