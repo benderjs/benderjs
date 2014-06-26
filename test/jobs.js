@@ -37,7 +37,7 @@ jobs.__set__( 'Datastore', Datastore );
 
 describe( 'Jobs', function() {
 	var job = {
-			browsers: [ 'chrome35', 'firefox', '123unknown' ],
+			browsers: [ 'chrome35', 'firefox', '123unknown', 'ie8', 'ie10', 'ie9' ],
 			description: 'test job 1',
 			filter: [ 'foo' ],
 			tests: [
