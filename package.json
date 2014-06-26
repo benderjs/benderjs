@@ -52,6 +52,7 @@
 		"mocha": "*",
 		"nodetime": "*",
 		"rewire": "*",
-		"sinon": "*"
+		"sinon": "*",
+		"socket.io-client": "~1.0.6"
 	}
 }
