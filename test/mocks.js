@@ -7,6 +7,8 @@
 var moduleMocks,
 	when = require( 'when' ),
 	chai = require( 'chai' ),
+	util = require( 'util' ),
+	EventEmitter = require( 'events' ).EventEmitter,
 	chaiAsPromised = require( 'chai-as-promised' );
 
 chai.use( chaiAsPromised );
@@ -116,19 +118,11 @@ moduleMocks = {
 };
 
 function App() {
+	EventEmitter.call( this );
 	this._modules = {};
-	this._handlers = {};
 }
 
-App.prototype.emit = function( name, args ) {
-	if ( typeof this._handlers[ name ] == 'function' ) {
-		this._handlers[ name ].apply( this, Array.prototype.slice.call( arguments, 1 ) );
-	}
-};
-
-App.prototype.on = function( name, callback ) {
-	this._handlers[ name ] = callback;
-};
+util.inherits( App, EventEmitter );
 
 App.prototype.use = function( modules, options ) {
 	// array of modules added
