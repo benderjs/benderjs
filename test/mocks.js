@@ -58,6 +58,27 @@ moduleMocks = {
 		};
 	},
 
+	middleware: function( bender ) {
+		function testMiddleware() {
+			return function( req, res, next ) {
+				if ( req.url === '/test' ) {
+					res.writeHead( 200 );
+					res.end( 'Test response' );
+				} else {
+					next();
+				}
+			};
+		}
+
+		bender.middleware = [ testMiddleware ];
+	},
+
+	sockets: function( bender ) {
+		bender.sockets = {
+			attach: function() {}
+		};
+	},
+
 	utils: function( bender ) {
 		bender.checkDeps = nop;
 
