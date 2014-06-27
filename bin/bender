@@ -190,9 +190,8 @@ function startServer( options ) {
 			delimeter: ':'
 		} ),
 		modules = [
-			utils, applications, testbuilders, pagebuilders, middleware,
-			browsers, template, constants, tests, jobs, sockets,
-			server, reporters, plugins
+			utils, constants, applications, testbuilders, pagebuilders, middleware,
+			browsers, tests, jobs, template, sockets, server, reporters, plugins
 		];
 
 	bender.use( conf, {
