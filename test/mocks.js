@@ -17,7 +17,35 @@ function nop() {}
 
 moduleMocks = {
 	applications: function( bender ) {
-		bender.applications = {};
+		bender.applications = {
+			test: {
+				url: 'test/',
+				path: 'test/fixtures/apps/',
+				files: [
+					'test.js',
+					'test.css'
+				],
+				js: [
+					'test.js'
+				],
+				css: [
+					'test.css'
+				]
+			},
+
+			test2: {
+				url: 'test2/',
+				proxy: 'http://localhost/',
+				files: [
+					'test.js',
+					'unknown'
+				],
+				js: [
+					'test.js'
+				],
+				css: []
+			}
+		};
 	},
 
 	assertions: function( bender ) {
@@ -118,6 +146,8 @@ moduleMocks = {
 				name: 'test'
 			}
 		};
+		bender.pagebuilders = bender.pagebuilders || [];
+		bender.testbuilders = bender.testbuilders || [];
 		bender.reporters = {};
 	},
 
@@ -258,4 +288,18 @@ module.exports.logger = {
 	error: nop,
 	info: nop,
 	debug: nop
+};
+
+module.exports.attachPagebuilder = function( bender, builder ) {
+	return function() {
+		var html = bender.plugins[ 'bender-pagebuilder-html' ],
+			idx;
+
+		// add plugin before pagebuilder-html
+		if ( html && ( idx = bender.pagebuilders.indexOf( html.build ) ) > -1 ) {
+			bender.pagebuilders.splice( idx, 0, builder.build );
+		} else {
+			bender.pagebuilders.push( builder.build );
+		}
+	};
 };
