@@ -19,6 +19,15 @@ moduleMocks = {
 	applications: function( bender ) {
 		bender.applications = {};
 	},
+
+	assertions: function( bender ) {
+		bender.assertions = {
+			test: {
+
+			}
+		};
+	},
+
 	conf: function( bender ) {
 		bender.conf = {
 			applications: {
@@ -54,6 +63,14 @@ moduleMocks = {
 		};
 	},
 
+	jobs: function( bender ) {
+		bender.jobs = {};
+
+		bender.jobs.getApp = function( jobId, name ) {
+			return when.resolve( bender.applications.get( name ) );
+		};
+	},
+
 	middleware: function( bender ) {
 		function testMiddleware() {
 			return function( req, res, next ) {
@@ -69,19 +86,33 @@ moduleMocks = {
 		bender.middleware = [ testMiddleware ];
 	},
 
-	sockets: function( bender ) {
-		bender.sockets = {
-			attach: function() {}
-		};
+	pagebuilders: function( bender ) {
+		function testPagebuilder( data ) {
+			data.parts.push( '<!DOCTYPE html><html><head></head><body>' +
+				'<img src="%BASE_PATH%_assets/img.jpg" /></body></html>' );
+
+			return when.resolve( data );
+		}
+
+		bender.pagebuilders = [ testPagebuilder ];
 	},
 
-	utils: function( bender ) {
-		bender.checkDeps = nop;
-
-		bender.utils = {
-			mkdirp: function( path, callback ) {
-				callback();
+	plugins: function( bender ) {
+		bender.plugins = {};
+		bender.assertions = {
+			test: {
+				css: [],
+				files: [],
+				js: [ 'assertion-test/adapter.js' ],
+				name: 'test'
 			}
+		};
+		bender.reporters = {};
+	},
+
+	sockets: function( bender ) {
+		bender.sockets = {
+			attach: nop
 		};
 	},
 
@@ -109,10 +140,22 @@ moduleMocks = {
 			group: 'Test'
 		} ];
 
-		bender.tests = {};
+		bender.tests = {
+			tests: tests
+		};
 
 		bender.tests.list = function() {
 			return when.resolve( tests );
+		};
+	},
+
+	utils: function( bender ) {
+		bender.checkDeps = nop;
+
+		bender.utils = {
+			mkdirp: function( path, callback ) {
+				callback();
+			}
 		};
 	}
 };
