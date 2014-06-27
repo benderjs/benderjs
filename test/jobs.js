@@ -513,8 +513,7 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should complete a fetched task', function() {
-		var promise,
-			spy = sinon.spy();
+		var promise;
 
 		bender.use( [ applications, jobs ] );
 		bender.init();

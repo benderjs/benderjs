@@ -9,7 +9,6 @@
 'use strict';
 
 var mocks = require( './mocks' ),
-	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	Collection = require( '../lib/collection' ),
@@ -155,7 +154,7 @@ describe( 'Browsers', function() {
 	it( 'should emit "change" event when client is removed', function( done ) {
 		bender.browsers.build( bender.conf );
 		bender.browsers.addClient( clients.Firefox );
-		bender.browsers.on( 'change', function handleChange( browsers ) {
+		bender.browsers.on( 'change', function handleChange() {
 			var result = bender.browsers.get( 'Firefox' ).clients;
 
 			expect( result.get() ).to.be.empty;

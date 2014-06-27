@@ -2,14 +2,13 @@
  * @file Tests for Server module
  */
 
-/*global describe, it, beforeEach, afterEach */
+/*global describe, it, beforeEach */
 /*jshint -W030 */
 /* removes annoying warning caused by some of Chai's assertions */
 
 'use strict';
 
 var mocks = require( './mocks' ),
-	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	http = require( 'http' ),
 	rewire = require( 'rewire' ),
