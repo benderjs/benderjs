@@ -29,10 +29,47 @@ describe( 'Tests', function() {
 	} );
 
 	it( 'should list tests specified in configuration file', function() {
+		var expected = [ {
+			id: 'test/fixtures/tests/test/1',
+			js: 'test/fixtures/tests/test/1.js',
+			assertion: 'test',
+			applications: [],
+			group: 'Test'
+		}, {
+			id: 'test/fixtures/tests/test/2',
+			js: 'test/fixtures/tests/test/2.js',
+			assertion: 'test',
+			applications: [],
+			group: 'Test'
+		}, {
+			id: 'test/fixtures/tests/test/3',
+			js: 'test/fixtures/tests/test/3.js',
+			assertion: 'test',
+			applications: [],
+			group: 'Test'
+		}, {
+			id: 'test/fixtures/tests/test2/1',
+			js: 'test/fixtures/tests/test2/1.js',
+			assertion: 'test',
+			applications: [ 'test' ],
+			group: 'Test2'
+		}, {
+			id: 'test/fixtures/tests/test2/2',
+			js: 'test/fixtures/tests/test2/2.js',
+			assertion: 'test',
+			applications: [ 'test' ],
+			group: 'Test2'
+		}, {
+			id: 'test/fixtures/tests/test2/3',
+			js: 'test/fixtures/tests/test2/3.js',
+			assertion: 'test',
+			applications: [ 'test' ],
+			group: 'Test2'
+		} ];
+
 		return bender.tests.list()
 			.then( function( tests ) {
-				expect( tests ).to.be.an( 'array' );
-				expect( tests ).to.have.length( 6 );
+				expect( tests ).to.deep.equal( expected );
 			} );
 	} );
 
@@ -81,9 +118,9 @@ describe( 'Tests', function() {
 			name: 'Test'
 		}, bender.conf.tests.Test );
 
-		return bender.tests.buildGroup( group )
+		return bender.tests.buildGroup( group, 'Test' )
 			.then( function() {
-				return bender.tests.buildGroup( group );
+				return bender.tests.buildGroup( group, 'Test' );
 			} )
 			.then( function( data ) {
 				// returned value should be a reference to cached group
