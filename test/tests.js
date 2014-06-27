@@ -29,8 +29,7 @@ describe( 'Tests', function() {
 	} );
 
 	it( 'should list tests specified in configuration file', function() {
-		return bender.tests
-			.list()
+		return bender.tests.list()
 			.then( function( tests ) {
 				expect( tests ).to.be.an( 'array' );
 				expect( tests ).to.have.length( 6 );
@@ -52,18 +51,21 @@ describe( 'Tests', function() {
 	} );
 
 	it( 'should resolve without result when trying to get test asset', function() {
-		return bender.tests
-			.get( 'test/fixtures/tests/_assets/file.js' )
+		return bender.tests.get( 'test/fixtures/tests/_assets/asset.js' )
 			.then( function( test ) {
-				expect( test ).to.be.undefined;
+				expect( test ).to.not.exist;
+
+				return bender.tests.get( 'test/fixtures/tests/test/_assets/asset.js' );
+			} )
+			.then( function( test ) {
+				expect( test ).to.not.exist;
 			} );
 	} );
 
 	it( 'should resolve without result when trying to get invalid test or asset', function() {
-		return bender.tests
-			.get( 'invalid/test/file.js' )
+		return bender.tests.get( 'invalid/test/file.js' )
 			.then( function( test ) {
-				expect( test ).to.be.undefined;
+				expect( test ).to.not.exist;
 			} );
 	} );
 
@@ -73,7 +75,7 @@ describe( 'Tests', function() {
 		expect( bender.tests.checkPath( 'invalid/test/file.js' ) ).to.be.false;
 	} );
 
-	it( 'should use group\'s data from cache if no changes in files were made', function() {
+	it( 'should use group\'s data taken from cache if no changes in files were made since last check', function() {
 		var group = _.merge( {
 			assertion: bender.conf.assertion,
 			name: 'Test'
