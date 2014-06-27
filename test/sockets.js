@@ -13,7 +13,6 @@ var mocks = require( './mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	http = require( 'http' ),
-	call = require( 'when/callbacks' ).call,
 	io = require( 'socket.io-client' ),
 	sockets = rewire( '../lib/sockets' ),
 	browsers = rewire( '../lib/browsers' );
@@ -22,6 +21,12 @@ describe( 'Sockets', function() {
 	var ua = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)' +
 		' Chrome/35.0.1916.153 Safari/537.36',
 		id = 'bdf3ebc3-d783-4ab0-b4d2-aa590d55c533',
+		result = {
+			id: 'tests/test/1',
+			tbId: 'foo',
+			jobId: 'bar',
+			success: true
+		},
 		bender,
 		server;
 
@@ -29,7 +34,7 @@ describe( 'Sockets', function() {
 		bender = mocks.getBender( 'utils', 'conf' );
 		bender.use( [ browsers, sockets ] );
 		bender.init();
-		server = http.createServer( function( req, res ) {} );
+		server = http.createServer( function() {} );
 
 		bender.sockets.attach( server );
 
@@ -158,7 +163,7 @@ describe( 'Sockets', function() {
 		} ).to.not.throw();
 	} );
 
-	it( 'should run a task on a connected client', function( done ) {
+	it( 'should run a task on a connected client and mark him as busy', function( done ) {
 		var socket = io( 'http://localhost:1031/client', {
 				forceNew: true
 			} ),
@@ -178,7 +183,11 @@ describe( 'Sockets', function() {
 		} );
 
 		socket.on( 'run', function( data ) {
+			var client = bender.browsers.clients.get( id );
+
 			expect( data ).to.deep.equal( task );
+			expect( client ).to.be.an( 'object' );
+			expect( client.ready ).to.be.false;
 			socket.disconnect();
 		} );
 
@@ -187,16 +196,61 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should emit results from a client', function( done ) {
+	it( 'should emit complete event on client\'s request', function( done ) {
+		var socket = io( 'http://localhost:1031/client', {
+			forceNew: true
+		} );
+
+		bender.on( 'client:complete', function( data ) {
+			expect( data ).to.be.an( 'object' );
+			expect( data.id ).to.equal( result.id );
+			expect( data.tbId ).to.equal( result.tbId );
+			expect( data.jobId ).to.equal( result.jobId );
+			expect( data.success ).to.equal( result.success );
+			socket.disconnect();
+		} );
+
+		socket.on( 'connect', function() {
+			socket.emit( 'register', {
+				id: id,
+				ua: ua
+			}, function callback() {
+				socket.emit( 'complete', result );
+			} );
+		} );
+
+		socket.on( 'disconnect', function() {
+			done();
+		} );
+	} );
+
+	it( 'should ignore complete requests from unknown clients', function( done ) {
 		var socket = io( 'http://localhost:1031/client', {
 				forceNew: true
 			} ),
-			result = {
-				id: 'tests/test/1',
-				tbId: 'foo',
-				jobId: 'bar',
-				success: true
-			};
+			spy = sinon.spy();
+
+		bender.on( 'client:complete', spy );
+
+		socket.on( 'connect', function() {
+			socket.emit( 'register', {
+				id: id,
+				ua: 'unknown'
+			}, function callback() {
+				socket.emit( 'complete' );
+
+				setTimeout( function() {
+					expect( spy.called ).to.be.false;
+					done();
+				}, 50 );
+			} );
+		} );
+	} );
+
+	it( 'should emit results from a client', function( done ) {
+		var socket = io( 'http://localhost:1031/client', {
+			forceNew: true
+		} );
 
 		socket.on( 'connect', function() {
 			socket.emit( 'register', {
@@ -245,7 +299,9 @@ describe( 'Sockets', function() {
 		var socket = io( 'http://localhost:1031/client', {
 				forceNew: true
 			} ),
-			promise = call( bender.on.bind( bender ), 'client:fetch' );
+			spy = sinon.spy();
+
+		bender.on( 'client:fetch', spy );
 
 		socket.on( 'connect', function() {
 			socket.emit( 'register', {
@@ -253,8 +309,52 @@ describe( 'Sockets', function() {
 				ua: 'unknown'
 			}, function callback() {
 				socket.emit( 'fetch' );
-				done();
+
+				setTimeout( function() {
+					expect( spy.called ).to.be.false;
+					done();
+				}, 50 );
 			} );
+		} );
+	} );
+
+	it( 'should emit client\'s error', function( done ) {
+		var socket = io( 'http://localhost:1031/client', {
+				forceNew: true
+			} ),
+			error = 'foo';
+
+		bender.on( 'client:error', function( data ) {
+			expect( data ).to.equal( error );
+			socket.disconnect();
+		} );
+
+		socket.on( 'connect', function() {
+			socket.emit( 'err', error );
+		} );
+
+		socket.on( 'disconnect', function() {
+			done();
+		} );
+	} );
+
+	it( 'should emit client\'s log', function( done ) {
+		var socket = io( 'http://localhost:1031/client', {
+				forceNew: true
+			} ),
+			msg = 'foo';
+
+		bender.on( 'client:log', function( data ) {
+			expect( data ).to.equal( msg );
+			socket.disconnect();
+		} );
+
+		socket.on( 'connect', function() {
+			socket.emit( 'log', msg );
+		} );
+
+		socket.on( 'disconnect', function() {
+			done();
 		} );
 	} );
 } );
