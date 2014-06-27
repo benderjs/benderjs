@@ -16,7 +16,7 @@ var mocks = require( '../mocks' ),
 		require( 'path' ).join( __dirname, '../../static/default.html' )
 	).toString();
 
-describe( 'Page Builders - default', function() {
+describe( 'Page Builders - Default', function() {
 	var oldAttach,
 		bender;
 
@@ -46,8 +46,10 @@ describe( 'Page Builders - default', function() {
 
 		data = defaultBuilder.build( data );
 
-		return data.parts[ 0 ].then( function( data ) {
-			expect( data ).to.equal( defaultTemplate );
+		expect( data.parts[ 0 ] ).to.exist;
+
+		return data.parts[ 0 ].then( function( result ) {
+			expect( result ).to.equal( defaultTemplate );
 		} );
 	} );
 
@@ -56,6 +58,8 @@ describe( 'Page Builders - default', function() {
 			parts: []
 		};
 
-		expect( defaultBuilder.build( data ).parts[ 0 ] ).to.equal( defaultTemplate );
+		data = defaultBuilder.build( data );
+
+		expect( data.parts[ 0 ] ).to.equal( defaultTemplate );
 	} );
 } );

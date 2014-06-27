@@ -178,6 +178,7 @@ moduleMocks = {
 		var tests = [ {
 			id: 'tests/test/1',
 			js: 'tests/test/1.js',
+			html: 'tests/test/1.html',
 			tags: [ 'foo', 'bar', 'baz' ],
 			assertion: 'yui',
 			applications: [ 'test', 'test2' ],

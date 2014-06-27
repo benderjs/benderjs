@@ -32,37 +32,37 @@ describe( 'Tests', function() {
 	it( 'should list tests specified in configuration file', function() {
 		var expected = [ {
 			id: 'test/fixtures/tests/test/1',
-			js: path.normalize('test/fixtures/tests/test/1.js'),
+			js: path.normalize( 'test/fixtures/tests/test/1.js' ),
 			assertion: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/2',
-			js: path.normalize('test/fixtures/tests/test/2.js'),
+			js: path.normalize( 'test/fixtures/tests/test/2.js' ),
 			assertion: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/3',
-			js: path.normalize('test/fixtures/tests/test/3.js'),
+			js: path.normalize( 'test/fixtures/tests/test/3.js' ),
 			assertion: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test2/1',
-			js: path.normalize('test/fixtures/tests/test2/1.js'),
+			js: path.normalize( 'test/fixtures/tests/test2/1.js' ),
 			assertion: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/2',
-			js: path.normalize('test/fixtures/tests/test2/2.js'),
+			js: path.normalize( 'test/fixtures/tests/test2/2.js' ),
 			assertion: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/3',
-			js: path.normalize('test/fixtures/tests/test2/3.js'),
+			js: path.normalize( 'test/fixtures/tests/test2/3.js' ),
 			assertion: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
