@@ -50,13 +50,24 @@ moduleMocks = {
 				}
 			},
 
+			assertion: 'test',
+
 			browsers: [ 'Chrome', 'Firefox', 'Opera' ],
 
 			tests: {
 				'Test': {
 					basePath: 'test/fixtures/tests/',
 					paths: [
-						'test/'
+						'test/',
+						'!_assets/'
+					]
+				},
+				'Test2': {
+					applications: [ 'test' ],
+					basePath: 'test/fixtures/tests/',
+					paths: [
+						'test2/',
+						'!_assets/'
 					]
 				}
 			}
@@ -114,6 +125,23 @@ moduleMocks = {
 		bender.sockets = {
 			attach: nop
 		};
+	},
+
+	testbuilders: function( bender ) {
+		function testBuilder( data ) {
+			data.files.forEach( function( file ) {
+				var id = file.split( '.' )[ 0 ];
+
+				data.tests[ id ] = {
+					id: id,
+					js: file
+				};
+			} );
+
+			return when.resolve( data );
+		}
+
+		bender.testbuilders = [ testBuilder ];
 	},
 
 	tests: function( bender ) {
