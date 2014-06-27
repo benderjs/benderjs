@@ -55,7 +55,7 @@
 
 		this.error = function( error ) {
 			lastError = JSON.parse( error );
-			socket.emit( 'error', lastError );
+			socket.emit( 'err', lastError );
 		};
 
 		this.result = function( result ) {
