@@ -36,8 +36,8 @@ describe( 'Template', function() {
 	} );
 
 	it( 'should replace %BASE_PATH% tag in test\'s HTML', function() {
-		var expected = '<!DOCTYPE html><html><head></head><body><img src="' +
-			path.normalize( '/test/fixtures/tests/_assets/img.jpg' ) + '" /></body></html>',
+		var expected = '<!DOCTYPE html><html><head></head><body>' +
+			'<img src="/test/fixtures/tests/_assets/img.jpg" /></body></html>',
 			promise = bender.template.replaceTags( basePathHtml, bender.tests.tests[ 0 ] );
 
 		return expect( promise ).to.eventually.equal( expected );
@@ -45,8 +45,8 @@ describe( 'Template', function() {
 
 	it( 'should replace %BASE_PATH% tag in job task\'s HTML', function() {
 		var jobId = 'foo',
-			expected = '<!DOCTYPE html><html><head></head><body><img src="' +
-			path.normalize( '/jobs/' + jobId + '/tests/test/fixtures/tests/_assets/img.jpg' ) + '" /></body></html>',
+			expected = '<!DOCTYPE html><html><head></head><body><img src="/jobs/' + jobId +
+			'/tests/test/fixtures/tests/_assets/img.jpg" /></body></html>',
 			task = _.extend( {
 				jobId: jobId
 			}, bender.tests.tests[ 0 ] ),
@@ -56,8 +56,8 @@ describe( 'Template', function() {
 	} );
 
 	it( 'should replace %TEST_DIR% tag in test\'s HTML', function() {
-		var expected = '<!DOCTYPE html><html><head></head><body><img src="' +
-			path.normalize( '/tests/test/_assets/img.jpg' ) + '" /></body></html>',
+		var expected = '<!DOCTYPE html><html><head></head><body>' +
+			'<img src="/tests/test/_assets/img.jpg" /></body></html>',
 			promise = bender.template.replaceTags( testDirHtml, bender.tests.tests[ 0 ] );
 
 		return expect( promise ).to.eventually.equal( expected );
@@ -65,8 +65,8 @@ describe( 'Template', function() {
 
 	it( 'should replace %TEST_DIR% tag in job task\'s HTML', function() {
 		var jobId = 'foo',
-			expected = '<!DOCTYPE html><html><head></head><body><img src="' +
-			path.normalize( '/jobs/' + jobId + '/tests/tests/test/_assets/img.jpg' ) + '" /></body></html>',
+			expected = '<!DOCTYPE html><html><head></head><body><img src="/jobs/' + jobId +
+			'/tests/tests/test/_assets/img.jpg" /></body></html>',
 			task = _.extend( {
 				jobId: jobId
 			}, bender.tests.tests[ 0 ] ),
@@ -76,8 +76,8 @@ describe( 'Template', function() {
 	} );
 
 	it( 'should build HTML for a test', function() {
-		var expected = '<!DOCTYPE html><html><head></head><body><img src="' +
-			path.normalize( '/test/fixtures/tests/_assets/img.jpg' ) + '" /></body></html>',
+		var expected = '<!DOCTYPE html><html><head></head><body>' +
+			'<img src="/test/fixtures/tests/_assets/img.jpg" /></body></html>',
 			promise = bender.template.build( bender.tests.tests[ 0 ] );
 
 		return expect( promise ).to.eventually.equal( expected );
@@ -88,8 +88,8 @@ describe( 'Template', function() {
 			task = _.extend( {
 				jobId: jobId
 			}, bender.tests.tests[ 0 ] ),
-			expected = '<!DOCTYPE html><html><head></head><body><img src="' +
-			path.normalize( '/jobs/' + jobId + '/tests/test/fixtures/tests/_assets/img.jpg' ) + '" /></body></html>',
+			expected = '<!DOCTYPE html><html><head></head><body><img src="/jobs/' + jobId +
+			'/tests/test/fixtures/tests/_assets/img.jpg" /></body></html>',
 			promise = bender.template.build( task );
 
 		return expect( promise ).to.eventually.equal( expected );
