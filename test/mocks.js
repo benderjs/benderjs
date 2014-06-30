@@ -101,7 +101,10 @@ moduleMocks = {
 						'!_assets/'
 					]
 				}
-			}
+			},
+
+			testRetries: 3,
+			testTimeout: 30000
 		};
 	},
 
