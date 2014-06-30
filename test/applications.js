@@ -2,7 +2,7 @@
  * @file Tests for Applications module
  */
 
-/*global describe, it */
+/*global describe, it, beforeEach */
 /*jshint -W030 */
 /* removes annoying warning caused by some of Chai's assertions */
 
@@ -19,8 +19,7 @@ var mocks = require( './mocks' ),
 applications.__set__( 'logger', mocks.logger );
 
 describe( 'Applications', function() {
-	var bender = mocks.getBender( 'conf', 'utils' ),
-		configs = {
+	var configs = {
 			noPath: {
 				applications: {
 					foo: {
@@ -53,9 +52,13 @@ describe( 'Applications', function() {
 					}
 				}
 			},
-		};
+		},
+		bender;
 
-	bender.use( applications );
+	beforeEach( function() {
+		bender = mocks.getBender( 'conf', 'utils' );
+		bender.use( applications );
+	} );
 
 	it( 'should inherit Collection', function() {
 		expect( bender.applications ).to.be.instanceof( Collection );
@@ -68,7 +71,7 @@ describe( 'Applications', function() {
 
 		result = bender.applications.get();
 
-		expect( result ).to.be.instanceof( Array );
+		expect( result ).to.be.an( 'array' );
 		expect( result ).to.have.length( 0 );
 	} );
 
@@ -79,8 +82,27 @@ describe( 'Applications', function() {
 
 		result = bender.applications.get();
 
-		expect( result ).to.be.instanceof( Array );
+		expect( result ).to.be.an( 'array' );
 		expect( result ).to.have.length( 2 );
+	} );
+
+	it( 'should use application\'s name as url if no url specified', function() {
+		var result;
+
+		bender.applications.build( {
+			applications: {
+				test: {
+					path: 'test/fixtures/apps/',
+					files: [ 'test.js' ]
+				}
+			}
+		} );
+
+		result = bender.applications.get();
+
+		expect( result ).to.be.an( 'array' );
+		expect( result ).to.have.length( 1 );
+		expect( result[ 0 ].url ).to.equal( 'test/' );
 	} );
 
 	it( 'should notify that path to an application is invalid', function() {
