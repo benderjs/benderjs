@@ -163,7 +163,12 @@ moduleMocks = {
 	testbuilders: function( bender ) {
 		function testBuilder( data ) {
 			data.files.forEach( function( file ) {
-				var id = file.split( '.' )[ 0 ];
+				var id = file.split( '.' )[ 0 ],
+					ext = file.split( '.' )[ 1 ];
+
+				if ( ext !== 'js' ) {
+					return;
+				}
 
 				data.tests[ id ] = {
 					id: id,
