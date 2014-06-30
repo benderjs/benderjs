@@ -11,6 +11,7 @@
 var mocks = require( '../mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
+	when = require( 'when' ),
 	path = require( 'path' ),
 	srcHtml = require( 'fs' ).readFileSync(
 		require( 'path' ).join( __dirname, '../fixtures/tests/test/1.html' )
@@ -45,6 +46,20 @@ describe( 'Page Builders - Html', function() {
 		data = html.build( data );
 
 		expect( data.parts[ 0 ] ).to.exist;
+		expect( data.parts[ 0 ] ).to.be.instanceof( when.Promise );
+
+		return data.parts[ 0 ].then( function( result ) {
+			expect( result ).to.equal( srcHtml );
+		} );
+	} );
+
+	it( 'should resolve th promise with HTML code for given data', function() {
+		var data = {
+			html: path.resolve( __dirname, '../fixtures/tests/test/1.html' ),
+			parts: []
+		};
+
+		data = html.build( data );
 
 		return data.parts[ 0 ].then( function( result ) {
 			expect( result ).to.equal( srcHtml );
