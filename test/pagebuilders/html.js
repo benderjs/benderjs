@@ -13,6 +13,7 @@ var mocks = require( '../mocks' ),
 	rewire = require( 'rewire' ),
 	when = require( 'when' ),
 	path = require( 'path' ),
+	_ = require( 'lodash' ),
 	srcHtml = require( 'fs' ).readFileSync(
 		require( 'path' ).join( __dirname, '../fixtures/tests/test/1.html' )
 	).toString(),
@@ -87,11 +88,10 @@ describe( 'Page Builders - Html', function() {
 
 	it( 'should not alter data if no html specified', function() {
 		var data = {
-			parts: []
-		};
+				parts: []
+			},
+			result = _.cloneDeep( html.build( data ) );
 
-		data = html.build( data );
-
-		expect( data ).to.equal( data );
+		expect( result ).to.deep.equal( data );
 	} );
 } );

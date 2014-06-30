@@ -13,6 +13,7 @@ var mocks = require( '../mocks' ),
 	rewire = require( 'rewire' ),
 	when = require( 'when' ),
 	path = require( 'path' ),
+	_ = require( 'lodash' ),
 	srcScript = require( 'fs' ).readFileSync(
 		require( 'path' ).join( __dirname, '../fixtures/tests/test/1.js' )
 	).toString(),
@@ -84,11 +85,10 @@ describe( 'Page Builders - Script', function() {
 
 	it( 'should not alter data if no script specified', function() {
 		var data = {
-			parts: []
-		};
+				parts: []
+			},
+			result = _.cloneDeep( script.build( data ) );
 
-		data = script.build( data );
-
-		expect( data ).to.equal( data );
+		expect( result ).to.deep.equal( data );
 	} );
 } );

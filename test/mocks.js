@@ -88,7 +88,10 @@ moduleMocks = {
 					paths: [
 						'test/',
 						'!_assets/'
-					]
+					],
+					regressions: {
+						'test/fixtures/tests/test/1': 'condition'
+					}
 				},
 				'Test2': {
 					applications: [ 'test' ],

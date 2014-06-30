@@ -11,6 +11,7 @@
 var mocks = require( '../mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
+	_ = require( 'lodash' ),
 	applications = rewire( '../../lib/pagebuilders/applications' );
 
 describe( 'Page Builders - Applications', function() {
@@ -72,9 +73,9 @@ describe( 'Page Builders - Applications', function() {
 		var data = {
 				parts: []
 			},
-			result = applications.build( data );
+			result = _.cloneDeep( applications.build( data ) );
 
-		expect( result ).to.equal( data );
+		expect( result ).to.deep.equal( data );
 	} );
 
 	it( 'should add scripts and stylesheets of multiple apps', function() {

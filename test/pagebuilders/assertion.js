@@ -11,6 +11,7 @@
 var mocks = require( '../mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
+	_ = require( 'lodash' ),
 	assertion = rewire( '../../lib/pagebuilders/assertion' );
 
 describe( 'Page Builders - Assertion', function() {
@@ -70,8 +71,8 @@ describe( 'Page Builders - Assertion', function() {
 		var data = {
 				parts: []
 			},
-			result = assertion.build( data );
+			result = _.cloneDeep( assertion.build( data ) );
 
-		expect( result ).to.equal( data );
+		expect( result ).to.deep.equal( data );
 	} );
 } );
