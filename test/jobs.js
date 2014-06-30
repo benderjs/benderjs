@@ -26,33 +26,25 @@ describe( 'Jobs', function() {
 			browsers: [ 'chrome35', 'firefox', '123unknown', 'ie8', 'ie10', 'ie9' ],
 			description: 'test job 1',
 			filter: [ 'foo' ],
-			tests: [
-				'tests/test/1', 'tests/test/2', 'tests/test/3'
-			]
+			tests: [ 'tests/test/1', 'tests/test/2', 'tests/test/3' ]
 		},
 		job2 = {
 			browsers: [ 'firefox' ],
 			description: 'test job 2',
 			filter: [ 'foo' ],
-			tests: [
-				'tests/test/1', 'tests/test/2', 'tests/test/3'
-			]
+			tests: [ 'tests/test/1', 'tests/test/2', 'tests/test/3' ]
 		},
 		job3 = {
 			browsers: [ 'firefox', 'chrome', 'opera', 'ie11' ],
 			description: 'test job 3',
 			filter: [ 'foo' ],
-			tests: [
-				'tests/test/1', 'tests/test/2', 'tests/test/3'
-			]
+			tests: [ 'tests/test/1', 'tests/test/2', 'tests/test/3' ]
 		},
 		job4 = {
 			browsers: [ 'chrome' ],
 			description: 'test job 4',
 			filter: [ 'foo' ],
-			tests: [
-				'tests/test/1'
-			]
+			tests: [ 'tests/test/1' ]
 		},
 		client = {
 			id: 12345,
@@ -485,14 +477,13 @@ describe( 'Jobs', function() {
 					}
 				} );
 			} )
-			.then( function( count ) {
+			.then( function() {
 				bender.jobs.fetch( client, callback );
 			} );
 	} );
 
 	it( 'should mark a task with exceeded retry limit as failed', function( done ) {
-		var store = datastores[ 'browser_tasks.db' ],
-			lastStart = new Date() - ( bender.conf.testTimeout + 1000 );
+		var store = datastores[ 'browser_tasks.db' ];
 
 		function callback( args ) {
 			expect( args ).to.not.exist;
@@ -512,13 +503,13 @@ describe( 'Jobs', function() {
 				}, {
 					$set: {
 						status: bender.jobs.STATUS.PENDING,
-						retries: 4,
-						// set earlier date to make it timed out
-						started: lastStart
+						// set higher than the limit retry count
+						retries: bender.conf.testRetries + 1,
+						started: new Date() - ( bender.conf.testTimeout + 1000 )
 					}
 				} );
 			} )
-			.then( function( count ) {
+			.then( function() {
 				bender.jobs.fetch( client, callback );
 			} );
 	} );
