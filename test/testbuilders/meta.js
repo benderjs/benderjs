@@ -43,19 +43,19 @@ describe( 'Page Builders - Meta', function() {
 	};
 
 	sampleData3.tests = {};
-	sampleData3.tests[ test3 ] =  {
+	sampleData3.tests[ test3 ] = {
 		id: 'test/fixtures/tests/test/3',
 		js: 'test/fixtures/tests/test/3.js'
 	};
 
 	sampleData4.tests = {};
-	sampleData4.tests[ test4 ] =  {
+	sampleData4.tests[ test4 ] = {
 		id: 'test/fixtures/tests/test2/1',
 		js: 'test/fixtures/tests/test2/1.js'
 	};
 
 	sampleData5.tests = {};
-	sampleData5.tests[ test5 ] =  {
+	sampleData5.tests[ test5 ] = {
 		id: 'test/fixtures/tests/test2/2',
 		js: 'test/fixtures/tests/test2/2.js'
 	};
@@ -131,7 +131,7 @@ describe( 'Page Builders - Meta', function() {
 		var expected = {};
 
 
-		expected[test4] = {
+		expected[ test4 ] = {
 			id: 'test/fixtures/tests/test2/1',
 			js: 'test/fixtures/tests/test2/1.js',
 			tags: [
