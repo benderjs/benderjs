@@ -37,6 +37,13 @@ describe( 'Page Builders - Default', function() {
 			],
 			tests: {}
 		},
+		sampleData3 = {
+			files: [
+				'test/fixtures/tests/test/1.html',
+				'test/fixtures/tests/test/2.html'
+			],
+			tests: {}
+		},
 		oldAttach,
 		bender;
 
@@ -126,5 +133,18 @@ describe( 'Page Builders - Default', function() {
 
 		expect( result ).to.deep.equal( expected );
 		expect( result.files ).to.contain( 'test/fixtures/tests/test2/template.html' );
+	} );
+
+	it( 'should not build tests if no .js file specified', function() {
+		var expected = {
+				files: [
+					'test/fixtures/tests/test/1.html',
+					'test/fixtures/tests/test/2.html'
+				],
+				tests: {}
+			},
+			result = defaultBuilder.build( sampleData3 );
+
+		expect( result ).to.deep.equal( expected );
 	} );
 } );
