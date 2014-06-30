@@ -72,6 +72,10 @@ describe( 'Page Builders - Script', function() {
 			},
 			expected = path.join( '.bender/jobs/', data.jobId, '/tests/', data.js );
 
+		if ( path.sep === '\\' ) {
+			expected = path.resolve( expected );
+		}
+
 		function handle( err ) {
 			expect( err ).to.be.an( 'object' );
 			expect( err.code ).to.equal( 'ENOENT' );
