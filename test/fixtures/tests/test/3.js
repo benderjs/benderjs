@@ -1,5 +1,3 @@
-/* bender-tags: foo, bar, baz */
-
 if ( global.bender ) {
 	bender.test( {
 		'test foo': function() {

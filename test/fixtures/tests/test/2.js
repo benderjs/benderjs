@@ -1,4 +1,5 @@
 /* bender-tags: foo, bar, baz */
+/* bender-testPlugin-flag: foo */
 
 if ( global.bender ) {
 	bender.test( {
