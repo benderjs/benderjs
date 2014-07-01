@@ -114,10 +114,161 @@ moduleMocks = {
 	},
 
 	jobs: function( bender ) {
-		bender.jobs = {};
+		var jobs = [ {
+				browsers: [ 'chrome' ],
+				description: 'test job 1',
+				created: 1403699939665,
+				filter: [ 'foo' ],
+				_id: 'AYIlcxZa1i1nhLox'
+			}, {
+				browsers: [ 'firefox', ],
+				description: 'test job 2',
+				created: 1403699939665,
+				filter: [ 'foo' ],
+				_id: 'ECNtxgcMzm94aQc9'
+			} ],
 
-		bender.jobs.getApp = function( jobId, name ) {
-			return when.resolve( bender.applications.get( name ) );
+			tasks = [ {
+				id: 'test/fixtures/tests/test/1',
+				_id: 'ECNtxgcMzm94aQc9',
+				jobId: 'AYIlcxZa1i1nhLox',
+				results: [ {
+					name: 'chrome',
+					version: 0,
+					jobId: 'AYIlcxZa1i1nhLox',
+					status: 0,
+					retries: 0
+				} ]
+			}, {
+				id: 'test/fixtures/tests/test/1?foo=bar',
+				_id: 'ECNtxgcMzm94aQc8',
+				jobId: 'AYIlcxZa1i1nhLox',
+				results: [ {
+					name: 'chrome',
+					version: 0,
+					jobId: 'AYIlcxZa1i1nhLox',
+					status: 0,
+					retries: 0
+				} ]
+			}, {
+				id: 'test/fixtures/tests/test/2',
+				_id: 'qxXbaXERyznmKIhz',
+				jobId: 'AYIlcxZa1i1nhLox',
+				results: [ {
+					name: 'chrome',
+					version: 0,
+					jobId: 'AYIlcxZa1i1nhLox',
+					status: 0,
+					retries: 0
+				} ]
+			}, {
+				id: 'test/fixtures/tests/test/3',
+				_id: 'oTNMAwH5EHFNr3lc',
+				jobId: 'AYIlcxZa1i1nhLox',
+				results: [ {
+					name: 'chrome',
+					version: 0,
+					jobId: 'AYIlcxZa1i1nhLox',
+					status: 0,
+					retries: 0
+				} ]
+			}, {
+				id: 'test/fixtures/tests/test/1',
+				_id: 'ECNtxgcMzm94aQc9',
+				jobId: 'ECNtxgcMzm94aQc9',
+				results: [ {
+					name: 'firefox',
+					version: 0,
+					jobId: 'ECNtxgcMzm94aQc9',
+					status: 0,
+					retries: 0
+				} ]
+			}, {
+				id: 'test/fixtures/tests/test/2',
+				_id: 'qxXbaXERyznmKIhz',
+				jobId: 'ECNtxgcMzm94aQc9',
+				results: [ {
+					name: 'firefox',
+					version: 0,
+					jobId: 'ECNtxgcMzm94aQc9',
+					status: 0,
+					retries: 0
+				} ]
+			}, {
+				id: 'test/fixtures/tests/test/3',
+				_id: 'oTNMAwH5EHFNr3lc',
+				jobId: 'ECNtxgcMzm94aQc9',
+				results: [ {
+					name: 'firefox',
+					version: 0,
+					jobId: 'ECNtxgcMzm94aQc9',
+					status: 0,
+					retries: 0
+				} ]
+			} ];
+
+		bender.jobs = {
+			jobs: jobs,
+
+			getApp: function( jobId, name ) {
+				return when.resolve( bender.applications.get( name ) );
+			},
+
+			getTask: function( jobId, taskId ) {
+				return when.resolve( _.where( tasks, {
+					id: taskId,
+					jobId: jobId
+				} )[ 0 ] );
+			},
+
+			get: function( jobId ) {
+				var job = _.where( jobs, {
+					_id: jobId
+				} )[ 0 ];
+
+				if ( job ) {
+					job.tasks = _.where( tasks, {
+						jobId: jobId
+					} );
+				}
+
+				return when.resolve( job ? job : null );
+			},
+
+			find: function( jobId ) {
+				return when.resolve( _.where( jobs, {
+					_id: jobId
+				} )[ 0 ] );
+			},
+
+			list: function() {
+				return when.resolve( jobs );
+			},
+
+			restart: function( jobId ) {
+				var job = _.where( jobs, {
+					_id: jobId
+				} )[ 0 ];
+
+				return job ?
+					when.resolve() :
+					when.reject( 'There are no tasks for this job or a job does not exist.' );
+			},
+
+
+			create: function() {
+				return when.resolve( 'newJobId' );
+			},
+
+			edit: function( data ) {
+				var job = bender.jobs.find( data.id );
+
+				return when.resolve( job );
+			},
+
+			delete: function() {
+				return when.resolve( 'newJobId' );
+			}
 		};
 	},
 
