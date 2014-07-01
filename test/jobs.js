@@ -26,25 +26,25 @@ describe( 'Jobs', function() {
 			browsers: [ 'chrome35', 'firefox', '123unknown', 'ie8', 'ie10', 'ie9' ],
 			description: 'test job 1',
 			filter: [ 'foo' ],
-			tests: [ 'tests/test/1', 'tests/test/2', 'tests/test/3' ]
+			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
 		},
 		job2 = {
 			browsers: [ 'firefox' ],
 			description: 'test job 2',
 			filter: [ 'foo' ],
-			tests: [ 'tests/test/1', 'tests/test/2', 'tests/test/3' ]
+			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
 		},
 		job3 = {
 			browsers: [ 'firefox', 'chrome', 'opera', 'ie11' ],
 			description: 'test job 3',
 			filter: [ 'foo' ],
-			tests: [ 'tests/test/1', 'tests/test/2', 'tests/test/3' ]
+			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
 		},
 		job4 = {
 			browsers: [ 'chrome' ],
 			description: 'test job 4',
 			filter: [ 'foo' ],
-			tests: [ 'tests/test/1' ]
+			tests: [ 'test/fixtures/tests/test/1' ]
 		},
 		client = {
 			id: 12345,
@@ -202,7 +202,7 @@ describe( 'Jobs', function() {
 				description: 'test job 3',
 				filter: [ 'foo' ],
 				tests: [
-					'tests/test/1', 'tests/test/2', 'tests/test/3'
+					'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3'
 				]
 			},
 			promise = bender.jobs.create( job )
@@ -321,7 +321,7 @@ describe( 'Jobs', function() {
 				created: 1403699939665,
 				filter: [ 'foo' ],
 				tasks: [ {
-					id: 'tests/test/1',
+					id: 'test/fixtures/tests/test/1',
 					_id: 'ECNtxgcMzm94aQc9',
 					jobId: 'AYIlcxZa1i1nhLox',
 					results: [ {
@@ -355,7 +355,7 @@ describe( 'Jobs', function() {
 						testedVersion: 16
 					} ]
 				}, {
-					id: 'tests/test/2',
+					id: 'test/fixtures/tests/test/2',
 					_id: 'qxXbaXERyznmKIhz',
 					jobId: 'AYIlcxZa1i1nhLox',
 					results: [ {
@@ -389,7 +389,7 @@ describe( 'Jobs', function() {
 						testedVersion: 16
 					} ]
 				}, {
-					id: 'tests/test/3',
+					id: 'test/fixtures/tests/test/3',
 					_id: 'oTNMAwH5EHFNr3lc',
 					jobId: 'AYIlcxZa1i1nhLox',
 					results: [ {

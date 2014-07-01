@@ -8,6 +8,9 @@ var moduleMocks,
 	when = require( 'when' ),
 	chai = require( 'chai' ),
 	util = require( 'util' ),
+	path = require( 'path' ),
+	fs = require( 'fs' ),
+	_ = require( 'lodash' ),
 	EventEmitter = require( 'events' ).EventEmitter,
 	chaiAsPromised = require( 'chai-as-promised' );
 
@@ -165,6 +168,17 @@ moduleMocks = {
 		};
 	},
 
+	template: function( bender ) {
+		bender.template = {
+			build: function( data ) {
+				return when.resolve(
+					data.html ? fs.readFileSync( path.resolve( data.html ) ).toString() :
+					fs.readFileSync( path.resolve( 'static/default.html' ) ).toString()
+				);
+			}
+		};
+	},
+
 	testbuilders: function( bender ) {
 		function testBuilder( data ) {
 			data.files.forEach( function( file ) {
@@ -189,23 +203,31 @@ moduleMocks = {
 
 	tests: function( bender ) {
 		var tests = [ {
-			id: 'tests/test/1',
-			js: 'tests/test/1.js',
-			html: 'tests/test/1.html',
+			id: 'test/fixtures/tests/test/1',
+			js: 'test/fixtures/tests/test/1.js',
+			html: 'test/fixtures/tests/test/1.html',
 			tags: [ 'foo', 'bar', 'baz' ],
 			assertion: 'yui',
 			applications: [ 'test', 'test2' ],
 			group: 'Test'
 		}, {
-			id: 'tests/test/2',
-			js: 'tests/test/2.js',
+			id: 'test/fixtures/tests/test/1?foo=bar',
+			js: 'test/fixtures/tests/test/1.js',
+			html: 'test/fixtures/tests/test/1.html',
+			tags: [ 'foo', 'bar', 'baz' ],
+			assertion: 'yui',
+			applications: [ 'test', 'test2' ],
+			group: 'Test'
+		}, {
+			id: 'test/fixtures/tests/test/2',
+			js: 'test/fixtures/tests/test/2.js',
 			tags: [ 'foo', 'bar', 'baz' ],
 			assertion: 'yui',
 			applications: [ 'test' ],
 			group: 'Test'
 		}, {
-			id: 'tests/test/3',
-			js: 'tests/test/3.js',
+			id: 'test/fixtures/tests/test/3',
+			js: 'test/fixtures/tests/test/3.js',
 			tags: [ 'foo', 'bar', 'baz' ],
 			assertion: 'yui',
 			applications: [ 'test' ],
@@ -218,6 +240,18 @@ moduleMocks = {
 
 		bender.tests.list = function() {
 			return when.resolve( tests );
+		};
+
+		bender.tests.get = function( id ) {
+			return when.resolve( _.where( tests, {
+				id: id
+			} )[ 0 ] );
+		};
+
+		bender.tests.checkPath = function( file ) {
+			return bender.conf.basePaths.some( function( basePath ) {
+				return file.indexOf( basePath ) === 0;
+			} );
 		};
 	},
 

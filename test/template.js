@@ -57,7 +57,7 @@ describe( 'Template', function() {
 
 	it( 'should replace %TEST_DIR% tag in test\'s HTML', function() {
 		var expected = '<!DOCTYPE html><html><head></head><body>' +
-			'<img src="/tests/test/_assets/img.jpg" /></body></html>',
+			'<img src="/test/fixtures/tests/test/_assets/img.jpg" /></body></html>',
 			promise = bender.template.replaceTags( testDirHtml, bender.tests.tests[ 0 ] );
 
 		return expect( promise ).to.eventually.equal( expected );
@@ -66,7 +66,7 @@ describe( 'Template', function() {
 	it( 'should replace %TEST_DIR% tag in job task\'s HTML', function() {
 		var jobId = 'foo',
 			expected = '<!DOCTYPE html><html><head></head><body><img src="/jobs/' + jobId +
-			'/tests/tests/test/_assets/img.jpg" /></body></html>',
+			'/tests/test/fixtures/tests/test/_assets/img.jpg" /></body></html>',
 			task = _.extend( {
 				jobId: jobId
 			}, bender.tests.tests[ 0 ] ),
