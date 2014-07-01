@@ -2,14 +2,13 @@
  * @file Tests for Applications middleware
  */
 
-/*global describe, it, before, after, beforeEach, afterEach */
+/*global describe, it, beforeEach */
 /*jshint -W030 */
 /* removes annoying warning caused by some of Chai's assertions */
 
 'use strict';
 
 var mocks = require( '../fixtures/_mocks' ),
-	sinon = require( 'sinon' ),
 	request = require( 'request' ),
 	expect = require( 'chai' ).expect,
 	request = require( 'request' ),
@@ -21,7 +20,7 @@ var mocks = require( '../fixtures/_mocks' ),
 	appsModule = require( '../../lib/applications' ),
 	serverModule = require( '../../lib/server' );
 
-describe( 'Applications middleware', function() {
+describe( 'Middleware - Applications', function() {
 	var testFile = fs.readFileSync( path.resolve( 'test/fixtures/apps/test.js' ) ).toString(),
 		tempServer = http.createServer( function( req, res ) {
 			// serve test.js file
@@ -79,7 +78,7 @@ describe( 'Applications middleware', function() {
 		var instance = bender.server.create();
 
 		tempServer.listen( 1032, function() {
-			instance.listen( 1031, function( err, res, body ) {
+			instance.listen( 1031, function() {
 				request.get( 'http://localhost:1031/apps/test2/test.js', function( err, res, body ) {
 					expect( body ).to.equal( testFile );
 					instance.close();
@@ -94,7 +93,7 @@ describe( 'Applications middleware', function() {
 		var instance = bender.server.create();
 
 		tempServer.listen( 1032, function() {
-			instance.listen( 1031, function( err, res, body ) {
+			instance.listen( 1031, function() {
 				request.get( 'http://localhost:1031/apps/test2/unknown.js', function( err, res, body ) {
 					expect( res.statusCode ).to.equal( 404 );
 					expect( body ).to.equal( http.STATUS_CODES[ '404' ] );
