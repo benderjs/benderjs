@@ -80,6 +80,8 @@ moduleMocks = {
 
 			assertion: 'test',
 
+			basePaths: [ 'test/fixtures/tests/' ],
+
 			browsers: [ 'Chrome', 'Firefox', 'Opera' ],
 
 			tests: {
