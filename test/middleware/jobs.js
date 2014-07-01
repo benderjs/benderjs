@@ -113,12 +113,12 @@ describe( 'Middleware - Jobs', function() {
 		} );
 	} );
 
-	it( 'should serve task assets - from base path', function( done ) {
+	it( 'should serve task assets', function( done ) {
 		var instance = bender.server.create(),
 			url = 'AYIlcxZa1i1nhLox/tests/test/fixtures/tests/_assets/asset.js',
 			oldCwd = process.cwd,
 			cwd = path.resolve( 'test/fixtures/tests/' ),
-			file = path.join( 'test/fixtures/tests/', '.bender/jobs/', url );
+			file = path.resolve( path.join( 'test/fixtures/tests/', '.bender/jobs/', url ) );
 
 		process.cwd = function() {
 			return cwd;
@@ -143,7 +143,7 @@ describe( 'Middleware - Jobs', function() {
 			url = 'AYIlcxZa1i1nhLox/apps/test.js',
 			oldCwd = process.cwd,
 			cwd = path.resolve( 'test/fixtures/tests/' ),
-			file = path.join( 'test/fixtures/tests/', '.bender/jobs/', url );
+			file = path.resolve( path.join( 'test/fixtures/tests/', '.bender/jobs/', url ) );
 
 		process.cwd = function() {
 			return cwd;
