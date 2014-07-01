@@ -76,7 +76,10 @@ describe( 'Middleware - Tests', function() {
 				},
 				function( err, res, body ) {
 					var assetFile = fs.readFileSync( path.resolve( file ) ).toString();
+
+					expect( res.statusCode ).to.equal( 200 );
 					expect( body ).to.equal( assetFile );
+
 					instance.close();
 					done();
 				} );
@@ -88,6 +91,8 @@ describe( 'Middleware - Tests', function() {
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/tests', function( err, res, body ) {
+				expect( res.statusCode ).to.equal( 200 );
+
 				bender.tests.list()
 					.done( function( list ) {
 						expect( JSON.parse( body ) ).to.deep.equal( {
@@ -107,6 +112,7 @@ describe( 'Middleware - Tests', function() {
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/' + file, function( err, res, body ) {
+				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( testHtml );
 
 				instance.close();
@@ -121,6 +127,7 @@ describe( 'Middleware - Tests', function() {
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/' + file, function( err, res, body ) {
+				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( testHtml );
 
 				instance.close();
@@ -135,6 +142,7 @@ describe( 'Middleware - Tests', function() {
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/' + file, function( err, res, body ) {
+				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( testHtml );
 
 				instance.close();
@@ -149,6 +157,7 @@ describe( 'Middleware - Tests', function() {
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/' + file, function( err, res, body ) {
+				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( testHtml );
 
 				instance.close();
