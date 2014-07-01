@@ -8,7 +8,7 @@
 
 'use strict';
 
-var mocks = require( './mocks' ),
+var mocks = require( './fixtures/_mocks' ),
 	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),

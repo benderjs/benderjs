@@ -8,7 +8,7 @@
 
 'use strict';
 
-var mocks = require( './mocks' ),
+var mocks = require( './fixtures/_mocks' ),
 	_ = require( 'lodash' ),
 	path = require( 'path' ),
 	expect = require( 'chai' ).expect,

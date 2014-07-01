@@ -8,7 +8,7 @@
 
 'use strict';
 
-var mocks = require( './mocks' ),
+var mocks = require( './fixtures/_mocks' ),
 	expect = require( 'chai' ).expect,
 	constants = require( '../lib/constants' );
 
