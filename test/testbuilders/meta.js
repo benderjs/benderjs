@@ -14,7 +14,7 @@ var mocks = require( '../mocks' ),
 	normalize = require( 'path' ).normalize,
 	meta = rewire( '../../lib/testbuilders/meta' );
 
-describe( 'Page Builders - Meta', function() {
+describe( 'Test Builders - Meta', function() {
 	var test1 = normalize( 'test/fixtures/tests/test/1' ),
 		test2 = normalize( 'test/fixtures/tests/test/2' ),
 		test3 = normalize( 'test/fixtures/tests/test/3' ),

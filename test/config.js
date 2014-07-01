@@ -17,13 +17,18 @@ var mocks = require( './mocks' ),
 	testDir = path.resolve( 'test/fixtures/' );
 
 describe( 'Config', function() {
-	var oldCwd = process.cwd;
+	var oldCwd;
 
 	before( function() {
+		oldCwd = config.__get__( 'process.cwd' );
 		config.__set__( 'process.cwd', function() {
 			return testDir;
 		} );
 		config.__set__( 'log', mocks.logger );
+	} );
+
+	after( function() {
+		config.__set__( 'process.cwd', oldCwd );
 	} );
 
 	it( 'should load valid configuration file', function() {
@@ -111,9 +116,5 @@ describe( 'Config', function() {
 		expect( bender.conf.plugins ).to.have.length( 2 );
 		expect( bender.conf.assertion ).to.equal( 'qunit' );
 		expect( bender.conf.testTimeout ).to.equal( 60000 );
-	} );
-
-	after( function() {
-		config.__set__( 'process.cwd', oldCwd );
 	} );
 } );

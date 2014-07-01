@@ -13,7 +13,7 @@ var mocks = require( '../mocks' ),
 	rewire = require( 'rewire' ),
 	template = rewire( '../../lib/testbuilders/template' );
 
-describe( 'Page Builders - Default', function() {
+describe( 'Test Builders - Default', function() {
 	var sampleData = {
 			files: [
 				'test/fixtures/tests/test2/template.html',
