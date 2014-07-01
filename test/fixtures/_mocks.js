@@ -70,7 +70,7 @@ moduleMocks = {
 
 				test2: {
 					url: 'test2/',
-					proxy: 'http://localhost/',
+					proxy: 'http://localhost:1032/',
 					files: [
 						'test.js',
 						'unknown'
