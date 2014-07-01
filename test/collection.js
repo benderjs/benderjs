@@ -70,7 +70,7 @@ describe( 'Collection', function() {
 		col.add( 'item3', item3 );
 
 		result = col.get( [ 'item1', 'item3' ] );
-		expect( result ).to.be.instanceof( Array );
+		expect( result ).to.be.an( 'array' );
 		expect( result ).to.have.length( 2 );
 		expect( result ).to.contain( item1 );
 		expect( result ).to.contain( item3 );
@@ -86,7 +86,7 @@ describe( 'Collection', function() {
 
 		result = col.get();
 
-		expect( result ).to.be.instanceof( Array );
+		expect( result ).to.be.an( 'array' );
 		expect( result ).to.have.length( 3 );
 		expect( result ).to.contain( item1 );
 		expect( result ).to.contain( item2 );
@@ -154,7 +154,7 @@ describe( 'Collection', function() {
 
 		result = col.find( 'bar', 'test' );
 
-		expect( result ).to.be.instanceof( Array );
+		expect( result ).to.be.an( 'array' );
 		expect( result ).to.have.length( 2 );
 		expect( result ).to.contain( item1 );
 		expect( result ).to.contain( item3 );
