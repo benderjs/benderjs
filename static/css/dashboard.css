@@ -44,12 +44,16 @@ th:last-child {
 	background: #fff;
 }
 
-.navbar-header,
+.navbar-header {
+	width: 100%;
+}
+
+.app-title,
 .navbar-text {
 	float: left;
 }
 
-.navbar-right {
+.capture-button {
 	float: right;
 }
 
