@@ -2,7 +2,7 @@
  * @file Tests for Applications middleware
  */
 
-/*global describe, it, beforeEach */
+/*global describe, it, beforeEach, afterEach */
 /*jshint -W030 */
 /* removes annoying warning caused by some of Chai's assertions */
 
@@ -35,6 +35,7 @@ describe( 'Middleware - Applications', function() {
 				res.end( http.STATUS_CODES[ '404' ] );
 			}
 		} ),
+		instance,
 		bender;
 
 	beforeEach( function() {
@@ -42,7 +43,13 @@ describe( 'Middleware - Applications', function() {
 		bender.use( [ serverModule, appsModule ] );
 		bender.init();
 		bender.middleware = [ applications.create ];
+		instance = bender.server.create();
+	} );
 
+	afterEach( function() {
+		try {
+			instance.close();
+		} catch ( e ) {}
 	} );
 
 	it( 'should expose create function', function() {
@@ -50,39 +57,36 @@ describe( 'Middleware - Applications', function() {
 	} );
 
 	it( 'should throw 404 on missing application files', function( done ) {
-		var instance = bender.server.create();
-
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/apps/test/unknown.js', function( err, res, body ) {
 				expect( res.statusCode ).to.equal( 404 );
 				expect( body ).to.equal( http.STATUS_CODES[ '404' ] );
-				instance.close();
+
 				done();
 			} );
 		} );
 	} );
 
 	it( 'should host local app files', function( done ) {
-		var instance = bender.server.create();
-
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/apps/test/test.js', function( err, res, body ) {
+				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( testFile );
-				instance.close();
+
 				done();
 			} );
 		} );
 	} );
 
 	it( 'should proxy to external app - valid file', function( done ) {
-		var instance = bender.server.create();
-
 		tempServer.listen( 1032, function() {
 			instance.listen( 1031, function() {
 				request.get( 'http://localhost:1031/apps/test2/test.js', function( err, res, body ) {
+					expect( res.statusCode ).to.equal( 200 );
 					expect( body ).to.equal( testFile );
-					instance.close();
+
 					tempServer.close();
+
 					done();
 				} );
 			} );
@@ -90,15 +94,14 @@ describe( 'Middleware - Applications', function() {
 	} );
 
 	it( 'should proxy to external app - missing file', function( done ) {
-		var instance = bender.server.create();
-
 		tempServer.listen( 1032, function() {
 			instance.listen( 1031, function() {
 				request.get( 'http://localhost:1031/apps/test2/unknown.js', function( err, res, body ) {
 					expect( res.statusCode ).to.equal( 404 );
 					expect( body ).to.equal( http.STATUS_CODES[ '404' ] );
-					instance.close();
+
 					tempServer.close();
+
 					done();
 				} );
 			} );

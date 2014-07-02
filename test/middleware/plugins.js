@@ -2,7 +2,7 @@
  * @file Tests for Plugins middleware
  */
 
-/*global describe, it, beforeEach, before, after */
+/*global describe, it, beforeEach, afterEach, before, after */
 /*jshint -W030 */
 /* removes annoying warning caused by some of Chai's assertions */
 
@@ -23,6 +23,7 @@ var mocks = require( '../fixtures/_mocks' ),
 describe( 'Middleware - Plugins', function() {
 	var oldCwd,
 		oldLog,
+		instance,
 		bender;
 
 	before( function() {
@@ -48,6 +49,13 @@ describe( 'Middleware - Plugins', function() {
 		bender.use( [ serverModule, pluginsModule ] );
 		bender.init();
 		bender.middleware = [ plugins.create ];
+		instance = bender.server.create();
+	} );
+
+	afterEach( function() {
+		try {
+			instance.close();
+		} catch ( e ) {}
 	} );
 
 	it( 'should expose create function', function() {
@@ -55,21 +63,18 @@ describe( 'Middleware - Plugins', function() {
 	} );
 
 	it( 'should throw 404 on missing files', function( done ) {
-		var instance = bender.server.create();
-
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/plugins/unknown.html', function( err, res, body ) {
 				expect( res.statusCode ).to.equal( 404 );
 				expect( body ).to.equal( http.STATUS_CODES[ '404' ] );
-				instance.close();
+
 				done();
 			} );
 		} );
 	} );
 
 	it( 'should respond with valid plugin\'s file', function( done ) {
-		var instance = bender.server.create(),
-			file = path.resolve( 'assertion-test/adapter.js' ),
+		var file = path.resolve( 'assertion-test/adapter.js' ),
 			url = 'http://localhost:1031/plugins/' + file.split( path.sep ).join( '/' );
 
 		instance.listen( 1031, function() {
@@ -79,7 +84,6 @@ describe( 'Middleware - Plugins', function() {
 				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( pluginFile );
 
-				instance.close();
 				done();
 			} );
 		} );
