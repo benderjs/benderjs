@@ -433,18 +433,14 @@ describe( 'Jobs', function() {
 		expect( results[ 3 ].status ).to.equal( bender.jobs.STATUS.PASSED );
 	} );
 
-	it( 'should fetch a waiting task for specified client and emit job:run if available', function() {
-		var promise = bender.jobs.create( job3 )
-			.then( function() {
-				bender.jobs.fetch( client );
+	it( 'should fetch a waiting task for specified client', function( done ) {
+		bender.jobs.create( job3 ).done( function() {
+			bender.jobs.fetch( client, function callback( data ) {
+				expect( data ).to.be.an( 'object' );
+				expect( data ).to.include.keys( [ 'id', 'jobId', 'tbId' ] );
 
-				return call( bender.on.bind( bender ), 'job:run' );
+				done();
 			} );
-
-		return promise.then( function( args ) {
-			expect( args[ 0 ] ).to.equal( client.id );
-			expect( args[ 1 ] ).to.be.an( 'object' );
-			expect( args[ 1 ] ).to.include.keys( [ 'id', 'jobId', 'tbId' ] );
 		} );
 	} );
 
@@ -515,16 +511,13 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should complete a failed task', function() {
-		var promise = bender.jobs.create( job3 )
+		return bender.jobs.create( job3 )
 			.then( function() {
-				bender.jobs.fetch( client );
-				return call( bender.on.bind( bender ), 'job:run' );
-			} );
-
-		return promise.then( function( args ) {
-			var task = args[ 1 ],
-				result = {
-					client: args[ 0 ],
+				return call( bender.jobs.fetch, client );
+			} )
+			.then( function( task ) {
+				var result = {
+					client: client,
 					id: task.id,
 					tbId: task.tbId,
 					jobId: task.jobId,
@@ -541,34 +534,30 @@ describe( 'Jobs', function() {
 					}
 				};
 
-			bender.jobs.completeTask( result );
+				bender.jobs.completeTask( result );
 
-			call( bender.on.bind( bender ), 'job:update' )
-				.then( function( args ) {
-					expect( args ).to.equal( task.jobId );
-				} );
-		} );
+				return call( bender.on.bind( bender ), 'job:update' )
+					.then( function( args ) {
+						expect( args ).to.equal( task.jobId );
+					} );
+			} );
 	} );
 
 	it( 'should complete an ignored task', function() {
-		var promise = bender.jobs.create( job4 )
+		return bender.jobs.create( job4 )
 			.then( function() {
-				bender.jobs.fetch( client );
-				return call( bender.on.bind( bender ), 'job:run' );
-			} );
-
-		return promise
-			.then( function( args ) {
-				var task = args[ 1 ],
-					result = {
-						client: args[ 0 ],
-						id: task.id,
-						tbId: task.tbId,
-						jobId: task.jobId,
-						success: true,
-						ignored: true,
-						results: {}
-					};
+				return call( bender.jobs.fetch, client );
+			} )
+			.then( function( task ) {
+				var result = {
+					client: client,
+					id: task.id,
+					tbId: task.tbId,
+					jobId: task.jobId,
+					success: true,
+					ignored: true,
+					results: {}
+				};
 
 				bender.jobs.completeTask( result );
 

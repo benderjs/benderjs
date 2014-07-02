@@ -26,6 +26,7 @@
 			lastError;
 
 		this.running = false;
+		this.fetching = false;
 		this.results = null;
 
 		this.runAsChild = true;
@@ -51,6 +52,39 @@
 				}
 				window.location.reload();
 			}, BENDER_CONFIG.testTimeout );
+		}
+
+		function handleFetch( data ) {
+			that.fetching = false;
+
+			if ( !data ) {
+				return;
+			}
+
+			data.results = {};
+			data.success = true;
+
+			that.results = data;
+			that.running = true;
+
+			that.run( data.id );
+		}
+
+		function startFetch() {
+			fetchInterval = setInterval( function() {
+				if ( !bender.running ) {
+					bender.fetching = true;
+					socket.emit( 'fetch', handleFetch );
+				}
+			}, 2000 );
+		}
+
+		function stopFetch() {
+			if ( fetchInterval ) {
+				clearInterval( fetchInterval );
+			}
+
+			bender.stop();
 		}
 
 		this.error = function( error ) {
@@ -146,7 +180,9 @@
 			this.running = false;
 			this.results = null;
 
-			socket.emit( 'fetch' );
+			if ( !this.fetching ) {
+				socket.emit( 'fetch', handleFetch );
+			}
 		};
 
 		this.log = function() {
@@ -169,36 +205,20 @@
 			}
 		};
 
-		// handle socket run message
-		socket.on( 'run', function( data ) {
-			data.results = {};
-			data.success = true;
+		socket
+			.on( 'connect', function() {
+				var id = /\/clients\/([^\/]+)/.exec( window.location )[ 1 ];
 
-			that.results = data;
-			that.running = true;
-
-			that.run( data.id );
-		} );
-	}
-
-	function startFetch() {
-		fetchInterval = setInterval( function() {
-			if ( !bender.running ) {
-				socket.emit( 'fetch' );
-			}
-		}, 2000 );
-	}
-
-	function stopFetch() {
-		if ( fetchInterval ) {
-			clearInterval( fetchInterval );
-		}
-
-		bender.stop();
+				socket.emit( 'register', {
+					id: id,
+					ua: navigator.userAgent
+				}, startFetch );
+			} )
+			.on( 'disconnect', stopFetch );
 	}
 
 	function setStatus( status ) {
-		return function( options ) {
+		return function() {
 			statusEl.innerHTML = status === states.CONNECT ? 'Connected' : 'Disconnected';
 			statusEl.className = status === states.CONNECT ? 'ok' : 'fail';
 		};
@@ -215,19 +235,7 @@
 	// handle socket connection status
 	socket
 		.on( 'connect', setStatus( states.CONNECT ) )
-		.on( 'connect', function() {
-			var id = /\/clients\/([^\/]+)/.exec( window.location )[ 1 ];
-
-			socket.emit( 'register', {
-				id: id,
-				ua: navigator.userAgent
-			}, startFetch );
-
-
-		} )
-		.on( 'disconnect', setStatus( states.DISCONNECT ) )
-		.on( 'disconnect', stopFetch );
+		.on( 'disconnect', setStatus( states.DISCONNECT ) );
 
 	window.bender = new Bender( socket );
-
 } )();
