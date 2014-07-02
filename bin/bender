@@ -244,23 +244,37 @@ function initialize() {
 	function buildDefaultConfig() {
 		var schema = require( '../lib/config-schema.js' ),
 			example = [ '/**', ' * Bender configuration file', ' * ' ],
-			props = schema.properties;
+			props = schema.properties,
+			keys = Object.keys( props ),
+			longest = 0;
 
 		// create documentation for config option
 		function addParam( name ) {
-			var type = props[ name ].type;
+			var type = props[ name ].type,
+				line;
 
 			type = type.charAt( 0 ).toUpperCase() + type.slice( 1 );
 
-			example.push( ' * @param {' + type + '}\t' + name +
-				( name.length < 8 ? '\t\t' : '\t' ) + props[ name ].description );
+			line = ' * @param {' + type + '}' + new Array( 8 - type.length + 2 ).join( ' ' ) + name;
+			line += ( new Array( longest - name.length ).join( ' ' ) ) + props[ name ].description;
+
+			if ( schema.required.indexOf( name ) > -1 ) {
+				line += ' (Required)';
+			}
+
+			example.push( line );
 		}
 
-		Object.keys( props ).forEach( addParam );
+		longest = Math.max.apply( Math, keys.map( function( key ) {
+			return key.length;
+		} ) );
+		longest = longest + 4 - ( longest % 4 );
+
+		keys.forEach( addParam );
 
 		example.push(
-			' */', 'var config = {', '\t// put your configuration here',
-			'};', 'module.exports = config;'
+			' */\n', 'var config = {', '\t// put your configuration here',
+			'};\n', 'module.exports = config;'
 		);
 
 		return example.join( '\n' );
