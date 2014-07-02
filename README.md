@@ -6,7 +6,7 @@ The anti-human approach to JavaScript testing.
 Installation
 ------------
 
-```bash
+```
 $ [sudo] npm install -g git://github.com/benderjs/benderjs.git
 ```
 
@@ -15,7 +15,7 @@ Configuration
 
 In order to configure Bender.js for your project, you need to create a configuration file.
 
-Use `bender init` to create Bender configuration file and local `.bender/` directory.
+Use `bender init` command to create Bender configuration file and local `.bender/` directory.
 
 Below is an empty config file.
 
@@ -43,7 +43,7 @@ Usage
 
 Currently available commands are:
 
-```bash
+```
 $ bender <command>
 
 Commands:
@@ -55,7 +55,7 @@ version     Print Bender.js version
 
 In order to run Bender in your project, open the console in project's directory and type:
 
-```bash
+```
 $ bender server run
 ```
 
@@ -69,7 +69,7 @@ http://localhost:1030
 
 **Note:** You can also run the server as a daemon:
 
-```bash
+```
 bender server start
 ```
 
@@ -77,7 +77,7 @@ At the moment, starting a daemon is supported **on Unix systems only**.
 
 If you want, you can specify a port or a hostname where Bender.js runs:
 
-```bash
+```
 -p, --port      The port on which the server will run (default: 1030).
 -H, --hostname  The hostname used to run the server (default: 0.0.0.0).
 ```
@@ -85,13 +85,14 @@ If you want, you can specify a port or a hostname where Bender.js runs:
 Running tests for Bender.js
 -------------
 
-```bash
+```
 $ npm install
 $ npm test
 ```
 
 To get the code coverage report run:
-```bash
+
+```
 $ npm test --coverage
 ```
 
