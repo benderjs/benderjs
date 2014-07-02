@@ -40,6 +40,8 @@ var argParser = require( 'nomnom' ),
 
 	log = require( dir + 'logger' ).create( 'cli' );
 
+argParser.script( 'bender' );
+
 argParser.command( 'init' )
 	.callback( initialize )
 	.help( 'Initialize Bender.js for this directory' );

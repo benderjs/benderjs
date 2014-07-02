@@ -41,16 +41,16 @@ module.exports = config;
 Usage
 -----
 
-Currently available commands are:
+Type `bender` to see available commands:
 
 ```
-$ bender <command>
+Usage: bender <command>
 
-Commands:
-init        Initialize Bender.js for this directory
-clean       Clean all Bender.js local files except the configuration
-server      Start Bender.js server
-version     Print Bender.js version
+command
+  init        Initialize Bender.js for this directory
+  clean       Clean all Bender.js local files except the configuration
+  server      Start Bender.js server
+  version     Print Bender.js version
 ```
 
 In order to run Bender in your project, open the console in project's directory and type:
