@@ -124,8 +124,12 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 		size: 'small',
 
+		ui: {
+			submit: '.submit-button'
+		},
+
 		events: {
-			'click .submit-button': 'submit'
+			'click @ui.submit': 'submit'
 		},
 
 		initialize: function( options ) {
@@ -137,11 +141,20 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			this.callback = options.callback;
 		},
 
+		closeHandler: function( doClose ) {
+			this.ui.submit.prop( 'disabled', false );
+
+			if ( doClose ) {
+				this.close();
+			}
+		},
+
 		submit: function() {
 			if ( typeof this.callback == 'function' ) {
-				this.callback();
+				this.callback( _.bind( this.closeHandler, this ) );
 			}
-			this.close();
+
+			this.ui.submit.prop( 'disabled', true );
 		}
 	} );
 

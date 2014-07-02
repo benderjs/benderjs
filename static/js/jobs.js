@@ -213,7 +213,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		removeJob: function() {
 			var that = this;
 
-			function remove() {
+			function remove( callback ) {
 				that.model.destroy( {
 					success: function( model, response ) {
 						App.Alerts.Manager.add(
@@ -223,6 +223,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 							response.error,
 							response.success ? 'Success!' : 'Error!'
 						);
+						callback( true );
 						App.back();
 					},
 					error: function( model, response ) {
@@ -231,6 +232,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 							response.error || 'Error while removing a job.',
 							'Error!'
 						);
+						callback( false );
 					}
 				} );
 			}
@@ -244,7 +246,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		restartJob: function() {
 			var that = this;
 
-			function restart() {
+			function restart( callback ) {
 				$.ajax( {
 					url: '/jobs/' + that.model.id + '/restart',
 					dataType: 'json',
@@ -262,6 +264,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 								force: true
 							} );
 						}
+
+						callback( !!response.success );
 					},
 					error: function( response, status ) {
 						App.Alerts.Manager.add(
@@ -269,6 +273,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 							status || 'Error while restarting a job.',
 							'Error!'
 						);
+
+						callback( false );
 					}
 				} );
 			}
