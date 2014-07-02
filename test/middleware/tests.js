@@ -16,6 +16,7 @@ var mocks = require( '../fixtures/_mocks' ),
 	http = require( 'http' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
+	_ = require( 'lodash' ),
 	tests = rewire( '../../lib/middleware/tests' ),
 	serverModule = require( '../../lib/server' ),
 	utilsModule = require( '../../lib/utils' );
@@ -96,7 +97,9 @@ describe( 'Middleware - Tests', function() {
 				bender.tests.list()
 					.done( function( list ) {
 						expect( JSON.parse( body ) ).to.deep.equal( {
-							test: list
+							test: list.map( function( test ) {
+								return _.pick( test, [ 'id', 'group', 'tags' ] );
+							} )
 						} );
 
 						instance.close();
