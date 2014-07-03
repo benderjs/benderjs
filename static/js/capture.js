@@ -155,7 +155,7 @@
 			this.results.success = true;
 			this.results.ignored = true;
 			this.results.duration = 0;
-			this.complete();
+			this.complete( '{"duration":0}' );
 		};
 
 		this.next = this.complete = function( result ) {
