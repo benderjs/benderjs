@@ -2,7 +2,7 @@
  * @file Tests for Jobs module
  */
 
-/*global describe, it, before, after, beforeEach, afterEach */
+/*global describe, it, before, after, beforeEach */
 /*jshint -W030 */
 /* removes annoying warning caused by some of Chai's assertions */
 
@@ -90,10 +90,6 @@ describe( 'Jobs', function() {
 		bender.init();
 	} );
 
-	afterEach( function() {
-		delete bender.jobs;
-	} );
-
 	it( 'should attach jobs to bender', function() {
 		bender.use( jobs );
 		expect( bender.jobs ).to.exist;
@@ -102,13 +98,15 @@ describe( 'Jobs', function() {
 	it( 'should notify user if bender wasn\'t initialized in current directory', function() {
 		var exit = sinon.stub( process, 'exit' );
 
-		exit.throws();
+		function Notification() {}
+
+		exit.throws( Notification );
 
 		jobs.__set__( 'jobsDir', path.resolve( 'unknown/path/to/jobs/' ) );
 
 		expect( function() {
 			bender.use( jobs );
-		} ).to.throw();
+		} ).to.throw( 'Notification' );
 
 		jobs.__set__( 'jobsDir', path.resolve( 'test/fixtures/jobs/store/' ) );
 		process.exit.restore();
@@ -138,9 +136,31 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should create new job', function() {
-		var promise = bender.jobs.create( job );
+		return bender.jobs.create( job )
+			.then( function( id ) {
+				expect( id ).to.be.a( 'string' );
 
-		return expect( promise ).to.eventually.be.a( 'string' );
+				return nodeCall( datastores[ 'jobs.db' ].find, {} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.an( 'array' );
+				expect( results ).to.have.length( 1 );
+				expect( results[ 0 ] ).to.include.keys(
+					[ '_id', 'description', 'browsers', 'filter', 'created' ]
+				);
+
+				return nodeCall( datastores[ 'tasks.db' ].find, {} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.an( 'array' );
+				expect( results ).to.have.length( 3 );
+
+				return nodeCall( datastores[ 'browser_tasks.db' ].find, {} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.an( 'array' );
+				expect( results ).to.have.length( 18 );
+			} );
 	} );
 
 	it( 'should list existing jobs', function() {
@@ -175,16 +195,21 @@ describe( 'Jobs', function() {
 		return promise.then( function( result ) {
 			expect( result ).to.be.an( 'object' );
 			expect( result ).to.include.keys( [ 'browsers', 'description', 'filter', 'tasks' ] );
+			expect( result.filter ).to.deep.equal( job.filter );
+			expect( result.description ).to.deep.equal( job.description );
+			expect( result.browsers.length ).to.equal( job.browsers.length );
 		} );
 	} );
 
-	it( 'should return a task of a given job', function() {
-		var promise = bender.jobs.create( job )
+	it( 'should return a task from a given job', function() {
+		return bender.jobs.create( job )
 			.then( function( id ) {
 				return bender.jobs.getTask( id, job.tests[ 0 ] );
+			} )
+			.then( function( result ) {
+				expect( result ).to.be.an( 'object' );
+				expect( result.id ).to.equal( job.tests[ 0 ] );
 			} );
-
-		return expect( promise ).to.eventually.be.an( 'object' );
 	} );
 
 	it( 'should return null for non-existent task of a job', function() {
@@ -197,20 +222,20 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should return an application of a given job', function() {
-		var job = {
-				browsers: [ 'chrome35', 'firefox', '123unknown' ],
-				description: 'test job 3',
-				filter: [ 'foo' ],
-				tests: [
-					'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3'
-				]
-			},
-			promise = bender.jobs.create( job )
+		return bender.jobs.create( job )
 			.then( function( id ) {
 				return bender.jobs.getApp( id, 'test' );
-			} );
+			} )
+			.then( function( result ) {
+				var app = bender.applications.get( 'test' );
 
-		return expect( promise ).to.eventually.be.an( 'object' );
+				expect( result ).to.be.an( 'object' );
+				expect( result.name ).to.equal( app.name );
+				expect( result.path ).to.equal( app.path );
+				expect( result.url ).to.equal( app.url );
+				expect( result.js ).to.deep.equal( app.js );
+				expect( result.css ).to.deep.equal( app.css );
+			} );
 	} );
 
 	it( 'should return null for non-existent application of a job', function() {
@@ -231,7 +256,7 @@ describe( 'Jobs', function() {
 		return expect( promise ).to.be.fulfilled;
 	} );
 
-	it( 'should return an error when returning non-existent job', function() {
+	it( 'should return an error when trying to remove non-existent job', function() {
 		var promise = bender.jobs.delete( 'unknown' );
 
 		return expect( promise ).to.be.rejectedWith( 'There\'s no such job.' );
@@ -272,7 +297,7 @@ describe( 'Jobs', function() {
 		return expect( promise ).to.be.fulfilled;
 	} );
 
-	it( 'should reject editing non-existent job', function() {
+	it( 'should return an error when trying to edit non-existent job', function() {
 		var promise = bender.jobs.edit( {
 			id: 'unknown',
 			description: 'new description',
@@ -288,7 +313,7 @@ describe( 'Jobs', function() {
 		return expect( promise ).to.be.rejectedWith( 'There\'s no such job' );
 	} );
 
-	it( 'should reject editing a job if no browsers specified', function() {
+	it( 'should return an error when trying to edit a job and browsers specified', function() {
 		var promise = bender.jobs.edit( {
 			id: 'unknown',
 			description: 'new description',
