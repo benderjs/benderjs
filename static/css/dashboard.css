@@ -84,6 +84,10 @@ th:last-child {
 	vertical-align: top;
 }
 
+.filter-form label {
+	max-width: none;
+}
+
 .clickable {
     cursor: pointer;
 }
