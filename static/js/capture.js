@@ -238,4 +238,16 @@
 		.on( 'disconnect', setStatus( states.DISCONNECT ) );
 
 	window.bender = new Bender( socket );
+
+	function disconnect() {
+		socket.disconnect();
+	}
+
+	if ( window.addEventListener ) {
+		window.addEventListener( 'load', disconnect, false );
+	} else if ( window.attachEvent ) {
+		window.attachEvent( 'onload', disconnect );
+	} else {
+		window.onload = disconnect;
+	}
 } )();
