@@ -78,18 +78,18 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 	/**
 	 * Table view used for displaying collections in bootstrap styled tables
-	 * @extends {Backbone.Marionette.CompositeView}
+	 * @extends {Marionette.CompositeView}
 	 */
-	Common.TableView = Backbone.Marionette.CompositeView.extend( {
+	Common.TableView = Marionette.CompositeView.extend( {
 		className: 'panel panel-default',
-		itemViewContainer: 'tbody'
+		childViewContainer: 'tbody'
 	} );
 
 	/**
 	 * View for displaying bootstrap styled modal dialogs
-	 * @extends {Backbone.Marionette.ItemView}
+	 * @extends {Marionette.ItemView}
 	 */
-	Common.ModalView = Backbone.Marionette.ItemView.extend( {
+	Common.ModalView = Marionette.ItemView.extend( {
 		className: 'modal-content',
 
 		onRender: function() {
@@ -106,9 +106,9 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 	/**
 	 * View for 404 error page
-	 * @extends {Backbone.Marionette.ItemView}
+	 * @extends {Marionette.ItemView}
 	 */
-	Common.Error404View = Backbone.Marionette.ItemView.extend( {
+	Common.Error404View = Marionette.ItemView.extend( {
 		template: '#error404'
 	} );
 
@@ -145,7 +145,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			this.ui.submit.prop( 'disabled', false );
 
 			if ( doClose ) {
-				this.close();
+				this.destroy();
 			}
 		},
 
@@ -237,7 +237,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	 * Display the 'Error 404' page
 	 */
 	App.show404 = function() {
-		App.header.close();
+		App.header.empty();
 		App.content.show( new Common.Error404View() );
 	};
 
@@ -261,7 +261,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 	App.hideDisconnectedPopup = function() {
 		if ( App.modal.currentView && App.modal.currentView.name === 'disconnected-modal' ) {
-			App.modal.close();
+			App.modal.empty();
 		}
 	};
 } );

@@ -10,7 +10,7 @@
 	/**
 	 * Marionette Application
 	 */
-	window.App = new Backbone.Marionette.Application();
+	window.App = new Marionette.Application();
 
 	/**
 	 * Navigate to a route
@@ -46,18 +46,18 @@
 	/**
 	 * Main layout region responsible for displaying dialog modals
 	 */
-	App.ModalRegion = Backbone.Marionette.Region.extend( {
+	App.ModalRegion = Marionette.Region.extend( {
 		el: '#modal',
 
 		constructor: function() {
-			Backbone.Marionette.Region.prototype.constructor.apply( this, arguments );
+			Marionette.Region.prototype.constructor.apply( this, arguments );
 
-			this.ensureEl();
-			this.$el.on( 'hidden.bs.modal', _.bind( this.close, this ) );
+			this._ensureElement();
+			this.$el.on( 'hidden.bs.modal', _.bind( this.empty, this ) );
 		},
 
 		onShow: function( view ) {
-			view.once( 'close', _.bind( this.onClose, this ) );
+			view.once( 'destroy', _.bind( this.onEmpty, this ) );
 
 			this.$el.modal( {
 				backdrop: 'static',
@@ -65,7 +65,7 @@
 			} );
 		},
 
-		onClose: function() {
+		onEmpty: function() {
 			this.$el.modal( 'hide' );
 		}
 	} );
@@ -89,7 +89,7 @@
 		} );
 	} );
 
-	App.on( 'initialize:after', function() {
+	App.on( 'start', function() {
 		Backbone.history.start();
 
 		if ( this.getCurrentRoute() === '' ) {

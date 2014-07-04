@@ -69,7 +69,7 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 	/**
 	 * Single tab view
 	 */
-	Tabs.TabView = Backbone.Marionette.ItemView.extend( {
+	Tabs.TabView = Marionette.ItemView.extend( {
 		template: '#tab',
 		tagName: 'li',
 
@@ -100,8 +100,8 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 	/**
 	 * Tabs list view
 	 */
-	Tabs.TabListView = Backbone.Marionette.CollectionView.extend( {
-		itemView: Tabs.TabView,
+	Tabs.TabListView = Marionette.CollectionView.extend( {
+		childView: Tabs.TabView,
 		tagName: 'ul',
 		className: 'nav nav-tabs nav-justified'
 	} );

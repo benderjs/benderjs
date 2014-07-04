@@ -34,7 +34,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	/**
 	 * Job table row view
 	 */
-	Jobs.JobRowView = Backbone.Marionette.ItemView.extend( {
+	Jobs.JobRowView = Marionette.ItemView.extend( {
 		template: '#job-row',
 		tagName: 'tr',
 		templateHelpers: App.Common.templateHelpers
@@ -73,7 +73,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	/**
 	 * Empty jobs list view
 	 */
-	Jobs.NoJobsView = Backbone.Marionette.ItemView.extend( {
+	Jobs.NoJobsView = Marionette.ItemView.extend( {
 		template: '#no-jobs',
 		tagName: 'tr'
 	} );
@@ -83,7 +83,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	 */
 	Jobs.JobsListView = App.Common.TableView.extend( {
 		template: '#jobs',
-		itemView: Jobs.JobRowView,
+		childView: Jobs.JobRowView,
 		emptyView: Jobs.NoJobsView,
 
 		initialize: function() {
@@ -95,24 +95,24 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.collection.fetch();
 		},
 
-		appendHtml: function( collectionView, itemView, index ) {
+		appendHtml: function( collectionView, childView, index ) {
 			var childrenContainer,
 				children;
 
 			if ( collectionView.isBuffering ) {
-				collectionView._bufferedChildren.push( itemView );
+				collectionView._bufferedChildren.push( childView );
 			}
 
 			childrenContainer = collectionView.isBuffering ?
 				$( collectionView.elBuffer ) :
-				this.getItemViewContainer( collectionView );
+				this.getChildViewContainer( collectionView );
 
 			children = childrenContainer.children();
 
 			if ( children.size() <= index ) {
-				childrenContainer.append( itemView.el );
+				childrenContainer.append( childView.el );
 			} else {
-				children.eq( index ).before( itemView.el );
+				children.eq( index ).before( childView.el );
 			}
 		}
 	} );
@@ -144,7 +144,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	/**
 	 * Task row view
 	 */
-	Jobs.TaskView = Backbone.Marionette.ItemView.extend( {
+	Jobs.TaskView = Marionette.ItemView.extend( {
 		template: '#task',
 		tagName: 'tr',
 		templateHelpers: App.Common.templateHelpers,
@@ -178,7 +178,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		template: '#job',
 		className: '',
 		templateHelpers: App.Common.templateHelpers,
-		itemView: Jobs.TaskView,
+		childView: Jobs.TaskView,
 
 		events: {
 			'click .back-button': 'goBack',
@@ -384,7 +384,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				'Success!'
 			);
 			this.ui.save.prop( 'disabled', false );
-			this.close();
+			this.destroy();
 			this.model.fetch( {
 				force: true
 			} );
@@ -417,7 +417,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	 * Controller for Jobs module
 	 * @type {Object}
 	 */
-	Jobs.Controller = Backbone.Marionette.Controller.extend( {
+	Jobs.Controller = Marionette.Controller.extend( {
 		initialize: function() {
 			App.Sockets.socket.on( 'job:update', _.bind( function( jobId ) {
 				this.trigger( 'job:update', jobId );
@@ -425,14 +425,14 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		listJobs: function() {
-			App.header.close();
+			App.header.empty();
 			App.content.show( new Jobs.JobsListView( {
 				collection: Jobs.jobsList
 			} ) );
 		},
 
 		showJob: function( id ) {
-			App.header.close();
+			App.header.empty();
 			App.content.show( new Jobs.JobView( {
 				model: new Jobs.Job( {
 					id: id

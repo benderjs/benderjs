@@ -18,12 +18,12 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 		}
 	} );
 
-	Alerts.View = Backbone.Marionette.ItemView.extend( {
+	Alerts.View = Marionette.ItemView.extend( {
 		template: '#alert',
 		className: 'alert',
 
 		events: {
-			'click': 'close'
+			'click': 'destroy'
 		},
 
 		onRender: function() {
@@ -45,8 +45,8 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 
 	} ) )();
 
-	Alerts.ListView = Backbone.Marionette.CollectionView.extend( {
-		itemView: Alerts.View,
+	Alerts.ListView = Marionette.CollectionView.extend( {
+		childView: Alerts.View,
 		className: 'alert-wrapper'
 	} );
 

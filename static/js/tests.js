@@ -90,7 +90,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	/**
 	 * Tests header view
 	 */
-	Tests.TestHeaderView = Backbone.Marionette.ItemView.extend( {
+	Tests.TestHeaderView = Marionette.ItemView.extend( {
 		template: '#test-header',
 		className: 'row',
 
@@ -216,7 +216,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	/**
 	 * Test view
 	 */
-	Tests.TestView = Backbone.Marionette.ItemView.extend( {
+	Tests.TestView = Marionette.ItemView.extend( {
 		template: '#test',
 		tagName: 'tr',
 		className: 'test',
@@ -383,7 +383,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		}
 	} ) )();
 
-	Tests.NoTestsView = Backbone.Marionette.ItemView.extend( {
+	Tests.NoTestsView = Marionette.ItemView.extend( {
 		template: '#no-tests',
 		tagName: 'tr'
 	} );
@@ -393,7 +393,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	 */
 	Tests.TestsListView = App.Common.TableView.extend( {
 		template: '#tests',
-		itemView: Tests.TestView,
+		childView: Tests.TestView,
 		emptyView: Tests.NoTestsView,
 
 		onRender: function() {
@@ -512,7 +512,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				'Success!'
 			);
 			this.ui.create.prop( 'disabled', false );
-			this.close();
+			this.destroy();
 		},
 
 		updateBrowsers: function() {

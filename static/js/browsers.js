@@ -37,7 +37,7 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	/**
 	 * Browser view
 	 */
-	Browsers.BrowserView = Backbone.Marionette.ItemView.extend( {
+	Browsers.BrowserView = Marionette.ItemView.extend( {
 		template: '#browser',
 		tagName: 'tr',
 
@@ -58,7 +58,7 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	 */
 	Browsers.BrowsersListView = App.Common.TableView.extend( {
 		template: '#browsers',
-		itemView: Browsers.BrowserView
+		childView: Browsers.BrowserView
 	} );
 
 	/**
@@ -67,7 +67,7 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	 */
 	Browsers.controller = {
 		show: function() {
-			App.header.close();
+			App.header.empty();
 
 			App.content.show( new Browsers.BrowsersListView( {
 				collection: Browsers.browsersList
