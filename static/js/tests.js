@@ -233,7 +233,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
+			// TODO enable when model is defined
+			// this.listenTo( this.model, 'change', this.render );
 		},
 
 		onRender: function() {
@@ -391,8 +392,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	/**
 	 * Test list view
 	 */
-	Tests.TestsListView = App.Common.TableView.extend( {
+	Tests.TestsListView = App.Common.LongTableView.extend( {
 		template: '#tests',
+		childTemplate: '#test',
 		childView: Tests.TestView,
 		emptyView: Tests.NoTestsView,
 
@@ -559,13 +561,21 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				model: Tests.testStatus
 			} ) );
 
-			App.content.show( new Tests.TestsListView( {
+			window.wtf = new Tests.TestsListView( {
 				collection: Tests.testsList
-			} ) );
+			} );
 
-			Tests.testsList.fetch().done( function() {
-				Tests.testStatus.parseFilter();
-				Tests.testsList.filterTests( Tests.testStatus.get( 'filter' ) );
+			App.content.show( wtf );
+
+			// App.content.show( new Tests.TestsListView( {
+			// 	collection: Tests.testsList
+			// } ) );
+
+			Tests.testsList.fetch( {
+				reset: true
+			} ).done( function() {
+				// Tests.testStatus.parseFilter();
+				// Tests.testsList.filterTests( Tests.testStatus.get( 'filter' ) );
 			} );
 		},
 
