@@ -56,16 +56,19 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 			App.hideDisconnectedPopup();
 		} );
 
-		socket.on( 'disconnect', function() {
+		function handleDisconnect() {
 			Sockets.status.setStatus( 'disconnected' );
 			App.showDisconnectedPopup();
-		} );
+		}
+
+		socket.on( 'disconnect', handleDisconnect );
 
 		App.socketStatus.show( new Sockets.StatusView( {
 			model: Sockets.status
 		} ) );
 
 		$( window ).on( 'beforeunload', function() {
+			socket.off( 'disconnect', handleDisconnect );
 			socket.disconnect();
 		} );
 	} );
