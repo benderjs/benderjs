@@ -88,11 +88,14 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		initialize: function() {
 			this.listenTo( this.collection, 'change', this.render );
+			// TODO should we disable this on IE8?
 			this.listenTo( Jobs.controller, 'job:update', _.bind( function() {
 				this.collection.fetch();
 			}, this ) );
 
-			this.collection.fetch();
+			this.collection.fetch( {
+				reset: true
+			} );
 		},
 
 		appendHtml: function( collectionView, childView, index ) {
@@ -192,13 +195,16 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 			this.listenTo( this.model, 'change', this.update );
 			this.listenTo( this.model, 'error', App.show404 );
+			// TODO should we disable this on IE8?
 			this.listenTo( Jobs.controller, 'job:update', function( jobId ) {
 				if ( jobId === this.model.id ) {
 					this.model.fetch();
 				}
 			} );
 
-			this.model.fetch();
+			this.model.fetch( {
+				reset: true
+			} );
 		},
 
 		update: function() {

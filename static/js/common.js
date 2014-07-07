@@ -8,6 +8,14 @@
 App.module( 'Common', function( Common, App, Backbone ) {
 	'use strict';
 
+	function throwError( message, name ) {
+		var error = new Error( message );
+
+		error.name = name || 'Error';
+
+		throw error;
+	}
+
 	/**
 	 * Helpers used in underscore templates
 	 * @type {Object}
@@ -77,31 +85,21 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	};
 
 	/**
-	 * Table view used for displaying collections in bootstrap styled tables
+	 * Optimized version of CompositeView that parses HTML for children just once when showing the entire collection
 	 * @extends {Marionette.CompositeView}
 	 */
 	Common.TableView = Marionette.CompositeView.extend( {
 		className: 'panel panel-default',
-		childViewContainer: 'tbody'
-	} );
-
-	/**
-	 * Optimized version of CompositeView that parses HTML for children just once when showing the entire collection
-	 * @extends {Marionette.CompositeView}
-	 */
-	Common.LongTableView = Marionette.CompositeView.extend( {
-		className: 'panel panel-default',
 		childViewContainer: 'tbody',
-		childTemplate: null,
 
 		getChildTemplate: function() {
-			var childTemplate = this.getOption( 'childTemplate' );
+			var childView = this.getOption( 'childView' );
 
-			if ( !childTemplate ) {
-				throwError( 'A "childTemplate" must be specified', 'NoChildViewError' );
+			if ( !childView ) {
+				throwError( 'A "childView" must be specified', 'NoChildViewError' );
 			}
 
-			return childTemplate;
+			return childView.prototype.template;
 		},
 
 		_onCollectionAdd: function( child, collection, options ) {
@@ -113,16 +111,42 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			this.addChild( child, childTemplate, index );
 		},
 
+		createEl: function( View, innerHTML ) {
+			var vp = View.prototype,
+				tagName = vp.tagName,
+				className = vp.className,
+				attributes = vp.attributes,
+				html = [ '<', tagName ];
+
+			if ( className ) {
+				html.push( ' class="' + className + '"' );
+			}
+
+			if ( attributes ) {
+				_.each( attributes, function( val, key ) {
+					html.push( ' ' + key + '="' + val + '"' );
+				} );
+			}
+
+			html.push( '>', innerHTML, '</', tagName, '>' );
+
+			return html.join( '' );
+		},
+
 		showCollection: function() {
 			var childTemplate = this.getChildTemplate(),
 				div = document.createElement( 'div' ),
 				html = [ '<table><tbody>' ];
 
 			this.collection.each( function( child, index ) {
-				html.push( '<tr>' + Marionette.Renderer.render(
-					childTemplate,
-					_.extend( child.toJSON(), this.childView.prototype.templateHelpers || {} )
-				) + '</tr>' );
+				html.push(
+					this.createEl(
+						this.childView,
+						Marionette.Renderer.render( childTemplate,
+							_.extend( child.toJSON(), this.childView.prototype.templateHelpers || {} )
+						)
+					)
+				);
 			}, this );
 
 			html.push( '</tbody></table>' );
@@ -130,7 +154,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			div.innerHTML = html.join( '' );
 
 			var elem = div.getElementsByTagName( 'tbody' )[ 0 ],
-				nodes = elem.childNodes,
+				nodes = _.toArray( elem.childNodes ),
 				len = nodes.length,
 				m = 0,
 				view,
@@ -161,7 +185,10 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 			var el = document.createElement( 'tr' );
 
-			el.innerHTML = Marionette.Renderer.render( childTemplate, child.toJSON() );
+			el.innerHTML = Marionette.Renderer.render(
+				childTemplate,
+				_.extend( child.toJSON(), this.childView.prototype.templateHelpers || {} )
+			);
 
 			var view = new Marionette.ItemView( {
 				el: el

@@ -79,7 +79,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			var model = this.toJSON(),
 				existing;
 
-			existing = _.filter( model.filter, function( val, index ) {
+			existing = _.filter( model.filter, function( val ) {
 				return _.indexOf( model.tags, val ) > -1;
 			} );
 
@@ -391,7 +391,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	/**
 	 * Test list view
 	 */
-	Tests.TestsListView = App.Common.LongTableView.extend( {
+	Tests.TestsListView = App.Common.TableView.extend( {
 		template: '#tests',
 		childTemplate: '#test',
 		childView: Tests.TestView,
@@ -541,8 +541,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		createJob: function() {
-			var that = this;
-
 			this.ui.create.prop( 'disabled', true );
 			this.model.save();
 		}
