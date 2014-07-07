@@ -370,7 +370,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		clearCurrentResult: function() {
-			var current = Tests.testsList.get( bender.current );
+			var current = this.get( bender.current );
 			if ( current ) {
 				current.set( 'result', '' );
 			}
@@ -391,8 +391,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	/**
 	 * Test list view
 	 */
-	Tests.TestsListView = App.Common.TableView.extend( {
+	Tests.TestsListView = App.Common.LongTableView.extend( {
 		template: '#tests',
+		childTemplate: '#test',
 		childView: Tests.TestView,
 		emptyView: Tests.NoTestsView,
 
@@ -563,7 +564,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				collection: Tests.testsList
 			} ) );
 
-			Tests.testsList.fetch().done( function() {
+			Tests.testsList.fetch( {
+				reset: true
+			} ).done( function() {
 				Tests.testStatus.parseFilter();
 				Tests.testsList.filterTests( Tests.testStatus.get( 'filter' ) );
 			} );

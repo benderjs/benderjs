@@ -86,6 +86,105 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	} );
 
 	/**
+	 * Optimized version of CompositeView that parses HTML for children just once when showing the entire collection
+	 * @extends {Marionette.CompositeView}
+	 */
+	Common.LongTableView = Marionette.CompositeView.extend( {
+		className: 'panel panel-default',
+		childViewContainer: 'tbody',
+		childTemplate: null,
+
+		getChildTemplate: function() {
+			var childTemplate = this.getOption( 'childTemplate' );
+
+			if ( !childTemplate ) {
+				throwError( 'A "childTemplate" must be specified', 'NoChildViewError' );
+			}
+
+			return childTemplate;
+		},
+
+		_onCollectionAdd: function( child, collection, options ) {
+			this.destroyEmptyView();
+
+			var childTemplate = this.getChildTemplate();
+			var index = this.collection.indexOf( child );
+
+			this.addChild( child, childTemplate, index );
+		},
+
+		showCollection: function() {
+			var childTemplate = this.getChildTemplate(),
+				div = document.createElement( 'div' ),
+				html = [ '<table><tbody>' ];
+
+			this.collection.each( function( child, index ) {
+				html.push( '<tr>' + Marionette.Renderer.render(
+					childTemplate,
+					_.extend( child.toJSON(), this.childView.prototype.templateHelpers || {} )
+				) + '</tr>' );
+			}, this );
+
+			html.push( '</tbody></table>' );
+
+			div.innerHTML = html.join( '' );
+
+			var elem = div.getElementsByTagName( 'tbody' )[ 0 ],
+				nodes = elem.childNodes,
+				len = nodes.length,
+				m = 0,
+				view,
+				node,
+				i;
+
+			for ( i = 0; i < len; i++ ) {
+				if ( ( node = nodes[ i ] ) && node.nodeType === 1 ) {
+					view = new this.childView( {
+						el: node,
+						model: this.collection.at( m )
+					} );
+
+					this._updateIndices( view, true, i );
+					this._addChildView( view, i );
+					m++;
+				}
+			}
+
+		},
+
+		addChild: function( child, childTemplate, index ) {
+			var childViewOptions = this.getOption( 'childViewOptions' );
+
+			if ( _.isFunction( childViewOptions ) ) {
+				childViewOptions = childViewOptions.call( this, child, index );
+			}
+
+			var el = document.createElement( 'tr' );
+
+			el.innerHTML = Marionette.Renderer.render( childTemplate, child.toJSON() );
+
+			var view = new Marionette.ItemView( {
+				el: el
+			} );
+
+			// increment indices of views after this one
+			this._updateIndices( view, true, index );
+
+			this._addChildView( view, index );
+
+			return view;
+		},
+
+		renderChildView: function( view, index ) {
+			if ( !view.el ) {
+				view.render();
+			}
+			this.attachHtml( this, view, index );
+		},
+	} );
+
+
+	/**
 	 * View for displaying bootstrap styled modal dialogs
 	 * @extends {Marionette.ItemView}
 	 */
