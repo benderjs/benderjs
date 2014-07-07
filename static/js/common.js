@@ -85,6 +85,10 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		childViewContainer: 'tbody'
 	} );
 
+	/**
+	 * Optimized version of CompositeView that parses HTML for children just once when showing the entire collection
+	 * @extends {Marionette.CompositeView}
+	 */
 	Common.LongTableView = Marionette.CompositeView.extend( {
 		className: 'panel panel-default',
 		childViewContainer: 'tbody',
@@ -128,6 +132,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			var elem = div.getElementsByTagName( 'tbody' )[ 0 ],
 				nodes = elem.childNodes,
 				len = nodes.length,
+				m = 0,
 				view,
 				node,
 				i;
@@ -135,11 +140,13 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			for ( i = 0; i < len; i++ ) {
 				if ( ( node = nodes[ i ] ) && node.nodeType === 1 ) {
 					view = new this.childView( {
-						el: node
+						el: node,
+						model: this.collection.at( m )
 					} );
 
 					this._updateIndices( view, true, i );
 					this._addChildView( view, i );
+					m++;
 				}
 			}
 

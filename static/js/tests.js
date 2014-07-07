@@ -233,8 +233,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		initialize: function() {
-			// TODO enable when model is defined
-			// this.listenTo( this.model, 'change', this.render );
+			this.listenTo( this.model, 'change', this.render );
 		},
 
 		onRender: function() {
@@ -371,7 +370,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		clearCurrentResult: function() {
-			var current = Tests.testsList.get( bender.current );
+			var current = this.get( bender.current );
 			if ( current ) {
 				current.set( 'result', '' );
 			}
@@ -561,21 +560,15 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				model: Tests.testStatus
 			} ) );
 
-			window.wtf = new Tests.TestsListView( {
+			App.content.show( new Tests.TestsListView( {
 				collection: Tests.testsList
-			} );
-
-			App.content.show( wtf );
-
-			// App.content.show( new Tests.TestsListView( {
-			// 	collection: Tests.testsList
-			// } ) );
+			} ) );
 
 			Tests.testsList.fetch( {
 				reset: true
 			} ).done( function() {
-				// Tests.testStatus.parseFilter();
-				// Tests.testsList.filterTests( Tests.testStatus.get( 'filter' ) );
+				Tests.testStatus.parseFilter();
+				Tests.testsList.filterTests( Tests.testStatus.get( 'filter' ) );
 			} );
 		},
 
