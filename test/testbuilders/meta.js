@@ -83,7 +83,8 @@ describe( 'Test Builders - Meta', function() {
 			js: 'test/fixtures/tests/test/1.js',
 			html: 'test/fixtures/tests/test/1.html',
 			tags: [ 'fixtures', 'tests', 'test', 'foo', 'bar', 'baz' ],
-			ui: 'collapsed'
+			ui: 'collapsed',
+			include: 'http://foo.com/bar/baz.js'
 		};
 
 		return meta.build( sampleData ).then( function( result ) {
