@@ -76,7 +76,7 @@ describe( 'Template', function() {
 
 	it( 'should build HTML for a test', function() {
 		var expected = '<!DOCTYPE html><html><head></head><body>' +
-			'<img src="/test/fixtures/tests/_assets/img.jpg" /></body></html>',
+			'<img src="/test/fixtures/tests/_assets/img.jpg"></body></html>',
 			promise = bender.template.build( bender.tests.tests[ 0 ] );
 
 		return expect( promise ).to.eventually.equal( expected );
@@ -88,7 +88,7 @@ describe( 'Template', function() {
 				jobId: jobId
 			}, bender.tests.tests[ 0 ] ),
 			expected = '<!DOCTYPE html><html><head></head><body><img src="/jobs/' + jobId +
-			'/tests/test/fixtures/tests/_assets/img.jpg" /></body></html>',
+			'/tests/test/fixtures/tests/_assets/img.jpg"></body></html>',
 			promise = bender.template.build( task );
 
 		return expect( promise ).to.eventually.equal( expected );
