@@ -105,8 +105,8 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		_onCollectionAdd: function( child, collection, options ) {
 			this.destroyEmptyView();
 
-			var childTemplate = this.getChildTemplate();
-			var index = this.collection.indexOf( child );
+			var childTemplate = this.getChildTemplate(),
+				index = this.collection.indexOf( child );
 
 			this.addChild( child, childTemplate, index );
 		},
