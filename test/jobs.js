@@ -56,7 +56,7 @@ describe( 'Jobs', function() {
 
 	before( function() {
 		jobs.__set__( 'cwd', path.resolve( 'test/fixtures/jobs/' ) );
-		jobs.__set__( 'log', mocks.logger );
+		jobs.__set__( 'logger', mocks.logger );
 		jobs.__set__( 'jobsDir', path.resolve( 'test/fixtures/jobs/store/' ) );
 
 		OldDatastore = jobs.__get__( 'Datastore' );

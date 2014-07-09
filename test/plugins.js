@@ -21,17 +21,17 @@ describe( 'Plugins', function() {
 	before( function() {
 		var cwd = path.resolve( 'test/fixtures/plugins/' );
 
-		oldLog = plugins.__get__( 'log' );
+		oldLog = plugins.__get__( 'logger' );
 		oldCwd = plugins.__get__( 'process.cwd' );
 
-		plugins.__set__( 'log', mocks.logger );
+		plugins.__set__( 'logger', mocks.logger );
 		plugins.__set__( 'process.cwd', function() {
 			return cwd;
 		} );
 	} );
 
 	after( function() {
-		plugins.__set__( 'log', oldLog );
+		plugins.__set__( 'logger', oldLog );
 		plugins.__set__( 'process.cwd', oldCwd );
 	} );
 

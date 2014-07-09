@@ -30,8 +30,8 @@ describe( 'Middleware - Plugins', function() {
 		var cwd = path.resolve( 'test/fixtures/plugins/' );
 
 		oldCwd = process.cwd;
-		oldLog = pluginsModule.__get__( 'log' );
-		oldLog = pluginsModule.__set__( 'log', mocks.logger );
+		oldLog = pluginsModule.__get__( 'logger' );
+		oldLog = pluginsModule.__set__( 'logger', mocks.logger );
 
 		process.cwd = function() {
 			return cwd;
@@ -40,7 +40,7 @@ describe( 'Middleware - Plugins', function() {
 
 	after( function() {
 		process.cwd = oldCwd;
-		oldLog = pluginsModule.__set__( 'log', oldLog );
+		oldLog = pluginsModule.__set__( 'logger', oldLog );
 	} );
 
 	beforeEach( function() {

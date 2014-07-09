@@ -24,7 +24,7 @@ describe( 'Config', function() {
 		config.__set__( 'process.cwd', function() {
 			return testDir;
 		} );
-		config.__set__( 'log', mocks.logger );
+		config.__set__( 'logger', mocks.logger );
 	} );
 
 	after( function() {
