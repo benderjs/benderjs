@@ -68,13 +68,14 @@
 
 		// handle bender-ui directive
 		// hide all results till the end of the tests
-		if ( bender.testData.ui === 'none' ) {
-			resultsEl.style.display = 'none';
-			// collapse the results
-		} else if ( bender.testData.ui === 'collapsed' ) {
-			resultsEl.className = 'results collapsed';
-			collapseEl.className = 'btn expand';
-			collapseEl.title = 'Expand the results';
+		if ( bender.testData.ui !== 'none' ) {
+			if ( bender.testData.ui === 'collapsed' ) {
+				resultsEl.className = 'results collapsed';
+				collapseEl.className = 'btn expand';
+				collapseEl.title = 'Expand the results';
+			}
+
+			document.body.appendChild( resultsEl );
 		}
 
 		// handle all clicks in results box
@@ -114,8 +115,6 @@
 		} else {
 			resultsEl.onclick = handleClick;
 		}
-
-		document.body.appendChild( resultsEl );
 	}
 
 	/**
@@ -132,7 +131,7 @@
 	function expandUI() {
 		// nothing is shown
 		if ( bender.testData.ui === 'none' ) {
-			resultsEl.style.display = '';
+			document.body.appendChild( resultsEl );
 			// results are collapsed
 		} else if ( bender.testData.ui === 'collapsed' && isCollapsed() ) {
 			resultsEl.className = 'results';
@@ -230,6 +229,7 @@
 				resultsEl.appendChild( resEl );
 
 				bender.stopRunner();
+				expandUI();
 
 				throw ( error.error );
 			} else {
