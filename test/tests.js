@@ -131,4 +131,25 @@ describe( 'Tests', function() {
 				expect( data ).to.equal( bender.tests.testsCache.Test );
 			} );
 	} );
+
+	it( 'should use tests\'s data taken from cache if no changes in files were made', function() {
+		var group = _.merge( {
+				assertion: bender.conf.assertion,
+				name: 'Test'
+			}, bender.conf.tests.Test ),
+			id = 'test/fixtures/tests/test/1';
+
+		return bender.tests.buildGroup( group, 'Test' )
+			.then( function() {
+				return bender.tests.get( id );
+			} )
+			.then( function( data ) {
+				var expected = _.find( bender.tests.testsCache.Test, {
+					id: id
+				} );
+
+				// returned value should be a reference to cached test
+				expect( data ).to.equal( expected );
+			} );
+	} );
 } );
