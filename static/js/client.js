@@ -306,6 +306,26 @@
 
 	bender.config = BENDER_CONFIG;
 
+	bender.addListener = function( target, event, handler ) {
+		if ( target.addEventListener ) {
+			target.addEventListener( event, handler, false );
+		} else if ( target.attachEvent ) {
+			target.attachEvent( 'on' + event, handler );
+		} else {
+			target[ 'on' + event ] = handler;
+		}
+	};
+
+	bender.removeListener = function( target, event, handler ) {
+		if ( target.removeEventListener ) {
+			target.removeEventListener( event, handler, false );
+		} else if ( target.detachEvent ) {
+			target.detachEvent( 'on' + event, handler );
+		} else {
+			target[ 'on' + event ] = null;
+		}
+	};
+
 	window.alert = function( msg ) {
 		throw {
 			message: 'window.alert: ' + msg
@@ -314,11 +334,5 @@
 
 	window.bender = bender;
 
-	if ( window.addEventListener ) {
-		window.addEventListener( 'load', init, false );
-	} else if ( window.attachEvent ) {
-		window.attachEvent( 'onload', init );
-	} else {
-		window.onload = init;
-	}
+	bender.addListener( window, 'load', init );
 } )();
