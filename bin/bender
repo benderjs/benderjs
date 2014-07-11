@@ -27,6 +27,7 @@ var argParser = require( 'nomnom' ),
 	conf = require( dir + 'config' ),
 	constants = require( dir + 'constants' ),
 	jobs = require( dir + 'jobs' ),
+	logger = require( dir + 'logger' ),
 	middleware = require( dir + 'middleware' ),
 	pagebuilders = require( dir + 'pagebuilders' ),
 	plugins = require( dir + 'plugins' ),
@@ -38,7 +39,7 @@ var argParser = require( 'nomnom' ),
 	tests = require( dir + 'tests' ),
 	utils = require( dir + 'utils' ),
 
-	log = require( dir + 'logger' ).create( 'cli' );
+	log = logger.create( 'cli' );
 
 argParser.script( 'bender' );
 
@@ -192,7 +193,7 @@ function startServer( options ) {
 			delimeter: ':'
 		} ),
 		modules = [
-			utils, constants, applications, testbuilders, pagebuilders, middleware,
+			utils, constants, logger, applications, testbuilders, pagebuilders, middleware,
 			browsers, tests, jobs, template, sockets, server, reporters, plugins
 		];
 
