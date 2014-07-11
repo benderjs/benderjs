@@ -198,7 +198,7 @@ function startServer( options ) {
 		];
 
 	bender.use( conf, {
-		path: path.resolve( process.cwd(), options.config )
+		path: path.resolve( options.config )
 	} );
 
 	modules.forEach( function( module ) {
