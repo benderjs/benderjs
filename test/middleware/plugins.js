@@ -48,7 +48,7 @@ describe( 'Middleware - Plugins', function() {
 
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets' );
-		bender.conf.plugins = [ 'assertion-test' ];
+		bender.conf.plugins = [ 'framework-test' ];
 		bender.use( [ serverModule, pluginsModule ] );
 		bender.init();
 		bender.middleware = [ plugins.create ];
@@ -77,7 +77,7 @@ describe( 'Middleware - Plugins', function() {
 	} );
 
 	it( 'should respond with valid plugin\'s file', function( done ) {
-		var file = path.resolve( 'assertion-test/adapter.js' ),
+		var file = path.resolve( 'framework-test/adapter.js' ),
 			url = 'http://localhost:1031/plugins/' + file.split( path.sep ).join( '/' );
 
 		instance.listen( 1031, function() {

@@ -117,7 +117,7 @@ describe( 'Config', function() {
 
 		expect( bender.conf.plugins ).to.exist;
 		expect( bender.conf.plugins ).to.have.length( 2 );
-		expect( bender.conf.assertion ).to.equal( 'qunit' );
+		expect( bender.conf.framework ).to.equal( 'qunit' );
 		expect( bender.conf.testTimeout ).to.equal( 60000 );
 	} );
 } );

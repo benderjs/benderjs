@@ -1,7 +1,7 @@
 /**
  * Bender configuration file
  *
- * @param {String}	assertion	Default assertion library used for the tests
+ * @param {String}	framework	Default framework used for the tests
  * @param {Object}	applications	Applications used in current project
  * @param {Array}	plugins		List of Bender plugins to load at startup
  * @param {Array}	browsers	List of default browsers used for testing

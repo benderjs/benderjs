@@ -51,8 +51,8 @@ moduleMocks = {
 		};
 	},
 
-	assertions: function( bender ) {
-		bender.assertions = {
+	frameworks: function( bender ) {
+		bender.frameworks = {
 			test: {
 
 			}
@@ -81,7 +81,7 @@ moduleMocks = {
 				}
 			},
 
-			assertion: 'test',
+			framework: 'test',
 
 			basePaths: [ 'test/fixtures/tests/' ],
 
@@ -300,11 +300,11 @@ moduleMocks = {
 
 	plugins: function( bender ) {
 		bender.plugins = {};
-		bender.assertions = {
+		bender.frameworks = {
 			test: {
 				css: [],
 				files: [],
-				js: [ 'assertion-test/adapter.js' ],
+				js: [ 'framework-test/adapter.js' ],
 				name: 'test'
 			}
 		};
@@ -358,7 +358,7 @@ moduleMocks = {
 			js: 'test/fixtures/tests/test/1.js',
 			html: 'test/fixtures/tests/test/1.html',
 			tags: [ 'foo', 'bar', 'baz' ],
-			assertion: 'yui',
+			framework: 'yui',
 			applications: [ 'test', 'test2' ],
 			group: 'Test'
 		}, {
@@ -366,21 +366,21 @@ moduleMocks = {
 			js: 'test/fixtures/tests/test/1.js',
 			html: 'test/fixtures/tests/test/1.html',
 			tags: [ 'foo', 'bar', 'baz' ],
-			assertion: 'yui',
+			framework: 'yui',
 			applications: [ 'test', 'test2' ],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/2',
 			js: 'test/fixtures/tests/test/2.js',
 			tags: [ 'foo', 'bar', 'baz' ],
-			assertion: 'yui',
+			framework: 'yui',
 			applications: [ 'test' ],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/3',
 			js: 'test/fixtures/tests/test/3.js',
 			tags: [ 'foo', 'bar', 'baz' ],
-			assertion: 'yui',
+			framework: 'yui',
 			applications: [ 'test' ],
 			group: 'Test'
 		} ];

@@ -40,7 +40,7 @@ describe( 'Page Builders - Test Data', function() {
 	it( 'should add a script to data parts containing test information', function() {
 		var data = {
 				_id: 'foo',
-				assertion: 'bar',
+				framework: 'bar',
 				applications: {},
 				group: 'Test',
 				parts: []
@@ -56,7 +56,7 @@ describe( 'Page Builders - Test Data', function() {
 	it( 'should strip unwanted test information', function() {
 		var data = {
 				_id: 'foo',
-				assertion: 'bar',
+				framework: 'bar',
 				applications: {},
 				group: 'Test',
 				parts: []
@@ -66,6 +66,6 @@ describe( 'Page Builders - Test Data', function() {
 			testData = JSON.parse( result.parts[ 0 ].match( pattern )[ 1 ] );
 
 		expect( testData ).to.include.key( 'group' );
-		expect( testData ).to.not.include.keys( [ '_id', 'assertion', 'applications', 'parts' ] );
+		expect( testData ).to.not.include.keys( [ '_id', 'framework', 'applications', 'parts' ] );
 	} );
 } );

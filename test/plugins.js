@@ -47,7 +47,7 @@ describe( 'Plugins', function() {
 
 		bender.use( plugins );
 
-		expect( bender ).to.include.keys( [ 'assertions', 'pagebuilders', 'testbuilders', 'reporters' ] );
+		expect( bender ).to.include.keys( [ 'frameworks', 'pagebuilders', 'testbuilders', 'reporters' ] );
 	} );
 
 	it( 'should not throw if no plugins defined', function() {
@@ -93,16 +93,16 @@ describe( 'Plugins', function() {
 		process.exit.restore();
 	} );
 
-	it( 'should load assertion plugin', function() {
+	it( 'should load framework plugin', function() {
 		var bender = mocks.getBender();
 
 		bender.conf = {
-			plugins: [ 'assertion-test' ]
+			plugins: [ 'framework-test' ]
 		};
 
 		bender.use( plugins );
 
-		expect( bender.assertions ).to.include.key( 'test' );
+		expect( bender.frameworks ).to.include.key( 'test' );
 	} );
 
 	it( 'should load pagebuilder plugin', function() {
@@ -160,11 +160,11 @@ describe( 'Plugins', function() {
 
 	it( 'should check if a file was defined in plugins', function() {
 		var bender = mocks.getBender(),
-			validFile = path.resolve( 'assertion-test/adapter.js' ),
-			invalidFile = path.resolve( 'assertion-test/invalid-file.js' );
+			validFile = path.resolve( 'framework-test/adapter.js' ),
+			invalidFile = path.resolve( 'framework-test/invalid-file.js' );
 
 		bender.conf = {
-			plugins: [ 'assertion-test' ]
+			plugins: [ 'framework-test' ]
 		};
 
 		bender.use( plugins );
@@ -175,7 +175,7 @@ describe( 'Plugins', function() {
 
 	it( 'should load plugin from the given location', function() {
 		var bender = mocks.getBender(),
-			dir = path.resolve( 'assertion-test' );
+			dir = path.resolve( 'framework-test' );
 
 		bender.conf = {
 			plugins: [ dir ]
@@ -183,6 +183,6 @@ describe( 'Plugins', function() {
 
 		bender.use( plugins );
 
-		expect( bender.assertions ).to.include.key( 'test' );
+		expect( bender.frameworks ).to.include.key( 'test' );
 	} );
 } );

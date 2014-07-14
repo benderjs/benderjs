@@ -7,7 +7,7 @@
 
 /*global describe, it, beforeEach */
 /*jshint -W030 */
-/* removes annoying warning caused by some of Chai's assertions */
+/* removes annoying warning caused by some of Chai's 4s */
 
 'use strict';
 
@@ -36,37 +36,37 @@ describe( 'Tests', function() {
 		var expected = [ {
 			id: 'test/fixtures/tests/test/1',
 			js: path.normalize( 'test/fixtures/tests/test/1.js' ),
-			assertion: 'test',
+			framework: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/2',
 			js: path.normalize( 'test/fixtures/tests/test/2.js' ),
-			assertion: 'test',
+			framework: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/3',
 			js: path.normalize( 'test/fixtures/tests/test/3.js' ),
-			assertion: 'test',
+			framework: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test2/1',
 			js: path.normalize( 'test/fixtures/tests/test2/1.js' ),
-			assertion: 'test',
+			framework: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/2',
 			js: path.normalize( 'test/fixtures/tests/test2/2.js' ),
-			assertion: 'test',
+			framework: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/3',
 			js: path.normalize( 'test/fixtures/tests/test2/3.js' ),
-			assertion: 'test',
+			framework: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
 		} ];
@@ -118,7 +118,7 @@ describe( 'Tests', function() {
 
 	it( 'should use group\'s data taken from cache if no changes in files were made since last check', function() {
 		var group = _.merge( {
-			assertion: bender.conf.assertion,
+			framework: bender.conf.framework,
 			name: 'Test'
 		}, bender.conf.tests.Test );
 
@@ -134,7 +134,7 @@ describe( 'Tests', function() {
 
 	it( 'should use tests\'s data taken from cache if no changes in files were made', function() {
 		var group = _.merge( {
-				assertion: bender.conf.assertion,
+				framework: bender.conf.framework,
 				name: 'Test'
 			}, bender.conf.tests.Test ),
 			id = 'test/fixtures/tests/test/1';

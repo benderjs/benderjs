@@ -1,7 +1,7 @@
 var path = require( 'path' );
 
 module.exports = {
-	name: 'bender-assertion-test',
+	name: 'bender-framework-test',
 	files: [
 		path.resolve( __dirname, 'adapter.js' )
 	]

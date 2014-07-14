@@ -1,6 +1,6 @@
 var config = {
 	plugins: [ 'benderjs-qunit', 'benderjs-test-plugin' ],
-	assertion: 'qunit'
+	framework: 'qunit'
 };
 
 module.exports = config;

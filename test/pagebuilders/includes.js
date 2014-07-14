@@ -41,7 +41,7 @@ describe( 'Page Builders - Includes', function() {
 	it( 'should not alter data if no includes defined in data', function() {
 		var data = {
 			id: 'foo',
-			assertion: 'bar',
+			framework: 'bar',
 			applications: {},
 			group: 'Test',
 			parts: []
@@ -53,7 +53,7 @@ describe( 'Page Builders - Includes', function() {
 	it( 'should add a script tag for each source defined in data.include array', function() {
 		var data = {
 				id: 'foo',
-				assertion: 'bar',
+				framework: 'bar',
 				applications: {},
 				group: 'Test',
 				include: 'foo/bar.js, baz/test.js',
@@ -69,7 +69,7 @@ describe( 'Page Builders - Includes', function() {
 	it( 'should support %BASE_PATH% and %TEST_DIR% tags in include paths', function() {
 		var data = {
 				id: 'test/fixtures/tests/bar/baz',
-				assertion: 'bar',
+				framework: 'bar',
 				applications: {},
 				group: 'Test',
 				include: '%TEST_DIR%foo/bar.js, %BASE_PATH%baz/test.js',

@@ -2,7 +2,7 @@
  * Copyright (c) 2014, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
  *
- * @file Tests for Assertion test page builder
+ * @file Tests for Framework test page builder
  */
 
 /*global describe, it, before, after */
@@ -15,30 +15,30 @@ var mocks = require( '../fixtures/_mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	_ = require( 'lodash' ),
-	assertion = rewire( '../../lib/pagebuilders/assertion' );
+	framework = rewire( '../../lib/pagebuilders/framework' );
 
-describe( 'Page Builders - Assertion', function() {
+describe( 'Page Builders - Framework', function() {
 	var oldAttach,
 		bender;
 
 	before( function() {
-		oldAttach = assertion.attach;
+		oldAttach = framework.attach;
 		bender = mocks.getBender( 'applications', 'plugins' );
-		assertion.attach = oldAttach || mocks.attachPagebuilder( bender, assertion );
-		bender.use( assertion );
+		framework.attach = oldAttach || mocks.attachPagebuilder( bender, framework );
+		bender.use( framework );
 	} );
 
 	after( function() {
-		assertion.attach = oldAttach;
+		framework.attach = oldAttach;
 	} );
 
 	it( 'should expose build function', function() {
-		expect( assertion.build ).to.be.a( 'function' );
+		expect( framework.build ).to.be.a( 'function' );
 	} );
 
-	it( 'should return <script> tag for defined assertion library\'s script', function() {
+	it( 'should return <script> tag for defined framework library\'s script', function() {
 		var data = {
-				assertion: {
+				framework: {
 					name: 'test',
 					files: [ 'test.js' ],
 					js: [ 'test.js' ],
@@ -47,15 +47,15 @@ describe( 'Page Builders - Assertion', function() {
 				parts: []
 			},
 			expected = '<head><script src="test.js"></script></head>',
-			result = assertion.build( data );
+			result = framework.build( data );
 
 		expect( result.parts ).to.have.length( 1 );
 		expect( result.parts[ 0 ] ).to.equal( expected );
 	} );
 
-	it( 'should return <link> tag for each defined assertion library\'s stylesheet', function() {
+	it( 'should return <link> tag for each defined framework library\'s stylesheet', function() {
 		var data = {
-				assertion: {
+				framework: {
 					name: 'test',
 					files: [ 'test.css' ],
 					js: [],
@@ -64,7 +64,7 @@ describe( 'Page Builders - Assertion', function() {
 				parts: []
 			},
 			expected = '<head><link rel="stylesheet" href="test.css"></head>',
-			result = assertion.build( data );
+			result = framework.build( data );
 
 		expect( result.parts ).to.have.length( 1 );
 		expect( result.parts[ 0 ] ).to.equal( expected );
@@ -74,7 +74,7 @@ describe( 'Page Builders - Assertion', function() {
 		var data = {
 				parts: []
 			},
-			result = _.cloneDeep( assertion.build( data ) );
+			result = _.cloneDeep( framework.build( data ) );
 
 		expect( result ).to.deep.equal( data );
 	} );
