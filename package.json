@@ -27,9 +27,9 @@
 	"dependencies": {
 		"broadway": "~0.2.9",
 		"connect": "~2.21.1",
-		"dom-combiner": "git://github.com/benderjs/dom-combiner.git",
+		"dom-combiner": "~0.1.1",
 		"forever": "~0.11.1",
-		"gerard": "git://github.com/benderjs/gerard.git",
+		"gerard": "~0.1.0",
 		"graceful-fs": "~3.0.2",
 		"lodash": "~2.4.1",
 		"ncp": "~0.6.0",
