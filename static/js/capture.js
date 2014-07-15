@@ -72,7 +72,7 @@
 
 		function startFetch() {
 			fetchInterval = setInterval( function() {
-				if ( !bender.running ) {
+				if ( !bender.running && !bender.fetching ) {
 					bender.fetching = true;
 					socket.emit( 'fetch', handleFetch );
 				}
