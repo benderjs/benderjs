@@ -203,7 +203,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		},
 
 		renderChildView: function( view, index ) {
-			if ( !view.el ) {
+			if ( !view.el || !view.el.innerHTML ) {
 				view.render();
 			}
 			this.attachHtml( this, view, index );
