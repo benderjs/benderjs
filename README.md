@@ -7,7 +7,7 @@ Installation
 ------------
 
 ```
-$ [sudo] npm install -g git://github.com/benderjs/benderjs.git
+$ [sudo] npm install -g benderjs
 ```
 
 Configuration
