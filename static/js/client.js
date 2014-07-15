@@ -169,7 +169,7 @@
 				result.success ? result.ignored ? 'ignored' : 'passed' : 'failed',
 				'"></span>',
 				result.module, ' - ',
-				'<a href="#' + encodeURIComponent( result.name ) + '" class="single">' + result.name + '</a>',
+				'<a href="#' + encodeURIComponent( result.fullName || result.name ) + '" class="single">' + result.name + '</a>',
 				'</p>'
 			],
 			i;
