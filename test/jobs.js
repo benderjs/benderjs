@@ -251,12 +251,36 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should delete an existing job', function() {
-		var promise = bender.jobs.create( job )
-			.then( function( id ) {
-				return bender.jobs.delete( id );
-			} );
+		var id;
 
-		return expect( promise ).to.be.fulfilled;
+		return bender.jobs.create( job )
+			.then( function( result ) {
+				id = result;
+
+				return bender.jobs.delete( id );
+			} )
+			.then( function() {
+				return nodeCall( datastores[ 'jobs.db' ].find, {
+					_id: id
+				} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.empty;
+
+				return nodeCall( datastores[ 'tasks.db' ].find, {
+					jobId: id
+				} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.empty;
+
+				return nodeCall( datastores[ 'browser_tasks.db' ].find, {
+					jobId: id
+				} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.empty;
+			} );
 	} );
 
 	it( 'should return an error when trying to remove non-existent job', function() {
@@ -266,12 +290,32 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should restart an existing job', function() {
-		var promise = bender.jobs.create( job )
-			.then( function( id ) {
-				return bender.jobs.restart( id );
-			} );
+		var store = datastores[ 'browser_tasks.db' ];
 
-		return expect( promise ).to.be.fulfilled;
+		return bender.jobs.create( job )
+			.then( function( id ) {
+				return bender.jobs.restart( id )
+					.then( function() {
+						return id;
+					} );
+			} )
+			.then( function( id ) {
+				return nodeCall( store.find, {
+					jobId: id
+				} );
+			} )
+			.then( function( results ) {
+				results.forEach( function( result ) {
+					expect( result.status ).to.equal( 0 );
+					expect( result.retries ).to.equal( 0 );
+					expect( result.errors ).to.equal( null );
+					expect( result.started ).to.equal( 0 );
+					expect( result.duration ).to.equal( 0 );
+					expect( result.total ).to.equal( 0 );
+					expect( result.testedVersion ).to.equal( 0 );
+					expect( result.testedUA ).to.equal( null );
+				} );
+			} );
 	} );
 
 	it( 'should return an error when trying to restart non-existent job', function() {
@@ -282,7 +326,9 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should edit existing job', function() {
-		var promise = bender.jobs.create( job )
+		var store = datastores[ 'browser_tasks.db' ];
+
+		return bender.jobs.create( job )
 			.then( function( id ) {
 				return bender.jobs.edit( {
 					id: id,
@@ -295,9 +341,19 @@ describe( 'Jobs', function() {
 						version: 0
 					} ]
 				} );
+			} )
+			.then( function( result ) {
+				return nodeCall( store.find, {
+					jobId: result.id
+				} );
+			} )
+			.then( function( tasks ) {
+				tasks.forEach( function( task ) {
+					expect( task ).to.contain.keys(
+						[ 'name', 'version', 'taskId', 'taskName', 'jobId', 'status', 'retries', 'created', '_id' ]
+					);
+				} );
 			} );
-
-		return expect( promise ).to.be.fulfilled;
 	} );
 
 	it( 'should return an error when trying to edit non-existent job', function() {
@@ -327,8 +383,21 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should not alter job tasks if no change in job\'s browsers list is made while editing', function() {
-		var promise = bender.jobs.create( job2 )
-			.then( function( id ) {
+		var store = datastores[ 'browser_tasks.db' ],
+			tasks,
+			id;
+
+		return bender.jobs.create( job2 )
+			.then( function( result ) {
+				id = result;
+
+				return nodeCall( store.find, {
+					jobId: id
+				} );
+			} )
+			.then( function( results ) {
+				tasks = results;
+
 				return bender.jobs.edit( {
 					id: id,
 					description: 'new description',
@@ -337,9 +406,15 @@ describe( 'Jobs', function() {
 						version: 0
 					} ]
 				} );
+			} )
+			.then( function() {
+				return nodeCall( store.find, {
+					jobId: id
+				} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.deep.equal( tasks );
 			} );
-
-		return expect( promise ).to.be.fulfilled;
 	} );
 
 	it( 'should compact results of a given job', function() {
