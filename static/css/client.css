@@ -43,6 +43,8 @@ body {
     list-style-type: none;
     margin: 0;
     padding: 56px 0 0;
+    z-index: 1000;
+    text-shadow: none;
 }
 
 .result {
