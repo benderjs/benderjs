@@ -176,22 +176,20 @@ describe( 'Sockets', function() {
 				jobId: 'bar'
 			};
 
+		bender.on( 'client:fetch', function( client, callback ) {
+			callback( task );
+		} );
+
 		socket.on( 'connect', function() {
 			socket.emit( 'register', {
 				id: id,
 				ua: ua
 			}, function callback() {
-				bender.emit( 'job:run', id, task );
+				socket.emit( 'fetch', function( task ) {
+					expect( task ).to.equal( task );
+					socket.disconnect();
+				} );
 			} );
-		} );
-
-		socket.on( 'run', function( data ) {
-			var client = bender.browsers.clients.get( id );
-
-			expect( data ).to.deep.equal( task );
-			expect( client ).to.be.an( 'object' );
-			expect( client.ready ).to.be.false;
-			socket.disconnect();
 		} );
 
 		socket.on( 'disconnect', function() {
