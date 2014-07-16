@@ -14,7 +14,7 @@ var moduleMocks,
 	path = require( 'path' ),
 	fs = require( 'fs' ),
 	_ = require( 'lodash' ),
-	EventEmitter = require( 'events' ).EventEmitter,
+	EventEmitter = require( 'eventemitter2' ).EventEmitter2,
 	chaiAsPromised = require( 'chai-as-promised' );
 
 chai.use( chaiAsPromised );
@@ -302,7 +302,7 @@ moduleMocks = {
 	},
 
 	plugins: function( bender ) {
-		bender.plugins = {};
+		bender.plugins = bender.plugins || {};
 		bender.frameworks = {
 			test: {
 				css: [],
@@ -423,17 +423,16 @@ moduleMocks = {
 function App() {
 	EventEmitter.call( this );
 	this._modules = {};
+	this.plugins = {};
 }
 
 util.inherits( App, EventEmitter );
-
-App.prototype.onAny = nop;
 
 App.prototype.use = function( modules, options ) {
 	// array of modules added
 	if ( Array.isArray( modules ) ) {
 		modules.forEach( function( module ) {
-			this[ module.name ] = module;
+			this.plugins[ module.name ] = module;
 
 			this._modules[ module.name ] = module;
 
@@ -445,7 +444,7 @@ App.prototype.use = function( modules, options ) {
 
 	// single module added
 	if ( typeof modules === 'object' && modules !== null ) {
-		this[ modules.name ] = modules;
+		this.plugins[ modules.name ] = modules;
 
 		this._modules[ modules.name ] = modules;
 

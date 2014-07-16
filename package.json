@@ -48,6 +48,7 @@
 	"devDependencies": {
 		"chai": "*",
 		"chai-as-promised": "*",
+		"eventemitter2": "^0.4.14",
 		"istanbul": "*",
 		"jsdoc": "*",
 		"mocha": "*",

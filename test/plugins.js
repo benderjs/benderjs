@@ -16,6 +16,7 @@ var mocks = require( './fixtures/_mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	path = require( 'path' ),
+	htmlbuilder = rewire( '../lib/pagebuilders/html' ),
 	plugins = rewire( '../lib/plugins' );
 
 describe( 'Plugins', function() {
@@ -124,6 +125,22 @@ describe( 'Plugins', function() {
 		expect( bender.pagebuilders[ 0 ] ).to.be.a( 'function' );
 	} );
 
+	it( 'should always load pagebuilders before bender-pagebuilder-html', function() {
+		var bender = mocks.getBender( 'utils' ),
+			testPlugin = require( path.resolve( 'node_modules/pagebuilder-test/' ) );
+
+		bender.conf = {
+			plugins: [ 'pagebuilder-test' ]
+		};
+
+		bender.use( plugins );
+		bender.plugins.add( 'html', htmlbuilder );
+		bender.plugins.load();
+
+		expect( bender.pagebuilders ).to.have.length( 2 );
+		expect( bender.pagebuilders[ 0 ] ).to.equal( testPlugin.build );
+	} );
+
 	it( 'should load testbuilder plugin', function() {
 		var bender = mocks.getBender();
 
@@ -139,7 +156,8 @@ describe( 'Plugins', function() {
 	} );
 
 	it( 'should load reporter plugin', function() {
-		var bender = mocks.getBender();
+		var bender = mocks.getBender(),
+			testParam = 'foo';
 
 		bender.conf = {
 			plugins: [ 'reporter-test' ]
@@ -149,6 +167,26 @@ describe( 'Plugins', function() {
 		bender.plugins.load();
 
 		expect( bender.reporters ).to.include.key( 'test' );
+
+		bender.on( 'test:callback', function( param ) {
+			expect( param ).to.equal( testParam );
+		} );
+
+		bender.emit( 'test', testParam );
+	} );
+
+	it( 'should load middleware plugin', function() {
+		var bender = mocks.getBender(),
+			testPlugin = require( path.resolve( 'node_modules/middleware-test/' ) );
+
+		bender.conf = {
+			plugins: [ 'middleware-test' ]
+		};
+
+		bender.use( plugins );
+		bender.plugins.load();
+
+		expect( bender.middlewares ).to.contain( testPlugin.build );
 	} );
 
 	it( 'should load advanced plugin containing its own attach function', function() {
