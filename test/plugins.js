@@ -134,7 +134,7 @@ describe( 'Plugins', function() {
 		};
 
 		bender.use( plugins );
-		bender.plugins.add( 'html', htmlbuilder );
+		bender.plugins.add( htmlbuilder );
 		bender.plugins.load();
 
 		expect( bender.pagebuilders ).to.have.length( 2 );
