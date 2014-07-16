@@ -275,7 +275,7 @@ moduleMocks = {
 		};
 	},
 
-	middleware: function( bender ) {
+	middlewares: function( bender ) {
 		function testMiddleware() {
 			return function( req, res, next ) {
 				if ( req.url === '/test' ) {
@@ -287,7 +287,7 @@ moduleMocks = {
 			};
 		}
 
-		bender.middleware = [ testMiddleware ];
+		bender.middlewares = [ testMiddleware ];
 	},
 
 	pagebuilders: function( bender ) {
@@ -426,6 +426,8 @@ function App() {
 }
 
 util.inherits( App, EventEmitter );
+
+App.prototype.onAny = nop;
 
 App.prototype.use = function( modules, options ) {
 	// array of modules added

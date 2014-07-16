@@ -19,7 +19,7 @@ var mocks = require( '../fixtures/_mocks' ),
 	http = require( 'http' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
-	jobs = rewire( '../../lib/middleware/jobs' ),
+	jobs = rewire( '../../lib/middlewares/jobs' ),
 	serverModule = require( '../../lib/server' ),
 	utilsModule = require( '../../lib/utils' );
 
@@ -31,7 +31,7 @@ describe( 'Middleware - Jobs', function() {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets', 'jobs', 'template' );
 		bender.use( [ serverModule, utilsModule ] );
 		bender.init();
-		bender.middleware = [ jobs.create ];
+		bender.middlewares = [ jobs.build ];
 		instance = bender.server.create();
 	} );
 
@@ -41,8 +41,8 @@ describe( 'Middleware - Jobs', function() {
 		} catch ( e ) {}
 	} );
 
-	it( 'should expose create function', function() {
-		expect( jobs.create ).to.be.a( 'function' );
+	it( 'should expose build function', function() {
+		expect( jobs.build ).to.be.a( 'function' );
 	} );
 
 	it( 'should throw 404 on missing job files', function( done ) {

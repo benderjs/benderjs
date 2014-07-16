@@ -22,7 +22,7 @@ describe( 'Server', function() {
 		instance;
 
 	beforeEach( function() {
-		bender = mocks.getBender( 'sockets', 'middleware', 'utils' );
+		bender = mocks.getBender( 'sockets', 'middlewares', 'utils' );
 		bender.use( server );
 		instance = bender.server.create();
 	} );

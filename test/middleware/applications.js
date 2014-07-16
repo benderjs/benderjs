@@ -19,7 +19,7 @@ var mocks = require( '../fixtures/_mocks' ),
 	http = require( 'http' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
-	applications = rewire( '../../lib/middleware/applications' ),
+	applications = rewire( '../../lib/middlewares/applications' ),
 	appsModule = require( '../../lib/applications' ),
 	serverModule = require( '../../lib/server' );
 
@@ -44,8 +44,8 @@ describe( 'Middleware - Applications', function() {
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets' );
 		bender.use( [ serverModule, appsModule ] );
+		bender.middlewares = [ applications.build ];
 		bender.init();
-		bender.middleware = [ applications.create ];
 		instance = bender.server.create();
 	} );
 
@@ -55,8 +55,8 @@ describe( 'Middleware - Applications', function() {
 		} catch ( e ) {}
 	} );
 
-	it( 'should expose create function', function() {
-		expect( applications.create ).to.be.a( 'function' );
+	it( 'should expose build function', function() {
+		expect( applications.build ).to.be.a( 'function' );
 	} );
 
 	it( 'should throw 404 on missing application files', function( done ) {

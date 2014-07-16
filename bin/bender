@@ -28,7 +28,7 @@ var argParser = require( 'nomnom' ),
 	constants = require( dir + 'constants' ),
 	jobs = require( dir + 'jobs' ),
 	logger = require( dir + 'logger' ),
-	middleware = require( dir + 'middleware' ),
+	middlewares = require( dir + 'middlewares' ),
 	pagebuilders = require( dir + 'pagebuilders' ),
 	plugins = require( dir + 'plugins' ),
 	reporters = require( dir + 'reporters' ),
@@ -193,8 +193,8 @@ function startServer( options ) {
 			delimeter: ':'
 		} ),
 		modules = [
-			utils, constants, logger, applications, testbuilders, pagebuilders, middleware,
-			browsers, tests, jobs, template, sockets, server, reporters, plugins
+			utils, constants, logger, plugins, applications, testbuilders, pagebuilders,
+			middlewares, browsers, tests, jobs, template, sockets, server, reporters
 		];
 
 	bender.use( conf, {
@@ -204,6 +204,8 @@ function startServer( options ) {
 	modules.forEach( function( module ) {
 		bender.use( module );
 	} );
+
+	bender.plugins.load();
 
 	bender.init( function( err ) {
 		if ( err ) {

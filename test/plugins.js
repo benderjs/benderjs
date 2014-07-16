@@ -46,8 +46,9 @@ describe( 'Plugins', function() {
 		};
 
 		bender.use( plugins );
+		bender.plugins.load();
 
-		expect( bender ).to.include.keys( [ 'frameworks', 'pagebuilders', 'testbuilders', 'reporters' ] );
+		expect( bender ).to.include.keys( [ 'frameworks', 'pagebuilders', 'testbuilders', 'reporters', 'middlewares' ] );
 	} );
 
 	it( 'should not throw if no plugins defined', function() {
@@ -56,6 +57,7 @@ describe( 'Plugins', function() {
 		bender.conf = {};
 		expect( function() {
 			bender.use( plugins );
+			bender.plugins.load();
 		} ).to.not.throw();
 	} );
 
@@ -71,6 +73,7 @@ describe( 'Plugins', function() {
 
 		expect( function() {
 			bender.use( plugins );
+			bender.plugins.load();
 		} ).to.throw();
 
 		process.exit.restore();
@@ -88,6 +91,7 @@ describe( 'Plugins', function() {
 
 		expect( function() {
 			bender.use( plugins );
+			bender.plugins.load();
 		} ).to.throw();
 
 		process.exit.restore();
@@ -101,6 +105,7 @@ describe( 'Plugins', function() {
 		};
 
 		bender.use( plugins );
+		bender.plugins.load();
 
 		expect( bender.frameworks ).to.include.key( 'test' );
 	} );
@@ -113,6 +118,7 @@ describe( 'Plugins', function() {
 		};
 
 		bender.use( plugins );
+		bender.plugins.load();
 
 		expect( bender.pagebuilders ).to.have.length( 1 );
 		expect( bender.pagebuilders[ 0 ] ).to.be.a( 'function' );
@@ -126,6 +132,7 @@ describe( 'Plugins', function() {
 		};
 
 		bender.use( plugins );
+		bender.plugins.load();
 
 		expect( bender.testbuilders ).to.have.length( 1 );
 		expect( bender.testbuilders[ 0 ] ).to.be.a( 'function' );
@@ -139,6 +146,7 @@ describe( 'Plugins', function() {
 		};
 
 		bender.use( plugins );
+		bender.plugins.load();
 
 		expect( bender.reporters ).to.include.key( 'test' );
 	} );
@@ -151,6 +159,7 @@ describe( 'Plugins', function() {
 		};
 
 		bender.use( plugins );
+		bender.plugins.load();
 
 		expect( bender.pagebuilders ).to.have.length( 1 );
 		expect( bender.pagebuilders[ 0 ] ).to.be.a( 'function' );
@@ -168,6 +177,7 @@ describe( 'Plugins', function() {
 		};
 
 		bender.use( plugins );
+		bender.plugins.load();
 
 		expect( bender.plugins.checkFile( validFile ) ).to.be.true;
 		expect( bender.plugins.checkFile( invalidFile ) ).to.be.false;
@@ -182,6 +192,7 @@ describe( 'Plugins', function() {
 		};
 
 		bender.use( plugins );
+		bender.plugins.load();
 
 		expect( bender.frameworks ).to.include.key( 'test' );
 	} );

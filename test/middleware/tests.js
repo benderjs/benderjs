@@ -20,7 +20,7 @@ var mocks = require( '../fixtures/_mocks' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
 	_ = require( 'lodash' ),
-	tests = rewire( '../../lib/middleware/tests' ),
+	tests = rewire( '../../lib/middlewares/tests' ),
 	serverModule = require( '../../lib/server' ),
 	utilsModule = require( '../../lib/utils' );
 
@@ -33,7 +33,7 @@ describe( 'Middleware - Tests', function() {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets', 'tests', 'template' );
 		bender.use( [ serverModule, utilsModule ] );
 		bender.init();
-		bender.middleware = [ tests.create ];
+		bender.middlewares = [ tests.build ];
 		instance = bender.server.create();
 	} );
 
@@ -43,8 +43,8 @@ describe( 'Middleware - Tests', function() {
 		} catch ( e ) {}
 	} );
 
-	it( 'should expose create function', function() {
-		expect( tests.create ).to.be.a( 'function' );
+	it( 'should expose build function', function() {
+		expect( tests.build ).to.be.a( 'function' );
 	} );
 
 	it( 'should throw 404 on missing files', function( done ) {
