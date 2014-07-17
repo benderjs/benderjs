@@ -15,6 +15,7 @@ var mocks = require( './fixtures/_mocks' ),
 	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
+	_ = require( 'lodash' ),
 	http = require( 'http' ),
 	io = require( 'socket.io-client' ),
 	sockets = rewire( '../lib/sockets' ),
@@ -250,8 +251,18 @@ describe( 'Sockets', function() {
 
 	it( 'should emit results from a client', function( done ) {
 		var socket = io( 'http://localhost:1031/client', {
-			forceNew: true
-		} );
+				forceNew: true
+			} ),
+			testResult = _.cloneDeep( result );
+
+		testResult.client = {
+			id: id,
+			addr: 'undefined:undefined',
+			browser: 'chrome',
+			ready: true,
+			ua: 'Chrome 35.0.1916 / Linux',
+			version: '35'
+		};
 
 		socket.on( 'connect', function() {
 			socket.emit( 'register', {
@@ -263,8 +274,7 @@ describe( 'Sockets', function() {
 		} );
 
 		bender.on( 'client:result', function( data ) {
-			expect( data.clientId ).to.deep.equal( id );
-			expect( data.result ).to.deep.equal( result );
+			expect( data ).to.deep.equal( testResult );
 			socket.disconnect();
 		} );
 
