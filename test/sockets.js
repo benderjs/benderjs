@@ -263,6 +263,7 @@ describe( 'Sockets', function() {
 		} );
 
 		bender.on( 'client:result', function( data ) {
+			expect( data.clientId ).to.deep.equal( id );
 			expect( data.result ).to.deep.equal( result );
 			socket.disconnect();
 		} );
