@@ -130,10 +130,10 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 					<% }) %>
 				</select>
 			</div>
-			<button type="button" class="btn btn-primary btn-sm run-button">
+			<button type="button" class="btn btn-primary btn-sm run-button" title="<%= running ? 'Stop' : 'Start' %> tests">
 				<span class="glyphicon glyphicon-<%= running ? 'stop' : 'play' %>"></span>
 			</button>
-			<button type="button" class="btn btn-primary btn-sm create-button">
+			<button type="button" class="btn btn-primary btn-sm create-button" title="Create a job">
 				<span class="glyphicon glyphicon-file"></span> Create a job
 			</button>
 		</div>
