@@ -283,6 +283,29 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
+	it( 'should ignore result requests from unknown clients', function( done ) {
+		var socket = io( 'http://localhost:1031/client', {
+				forceNew: true
+			} ),
+			spy = sinon.spy();
+
+		bender.on( 'client:result', spy );
+
+		socket.on( 'connect', function() {
+			socket.emit( 'register', {
+				id: id,
+				ua: 'unknown'
+			}, function callback() {
+				socket.emit( 'result', {} );
+
+				setTimeout( function() {
+					expect( spy.called ).to.be.false;
+					done();
+				}, 50 );
+			} );
+		} );
+	} );
+
 	it( 'should emit client\'s fetch request', function( done ) {
 		var socket = io( 'http://localhost:1031/client', {
 			forceNew: true
