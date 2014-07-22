@@ -417,6 +417,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		defaults: {
 			browsers: [],
 			description: '',
+			snapshot: false,
 			tests: [],
 			filter: []
 		},
@@ -447,12 +448,14 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		ui: {
 			'browsers': '.job-browsers',
 			'description': '.job-description',
+			'snapshot': '.take-snapshot',
 			'create': '.create-button'
 		},
 
 		events: {
 			'change @ui.browsers': 'updateBrowsers',
 			'change @ui.description': 'updateDescription',
+			'change @ui.snapshot': 'updateSnapshot',
 			'click .dropdown-menu a': 'addBrowser',
 			'click @ui.create': 'createJob',
 			'click .add-captured-button': 'addCaptured'
@@ -516,7 +519,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.destroy();
 		},
 
-		updateBrowsers: function() {
+		updateBrowsers: function( event ) {
 			var browsers = $( event.target ).val().replace( /^\s+|\s+$/g, '' );
 
 			browsers = browsers.length ? browsers.replace( /\s+/g, ' ' ).split( /\s+/ ) : [];
@@ -524,9 +527,13 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.model.set( 'browsers', _.uniq( browsers ) );
 		},
 
-		updateDescription: function() {
+		updateDescription: function( event ) {
 			var description = $( event.target ).val().replace( /^\s+|\s+$/g, '' );
 			this.model.set( 'description', description );
+		},
+
+		updateSnapshot: function( event ) {
+			this.model.set( 'snapshot', event.target.checked );
 		},
 
 		addBrowser: function( event ) {
