@@ -89,7 +89,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 
 	<!-- template for a single test row -->
 	<script type="text/html" id="test">
-	<td><a href="/<%= id %>" title="<%= id %>"><%= id %></a></td>
+	<td><a href="/<%= id %>" title="<%= id %>" target="_blank"><%= id %></a></td>
 	<td><span title="<%= group %>"><%= group %></span></td>
 	<td title="<%= tags.join(', ') %>"><%= tags.join(', ') %></td>
 	<td>
@@ -263,7 +263,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 
 	<!-- template for a single task row -->
 	<script type="text/html" id="task">
-		<td><a href="/jobs/<%= jobId %>/tests/<%= id %>" title="<%= id %>"><%= id %></a></td>
+		<td><a href="/jobs/<%= jobId %>/tests/<%= id %>" title="<%= id %>" target="_blank"><%= id %></a></td>
 		<td class="results">
 			<% _.each(results, function (result) { %>
 				<div class="result <%= getResultStyle(result) %><%= result.errors ? ' clickable' : '' %><%= isSlow(result) ? ' slow' : '' %>">
