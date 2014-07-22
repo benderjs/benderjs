@@ -330,8 +330,7 @@ describe( 'Jobs', function() {
 
 		return bender.jobs.create( job )
 			.then( function( id ) {
-				return bender.jobs.edit( {
-					id: id,
+				return bender.jobs.edit( id, {
 					description: 'new description',
 					browsers: [ {
 						name: 'chrome',
@@ -357,8 +356,7 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should return an error when trying to edit non-existent job', function() {
-		var promise = bender.jobs.edit( {
-			id: 'unknown',
+		var promise = bender.jobs.edit( 'unknown', {
 			description: 'new description',
 			browsers: [ {
 				name: 'chrome',
@@ -373,8 +371,7 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should return an error when trying to edit a job and browsers specified', function() {
-		var promise = bender.jobs.edit( {
-			id: 'unknown',
+		var promise = bender.jobs.edit( 'unknown', {
 			description: 'new description',
 			browsers: []
 		} );
@@ -398,8 +395,7 @@ describe( 'Jobs', function() {
 			.then( function( results ) {
 				tasks = results;
 
-				return bender.jobs.edit( {
-					id: id,
+				return bender.jobs.edit( id, {
 					description: 'new description',
 					browsers: [ {
 						name: 'firefox',

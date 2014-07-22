@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2014, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
- 
+ *
  * @file Mockup to be used in tests
  */
 
@@ -263,8 +263,8 @@ moduleMocks = {
 				return when.resolve( 'newJobId' );
 			},
 
-			edit: function( data ) {
-				var job = bender.jobs.find( data.id );
+			edit: function( id, data ) {
+				var job = bender.jobs.find( id );
 
 				return when.resolve( job );
 			},
