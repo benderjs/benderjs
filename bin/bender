@@ -55,12 +55,10 @@ argParser.command( 'server' )
 	.callback( handleServer )
 	.option( 'port', {
 		abbr: 'p',
-		default: constants.PORT,
 		help: 'Port on which the server will run'
 	} )
 	.option( 'hostname', {
 		abbr: 'H', // YEAH... should be "h" but it's reserved for nomnom's help
-		default: constants.HOSTNAME,
 		help: 'Hostname used to run server'
 	} )
 	.option( 'config', {
@@ -214,25 +212,28 @@ function startServer( options ) {
 			process.exit( 1 );
 		}
 
+		var port = options.port || bender.conf.port || constants.PORT,
+			hostname = options.hostname || bender.conf.hostname || constants.HOSTNAME;
+
 		bender.server
 			.create()
 			.listen(
-				options.port,
-				options.hostname,
+				port,
+				hostname,
 				function() {
 					log.info(
 						'Bender.js v%s Server started at http://%s:%s',
 						constants.VERSION,
-						options.hostname,
-						options.port
+						hostname,
+						port
 					);
 				} )
 			.on( 'error', function( e ) {
 				if ( e.code === 'EADDRINUSE' ) {
 					log.error(
 						'Address http://%s:%s in use. Please try running Bender on a different port.',
-						options.hostname,
-						options.port
+						hostname,
+						port
 					);
 					process.exit( 1 );
 				}
