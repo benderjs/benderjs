@@ -25,13 +25,14 @@ var argParser = require( 'nomnom' ),
 	applications = require( dir + 'applications' ),
 	browsers = require( dir + 'browsers' ),
 	conf = require( dir + 'config' ),
+	consoleReporter = require( dir + 'reporters/console' ),
 	constants = require( dir + 'constants' ),
 	jobs = require( dir + 'jobs' ),
 	logger = require( dir + 'logger' ),
 	middlewares = require( dir + 'middlewares' ),
 	pagebuilders = require( dir + 'pagebuilders' ),
 	plugins = require( dir + 'plugins' ),
-	consoleReporter = require( dir + 'reporters/console' ),
+	queues = require( dir + 'queues' ),
 	server = require( dir + 'server' ),
 	sockets = require( dir + 'sockets' ),
 	template = require( dir + 'template' ),
@@ -73,6 +74,27 @@ argParser.command( 'version' )
 		log.info( 'Bender.js v%s', constants.VERSION );
 	} )
 	.help( 'Print Bender.js version' );
+
+argParser.command( 'run' )
+	.callback( runTests )
+	.option( 'port', {
+		abbr: 'p',
+		help: 'Port on which the server will run'
+	} )
+	.option( 'hostname', {
+		abbr: 'H', // YEAH... should be "h" but it's reserved for nomnom's help
+		help: 'Hostname used to run server'
+	} )
+	.option( 'config', {
+		abbr: 'c',
+		default: constants.CONFIG_NAME,
+		help: 'Alternative path to Bender.js configuration file'
+	} )
+	.option( 'browser', {
+		abbr: 'b',
+		help: 'Browsers to run the tests on'
+	} )
+	.help( 'Run the tests in a browser and output the results to the console' );
 
 argParser.parse();
 
@@ -127,7 +149,9 @@ function handleServer( options ) {
 			break;
 
 		case 'run':
-			startServer( options );
+			startServer( options, function( bender ) {
+				bender.plugins.add( consoleReporter );
+			} );
 			break;
 
 		default: // TODO improve this help part / include in cli help
@@ -186,13 +210,13 @@ function startDaemon() {
  * Start bender server
  * @param  {Object} options Command line options
  */
-function startServer( options ) {
+function startServer( options, callback ) {
 	var bender = new broadway.App( {
 			delimeter: ':'
 		} ),
 		modules = [
 			utils, constants, logger, plugins, applications, testbuilders, pagebuilders,
-			middlewares, browsers, tests, jobs, template, sockets, server
+			middlewares, browsers, tests, jobs, template, sockets, server, queues
 		];
 
 	bender.use( conf, {
@@ -204,7 +228,6 @@ function startServer( options ) {
 	} );
 
 	bender.plugins.load();
-	bender.plugins.add( consoleReporter );
 
 	bender.init( function( err ) {
 		if ( err ) {
@@ -227,9 +250,13 @@ function startServer( options ) {
 						hostname,
 						port
 					);
+
+					if ( typeof callback == 'function' ) {
+						callback( bender );
+					}
 				} )
-			.on( 'error', function( e ) {
-				if ( e.code === 'EADDRINUSE' ) {
+			.on( 'error', function( err ) {
+				if ( err.code === 'EADDRINUSE' ) {
 					log.error(
 						'Address http://%s:%s in use. Please try running Bender on a different port.',
 						hostname,
@@ -237,6 +264,23 @@ function startServer( options ) {
 					);
 					process.exit( 1 );
 				}
+			} );
+	} );
+}
+
+function runTests( options ) {
+	var testId = options[ 1 ],
+		browsers = options.browsers;
+
+	startServer( options, function( bender ) {
+		bender.on( 'queues:complete', function() {
+			log.info( 'Testing complete' );
+			process.exit( 0 );
+		} );
+
+		bender.queues.build( browsers, testId )
+			.done( function() {
+				// launch browser here
 			} );
 	} );
 }
