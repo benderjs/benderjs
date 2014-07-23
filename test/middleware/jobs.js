@@ -24,7 +24,8 @@ var mocks = require( '../fixtures/_mocks' ),
 	utilsModule = require( '../../lib/utils' );
 
 describe( 'Middleware - Jobs', function() {
-	var bender,
+	var oldCwd = process.cwd,
+		bender,
 		instance;
 
 	beforeEach( function() {
@@ -33,6 +34,8 @@ describe( 'Middleware - Jobs', function() {
 		bender.init();
 		bender.middlewares = [ jobs.build ];
 		instance = bender.server.create();
+
+		process.cwd = oldCwd;
 	} );
 
 	afterEach( function() {
@@ -134,6 +137,23 @@ describe( 'Middleware - Jobs', function() {
 				expect( body ).to.equal( assetFile );
 
 				process.cwd = oldCwd;
+
+				done();
+			} );
+		} );
+	} );
+
+	it( 'should serve task assets for jobs with no snapshot taken', function( done ) {
+		var url = 'ECNtxgcMzm94aQc9/tests/test/fixtures/tests/_assets/asset.js',
+			oldCwd = process.cwd,
+			file = path.resolve( 'test/fixtures/tests/_assets/asset.js' );
+
+		instance.listen( 1031, function() {
+			request.get( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
+				var assetFile = fs.readFileSync( file ).toString();
+
+				expect( res.statusCode ).to.equal( 200 );
+				expect( body ).to.equal( assetFile );
 
 				done();
 			} );

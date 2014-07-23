@@ -73,6 +73,7 @@ describe( 'Page Builders - Html', function() {
 	it( 'should load job\'s HTML from the job\'s directory', function() {
 		var data = {
 				jobId: 'foo',
+				snapshot: true,
 				html: 'fixtures/tests/test/1.html',
 				parts: []
 			},

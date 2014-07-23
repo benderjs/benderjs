@@ -70,6 +70,7 @@ describe( 'Page Builders - Script', function() {
 	it( 'should load job\'s script from the job\'s directory', function() {
 		var data = {
 				jobId: 'foo',
+				snapshot: true,
 				js: 'fixtures/tests/test/1.js',
 				parts: []
 			},

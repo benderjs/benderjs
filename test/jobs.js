@@ -31,6 +31,13 @@ describe( 'Jobs', function() {
 			filter: [ 'foo' ],
 			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
 		},
+		job_snapshot = {
+			browsers: [ 'chrome35', 'firefox', '123unknown', 'ie8', 'ie10', 'ie9' ],
+			description: 'test job 1',
+			snapshot: true,
+			filter: [ 'foo' ],
+			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
+		},
 		job2 = {
 			browsers: [ 'firefox' ],
 			description: 'test job 2',
@@ -225,7 +232,7 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should return an application of a given job', function() {
-		return bender.jobs.create( job )
+		return bender.jobs.create( job_snapshot )
 			.then( function( id ) {
 				return bender.jobs.getApp( id, 'test' );
 			} )

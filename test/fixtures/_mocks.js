@@ -121,6 +121,7 @@ moduleMocks = {
 				browsers: [ 'chrome' ],
 				description: 'test job 1',
 				created: 1403699939665,
+				snapshot: true,
 				filter: [ 'foo' ],
 				_id: 'AYIlcxZa1i1nhLox'
 			}, {
@@ -208,13 +209,17 @@ moduleMocks = {
 					status: 0,
 					retries: 0
 				} ]
-			} ];
+			} ],
+			snapshots = {
+				AYIlcxZa1i1nhLox: true,
+				ECNtxgcMzm94aQc9: false
+			};
 
 		bender.jobs = {
 			jobs: jobs,
 
 			getApp: function( jobId, name ) {
-				return when.resolve( bender.applications.get( name ) );
+				return when.resolve( snapshots[ jobId ] ? bender.applications.get( name ) : null );
 			},
 
 			getTask: function( jobId, taskId ) {
