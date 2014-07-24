@@ -10,7 +10,6 @@
 
 	var statusEl = document.getElementById( 'status' ),
 		isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1,
-		fetchInterval = null,
 		states = {
 			CONNECT: 0,
 			DISCONNECT: 1
@@ -26,7 +25,6 @@
 			lastError;
 
 		this.running = false;
-		this.fetching = false;
 		this.results = null;
 
 		this.runAsChild = true;
@@ -54,9 +52,7 @@
 			}, BENDER_CONFIG.testTimeout );
 		}
 
-		function handleFetch( data ) {
-			that.fetching = false;
-
+		function handleRun( data ) {
 			if ( !data ) {
 				return;
 			}
@@ -67,24 +63,7 @@
 			that.results = data;
 			that.running = true;
 
-			that.run( data.id );
-		}
-
-		function startFetch() {
-			fetchInterval = setInterval( function() {
-				if ( !bender.running && !bender.fetching ) {
-					bender.fetching = true;
-					socket.emit( 'fetch', handleFetch );
-				}
-			}, 2000 );
-		}
-
-		function stopFetch() {
-			if ( fetchInterval ) {
-				clearInterval( fetchInterval );
-			}
-
-			bender.stop();
+			that.run( data.id[ 0 ] === '/' ? data.id : '/' + data.id );
 		}
 
 		this.error = function( error ) {
@@ -105,6 +84,8 @@
 			}
 
 			this.results.results[ result.name ] = result;
+
+			socket.emit( 'result', result );
 
 			resetTestTimeout();
 		};
@@ -179,10 +160,6 @@
 
 			this.running = false;
 			this.results = null;
-
-			if ( !this.fetching ) {
-				socket.emit( 'fetch', handleFetch );
-			}
 		};
 
 		this.log = function() {
@@ -212,9 +189,9 @@
 				socket.emit( 'register', {
 					id: id,
 					ua: navigator.userAgent
-				}, startFetch );
+				} );
 			} )
-			.on( 'disconnect', stopFetch );
+			.on( 'run', handleRun );
 	}
 
 	function setStatus( status ) {
