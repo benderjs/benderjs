@@ -110,7 +110,7 @@ describe( 'Browsers', function() {
 		bender.browsers.on( 'change', function handleChange( browsers ) {
 			var result = bender.browsers.get( 'Firefox' ).clients;
 
-			expect( browsers ).to.have.length( 3 );
+			expect( browsers ).to.have.length( 4 );
 			expect( result.get() ).to.have.length( 1 );
 
 			bender.browsers.removeListener( 'change', handleChange );
@@ -148,7 +148,7 @@ describe( 'Browsers', function() {
 		expect( bender.browsers.clients.get() ).to.be.empty;
 		expect( bender.browsers.unknown.get() ).to.have.length( 1 );
 
-		bender.browsers.removeClient( clients.IE9.id );
+		bender.browsers.removeClient( clients.IE9 );
 
 		expect( bender.browsers.unknown.get() ).to.be.empty;
 		expect( bender.browsers.clients.get() ).to.be.empty;
@@ -166,7 +166,7 @@ describe( 'Browsers', function() {
 			done();
 		} );
 
-		bender.browsers.removeClient( clients.Firefox.id );
+		bender.browsers.removeClient( clients.Firefox );
 	} );
 
 	it( 'should change client ready state', function() {
