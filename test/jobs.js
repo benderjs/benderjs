@@ -21,6 +21,8 @@ var mocks = require( './fixtures/_mocks' ),
 	call = require( 'when/callbacks' ).call,
 	nodeCall = require( 'when/node' ).call,
 	applications = rewire( '../lib/applications' ),
+	browsers = rewire( '../lib/browsers' ),
+	queues = rewire( '../lib/queues' ),
 	jobs = rewire( '../lib/jobs' ),
 	datastores = {};
 
@@ -96,8 +98,10 @@ describe( 'Jobs', function() {
 
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'applications', 'tests', 'utils' );
-		bender.use( [ applications, jobs ] );
+		bender.use( [ applications, jobs, browsers, queues ] );
 		bender.init();
+
+		bender.queues.buildQueues( bender.conf.browsers );
 	} );
 
 	it( 'should attach jobs to bender', function() {
@@ -123,15 +127,9 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should attach listeners during bender initialization', function() {
-		sinon.spy( bender.jobs, 'fetch' ),
 		sinon.spy( bender.jobs, 'completeTask' );
 
 		bender.init();
-
-		bender.emit( 'client:fetch', client );
-
-		expect( bender.jobs.fetch.calledOnce ).to.be.true;
-		bender.jobs.fetch.restore();
 
 		bender.emit( 'client:complete', {
 			success: true,
@@ -146,6 +144,10 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should create new job', function() {
+		var spy = sinon.spy();
+
+		bender.on( 'tasks:add', spy );
+
 		return bender.jobs.create( job )
 			.then( function( id ) {
 				expect( id ).to.be.a( 'string' );
@@ -170,6 +172,7 @@ describe( 'Jobs', function() {
 			.then( function( results ) {
 				expect( results ).to.be.an( 'array' );
 				expect( results ).to.have.length( 18 );
+				expect( spy.callCount ).to.equal( job.browsers.length );
 			} );
 	} );
 
@@ -258,7 +261,10 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should delete an existing job', function() {
-		var id;
+		var spy = sinon.spy(),
+			id;
+
+		bender.on( 'tasks:remove', spy );
 
 		return bender.jobs.create( job )
 			.then( function( result ) {
@@ -287,6 +293,11 @@ describe( 'Jobs', function() {
 			} )
 			.then( function( results ) {
 				expect( results ).to.be.empty;
+				expect( spy.callCount ).to.equal( job.browsers.length );
+				spy.args.forEach( function( arg ) {
+					expect( arg[ 0 ] ).to.be.a.string;
+					expect( arg[ 1 ].length ).to.equal( job.tests.length );
+				} );
 			} );
 	} );
 
@@ -297,10 +308,13 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should restart an existing job', function() {
-		var store = datastores[ 'browser_tasks.db' ];
+		var store = datastores[ 'browser_tasks.db' ],
+			spy = sinon.spy();
 
 		return bender.jobs.create( job )
 			.then( function( id ) {
+				bender.on( 'tasks:add', spy );
+
 				return bender.jobs.restart( id )
 					.then( function() {
 						return id;
@@ -321,6 +335,11 @@ describe( 'Jobs', function() {
 					expect( result.total ).to.equal( 0 );
 					expect( result.testedVersion ).to.equal( 0 );
 					expect( result.testedUA ).to.equal( null );
+					expect( spy.callCount ).to.equal( job.browsers.length );
+					spy.args.forEach( function( arg ) {
+						expect( arg[ 0 ] ).to.be.a.string;
+						expect( arg[ 1 ].length ).to.equal( job.tests.length );
+					} );
 				} );
 			} );
 	} );
@@ -333,10 +352,15 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should edit existing job', function() {
-		var store = datastores[ 'browser_tasks.db' ];
+		var store = datastores[ 'browser_tasks.db' ],
+			addSpy = sinon.spy(),
+			removeSpy = sinon.spy();
 
 		return bender.jobs.create( job )
 			.then( function( id ) {
+				bender.on( 'tasks:add', addSpy );
+				bender.on( 'tasks:remove', removeSpy );
+
 				return bender.jobs.edit( id, {
 					description: 'new description',
 					browsers: [ {
@@ -358,6 +382,15 @@ describe( 'Jobs', function() {
 					expect( task ).to.contain.keys(
 						[ 'name', 'version', 'taskId', 'taskName', 'jobId', 'status', 'retries', 'created', '_id' ]
 					);
+				} );
+
+				expect( addSpy.callCount ).to.equal( 1 );
+				expect( addSpy.args[ 0 ][ 0 ] ).to.equal( 'chrome0' );
+				expect( addSpy.args[ 0 ][ 1 ].length ).to.equal( job.tests.length );
+				expect( removeSpy.callCount ).to.equal( 5 );
+				removeSpy.args.forEach( function( arg ) {
+					expect( arg[ 0 ] ).to.be.a.string;
+					expect( arg[ 1 ].length ).to.equal( job.tests.length );
 				} );
 			} );
 	} );
@@ -388,6 +421,8 @@ describe( 'Jobs', function() {
 
 	it( 'should not alter job tasks if no change in job\'s browsers list is made while editing', function() {
 		var store = datastores[ 'browser_tasks.db' ],
+			addSpy = sinon.spy(),
+			removeSpy = sinon.spy(),
 			tasks,
 			id;
 
@@ -401,6 +436,9 @@ describe( 'Jobs', function() {
 			} )
 			.then( function( results ) {
 				tasks = results;
+
+				bender.on( 'tasks:add', addSpy );
+				bender.on( 'tasks:remove', removeSpy );
 
 				return bender.jobs.edit( id, {
 					description: 'new description',
@@ -417,6 +455,8 @@ describe( 'Jobs', function() {
 			} )
 			.then( function( results ) {
 				expect( results ).to.deep.equal( tasks );
+				expect( addSpy.called ).to.be.false;
+				expect( removeSpy.called ).to.be.false;
 			} );
 	} );
 
@@ -539,106 +579,79 @@ describe( 'Jobs', function() {
 		expect( results[ 3 ].status ).to.equal( bender.jobs.STATUS.PASSED );
 	} );
 
-	it( 'should fetch a waiting task for specified client', function( done ) {
-		bender.jobs.create( job3 ).done( function() {
-			bender.jobs.fetch( client, function callback( data ) {
-				expect( data ).to.be.an( 'object' );
-				expect( data ).to.include.keys( [ 'id', 'jobId', 'tbId' ] );
-
-				done();
-			} );
-		} );
-	} );
-
-	it( 'should fetch a pending, but timed out task and increase it\'s retry counter', function( done ) {
-		var store = datastores[ 'browser_tasks.db' ],
-			lastStart = new Date() - ( bender.conf.testTimeout + 1000 );
-
-		function callback( args ) {
-			expect( args ).to.be.an( 'object' );
-
-			return nodeCall( store.findOne, {
-				taskName: job4.tests[ 0 ]
-			} ).then( function( task ) {
-				expect( task.retries ).to.equal( 1 );
-				expect( task.started ).to.not.equal( lastStart );
-				done();
-			} );
-		}
-
-
-		bender.jobs.create( job4 )
+	it( 'should prepare queues from unhandled tests', function() {
+		return bender.jobs.create( job3 )
 			.then( function() {
-				return nodeCall( store.update, {
-					taskName: job4.tests[ 0 ]
-				}, {
-					$set: {
-						status: bender.jobs.STATUS.PENDING,
-						// set earlier date to make it timed out
-						started: lastStart
-					}
-				} );
+				return bender.jobs.buildQueues();
 			} )
 			.then( function() {
-				bender.jobs.fetch( client, callback );
+				job3.browsers.forEach( function( browser ) {
+					var queue = bender.queues.findQueue( browser );
+
+					expect( queue ).to.exist;
+					expect( queue.tests.length ).to.equal( job3.tests.length );
+				} );
 			} );
 	} );
 
-	it( 'should mark a task with exceeded retry limit as failed', function( done ) {
-		var store = datastores[ 'browser_tasks.db' ];
-
-		function callback( args ) {
-			expect( args ).to.not.exist;
-
-			return nodeCall( store.findOne, {
-				taskName: job4.tests[ 0 ]
-			} ).done( function( task ) {
-				expect( task.status ).to.equal( bender.jobs.STATUS.FAILED );
-				done();
-			} );
-		}
-
-		bender.jobs.create( job4 )
+	it( 'should complete a successful task', function() {
+		return bender.jobs.create( job3 )
 			.then( function() {
-				return nodeCall( store.update, {
-					taskName: job4.tests[ 0 ]
-				}, {
-					$set: {
-						status: bender.jobs.STATUS.PENDING,
-						// set higher than the limit retry count
-						retries: bender.conf.testRetries + 1,
-						started: new Date() - ( bender.conf.testTimeout + 1000 )
-					}
-				} );
+				return bender.jobs.buildQueues();
 			} )
 			.then( function() {
-				bender.jobs.fetch( client, callback );
+				var task = bender.queues.get( client ),
+					result = {
+						_id: task._id,
+						client: client,
+						id: task.id,
+						jobId: task.jobId,
+						success: true,
+						results: {
+							'test sample': {
+								success: true,
+								error: null
+							},
+							'test sample 2': {
+								success: true,
+								error: null
+							}
+						}
+					};
+
+				bender.jobs.completeTask( result );
+
+				return call( bender.on.bind( bender ), 'job:update' )
+					.then( function( args ) {
+						expect( args ).to.equal( task.jobId );
+					} );
 			} );
 	} );
 
 	it( 'should complete a failed task', function() {
 		return bender.jobs.create( job3 )
 			.then( function() {
-				return call( bender.jobs.fetch, client );
+				return bender.jobs.buildQueues();
 			} )
-			.then( function( task ) {
-				var result = {
-					client: client,
-					id: task.id,
-					tbId: task.tbId,
-					jobId: task.jobId,
-					success: false,
-					results: {
-						'test sample': {
-							success: false,
-							error: 'sample error'
-						},
-						'test sample 2': {
-							success: true,
-							error: null
+			.then( function() {
+				var task = bender.queues.get( client ),
+					result = {
+						_id: task._id,
+						client: client,
+						id: task.id,
+						jobId: task.jobId,
+						success: false,
+						results: {
+							'test sample': {
+								success: false,
+								error: 'failure message'
+							},
+							'test sample 2': {
+								success: true,
+								error: null
+							}
 						}
-					}
-				};
+					};
 
 				bender.jobs.completeTask( result );
 
@@ -650,32 +663,28 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should complete an ignored task', function() {
-		return bender.jobs.create( job4 )
+		return bender.jobs.create( job3 )
 			.then( function() {
-				return call( bender.jobs.fetch, client );
+				return bender.jobs.buildQueues();
 			} )
-			.then( function( task ) {
-				var result = {
-					client: client,
-					id: task.id,
-					tbId: task.tbId,
-					jobId: task.jobId,
-					success: true,
-					ignored: true,
-					results: {}
-				};
+			.then( function() {
+				var task = bender.queues.get( client ),
+					result = {
+						_id: task._id,
+						client: client,
+						id: task.id,
+						jobId: task.jobId,
+						success: true,
+						ignored: true,
+						results: {}
+					};
 
 				bender.jobs.completeTask( result );
 
-				return call( bender.on.bind( bender ), 'job:update' );
-			} )
-			.then( function() {
-				return nodeCall( datastores[ 'browser_tasks.db' ].findOne, {
-					taskName: job4.tests[ 0 ]
-				} );
-			} )
-			.then( function( task ) {
-				expect( task.status ).to.equal( bender.jobs.STATUS.IGNORED );
+				return call( bender.on.bind( bender ), 'job:update' )
+					.then( function( args ) {
+						expect( args ).to.equal( task.jobId );
+					} );
 			} );
 	} );
 } );
