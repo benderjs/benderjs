@@ -129,8 +129,8 @@ describe( 'Sockets', function() {
 			socket.disconnect();
 		} );
 
-		bender.on( 'client:disconnect', function( id ) {
-			expect( id ).to.equal( 'unknown' );
+		bender.on( 'client:disconnect', function( client ) {
+			expect( client.id ).to.equal( 'unknown' );
 			done();
 		} );
 	} );
@@ -177,8 +177,9 @@ describe( 'Sockets', function() {
 				jobId: 'bar'
 			};
 
-		bender.on( 'client:fetch', function( client, callback ) {
-			callback( task );
+		socket.on( 'run', function( test ) {
+			expect( test ).to.deep.equal( task );
+			socket.disconnect();
 		} );
 
 		socket.on( 'connect', function() {
@@ -186,10 +187,7 @@ describe( 'Sockets', function() {
 				id: id,
 				ua: ua
 			}, function callback() {
-				socket.emit( 'fetch', function( task ) {
-					expect( task ).to.equal( task );
-					socket.disconnect();
-				} );
+				bender.emit( 'client:run', id, task );
 			} );
 		} );
 
@@ -303,30 +301,6 @@ describe( 'Sockets', function() {
 					done();
 				}, 50 );
 			} );
-		} );
-	} );
-
-	it( 'should emit client\'s fetch request', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-			forceNew: true
-		} );
-
-		bender.on( 'client:fetch', function( client ) {
-			expect( client ).to.be.an( 'object' );
-			socket.disconnect();
-		} );
-
-		socket.on( 'connect', function() {
-			socket.emit( 'register', {
-				id: id,
-				ua: ua
-			}, function callback() {
-				socket.emit( 'fetch' );
-			} );
-		} );
-
-		socket.on( 'disconnect', function() {
-			done();
 		} );
 	} );
 
