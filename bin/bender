@@ -25,7 +25,6 @@ var argParser = require( 'nomnom' ),
 	applications = require( dir + 'applications' ),
 	browsers = require( dir + 'browsers' ),
 	conf = require( dir + 'config' ),
-	consoleReporter = require( dir + 'reporters/console' ),
 	constants = require( dir + 'constants' ),
 	jobs = require( dir + 'jobs' ),
 	logger = require( dir + 'logger' ),
@@ -39,6 +38,9 @@ var argParser = require( 'nomnom' ),
 	testbuilders = require( dir + 'testbuilders' ),
 	tests = require( dir + 'tests' ),
 	utils = require( dir + 'utils' ),
+
+	consoleReporter = require( dir + 'reporters/console' ),
+	dotReporter = require( dir + 'reporters/dot' ),
 
 	log = logger.create( 'cli' );
 
@@ -92,7 +94,7 @@ argParser.command( 'run' )
 	} )
 	.option( 'browser', {
 		abbr: 'b',
-		help: 'Browsers to run the tests on'
+		help: 'Browser to run the tests on'
 	} )
 	.help( 'Run the tests in a browser and output the results to the console' );
 
@@ -150,7 +152,20 @@ function handleServer( options ) {
 
 		case 'run':
 			startServer( options, function( bender ) {
+				// load standard console reporter
 				bender.plugins.add( consoleReporter );
+
+				// prepare queues for all browsers defined in the configuration file
+				bender.queues.buildQueues( bender.conf.browsers );
+
+				// build queues of the remaining jobs' tasks
+				bender.jobs.buildQueues()
+					.then( function( queue ) {
+						// feed the queues
+						Object.keys( queue ).forEach( function( name ) {
+							bender.queues.addTests( name, queue[ name ] );
+						} );
+					} );
 			} );
 			break;
 
@@ -269,18 +284,28 @@ function startServer( options, callback ) {
 }
 
 function runTests( options ) {
-	var testId = options[ 1 ],
-		browsers = options.browsers;
-
 	startServer( options, function( bender ) {
-		bender.on( 'queues:complete', function() {
-			log.info( 'Testing complete' );
-			process.exit( 0 );
-		} );
+		var testId = options[ 1 ],
+			browser = options.browser || bender.conf.startBrowser;
 
-		bender.queues.build( browsers, testId )
-			.done( function() {
-				// launch browser here
+		// use dot reporter for shorter output
+		bender.plugins.add( dotReporter );
+
+		// build a queue for specified browser
+		bender.queues.buildQueues( [ browser ] );
+
+		// if no test ID specified, run all the tests available
+		( testId ? bender.tests.get( testId ) : bender.tests.list() )
+			.then( function( tests ) {
+				tests = !Array.isArray( tests ) ? [ tests ] : tests;
+
+				// feed the queue with test(s)
+				bender.queues.addTests( browser, tests );
+			}, function( err ) {
+				log.error( 'Error while building test queue:' );
+				log.error( err.code === 'ENOENT' ? 'No test(s) found.' : String( err ) );
+				// exit on error
+				process.exit( 1 );
 			} );
 	} );
 }
