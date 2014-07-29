@@ -384,10 +384,10 @@ function initialize() {
 
 	createBenderDir()
 		.then( function() {
-			return createConfig( '.bender/bender.js' );
+			return createConfig( '.bender/' + constants.CONFIG_NAME );
 		} )
 		.then( function() {
-			return createConfig( 'bender.js' );
+			return createConfig( constants.CONFIG_NAME );
 		} )
 		.then( function() {
 			log.info( 'Created Bender configuration files' );
@@ -405,7 +405,7 @@ function initialize() {
  */
 function clean() {
 	function remove( file ) {
-		return file === 'bender.js' ?
+		return file === constants.CONFIG_NAME ?
 			when.resolve() :
 			whenNode.call( rimraf, path.join( '.bender/', file ) );
 	}
