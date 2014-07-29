@@ -19,9 +19,7 @@ var mocks = require( './fixtures/_mocks' ),
 
 describe( 'Browsers', function() {
 	var configs = {
-			invalidBrowser: {
-				browsers: [ 'Chrome35', '123IE' ]
-			}
+			invalidBrowser: [ 'Chrome35', '123IE' ]
 		},
 		clients = {
 			Chrome: {
@@ -75,7 +73,7 @@ describe( 'Browsers', function() {
 	it( 'should return a single item if passed a string to .get() function', function() {
 		var result;
 
-		bender.browsers.build( bender.conf );
+		bender.browsers.build( bender.conf.browsers );
 
 		result = bender.browsers.get( 'Chrome' );
 
@@ -86,7 +84,7 @@ describe( 'Browsers', function() {
 	it( 'should return array of items if passed array of strings to .get() function', function() {
 		var result;
 
-		bender.browsers.build( bender.conf );
+		bender.browsers.build( bender.conf.browsers );
 
 		result = bender.browsers.get( [ 'Chrome', 'Firefox' ] );
 
@@ -96,7 +94,7 @@ describe( 'Browsers', function() {
 	it( 'should add client with existing browser', function() {
 		var result;
 
-		bender.browsers.build( bender.conf );
+		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.Chrome );
 
 		result = bender.browsers.get( 'Chrome' ).clients;
@@ -106,7 +104,7 @@ describe( 'Browsers', function() {
 	} );
 
 	it( 'should emit "change" event when client is added', function( done ) {
-		bender.browsers.build( bender.conf );
+		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.on( 'change', function handleChange( browsers ) {
 			var result = bender.browsers.get( 'Firefox' ).clients;
 
@@ -121,9 +119,7 @@ describe( 'Browsers', function() {
 	} );
 
 	it( 'should add client with unknown browser to the Unknown list', function() {
-		bender.browsers.build( {
-			browsers: [ 'IE11' ]
-		} );
+		bender.browsers.build( [ 'IE11' ] );
 
 		expect( bender.browsers.unknown.get() ).to.be.empty;
 		expect( bender.browsers.clients.get() ).to.be.empty;
@@ -135,14 +131,14 @@ describe( 'Browsers', function() {
 	} );
 
 	it( 'should not add invalid client', function() {
-		bender.browsers.build( bender.conf );
+		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.Invalid );
 		expect( bender.browsers.unknown.get() ).to.be.empty;
 		expect( bender.browsers.clients.get() ).to.be.empty;
 	} );
 
 	it( 'should remove a client', function() {
-		bender.browsers.build( bender.conf );
+		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.IE9 );
 
 		expect( bender.browsers.clients.get() ).to.be.empty;
@@ -155,7 +151,7 @@ describe( 'Browsers', function() {
 	} );
 
 	it( 'should emit "change" event when client is removed', function( done ) {
-		bender.browsers.build( bender.conf );
+		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.Firefox );
 		bender.browsers.on( 'change', function handleChange() {
 			var result = bender.browsers.get( 'Firefox' ).clients;
@@ -173,7 +169,7 @@ describe( 'Browsers', function() {
 		var id = clients.Chrome.id,
 			results;
 
-		bender.browsers.build( bender.conf );
+		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.Chrome );
 
 		results = bender.browsers.get( 'Chrome' ).clients,
@@ -195,7 +191,7 @@ describe( 'Browsers', function() {
 		var id = clients.Chrome.id,
 			client;
 
-		bender.browsers.build( bender.conf );
+		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.Chrome );
 
 		client = bender.browsers.get( 'Chrome' ).clients.get( id );
