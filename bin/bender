@@ -27,6 +27,7 @@ var argParser = require( 'nomnom' ),
 	conf = require( dir + 'config' ),
 	constants = require( dir + 'constants' ),
 	jobs = require( dir + 'jobs' ),
+	launcher = require( dir + 'launcher' ),
 	logger = require( dir + 'logger' ),
 	middlewares = require( dir + 'middlewares' ),
 	pagebuilders = require( dir + 'pagebuilders' ),
@@ -230,7 +231,7 @@ function startServer( options, callback ) {
 			delimeter: ':'
 		} ),
 		modules = [
-			utils, constants, logger, plugins, applications, testbuilders, pagebuilders,
+			utils, constants, logger, plugins, launcher, applications, testbuilders, pagebuilders,
 			middlewares, browsers, tests, jobs, template, sockets, server, queues
 		];
 
@@ -250,20 +251,20 @@ function startServer( options, callback ) {
 			process.exit( 1 );
 		}
 
-		var port = options.port || bender.conf.port || constants.PORT,
-			hostname = options.hostname || bender.conf.hostname || constants.HOSTNAME;
+		bender.conf.port = options.port || bender.conf.port || constants.PORT;
+		bender.conf.hostname = options.hostname || bender.conf.hostname || constants.HOSTNAME;
+		bender.conf.address = 'http://' + bender.conf.hostname + ':' + bender.conf.port;
 
 		bender.server
 			.create()
 			.listen(
-				port,
-				hostname,
+				bender.conf.port,
+				bender.conf.hostname,
 				function() {
 					log.info(
-						'Bender.js v%s Server started at http://%s:%s',
+						'Bender.js v%s Server started at %s',
 						constants.VERSION,
-						hostname,
-						port
+						bender.conf.address
 					);
 
 					if ( typeof callback == 'function' ) {
@@ -273,9 +274,8 @@ function startServer( options, callback ) {
 			.on( 'error', function( err ) {
 				if ( err.code === 'EADDRINUSE' ) {
 					log.error(
-						'Address http://%s:%s in use. Please try running Bender on a different port.',
-						hostname,
-						port
+						'Address %s in use. Please try running Bender on a different port.',
+						bender.conf.address
 					);
 					process.exit( 1 );
 				}
@@ -287,6 +287,8 @@ function runTests( options ) {
 	startServer( options, function( bender ) {
 		var testId = options[ 1 ],
 			browser = options.browser || bender.conf.startBrowser;
+
+		bender.browsers.build( [ browser ] );
 
 		// use dot reporter for shorter output
 		bender.plugins.add( dotReporter );
@@ -301,6 +303,8 @@ function runTests( options ) {
 
 				// feed the queue with test(s)
 				bender.queues.addTests( browser, tests );
+
+				bender.launcher.launch( browser );
 			}, function( err ) {
 				log.error( 'Error while building test queue:' );
 				log.error( err.code === 'ENOENT' ? 'No test(s) found.' : String( err ) );
