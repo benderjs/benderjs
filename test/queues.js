@@ -192,24 +192,25 @@ describe( 'Queues', function() {
 		bender.emit( 'client:afterRegister', client );
 	} );
 
-	it( 'should emit client:run event after a client completes a test and there\'s another test for him', function( done ) {
-		var test;
+	it( 'should emit client:run event after a client completes a test' +
+		' and there\'s another test for him', function( done ) {
+			var test;
 
-		bender.on( 'client:run', function( id, test ) {
-			expect( id ).to.equal( client.id );
-			expect( test ).to.equal( tests[ 1 ] );
-			done();
+			bender.on( 'client:run', function( id, test ) {
+				expect( id ).to.equal( client.id );
+				expect( test ).to.equal( tests[ 1 ] );
+				done();
+			} );
+
+			bender.queues.buildQueues( browsers );
+			bender.queues.addTests( client, tests );
+
+			test = bender.queues.getTest( client );
+
+			bender.emit( 'client:complete', _.merge( {
+				client: client
+			}, test ) );
 		} );
-
-		bender.queues.buildQueues( browsers );
-		bender.queues.addTests( client, tests );
-
-		test = bender.queues.getTest( client );
-
-		bender.emit( 'client:complete', _.merge( {
-			client: client
-		}, test ) );
-	} );
 
 	it( 'should emit client:run while adding new tests to the queue and there\'s a client waiting', function( done ) {
 		var test;

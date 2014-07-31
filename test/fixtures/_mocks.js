@@ -268,7 +268,7 @@ moduleMocks = {
 				return when.resolve( 'newJobId' );
 			},
 
-			edit: function( id, data ) {
+			edit: function( id ) {
 				var job = bender.jobs.find( id );
 
 				return when.resolve( job );

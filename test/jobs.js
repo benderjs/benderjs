@@ -52,12 +52,6 @@ describe( 'Jobs', function() {
 			filter: [ 'foo' ],
 			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
 		},
-		job4 = {
-			browsers: [ 'chrome' ],
-			description: 'test job 4',
-			filter: [ 'foo' ],
-			tests: [ 'test/fixtures/tests/test/1' ]
-		},
 		client = {
 			id: 12345,
 			browser: 'chrome',

@@ -14,8 +14,6 @@
 var mocks = require( '../fixtures/_mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
-	vm = require( 'vm' ),
-	_ = require( 'lodash' ),
 	testdata = rewire( '../../lib/pagebuilders/testdata' );
 
 describe( 'Page Builders - Test Data', function() {

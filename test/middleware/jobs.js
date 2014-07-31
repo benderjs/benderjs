@@ -145,7 +145,6 @@ describe( 'Middleware - Jobs', function() {
 
 	it( 'should serve task assets for jobs with no snapshot taken', function( done ) {
 		var url = 'ECNtxgcMzm94aQc9/tests/test/fixtures/tests/_assets/asset.js',
-			oldCwd = process.cwd,
 			file = path.resolve( 'test/fixtures/tests/_assets/asset.js' );
 
 		instance.listen( 1031, function() {
