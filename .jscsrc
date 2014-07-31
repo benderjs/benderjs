@@ -5,7 +5,6 @@
 		"coverage/*",
 		"out/*"
 	],
-
 	"requireCurlyBraces": [
 		"if", "else", "for", "while", "do", "switch", "try", "catch"
 	],
@@ -33,25 +32,26 @@
 	"disallowSpaceAfterObjectKeys": true,
 	"requireCommaBeforeLineBreak": true,
 	"requireOperatorBeforeLineBreak": [
-		"?", "=", "+", "-", "/", "*", "==", "===", "!=", "!==", ">", ">=", "<", "<=", "|", "||", "&", "&&", "^",
-		"+=", "*=", "-=", "/=", "^="
-	],
-	"disallowLeftStickedOperators": [
-		"?", "=", "+", "-", "/", "*", "==", "===", "!=", "!==", ">", ">=", "<", "<=", "|", "||", "&", "&&", "^",
-		"+=", "*=", "-=", "/=", "^="
-	],
-	"disallowRightStickedOperators": [
-		"?", "=", "/", "*", "==", "===", "!=", "!==", ">", ">=", "<", "<=", "|", "||", "&", "&&", "^",
-		"+=", "*=", "-=", "/=", "^="
+		"?", "=", "+", "-", "/", "*", "==", "===", "!=", "!==", ">", ">=", "<", "<=", "|", "||", "&", "&&", "^", "+=", "*=",
+		"-=", "/=", "^="
 	],
 	"requireSpaceBeforeBinaryOperators": [
-		"+", "-", "/", "*", "==", "===", "!=", "!=="
+		"+", "-", "/", "*", "=", "==", "===", "!=", "!==", ">", ">=", "<", "<=", "|", "||", "&", "&&", "^", "+=", "*=", "-=",
+		"/=", "^="
+	],
+	"requireSpaceAfterBinaryOperators": [
+		"+", "-", "/", "*", "=", "==", "===", "!=", "!==", ">", ">=", "<", "<=", "|", "||", "&", "&&", "^", "+=", "*=", "-=",
+		"/=", "^="
 	],
 	"disallowSpaceAfterPrefixUnaryOperators": [
 		"++", "--", "+", "-", "~", "!"
 	],
-	"disallowSpaceBeforePostfixUnaryOperators": [ "++", "--" ],
-	"disallowKeywords": [ "with" ],
+	"disallowSpaceBeforePostfixUnaryOperators": [
+		"++", "--"
+	],
+	"disallowKeywords": [
+		"with"
+	],
 	"validateLineBreaks": "LF",
 	"validateQuoteMarks": {
 		"mark": "'",
@@ -60,11 +60,13 @@
 	"validateIndentation": "\t",
 	"disallowMixedSpacesAndTabs": true,
 	"disallowTrailingWhitespace": true,
-	"disallowKeywordsOnNewLine": [ "else", "catch" ],
+	"disallowKeywordsOnNewLine": [
+		"else", "catch"
+	],
 	"maximumLineLength": 120,
-	"safeContextKeyword": [ "that", "bender" ],
+	"safeContextKeyword": [
+		"that", "bender"
+	],
 	"requireDotNotation": true,
-	"disallowYodaConditions": true,
-	"requireLeftStickedOperators": [ "," ],
-	"requireRightStickedOperators": [ "!" ]
+	"disallowYodaConditions": true
 }
