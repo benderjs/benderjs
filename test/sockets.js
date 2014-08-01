@@ -58,8 +58,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should accept dashboard connection and notify about disconnect', function( done ) {
-		var socket = io( 'http://localhost:1031/dashboard', {
-			forceNew: true
+		var socket = io.connect( 'http://localhost:1031/dashboard', {
+			'force new connection': true
 		} );
 
 		socket.on( 'connect', function() {
@@ -73,8 +73,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should accept dashboard registration and emit browsers:update after that', function( done ) {
-		var socket = io( 'http://localhost:1031/dashboard', {
-				forceNew: true
+		var socket = io.connect( 'http://localhost:1031/dashboard', {
+				'force new connection': true
 			} ),
 			spy = sinon.spy();
 
@@ -97,8 +97,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should notify connected dashboards about job update', function( done ) {
-		var socket = io( 'http://localhost:1031/dashboard', {
-				forceNew: true
+		var socket = io.connect( 'http://localhost:1031/dashboard', {
+				'force new connection': true
 			} ),
 			jobId = 'foo';
 
@@ -121,8 +121,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should accept client connection and notify about disconnect', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-			forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+			'force new connection': true
 		} );
 
 		socket.on( 'connect', function() {
@@ -136,8 +136,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should accept client registration', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-			forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+			'force new connection': true
 		} );
 
 		socket.on( 'connect', function() {
@@ -168,8 +168,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should run a task on a connected client and mark him as busy', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-				forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+				'force new connection': true
 			} ),
 			task = {
 				id: 'tests/test/1',
@@ -197,8 +197,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should emit complete event on client\'s request', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-			forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+			'force new connection': true
 		} );
 
 		bender.on( 'client:complete', function( data ) {
@@ -225,8 +225,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should ignore complete requests from unknown clients', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-				forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+				'force new connection': true
 			} ),
 			spy = sinon.spy();
 
@@ -248,8 +248,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should emit results from a client', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-				forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+				'force new connection': true
 			} ),
 			testResult = _.cloneDeep( result );
 
@@ -272,7 +272,7 @@ describe( 'Sockets', function() {
 		} );
 
 		bender.on( 'client:result', function( data ) {
-			expect( data ).to.deep.equal( testResult );
+			expect( data ).to.have.keys( Object.keys( testResult ) );
 			socket.disconnect();
 		} );
 
@@ -282,8 +282,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should ignore result requests from unknown clients', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-				forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+				'force new connection': true
 			} ),
 			spy = sinon.spy();
 
@@ -305,8 +305,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should ignore fetch requests from unknown clients', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-				forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+				'force new connection': true
 			} ),
 			spy = sinon.spy();
 
@@ -328,8 +328,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should emit client\'s error', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-				forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+				'force new connection': true
 			} ),
 			error = 'foo';
 
@@ -348,8 +348,8 @@ describe( 'Sockets', function() {
 	} );
 
 	it( 'should emit client\'s log', function( done ) {
-		var socket = io( 'http://localhost:1031/client', {
-				forceNew: true
+		var socket = io.connect( 'http://localhost:1031/client', {
+				'force new connection': true
 			} ),
 			msg = 'foo';
 
