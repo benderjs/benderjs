@@ -202,10 +202,10 @@
 		};
 	}
 
-	socket = io( '/client', {
-		reconnection: true,
-		reconnectionDelay: 2000,
-		reconnectionDelayMax: 2000
+	socket = io.connect( '/client', {
+		'reconnection delay': 2000,
+		'reconnection limit': 2000,
+		'max reconnection attempts': Infinity
 	} );
 
 	// handle socket connection status

@@ -36,14 +36,11 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 	} );
 
 	Sockets.addInitializer( function() {
-		var socketUrl = 'http://' + window.location.hostname + ':' +
-			window.location.port + '/dashboard',
-			options = {
-				reconnection: true,
-				reconnectionDelay: 2000,
-				reconnectionDelayMax: 2000
-			},
-			socket = io( socketUrl, options );
+		var socket = io.connect( '/dashboard', {
+			'reconnection delay': 2000,
+			'reconnection limit': 2000,
+			'max reconnection attempts': Infinity
+		} );
 
 		Sockets.socket = socket;
 
