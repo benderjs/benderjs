@@ -167,6 +167,7 @@
 		};
 
 		this.stop = function() {
+			var frame;
 			// close everything on disconnect
 			if ( this.running ) {
 				this.running = false;
@@ -201,13 +202,11 @@
 		};
 	}
 
-	socket = io(
-		'http://' + window.location.hostname + ':' + ( window.location.port || 80 ) + '/client', {
-			reconnection: true,
-			reconnectionDelay: 2000,
-			reconnectionDelayMax: 2000
-		}
-	);
+	socket = io( '/client', {
+		reconnection: true,
+		reconnectionDelay: 2000,
+		reconnectionDelayMax: 2000
+	} );
 
 	// handle socket connection status
 	socket
@@ -221,10 +220,10 @@
 	}
 
 	if ( window.addEventListener ) {
-		window.addEventListener( 'load', disconnect, false );
+		window.addEventListener( 'unload', disconnect, false );
 	} else if ( window.attachEvent ) {
-		window.attachEvent( 'onload', disconnect );
+		window.attachEvent( 'onunload', disconnect );
 	} else {
-		window.onload = disconnect;
+		window.onunload = disconnect;
 	}
 } )();
