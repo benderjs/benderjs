@@ -4,59 +4,28 @@
  * Copyright (c) 2014, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
  *
- * @file Bender command line interface
+ * @file Bender executable
  */
 
 'use strict';
 
 var argParser = require( 'nomnom' ),
-	path = require( 'path' ),
-	fs = require( 'fs' ),
-	when = require( 'when' ),
-	whenCb = require( 'when/callbacks' ),
-	whenNode = require( 'when/node' ),
-	whenFs = whenNode.liftAll( fs ),
-	broadway = require( 'broadway' ),
-	forever = require( 'forever' ),
-	rimraf = require( 'rimraf' ),
-
 	dir = '../lib/',
-
-	applications = require( dir + 'applications' ),
-	browsers = require( dir + 'browsers' ),
-	conf = require( dir + 'config' ),
 	constants = require( dir + 'constants' ),
-	jobs = require( dir + 'jobs' ),
-	launcher = require( dir + 'launcher' ),
-	logger = require( dir + 'logger' ),
-	middlewares = require( dir + 'middlewares' ),
-	pagebuilders = require( dir + 'pagebuilders' ),
-	plugins = require( dir + 'plugins' ),
-	queues = require( dir + 'queues' ),
-	server = require( dir + 'server' ),
-	sockets = require( dir + 'sockets' ),
-	template = require( dir + 'template' ),
-	testbuilders = require( dir + 'testbuilders' ),
-	tests = require( dir + 'tests' ),
-	utils = require( dir + 'utils' ),
-
-	consoleReporter = require( dir + 'reporters/console' ),
-	dotReporter = require( dir + 'reporters/dot' ),
-
-	log = logger.create( 'cli' );
+	cli = require( dir + 'cli' );
 
 argParser.script( 'bender' );
 
 argParser.command( 'init' )
-	.callback( initialize )
+	.callback( cli.initialize )
 	.help( 'Initialize Bender.js for this directory' );
 
 argParser.command( 'clean' )
-	.callback( clean )
+	.callback( cli.clean )
 	.help( 'Clean all Bender.js local files except the configuration' );
 
 argParser.command( 'server' )
-	.callback( handleServer )
+	.callback( cli.handleServer )
 	.option( 'port', {
 		abbr: 'p',
 		help: 'Port on which the server will run'
@@ -74,12 +43,12 @@ argParser.command( 'server' )
 
 argParser.command( 'version' )
 	.callback( function() {
-		log.info( 'Bender.js v%s', constants.VERSION );
+		console.log( 'Bender.js v%s', constants.VERSION );
 	} )
 	.help( 'Print Bender.js version' );
 
 argParser.command( 'run' )
-	.callback( runTests )
+	.callback( cli.runTests )
 	.option( 'port', {
 		abbr: 'p',
 		help: 'Port on which the server will run'
@@ -100,333 +69,3 @@ argParser.command( 'run' )
 	.help( 'Run the tests in a browser and output the results to the console' );
 
 argParser.parse();
-
-/**
- * Handle server command line
- * @param {Object} options Command line options
- */
-function handleServer( options ) {
-	switch ( options[ 1 ] ) {
-		case 'start':
-			getMeta( function( meta ) {
-				if ( meta ) {
-					log.info( 'Bender server is already running' );
-				} else {
-					startDaemon();
-				}
-			} );
-			break;
-
-		case 'stop':
-			forever.stop( __filename )
-				.on( 'stop', function() {
-					log.info( 'Bender server stopped successfully' );
-				} )
-				.on( 'error', function() {
-					log.error( 'Bender server not running or user not authorized to stop it' );
-				} );
-			break;
-
-		case 'restart':
-			getMeta( function( meta ) {
-				if ( meta ) {
-					forever.stop( __filename )
-						.on( 'stop', function() {
-							log.info( 'Bender server stopped successfully' );
-							startDaemon();
-						} );
-				} else {
-					startDaemon();
-				}
-			} );
-			break;
-
-		case 'status':
-			getMeta( function( meta ) {
-				if ( meta ) {
-					log.info( 'Bender server is running since ' + new Date( meta.ctime ) );
-				} else {
-					log.error( 'Bender server is not running or user not authorized to see the status' );
-				}
-			} );
-			break;
-
-		case 'run':
-			startServer( options, function( bender ) {
-				// load standard console reporter
-				bender.plugins.add( consoleReporter );
-
-				// prepare queues for all browsers defined in the configuration file
-				bender.queues.buildQueues( bender.conf.browsers );
-
-				// build queues of the remaining jobs' tasks
-				bender.jobs.buildQueues()
-					.then( function( queue ) {
-						// feed the queues
-						Object.keys( queue ).forEach( function( name ) {
-							bender.queues.addTests( name, queue[ name ] );
-						} );
-					} );
-			} );
-			break;
-
-		default: // TODO improve this help part / include in cli help
-			log.info( 'Use server start, stop, restart or status commands' );
-	}
-}
-
-/**
- * Get child process metadata
- * @param  {Function} callback Function called when done
- */
-function getMeta( callback ) {
-	forever.list( false, function( err, list ) {
-		if ( err || !list ) {
-			return callback( null );
-		}
-
-		list.some( function( meta ) {
-			if ( meta.file === __filename ) {
-				callback( meta );
-				return true;
-			}
-		} );
-	} );
-}
-
-/**
- * Restart this script as a deamon
- */
-function startDaemon() {
-	var opts, child;
-
-	opts = process.argv.slice( 2 );
-	opts[ 1 ] = 'run';
-
-	child = forever.startDaemon( __filename, {
-		max: 3,
-		silent: false,
-		outFile: 'bender-out.log',
-		errFile: 'bender-err.log',
-		options: opts
-	} );
-
-	child.on( 'error', function( err ) {
-		log.error( 'child process error', err );
-	} );
-
-	child.on( 'exit', function() {
-		log.error( 'child process exit after 3 retries' );
-	} );
-
-	log.info( 'Bender server started successfully' );
-}
-
-/**
- * Start bender server
- * @param  {Object} options Command line options
- */
-function startServer( options, callback ) {
-	var bender = new broadway.App( {
-			delimeter: ':'
-		} ),
-		modules = [
-			utils, constants, logger, plugins, launcher, applications, testbuilders, pagebuilders,
-			middlewares, browsers, tests, jobs, template, sockets, server, queues
-		];
-
-	bender.use( conf, {
-		path: path.resolve( options.config )
-	} );
-
-	modules.forEach( function( module ) {
-		bender.use( module );
-	} );
-
-	bender.plugins.load();
-
-	bender.init( function( err ) {
-		if ( err ) {
-			log.error( err );
-			process.exit( 1 );
-		}
-
-		bender.conf.port = options.port || bender.conf.port || constants.PORT;
-		bender.conf.hostname = options.hostname || bender.conf.hostname || constants.HOSTNAME;
-		bender.conf.address = 'http://' + bender.conf.hostname + ':' + bender.conf.port;
-
-		bender.server
-			.create()
-			.listen(
-				bender.conf.port,
-				bender.conf.hostname,
-				function() {
-					log.info(
-						'Bender.js v%s Server started at %s',
-						constants.VERSION,
-						bender.conf.address
-					);
-
-					if ( typeof callback == 'function' ) {
-						callback( bender );
-					}
-				} )
-			.on( 'error', function( err ) {
-				if ( err.code === 'EADDRINUSE' ) {
-					log.error(
-						'Address %s in use. Please try running Bender on a different port.',
-						bender.conf.address
-					);
-					process.exit( 1 );
-				}
-			} );
-	} );
-}
-
-function runTests( options ) {
-	startServer( options, function( bender ) {
-		var testId = options[ 1 ],
-			browser = options.browser || bender.conf.startBrowser,
-			exitCode = 1;
-
-		bender.browsers.build( [ browser ] );
-
-		// use dot reporter for shorter output
-		bender.plugins.add( dotReporter );
-
-		// build a queue for specified browser
-		bender.queues.buildQueues( [ browser ] );
-
-		// shut down bender when queues are done
-		bender.on( 'queues:result', function( errors ) {
-			exitCode = errors.length ? 1 : 0;
-		} );
-
-		// shut down bender when instance is stopped
-		bender.on( 'browser:stopped', function() {
-			process.exit( exitCode );
-		} );
-
-		// if no test ID specified, run all the tests available
-		( testId ? bender.tests.get( testId ) : bender.tests.list() )
-			.then( function( tests ) {
-				tests = !Array.isArray( tests ) ? [ tests ] : tests;
-
-				// feed the queue with test(s)
-				bender.queues.addTests( browser, tests );
-
-				// launch a browser
-				bender.launcher.launch( browser );
-			}, function( err ) {
-				log.error( 'Error while building test queue:' );
-				log.error( err.code === 'ENOENT' ? 'No test(s) found.' : String( err ) );
-				// exit on error
-				process.exit( 1 );
-			} );
-	} );
-}
-
-/**
- * Initialize Bender in current directory
- */
-function initialize() {
-	var defaultConfig = buildDefaultConfig();
-
-	// build default configuration file from schema
-	function buildDefaultConfig() {
-		var schema = require( '../lib/config-schema.js' ),
-			example = [ '/**', ' * Bender configuration file', ' * ' ],
-			props = schema.properties,
-			keys = Object.keys( props ),
-			longest = 0;
-
-		// create documentation for config option
-		function addParam( name ) {
-			var type = props[ name ].type,
-				line;
-
-			type = type.charAt( 0 ).toUpperCase() + type.slice( 1 );
-
-			line = ' * @param {' + type + '}' + new Array( 8 - type.length + 2 ).join( ' ' ) + name;
-			line += ( new Array( longest - name.length ).join( ' ' ) ) + props[ name ].description;
-
-			if ( schema.required.indexOf( name ) > -1 ) {
-				line += ' (Required)';
-			}
-
-			example.push( line );
-		}
-
-		longest = Math.max.apply( Math, keys.map( function( key ) {
-			return key.length;
-		} ) );
-		longest = longest + 4 - ( longest % 4 );
-
-		keys.forEach( addParam );
-
-		example.push(
-			' */\n', 'var config = {', '\t// put your configuration here',
-			'};\n', 'module.exports = config;'
-		);
-
-		return example.join( '\n' );
-	}
-
-	// create Bender configuration file with default content
-	function createConfig( file ) {
-		return whenCb
-			.call( fs.exists, file )
-			.then( function( exists ) {
-				if ( !exists ) {
-					return whenFs.writeFile( file, defaultConfig );
-				}
-			} );
-	}
-
-	// create a directory for Bender local resources
-	function createBenderDir() {
-		return whenCb
-			.call( fs.exists, '.bender/' )
-			.then( function( exists ) {
-				if ( !exists ) {
-					return whenFs.mkdir( '.bender/' );
-				}
-			} );
-	}
-
-	createBenderDir()
-		.then( function() {
-			return createConfig( '.bender/' + constants.CONFIG_NAME );
-		} )
-		.then( function() {
-			return createConfig( constants.CONFIG_NAME );
-		} )
-		.then( function() {
-			log.info( 'Created Bender configuration files' );
-		}, function( err ) {
-			log.error( 'Error while initializing Bender', err );
-		} )
-	// TODO remove after disabling nodetime
-	.finally( function() {
-		process.exit( 1 );
-	} );
-}
-
-/**
- * Remove all files from .bender/ directory except bender.js configuration file
- */
-function clean() {
-	function remove( file ) {
-		return file === constants.CONFIG_NAME ?
-			when.resolve() :
-			whenNode.call( rimraf, path.join( '.bender/', file ) );
-	}
-
-	whenFs.readdir( '.bender/' )
-		.then( function( files ) {
-			return when.map( files, remove );
-		} )
-		.done( function() {
-			log.info( 'Removed Bender local files' );
-		} );
-}
