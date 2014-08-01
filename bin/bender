@@ -286,7 +286,8 @@ function startServer( options, callback ) {
 function runTests( options ) {
 	startServer( options, function( bender ) {
 		var testId = options[ 1 ],
-			browser = options.browser || bender.conf.startBrowser;
+			browser = options.browser || bender.conf.startBrowser,
+			exitCode = 1;
 
 		bender.browsers.build( [ browser ] );
 
@@ -296,6 +297,16 @@ function runTests( options ) {
 		// build a queue for specified browser
 		bender.queues.buildQueues( [ browser ] );
 
+		// shut down bender when queues are done
+		bender.on( 'queues:result', function( errors ) {
+			exitCode = errors.length ? 1 : 0;
+		} );
+
+		// shut down bender when instance is stopped
+		bender.on( 'browser:stopped', function() {
+			process.exit( exitCode );
+		} );
+
 		// if no test ID specified, run all the tests available
 		( testId ? bender.tests.get( testId ) : bender.tests.list() )
 			.then( function( tests ) {
@@ -304,6 +315,7 @@ function runTests( options ) {
 				// feed the queue with test(s)
 				bender.queues.addTests( browser, tests );
 
+				// launch a browser
 				bender.launcher.launch( browser );
 			}, function( err ) {
 				log.error( 'Error while building test queue:' );
