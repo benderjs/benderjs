@@ -118,7 +118,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			}, this ) );
 
 			this.collection.fetch( {
-				reset: true
+				reset: true,
+				force: true
 			} );
 		},
 
