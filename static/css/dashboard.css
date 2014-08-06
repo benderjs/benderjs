@@ -44,8 +44,14 @@ th:last-child {
 	background: #fff;
 }
 
-.navbar-header {
-	width: 100%;
+@media (min-width: 768px) {
+	.navbar-header {
+		width: 100%;
+	}
+
+	.navbar .capture-button {
+		margin-right: 0;
+	}
 }
 
 .app-title,
@@ -55,6 +61,7 @@ th:last-child {
 
 .capture-button {
 	float: right;
+	margin-right: 15px;
 }
 
 .app-title {
@@ -123,6 +130,9 @@ th:last-child {
     line-height: 34px;
     font-size: 18px;
     color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .browsers th:first-child {

@@ -118,7 +118,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		onRender: function() {
 			this.ui.filter.chosen( {
-				width: '310px'
+				width: '250px'
 			} );
 
 			App.navigate( 'tests/' + this.model.get( 'filter' ).join( ',' ), {
