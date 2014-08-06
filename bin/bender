@@ -9,63 +9,85 @@
 
 'use strict';
 
-var argParser = require( 'nomnom' ),
+var scmd = require( 'subcommander' ),
 	dir = '../lib/',
 	constants = require( dir + 'constants' ),
-	cli = require( dir + 'cli' );
+	cli = require( dir + 'cli' ),
+	server;
 
-argParser.script( 'bender' );
+scmd.scriptName( 'bender' );
 
-argParser.command( 'init' )
-	.callback( cli.initialize )
-	.help( 'Initialize Bender.js for this directory' );
+scmd.command( 'init', {
+	callback: cli.initialize,
+	desc: 'Initialize Bender.js for this directory'
+} );
 
-argParser.command( 'clean' )
-	.callback( cli.clean )
-	.help( 'Clean all Bender.js local files except the configuration' );
+scmd.command( 'clean', {
+	callback: cli.clean,
+	desc: 'Clean all Bender.js local files except the configuration'
+} );
 
-argParser.command( 'server' )
-	.callback( cli.handleServer )
+scmd
 	.option( 'port', {
 		abbr: 'p',
-		help: 'Port on which the server will run'
+		desc: 'Port on which the server will listen'
 	} )
 	.option( 'hostname', {
-		abbr: 'H', // YEAH... should be "h" but it's reserved for nomnom's help
-		help: 'Hostname used to run server'
+		abbr: 'H', // "h" is reserved for "help"
+		desc: 'Hostname used to run the server'
 	} )
 	.option( 'config', {
 		abbr: 'c',
 		default: constants.CONFIG_NAME,
-		help: 'Alternative path to Bender.js configuration file'
-	} )
-	.help( 'Start Bender.js server' );
+		desc: 'Alternative path to Bender.js configuration file'
+	} );
 
-argParser.command( 'version' )
-	.callback( function() {
+server = scmd
+	.command( 'server', {
+		callback: cli.handleServer,
+		desc: 'Handle Bender.js server'
+	} );
+
+server.command( 'start', {
+	callback: cli.serverStart,
+	desc: 'Start the server as a daemon'
+} );
+
+server.command( 'stop', {
+	callback: cli.serverStop,
+	desc: 'Stop the server'
+} );
+
+server.command( 'status', {
+	callback: cli.serverStatus,
+	desc: 'Show the server\'s status'
+} );
+
+server.command( 'restart', {
+	callback: cli.serverRestart,
+	desc: 'Restart the server'
+} );
+
+server.command( 'run', {
+	callback: cli.serverRun,
+	desc: 'Run the server in a verbose mode'
+} );
+
+scmd.command( 'version', {
+	callback: function() {
 		console.log( 'Bender.js v%s', constants.VERSION );
-	} )
-	.help( 'Print Bender.js version' );
+	},
+	desc: 'Print Bender.js version'
+} );
 
-argParser.command( 'run' )
-	.callback( cli.runTests )
-	.option( 'port', {
-		abbr: 'p',
-		help: 'Port on which the server will run'
-	} )
-	.option( 'hostname', {
-		abbr: 'H', // YEAH... should be "h" but it's reserved for nomnom's help
-		help: 'Hostname used to run server'
-	} )
-	.option( 'config', {
-		abbr: 'c',
-		default: constants.CONFIG_NAME,
-		help: 'Alternative path to Bender.js configuration file'
+scmd
+	.command( 'run', {
+		callback: cli.runTests,
+		desc: 'Run the tests in a browser and output the results to the console'
 	} )
 	.option( 'browser', {
 		abbr: 'b',
-		help: 'Browser to run the tests on'
-	} )
-	.help( 'Run the tests in a browser and output the results to the console' );
+		desc: 'Browser to run the tests on'
+	} );
 
-argParser.parse();
+scmd.parse();
