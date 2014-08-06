@@ -8,6 +8,30 @@
 App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	'use strict';
 
+	Jobs.templateHelpers = {
+		// build browser object from a string
+		prepareBrowser: function( browser ) {
+			var match = /^([a-z]+)(\d*)/i.exec( browser );
+
+			return match ? {
+				name: match[ 1 ].toLowerCase(),
+				version: parseInt( match[ 2 ], 10 ) || 0
+			} : browser;
+		},
+
+		getBrowsers: function( browsers ) {
+			return _.map( browsers, function( browser ) {
+				return browser.name + ( browser.version || '' );
+			} ).join( ' ' );
+		},
+
+		findBrowser: function( browsers, browser ) {
+			return _.indexOf( _.map( browsers, function( browser ) {
+				return browser.toLowerCase();
+			} ), browser.toLowerCase() ) > -1;
+		}
+	};
+
 	/**
 	 * Router for Jobs module
 	 */
@@ -128,14 +152,22 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			id: '',
 			description: '',
 			created: 0,
-			browsers: [],
-			filter: [],
-			tasks: []
+			tempBrowsers: null,
+			browsers: null,
+			filter: null,
+			tasks: null
 		},
 
 		urlRoot: '/jobs/',
 
 		oldFetch: Backbone.Model.prototype.fetch,
+
+		initialize: function() {
+			this
+				.set( 'browsers', [] )
+				.set( 'filter', [] )
+				.set( 'tasks', [] );
+		},
 
 		validate: function( attrs ) {
 			if ( !attrs.browsers.length ) {
@@ -180,7 +212,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.JobView = App.Common.TableView.extend( {
 		template: '#job',
 		className: '',
-		templateHelpers: App.Common.templateHelpers,
+		templateHelpers: _.extend( {}, Jobs.templateHelpers, App.Common.templateHelpers ),
 		childView: Jobs.TaskView,
 
 		events: {
@@ -313,69 +345,93 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		events: {
-			'click .dropdown-menu a': 'addBrowser',
+			'change @ui.browsers': 'updateBrowsers',
 			'click @ui.save': 'saveJob',
-			'click .add-captured-button': 'addCaptured'
+			'click .add-captured-button': 'addCaptured',
+			'click .add-all-button': 'addAll'
 		},
 
-		templateHelpers: {
-			getBrowsers: function( browsers ) {
-				return _.map( browsers, function( browser ) {
-					return browser.name + ( browser.version || '' );
-				} ).join( ' ' );
-			}
-		},
+		templateHelpers: Jobs.templateHelpers,
 
 		initialize: function() {
 			this.listenTo( this.model, 'invalid', this.showError );
 			this.listenTo( this.model, 'sync', this.handleSave );
+
+			this.model.set( 'tempBrowsers', [].concat( this.model.get( 'browsers' ) ), {
+				silent: true
+			} );
 		},
 
-		getBrowsersArray: function() {
-			return _.compact( this.ui.browsers.val().replace( /^\s+|\s+$/g, '' ).split( /\s+/ ) );
+		onRender: function() {
+			App.Common.ModalView.prototype.onRender.apply( this, arguments );
+
+			this.ui.browsers.chosen( {
+				width: '100%'
+			} );
 		},
 
-		addBrowser: function( event ) {
-			var browsers = this.getBrowsersArray(),
-				name = $( event.target ).text().replace( /^\s+|\s+$/g, '' ),
-				pattern = new RegExp( '(?:^|,)' + name + '(?:,|$)', 'i' );
+		updateBrowsers: function( event, params ) {
+			var browsers = this.model.get( 'tempBrowsers' ),
+				idx;
 
-			if ( name && !pattern.test( browsers.join( ',' ) ) ) {
-				browsers = browsers.concat( name );
-
-				this.ui.browsers.val( browsers.join( ' ' ) );
+			if ( params.selected ) {
+				browsers.push( params.selected.toLowerCase() );
+			} else if ( params.deselected &&
+				( idx = _.indexOf( browsers, params.deselected.toLowerCase() ) ) > -1 ) {
+				browsers.splice( idx, 1 );
 			}
+
+			this.model.set( 'tempBrowsers', browsers, {
+				silent: true
+			} );
 		},
 
 		addCaptured: function() {
-			var current = this.getBrowsersArray(),
-				captured = [];
+			var current = this.model.get( 'tempBrowsers' ) || [],
+				that = this,
+				captured = [],
+				toAdd;
 
 			App.Browsers.browsersList.each( function( browser ) {
 				var clients = browser.get( 'clients' );
 
 				if ( clients && clients.length ) {
-					captured.push( browser.id );
+					captured.push( browser.id.toLowerCase() );
 				}
 			} );
 
-			// add captured browsers omitting those already included
-			function addBrowsers() {
-				var currentLower = _.map( current, function( browser ) {
-						return browser.toLowerCase();
-					} ),
-					result = [].concat( current );
+			toAdd = _.uniq( current.concat( captured ) );
 
-				_.each( captured, function( browser ) {
-					if ( currentLower.indexOf( browser.toLowerCase() ) === -1 ) {
-						result.push( browser );
-					}
-				} );
+			this.model.set( 'tempBrowsers', toAdd, {
+				silent: true
+			} );
 
-				return result;
-			}
+			_.each( toAdd, function( id ) {
+				that.ui.browsers.find( 'option[value="' + id + '"]' ).attr( 'selected', true );
+			} );
 
-			this.ui.browsers.val( ( current.length ? addBrowsers() : captured ).join( ' ' ) );
+			this.ui.browsers.trigger( 'chosen:updated' );
+		},
+
+		addAll: function() {
+			var that = this,
+				browsers = [];
+
+			App.Browsers.browsersList.each( function( browser ) {
+				if ( browser.attributes.header && browser.id !== 'Unknown' ) {
+					browsers.push( browser.id.toLowerCase() );
+				}
+			} );
+
+			this.model.set( 'tempBrowsers', browsers, {
+				silent: true
+			} );
+
+			_.each( browsers, function( id ) {
+				that.ui.browsers.find( 'option[value="' + id + '"]' ).attr( 'selected', true );
+			} );
+
+			this.ui.browsers.trigger( 'chosen:updated' );
 		},
 
 		showError: function( model, error ) {
@@ -389,6 +445,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				'Job saved.',
 				'Success!'
 			);
+
 			this.ui.save.prop( 'disabled', false );
 			this.destroy();
 			this.model.fetch( {
@@ -397,23 +454,12 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		saveJob: function() {
-			var browsers = this.getBrowsersArray(),
-				description = this.ui.description.val().replace( /^\s+|\s+$/g, '' );
-
-			// build browser object from a string
-			function prepareBrowser( browser ) {
-				var match = /^([a-z]+)(\d*)/i.exec( browser );
-
-				return match ? {
-					name: match[ 1 ].toLowerCase(),
-					version: match[ 2 ] || 0
-				} : browser;
-			}
+			var description = this.ui.description.val().replace( /^\s+|\s+$/g, '' );
 
 			this.ui.save.prop( 'disabled', true );
 
 			this.model
-				.set( 'browsers', _.map( _.uniq( browsers ), prepareBrowser ) )
+				.set( 'browsers', this.model.get( 'tempBrowsers' ) )
 				.set( 'description', description )
 				.save();
 		}

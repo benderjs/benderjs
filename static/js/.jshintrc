@@ -1,0 +1,6 @@
+{
+	"browser": true,
+	"undef": true,
+	"unused": true,
+	"predef": ["bender", "Backbone", "Marionette", "App", "_", "$"]
+}

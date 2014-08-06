@@ -31,13 +31,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			start: 0,
 			completed: 0,
 			total: 0,
-			tags: [],
-			filter: [],
+			tags: null,
+			filter: null,
 			running: false,
 			onlyFailed: false
 		},
 
 		initialize: function() {
+			this
+				.set( 'tags', [] )
+				.set( 'filter', [] );
+
 			App.vent.on( 'tests:stop', this.stop, this );
 		},
 
@@ -195,7 +199,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		defaults: {
 			id: '',
 			group: '',
-			tags: [],
+			tags: null,
 			result: '',
 			status: '',
 			errors: null,
@@ -415,16 +419,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	 */
 	Tests.NewJob = Backbone.Model.extend( {
 		defaults: {
-			browsers: [],
+			browsers: null,
 			description: '',
 			snapshot: false,
-			tests: [],
-			filter: []
+			tests: null,
+			filter: null
 		},
 
 		initialize: function() {
-			this.set( 'tests', Tests.testsList.getIds() );
-			this.set( 'filter', Tests.testStatus.get( 'filter' ) );
+			this.set( 'browsers', [] )
+				.set( 'tests', Tests.testsList.getIds() )
+				.set( 'filter', Tests.testStatus.get( 'filter' ) );
 		},
 
 		validate: function( attrs ) {
@@ -448,60 +453,87 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		ui: {
 			'browsers': '.job-browsers',
 			'description': '.job-description',
-			'snapshot': '.take-snapshot',
 			'create': '.create-button'
 		},
 
 		events: {
 			'change @ui.browsers': 'updateBrowsers',
 			'change @ui.description': 'updateDescription',
-			'change @ui.snapshot': 'updateSnapshot',
-			'click .dropdown-menu a': 'addBrowser',
 			'click @ui.create': 'createJob',
-			'click .add-captured-button': 'addCaptured'
+			'change .take-snapshot': 'updateSnapshot',
+			'click .add-captured-button': 'addCaptured',
+			'click .add-all-button': 'addAll'
 		},
 
 		initialize: function() {
-			this.listenTo( this.model, 'change', this.updateUI );
 			this.listenTo( this.model, 'invalid', this.showError );
 			this.listenTo( this.model, 'sync', this.handleCreate );
 		},
 
-		updateUI: function() {
-			var model = this.model.toJSON();
+		onRender: function() {
+			App.Common.ModalView.prototype.onRender.apply( this, arguments );
 
-			this.ui.browsers.val( model.browsers.join( ' ' ) );
-			this.ui.description.val( model.description );
+			this.ui.browsers.chosen( {
+				width: '100%'
+			} );
+		},
+
+		updateBrowsers: function( event, params ) {
+			var browsers = this.model.get( 'browsers' ),
+				idx;
+
+			if ( params.selected ) {
+				browsers.push( params.selected.toLowerCase() );
+			} else if ( params.deselected &&
+				( idx = _.indexOf( browsers, params.deselected.toLowerCase() ) ) > -1 ) {
+				browsers.splice( idx, 1 );
+			}
+
+			this.model.set( 'browsers', browsers );
 		},
 
 		addCaptured: function() {
-			var current = this.model.get( 'browsers' ),
-				browsers = [];
+			var current = this.model.get( 'browsers' ) || [],
+				that = this,
+				captured = [],
+				toAdd;
 
 			App.Browsers.browsersList.each( function( browser ) {
 				var clients = browser.get( 'clients' );
 
-				if ( clients && clients.length ) {
-					browsers.push( browser.id );
+				if ( browser.id !== 'Unknown' && clients && clients.length ) {
+					captured.push( browser.id.toLowerCase() );
 				}
 			} );
 
-			function addBrowsers() {
-				var currentLower = _.map( current, function( browser ) {
-						return browser.toLowerCase();
-					} ),
-					result = [].concat( current );
+			toAdd = _.uniq( current.concat( captured ) );
 
-				_.each( browsers, function( browser ) {
-					if ( currentLower.indexOf( browser.toLowerCase() ) === -1 ) {
-						result.push( browser );
-					}
-				} );
+			this.model.set( 'browsers', toAdd );
 
-				return result;
-			}
+			_.each( toAdd, function( id ) {
+				that.ui.browsers.find( 'option[value="' + id + '"]' ).attr( 'selected', true );
+			} );
 
-			this.model.set( 'browsers', current.length ? addBrowsers() : browsers );
+			this.ui.browsers.trigger( 'chosen:updated' );
+		},
+
+		addAll: function() {
+			var that = this,
+				browsers = [];
+
+			App.Browsers.browsersList.each( function( browser ) {
+				if ( browser.attributes.header && browser.id !== 'Unknown' ) {
+					browsers.push( browser.id.toLowerCase() );
+				}
+			} );
+
+			this.model.set( 'browsers', browsers );
+
+			_.each( browsers, function( id ) {
+				that.ui.browsers.find( 'option[value="' + id + '"]' ).attr( 'selected', true );
+			} );
+
+			this.ui.browsers.trigger( 'chosen:updated' );
 		},
 
 		showError: function( model, error ) {
@@ -519,14 +551,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.destroy();
 		},
 
-		updateBrowsers: function( event ) {
-			var browsers = $( event.target ).val().replace( /^\s+|\s+$/g, '' );
-
-			browsers = browsers.length ? browsers.replace( /\s+/g, ' ' ).split( /\s+/ ) : [];
-
-			this.model.set( 'browsers', _.uniq( browsers ) );
-		},
-
 		updateDescription: function( event ) {
 			var description = $( event.target ).val().replace( /^\s+|\s+$/g, '' );
 			this.model.set( 'description', description );
@@ -534,17 +558,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		updateSnapshot: function( event ) {
 			this.model.set( 'snapshot', event.target.checked );
-		},
-
-		addBrowser: function( event ) {
-			var browsers = this.model.get( 'browsers' ),
-				name = $( event.target ).text().replace( /^\s+|\s+$/g, '' ),
-				pattern = new RegExp( '(?:^|,)' + name + '(?:,|$)', 'i' );
-
-			if ( name && !pattern.test( browsers.join( ',' ) ) ) {
-				browsers = browsers.concat( name );
-				this.model.set( 'browsers', browsers );
-			}
 		},
 
 		createJob: function() {

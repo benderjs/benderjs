@@ -357,13 +357,7 @@ describe( 'Jobs', function() {
 
 				return bender.jobs.edit( id, {
 					description: 'new description',
-					browsers: [ {
-						name: 'chrome',
-						version: 0
-					}, {
-						name: 'firefox',
-						version: 0
-					} ]
+					browsers: [ 'chrome', 'firefox' ]
 				} );
 			} )
 			.then( function( result ) {
@@ -392,13 +386,7 @@ describe( 'Jobs', function() {
 	it( 'should return an error when trying to edit non-existent job', function() {
 		var promise = bender.jobs.edit( 'unknown', {
 			description: 'new description',
-			browsers: [ {
-				name: 'chrome',
-				version: 0
-			}, {
-				name: 'firefox',
-				version: 0
-			} ]
+			browsers: [ 'chrome', 'firefox' ]
 		} );
 
 		return expect( promise ).to.be.rejectedWith( 'There\'s no such job' );
@@ -436,10 +424,7 @@ describe( 'Jobs', function() {
 
 				return bender.jobs.edit( id, {
 					description: 'new description',
-					browsers: [ {
-						name: 'firefox',
-						version: 0
-					} ]
+					browsers: [ 'firefox' ]
 				} );
 			} )
 			.then( function() {

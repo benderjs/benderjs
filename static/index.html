@@ -227,9 +227,9 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 				<tr>
 					<th class="col-md-3">Test ID</th>
 					<th class="col-md-9 job-browsers">
-						<% _.each(browsers, function (browser) { %>
+						<% _.each(_.map(browsers, prepareBrowser), function (browser) { %>
 						<div class="browser <%= browser.name %>">
-							<small><%= browser.version ? browser.version : '*' %></small>
+							<small><%= browser.version !== 0 ? browser.version : '*' %></small>
 						</div>
 						<% }) %>
 					</th>
@@ -290,19 +290,22 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<div class="form-group input-append btn-group job-browsers-group">
 			<label for="job-browsers">
 				Browsers
+				<button type="button" class="btn btn-default btn-xs add-all-button">
+					<span class="glyphicon glyphicon-plus"></span>
+					Add all
+				</button>
 				<button type="button" class="btn btn-default btn-xs add-captured-button">
 					<span class="glyphicon glyphicon-plus"></span>
 					Add captured
 				</button>
 			</label>
-			<input type="text" class="form-control job-browsers" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value="<%= browsers.join(' ') %>">
-			<ul class="dropdown-menu">
-				<% _.each(App.Browsers.browsersList.models, function (browser) { %>
-					<% if (browser.attributes.header) { %>
-						<li><a><%= browser.id %></a></li>
-					<% } %>
-				<% }) %>
-			</ul>
+			<select data-placeholder="Choose..." multiple class="job-browsers form-control" name="job-browsers">
+			<% _.each(App.Browsers.browsersList.models, function (browser) { %>
+				<% if (browser.attributes.header && browser.id !== 'Unknown') { %>
+					<option value="<%= browser.id.toLowerCase() %>"><%= browser.id %></option>
+				<% } %>
+			<% }) %>
+			</select>
 		</div>
 		<div class="form-group">
 			<label for="job-description">Job description <span>(optional)</span></label>
@@ -343,19 +346,22 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<div class="form-group input-append btn-group job-browsers-group">
 			<label for="job-browsers">
 				Browsers
+				<button type="button" class="btn btn-default btn-xs add-all-button">
+					<span class="glyphicon glyphicon-plus"></span>
+					Add all
+				</button>
 				<button type="button" class="btn btn-default btn-xs add-captured-button">
 					<span class="glyphicon glyphicon-plus"></span>
 					Add captured
 				</button>
 			</label>
-			<input type="text" class="form-control job-browsers" name="job-browsers" data-toggle="dropdown" placeholder="Choose browsers e.g. Chrome Firefox IE9 Safari" value="<%= getBrowsers(browsers) %>">
-			<ul class="dropdown-menu">
-				<% _.each(App.Browsers.browsersList.models, function (browser) { %>
-					<% if (browser.attributes.header) { %>
-						<li><a><%= browser.id %></a></li>
-					<% } %>
-				<% }) %>
-			</ul>
+			<select data-placeholder="Choose..." multiple class="job-browsers form-control" name="job-browsers">
+			<% _.each(App.Browsers.browsersList.models, function (browser) { %>
+				<% if (browser.attributes.header && browser.id !== 'Unknown') { %>
+					<option value="<%= browser.id.toLowerCase() %>" <%= findBrowser(browsers, browser.id) ? 'selected' : '' %>><%= browser.id %></option>
+				<% } %>
+			<% }) %>
+			</select>
 		</div>
 		<div class="form-group">
 			<label for="job-description">Job description</label>

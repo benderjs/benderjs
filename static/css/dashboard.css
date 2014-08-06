@@ -265,7 +265,9 @@ table tr th.job-browsers {
     color: #999;
 }
 
-.add-captured-button {
+.add-captured-button,
+.add-all-button {
+	margin-left: 5px;
 	float: right;
 }
 
@@ -316,4 +318,8 @@ button:disabled .loader {
 
 .modal-confirm .modal-footer {
 	margin: 0;
+}
+
+input.job-description {
+	font-size: 13px;
 }
