@@ -216,7 +216,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		childView: Jobs.TaskView,
 
 		events: {
-			'click .back-button': 'goBack',
 			'click .remove-button': 'removeJob',
 			'click .restart-button': 'restartJob',
 			'click .edit-button': 'editJob',
@@ -243,11 +242,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.collection.reset( this.model.get( 'tasks' ) );
 			this.render();
 		},
-
-		goBack: function() {
-			App.back();
-		},
-
 		removeJob: function() {
 			var that = this;
 
