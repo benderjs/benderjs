@@ -1,6 +1,6 @@
 {
 	"name": "benderjs",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "The anti-human approach to JavaScript testing",
 	"keywords": [
 		"test",
