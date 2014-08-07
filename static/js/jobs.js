@@ -168,6 +168,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				.set( 'browsers', [] )
 				.set( 'filter', [] )
 				.set( 'tasks', [] );
+
+			App.Common.DeferredFetchMixin.initialize.apply( this, arguments );
 		},
 
 		validate: function( attrs ) {
