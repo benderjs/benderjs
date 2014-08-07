@@ -68,7 +68,7 @@ describe( 'Queues', function() {
 		tests1 = [ tests[ 0 ] ];
 
 	beforeEach( function() {
-		bender = mocks.getBender( 'conf', 'utils' );
+		bender = mocks.getBender( 'conf', 'utils', 'jobs' );
 
 		bender.use( [ browsersModule, queues ] );
 		bender.init();

@@ -276,6 +276,10 @@ moduleMocks = {
 
 			delete: function() {
 				return when.resolve( 'newJobId' );
+			},
+
+			startTask: function( task ) {
+				return when.resolve( task );
 			}
 		};
 	},
