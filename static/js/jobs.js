@@ -183,10 +183,17 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.TaskView = Marionette.ItemView.extend( {
 		template: '#task',
 		tagName: 'tr',
+		className: 'task',
 		templateHelpers: App.Common.templateHelpers,
 
 		events: {
 			'click .clickable': 'showError'
+		},
+
+		initialize: function() {
+			if ( this.model.get( 'failed' ) ) {
+				this.$el.addClass( 'failed' );
+			}
 		},
 
 		showError: function( event ) {
@@ -211,14 +218,23 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		template: '#job-header',
 		templateHelpers: _.extend( {}, Jobs.templateHelpers, App.Common.templateHelpers ),
 
+		ui: {
+			'all': '.check-all',
+			'failed': '.check-failed'
+		},
+
 		events: {
 			'click .remove-button': 'removeJob',
 			'click .restart-button': 'restartJob',
 			'click .edit-button': 'editJob',
+			'change @ui.all, @ui.failed': 'filterFailed'
 		},
 
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
+			this.model.set( 'onlyFailed', false, {
+				silent: true
+			} );
 		},
 
 		onRender: function() {
@@ -306,6 +322,20 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					model: this.model
 				} )
 			);
+		},
+
+		filterFailed: function() {
+			if ( this.ui.all.is( ':checked' ) ) {
+				this.model.set( 'onlyFailed', false, {
+					silent: true
+				} );
+				$( '.jobs' ).removeClass( 'only-failed' );
+			} else if ( this.ui.failed.is( ':checked' ) ) {
+				this.model.set( 'onlyFailed', true, {
+					silent: true
+				} );
+				$( '.jobs' ).addClass( 'only-failed' );
+			}
 		}
 	} );
 

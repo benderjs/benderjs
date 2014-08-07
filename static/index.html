@@ -114,14 +114,13 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<div class="col-md-6">
 		<div class="form-inline filter-form" role="form">
 			<div class="btn-group" data-toggle="buttons">
-			  <label class="btn btn-primary btn-sm <%= onlyFailed ? '' : 'active' %>" title="Show all tests">
-				<input type="radio" name="show-mode" id="all" <%= onlyFailed ? '' : 'checked' %>> All
-			  </label>
-			  <label class="btn btn-danger btn-sm <%= onlyFailed ? 'active' : '' %>" title="Show failed tests">
-				<input type="radio" name="show-mode" id="failed" <%= onlyFailed ? 'checked' : '' %>> Failed
-			  </label>
+				<label class="btn btn-primary btn-sm <%= onlyFailed ? '' : 'active' %>" title="Show all tests">
+					<input type="radio" name="show-mode" class="check-all" <%= onlyFailed ? '' : 'checked' %>> All
+				</label>
+				<label class="btn btn-danger btn-sm <%= onlyFailed ? 'active' : '' %>" title="Show failed tests">
+					<input type="radio" name="show-mode" class="check-failed" <%= onlyFailed ? 'checked' : '' %>> Failed
+				</label>
 			</div>
-
 			<div class="form-group input-append btn-group">
 				<select data-placeholder="Filter tests..." multiple
 				class="tag-filter form-control" <%= running ? 'disabled="disabled"' : '' %>>
@@ -191,6 +190,14 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 			</h4>
 		</div>
 		<div class="col-md-6 text-right">
+			<div class="btn-group" data-toggle="buttons">
+				<label class="btn btn-primary btn-sm <%= onlyFailed ? '' : 'active' %>" title="Show all tests">
+					<input type="radio" name="show-mode" class="check-all" <%= onlyFailed ? '' : 'checked' %>> All
+				</label>
+				<label class="btn btn-danger btn-sm <%= onlyFailed ? 'active' : '' %>" title="Show failed tests">
+					<input type="radio" name="show-mode" class="check-failed" <%= onlyFailed ? 'checked' : '' %>> Failed
+				</label>
+			</div>
 			<a href="/#jobs" class="btn btn-sm btn-primary back-button">
 				<span class="glyphicon glyphicon-arrow-left"></span> Back
 			</a>

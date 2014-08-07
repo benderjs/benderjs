@@ -103,15 +103,15 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			'create': '.create-button',
 			'filter': '.tag-filter',
 			'clear': '.clear-filter',
-			'all': '#all',
-			'failed': '#failed'
+			'all': '.check-all',
+			'failed': '.check-failed'
 		},
 
 		events: {
 			'click @ui.run': 'runTests',
 			'click @ui.create': 'showCreateJob',
 			'change @ui.filter': 'updateFilter',
-			'change #all, #failed': 'filterFailed'
+			'change @ui.all, @ui.failed': 'filterFailed'
 		},
 
 		templateHelpers: App.Common.templateHelpers,
@@ -183,12 +183,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		filterFailed: function() {
 			if ( this.ui.all.is( ':checked' ) ) {
 				this.model.set( 'onlyFailed', false );
-				$( '.tests' ).removeClass( 'tests-failed' );
+				$( '.tests' ).removeClass( 'only-failed' );
 			} else if ( this.ui.failed.is( ':checked' ) ) {
 				this.model.set( 'onlyFailed', true );
-				$( '.tests' ).addClass( 'tests-failed' );
+				$( '.tests' ).addClass( 'only-failed' );
 			}
-
 		}
 	} );
 
@@ -405,7 +404,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			var status = Tests.testStatus.toJSON();
 
 			if ( status.onlyFailed ) {
-				this.$el.find( '.tests' ).addClass( 'tests-failed' );
+				this.$el.find( '.tests' ).addClass( 'only-failed' );
 			}
 
 			if ( status.filter.length ) {

@@ -103,11 +103,13 @@ th:last-child {
     margin-left: .5em;
 }
 
-.tests-failed .test {
+.only-failed .test,
+.only-failed .task {
 	display: none !important;
 }
 
-.tests-failed .danger {
+.only-failed .danger,
+.only-failed tr.failed {
 	display: table-row !important;
 }
 
