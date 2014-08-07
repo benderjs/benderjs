@@ -152,4 +152,17 @@ describe( 'Utils', function() {
 		bender.utils.mkdirp( dir, callback );
 	} );
 
+	it( 'should strip params after ; from a path', function() {
+		var file = 'foo/bar/baz.js;param1=1;param2=2?query=quux',
+			expected = 'foo/bar/baz.js';
+
+		expect( bender.utils.stripParams( file ) ).to.equal( expected );
+	} );
+
+	it( 'should strip params after ? from a path', function() {
+		var file = 'foo/bar/baz.js?query=quux&bar=baz',
+			expected = 'foo/bar/baz.js';
+
+		expect( bender.utils.stripParams( file ) ).to.equal( expected );
+	} );
 } );

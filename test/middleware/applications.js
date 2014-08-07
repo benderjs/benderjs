@@ -21,6 +21,7 @@ var mocks = require( '../fixtures/_mocks' ),
 	fs = require( 'fs' ),
 	applications = rewire( '../../lib/middlewares/applications' ),
 	appsModule = require( '../../lib/applications' ),
+	utilsModule = require( '../../lib/utils' ),
 	serverModule = require( '../../lib/server' );
 
 describe( 'Middleware - Applications', function() {
@@ -42,9 +43,9 @@ describe( 'Middleware - Applications', function() {
 		bender;
 
 	beforeEach( function() {
-		bender = mocks.getBender( 'conf', 'utils', 'sockets' );
-		bender.use( [ serverModule, appsModule ] );
+		bender = mocks.getBender( 'conf', 'sockets' );
 		bender.middlewares = [ applications.build ];
+		bender.use( [ utilsModule, serverModule, appsModule ] );
 		bender.init();
 		instance = bender.server.create();
 	} );

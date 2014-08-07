@@ -30,9 +30,9 @@ describe( 'Middleware - Jobs', function() {
 
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets', 'jobs', 'template' );
+		bender.middlewares = [ jobs.build ];
 		bender.use( [ serverModule, utilsModule ] );
 		bender.init();
-		bender.middlewares = [ jobs.build ];
 		instance = bender.server.create();
 
 		process.cwd = oldCwd;

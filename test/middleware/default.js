@@ -30,9 +30,9 @@ describe( 'Middleware - Default', function() {
 
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets' );
+		bender.middlewares = [ defaultMiddleware.build ];
 		bender.use( [ serverModule, utils ] );
 		bender.init();
-		bender.middlewares = [ defaultMiddleware.build ];
 		instance = bender.server.create();
 	} );
 
