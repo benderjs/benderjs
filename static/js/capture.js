@@ -59,6 +59,7 @@
 
 			data.results = {};
 			data.success = true;
+			data.resultCount = 0;
 
 			that.results = data;
 			that.running = true;
@@ -84,6 +85,7 @@
 			}
 
 			this.results.results[ result.name ] = result;
+			this.results.resultCount++;
 
 			socket.emit( 'result', result );
 
@@ -132,7 +134,7 @@
 			}
 		};
 
-		this.ignore = function( result ) {
+		this.ignore = function() {
 			this.results.success = true;
 			this.results.ignored = true;
 			this.results.duration = 0;
@@ -146,6 +148,10 @@
 			clearTestTimeout();
 
 			this.results.duration = parsed.duration;
+
+			if ( !this.results.resultCount ) {
+				this.results.success = false;
+			}
 
 			socket.emit( 'complete', this.results );
 

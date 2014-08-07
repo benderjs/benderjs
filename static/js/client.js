@@ -217,9 +217,13 @@
 		};
 
 		this.error = function( error ) {
-			if ( error.error ) {
-				var resEl = document.createElement( 'div' );
+			var resEl = document.createElement( 'div' );
 
+			if ( !resultsEl ) {
+				prepareResultsEl();
+			}
+
+			if ( error.error ) {
 				resEl.className = 'result fail';
 				resEl.innerHTML = '<p><span class="icon failed"></span>Error' +
 					( error.methodName ? ( ' in ' + error.methodName ) : '' ) +
@@ -233,6 +237,11 @@
 
 				throw ( error.error );
 			} else {
+				resEl.className = 'result fail';
+				resEl.innerHTML = '<p><span class="icon failed"></span>Error<pre>' + error + '</pre></p>';
+
+				resultsEl.appendChild( resEl );
+
 				if ( supportsConsole ) {
 					console.log( error.stack ? error.stack : error.error ? error.error : error );
 				}
@@ -249,7 +258,6 @@
 		};
 
 		this.start = this.complete = function() {};
-
 	}
 
 	/**
@@ -289,8 +297,6 @@
 			}
 		};
 
-		window.onerror = bender.error;
-
 		init = start;
 		// standalone run, local instance of Bender and additional CSS is needed
 	} else {
@@ -304,6 +310,7 @@
 		};
 	}
 
+	window.onerror = bender.error;
 	bender.config = BENDER_CONFIG;
 
 	bender.addListener = function( target, event, handler ) {
