@@ -181,8 +181,8 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	</script>
 
 
-	<!-- template for a job details page -->
-	<script type="text/html" id="job">
+	<!-- template for a job details page header section -->
+	<script type="text/html" id="job-header">
 	<div class="row">
 		<div class="col-md-6">
 			<h4>
@@ -221,24 +221,26 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 			</h4>
 		</div>
 	</div>
-	<div class="panel panel-default">
-		<table class="table table-hover jobs">
-			<thead>
-				<tr>
-					<th class="col-md-3">Test ID</th>
-					<th class="col-md-9 job-browsers">
-						<% _.each(_.map(browsers, prepareBrowser), function (browser) { %>
-						<div class="browser <%= browser.name %>">
-							<small><%= browser.version !== 0 ? browser.version : '*' %></small>
-						</div>
-						<% }) %>
-					</th>
-				</tr>
-			</thead>
-			<tbody>
-			</tbody>
-		</table>
-	</div>
+	</script>
+
+	<!-- template for a job results section -->
+	<script type="text/html" id="job">
+	<table class="table table-hover jobs">
+		<thead>
+			<tr>
+				<th class="col-md-3">Test ID</th>
+				<th class="col-md-9 job-browsers">
+					<% _.each(_.map(browsers, prepareBrowser), function (browser) { %>
+					<div class="browser <%= browser.name %>">
+						<small><%= browser.version !== 0 ? browser.version : '*' %></small>
+					</div>
+					<% }) %>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
 	</script>
 
 	<!-- template for confirmation modal -->

@@ -207,14 +207,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		}
 	} );
 
-	/**
-	 * Job details view
-	 */
-	Jobs.JobView = App.Common.TableView.extend( {
-		template: '#job',
-		className: '',
+	Jobs.JobHeaderView = Marionette.ItemView.extend( {
+		template: '#job-header',
 		templateHelpers: _.extend( {}, Jobs.templateHelpers, App.Common.templateHelpers ),
-		childView: Jobs.TaskView,
 
 		events: {
 			'click .remove-button': 'removeJob',
@@ -223,26 +218,13 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		initialize: function() {
-			this.collection = new Backbone.Collection();
-
-			this.listenTo( this.model, 'change', this.update );
-			this.listenTo( this.model, 'error', App.show404 );
-			// TODO should we disable this on IE8?
-			this.listenTo( Jobs.controller, 'job:update', function( jobId ) {
-				if ( jobId === this.model.id ) {
-					this.model.fetch();
-				}
-			} );
-
-			this.model.fetch( {
-				reset: true
-			} );
+			this.listenTo( this.model, 'change', this.render );
 		},
 
-		update: function() {
-			this.collection.reset( this.model.get( 'tasks' ) );
-			this.render();
+		onRender: function() {
+			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
 		},
+
 		removeJob: function() {
 			var that = this;
 
@@ -324,6 +306,38 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					model: this.model
 				} )
 			);
+		}
+	} );
+
+	/**
+	 * Job details view
+	 */
+	Jobs.JobView = App.Common.TableView.extend( {
+		template: '#job',
+		className: 'panel panel-default',
+		templateHelpers: _.extend( {}, Jobs.templateHelpers, App.Common.templateHelpers ),
+		childView: Jobs.TaskView,
+
+		initialize: function() {
+			this.collection = new Backbone.Collection();
+
+			this.listenTo( this.model, 'change', this.update );
+			this.listenTo( this.model, 'error', App.show404 );
+			// TODO should we disable this on IE8?
+			this.listenTo( Jobs.controller, 'job:update', function( jobId ) {
+				if ( jobId === this.model.id ) {
+					this.model.fetch();
+				}
+			} );
+
+			this.model.fetch( {
+				reset: true
+			} );
+		},
+
+		update: function() {
+			this.collection.reset( this.model.get( 'tasks' ) );
+			this.render();
 		}
 	} );
 
@@ -479,11 +493,18 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		showJob: function( id ) {
-			App.header.empty();
+			var job = new Jobs.Job( {
+				id: id
+			} );
+
+			// App.header.empty();
+
+			App.header.show( new Jobs.JobHeaderView( {
+				model: job
+			} ) );
+
 			App.content.show( new Jobs.JobView( {
-				model: new Jobs.Job( {
-					id: id
-				} )
+				model: job
 			} ) );
 		}
 	} );

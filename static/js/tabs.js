@@ -8,6 +8,17 @@
 App.module( 'Tabs', function( Tabs, App, Backbone ) {
 	'use strict';
 
+	var tabs = [ {
+		label: 'Tests',
+		id: 'tests'
+	}, {
+		label: 'Jobs',
+		id: 'jobs'
+	}, {
+		label: 'Browsers',
+		id: 'browsers'
+	} ];
+
 	/**
 	 * Tab model
 	 */
@@ -27,7 +38,6 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		model: Tabs.Tab,
 
 		initialize: function() {
-			var wtf = 1 - 2;
 			App.vent.on( 'tests:start', this.disableTabs, this );
 			App.vent.on( 'tests:stop', this.enableTabs, this );
 		},
@@ -55,16 +65,7 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 				tab.set( 'disabled', false );
 			} );
 		}
-	} ) )( [ {
-		label: 'Tests',
-		id: 'tests'
-	}, {
-		label: 'Jobs',
-		id: 'jobs'
-	}, {
-		label: 'Browsers',
-		id: 'browsers'
-	} ] );
+	} ) )( tabs );
 
 	/**
 	 * Single tab view
