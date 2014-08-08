@@ -582,6 +582,7 @@ describe( 'Jobs', function() {
 				var task = bender.queues.getTest( client ),
 					result = {
 						_id: task._id,
+						tbId: task._id,
 						client: client,
 						id: task.id,
 						jobId: task.jobId,
@@ -616,6 +617,7 @@ describe( 'Jobs', function() {
 				var task = bender.queues.getTest( client ),
 					result = {
 						_id: task._id,
+						tbId: task._id,
 						client: client,
 						id: task.id,
 						jobId: task.jobId,
@@ -650,6 +652,7 @@ describe( 'Jobs', function() {
 				var task = bender.queues.getTest( client ),
 					result = {
 						_id: task._id,
+						tbId: task._id,
 						client: client,
 						id: task.id,
 						jobId: task.jobId,
