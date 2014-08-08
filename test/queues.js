@@ -26,7 +26,7 @@ describe( 'Queues', function() {
 		client = {
 			id: 'abcd-1234',
 			name: 'chrome',
-			version: '36'
+			version: 36
 		},
 		tests = [ {
 			id: 'test/fixtures/tests/test/1',
