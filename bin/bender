@@ -88,6 +88,11 @@ scmd
 	.option( 'browser', {
 		abbr: 'b',
 		desc: 'Browser to run the tests on'
+	} )
+	.option( 'list', {
+		abbr: 'l',
+		flag: true,
+		desc: 'List all the available browsers'
 	} );
 
 scmd.parse();
