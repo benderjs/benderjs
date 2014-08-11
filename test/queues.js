@@ -65,7 +65,38 @@ describe( 'Queues', function() {
 				retries: 0
 			} ]
 		} ],
-		tests1 = [ tests[ 0 ] ];
+		tests1 = [ tests[ 0 ] ],
+		tests2 = [ {
+			id: 'tests/html',
+			html: 'tests/html.html',
+			js: 'tests/html.js',
+			tags: [],
+			include: '%BASE_PATH%assets/helpers.js,%BASE_PATH%assets/results.js',
+			framework: 'jasmine',
+			applications: [],
+			group: 'Core'
+		}, {
+			id: 'tests/script',
+			js: 'tests/script.js',
+			tags: [],
+			include: '%BASE_PATH%assets/helpers.js',
+			framework: 'jasmine',
+			applications: [],
+			group: 'Core'
+		} ],
+		tests3 = [ {
+			id: 'test/fixtures/tests/test/1',
+			_id: 'ECNtxgcMzm94aQc9',
+			taskId: 'ECNtxgcMzm94aQc9',
+			jobId: 'AYIlcxZa1i1nhLox',
+			results: [ {
+				name: 'chrome',
+				version: 0,
+				jobId: 'AYIlcxZa1i1nhLox',
+				status: 0,
+				retries: 1
+			} ]
+		} ];
 
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'utils', 'jobs' );
@@ -180,6 +211,19 @@ describe( 'Queues', function() {
 		expect( spy.calledOnce ).to.be.true;
 	} );
 
+	it( 'should emit client:run event after client:getTest event', function( done ) {
+		bender.queues.buildQueues( browsers );
+		bender.queues.addTests( client, tests2 );
+
+		bender.on( 'client:run', function( id, test ) {
+			expect( id ).to.equal( client.id );
+			expect( test ).to.equal( tests2[ 0 ] );
+			done();
+		} );
+
+		bender.emit( 'client:getTest', client );
+	} );
+
 	it( 'should emit client:run event after a client connects and there\'s a test for him', function( done ) {
 		bender.on( 'client:run', function( id, test ) {
 			expect( id ).to.equal( client.id );
@@ -232,6 +276,21 @@ describe( 'Queues', function() {
 		bender.queues.addTests( client, tests );
 	} );
 
+	it( 'should take another test if jobs task was marked as failed after retries', function( done ) {
+		sinon.spy( bender.queues, 'done' );
+
+		bender.queues.buildQueues( browsers );
+		bender.queues.addTests( client, tests3 );
+
+		bender.emit( 'client:getTest', client );
+
+		bender.on( 'client:getTest', function() {
+			expect( bender.queues.done.calledOnce ).to.be.true;
+			bender.queues.done.restore();
+			done();
+		} );
+	} );
+
 	it( 'should push a test taken by a client back to the queue during client removal', function() {
 		var queue,
 			test;
@@ -265,6 +324,25 @@ describe( 'Queues', function() {
 	} );
 
 	it( 'should remove a specified test from queues', function() {
+		var queue, test;
+
+		bender.queues.buildQueues( browsers );
+		bender.queues.addTests( client, tests );
+
+		queue = bender.queues.findQueue( client );
+
+		expect( queue.tests ).to.have.length( 3 );
+
+		test = queue.getTest( client );
+
+		expect( bender.queues.removeTests( client, tests1 ) ).to.be.true;
+
+		expect( queue.tests ).to.have.length( 2 );
+
+		expect( queue.clients[ client.id ] ).to.have.length( 0 );
+	} );
+
+	it( 'should remove a specified test from client\'s queue', function() {
 		var queue;
 
 		bender.queues.buildQueues( browsers );

@@ -279,7 +279,7 @@ moduleMocks = {
 			},
 
 			startTask: function( task ) {
-				return when.resolve( task );
+				return when.resolve( ( task.results && task.results[ 0 ].retries > 0 ) ? null : task );
 			}
 		};
 	},
