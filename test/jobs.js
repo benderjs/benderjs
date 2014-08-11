@@ -52,6 +52,12 @@ describe( 'Jobs', function() {
 			filter: [ 'foo' ],
 			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
 		},
+		job4 = {
+			browsers: [ 'firefox', 'chrome', 'opera', 'ie11' ],
+			description: 'test job 4',
+			filter: [ 'foo' ],
+			tests: [ 'test/fixtures/tests/test/1' ]
+		},
 		client = {
 			id: 12345,
 			browser: 'chrome',
@@ -573,8 +579,135 @@ describe( 'Jobs', function() {
 			} );
 	} );
 
-	it( 'should complete a successful task', function() {
+	it( 'should start a waiting task', function() {
+		var startTask;
+
 		return bender.jobs.create( job3 )
+			.then( function() {
+				return bender.jobs.buildQueues();
+			} )
+			.then( function() {
+				startTask = bender.queues.getTest( client );
+				return bender.jobs.startTask( startTask );
+			} )
+			.then( function( task ) {
+				expect( task ).to.have.keys( [ 'tbId', 'jobId', 'id' ] );
+				expect( task.tbId ).to.equal( startTask._id );
+				expect( task.jobId ).to.equal( startTask.jobId );
+				expect( task.id ).to.equal( '/jobs/' + startTask.jobId + '/tests/' + startTask.id );
+
+				return nodeCall( datastores[ 'browser_tasks.db' ].findOne, {
+					_id: task.tbId
+				} );
+			} )
+			.then( function( task ) {
+				expect( task.status ).to.equal( bender.jobs.STATUS.PENDING );
+				expect( task.started ).to.be.above( 0 );
+			} );
+	} );
+
+	it( 'should restart a failed task', function() {
+		var startTask,
+			task;
+
+		return bender.jobs.create( job4 )
+			.then( function() {
+				return bender.jobs.buildQueues();
+			} )
+			.then( function() {
+				task = bender.queues.getTest( client );
+
+				return bender.jobs.completeTask( {
+					_id: task._id,
+					tbId: task._id,
+					client: client,
+					id: task.id,
+					jobId: task.jobId,
+					success: false,
+					results: {
+						'test sample': {
+							success: false,
+							error: 'failure message'
+						},
+						'test sample 2': {
+							success: true,
+							error: null
+						}
+					}
+				} );
+			} )
+			.then( function() {
+				startTask = bender.queues.getTest( client );
+
+				expect( startTask.retries ).to.equal( 1 );
+				expect( startTask.status ).to.equal( bender.jobs.STATUS.FAILED );
+
+				return bender.jobs.startTask( startTask );
+			} )
+			.then( function( task ) {
+				expect( task ).to.have.keys( [ 'tbId', 'jobId', 'id' ] );
+				expect( task.tbId ).to.equal( startTask._id );
+				expect( task.jobId ).to.equal( startTask.jobId );
+				expect( task.id ).to.equal( '/jobs/' + startTask.jobId + '/tests/' + startTask.taskName );
+
+				return nodeCall( datastores[ 'browser_tasks.db' ].findOne, {
+					_id: task.tbId
+				} );
+			} )
+			.then( function( task ) {
+				expect( task.status ).to.equal( bender.jobs.STATUS.PENDING );
+				expect( task.started ).to.be.above( 0 );
+			} );
+	} );
+
+
+	it( 'shouldn\'t restart a failed task if retries count exceeded', function() {
+		var startTask,
+			task;
+
+		bender.conf.testRetries = 0;
+
+		return bender.jobs.create( job4 )
+			.then( function() {
+				return bender.jobs.buildQueues();
+			} )
+			.then( function() {
+				task = bender.queues.getTest( client );
+
+				return bender.jobs.completeTask( {
+					_id: task._id,
+					tbId: task._id,
+					client: client,
+					id: task.id,
+					jobId: task.jobId,
+					success: false,
+					results: {
+						'test sample': {
+							success: false,
+							error: 'failure message'
+						},
+						'test sample 2': {
+							success: true,
+							error: null
+						}
+					}
+				} );
+			} )
+			.then( function() {
+				startTask = bender.queues.getTest( client );
+
+				expect( startTask.retries ).to.equal( 1 );
+				expect( startTask.status ).to.equal( bender.jobs.STATUS.FAILED );
+
+				return bender.jobs.startTask( startTask );
+			} )
+			.then( function( task ) {
+				expect( task ).to.be.null;
+			} );
+	} );
+
+	it( 'should complete a successful task', function( done ) {
+		bender.jobs.create( job3 )
 			.then( function() {
 				return bender.jobs.buildQueues();
 			} )
@@ -599,17 +732,17 @@ describe( 'Jobs', function() {
 						}
 					};
 
-				bender.jobs.completeTask( result );
+				bender.on( 'job:update', function( id ) {
+					expect( id ).to.equal( task.jobId );
+					done();
+				} );
 
-				return call( bender.on.bind( bender ), 'job:update' )
-					.then( function( args ) {
-						expect( args ).to.equal( task.jobId );
-					} );
+				bender.jobs.completeTask( result );
 			} );
 	} );
 
-	it( 'should complete a failed task', function() {
-		return bender.jobs.create( job3 )
+	it( 'should complete a failed task', function( done ) {
+		bender.jobs.create( job3 )
 			.then( function() {
 				return bender.jobs.buildQueues();
 			} )
@@ -634,17 +767,17 @@ describe( 'Jobs', function() {
 						}
 					};
 
-				bender.jobs.completeTask( result );
+				bender.on( 'job:update', function( id ) {
+					expect( id ).to.equal( task.jobId );
+					done();
+				} );
 
-				return call( bender.on.bind( bender ), 'job:update' )
-					.then( function( args ) {
-						expect( args ).to.equal( task.jobId );
-					} );
+				bender.jobs.completeTask( result );
 			} );
 	} );
 
-	it( 'should complete an ignored task', function() {
-		return bender.jobs.create( job3 )
+	it( 'should complete an ignored task', function( done ) {
+		bender.jobs.create( job3 )
 			.then( function() {
 				return bender.jobs.buildQueues();
 			} )
@@ -661,12 +794,12 @@ describe( 'Jobs', function() {
 						results: {}
 					};
 
-				bender.jobs.completeTask( result );
+				bender.on( 'job:update', function( id ) {
+					expect( id ).to.equal( task.jobId );
+					done();
+				} );
 
-				return call( bender.on.bind( bender ), 'job:update' )
-					.then( function( args ) {
-						expect( args ).to.equal( task.jobId );
-					} );
+				bender.jobs.completeTask( result );
 			} );
 	} );
 } );

@@ -61,9 +61,14 @@ describe( 'Config', function() {
 
 	it( 'should not report missing global configuration file', function() {
 		var exit = sinon.stub( process, 'exit' ),
-			bender = mocks.getBender();
+			bender = mocks.getBender(),
+			oldHome = config.__get__( 'osenv.home' );
 
-		config.__set__( 'process.env.HOME', path.resolve( 'test/fixtures/home/' ) );
+
+
+		config.__set__( 'osenv.home', function() {
+			return path.resolve( 'test/fixtures/home/' );
+		} );
 
 		exit.throws();
 
@@ -74,6 +79,8 @@ describe( 'Config', function() {
 		} ).to.not.throw();
 
 		process.exit.restore();
+
+		config.__get__( 'osenv.home', oldHome );
 	} );
 
 	it( 'should report invalid configuration file', function() {
