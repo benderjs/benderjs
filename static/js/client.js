@@ -171,8 +171,7 @@
 				result.module, ' - ',
 				'<a href="#' + encodeURIComponent( result.fullName || result.name ) + '" class="single">' + result.name + '</a>',
 				'</p>'
-			],
-			i;
+			];
 
 		if ( !result.success ) {
 			res.push( '<pre>', escapeTags( result.error ), '</pre>' );
