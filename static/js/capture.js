@@ -148,6 +148,7 @@
 			clearTestTimeout();
 
 			this.results.duration = parsed.duration;
+			this.results.coverage = parsed.coverage;
 
 			if ( !this.results.resultCount ) {
 				this.results.success = false;
