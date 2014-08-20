@@ -65,7 +65,7 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 		} ) );
 
 		$( window ).on( 'beforeunload', function() {
-			socket.off( 'disconnect', handleDisconnect );
+			socket.removeListener( 'disconnect', handleDisconnect );
 			socket.disconnect();
 		} );
 	} );
