@@ -69,7 +69,7 @@ server.command( 'restart', {
 } );
 
 server.command( 'run', {
-	callback: cli.serverRun,
+	callback: cli.runServer,
 	desc: 'Run the server in a verbose mode'
 } );
 
