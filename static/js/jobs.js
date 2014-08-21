@@ -257,7 +257,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 							response.success ? 'Success!' : 'Error!'
 						);
 						callback( true );
-						App.back();
+						App.navigate( 'jobs' );
 					},
 					error: function( model, response ) {
 						App.Alerts.Manager.add(
