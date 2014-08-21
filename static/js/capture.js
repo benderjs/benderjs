@@ -199,6 +199,10 @@
 					ua: navigator.userAgent
 				} );
 			} )
+			.on( 'disconnect', function() {
+				this.stop();
+				clearTestTimeout();
+			} )
 			.on( 'run', handleRun );
 	}
 
