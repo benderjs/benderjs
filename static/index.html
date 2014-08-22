@@ -221,13 +221,30 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<div class="col-md-12">
 			<h4><small>Filters:</small>
 				<% if (filter.length) { _.each(filter, function (item) { %>
-					<span class="filter"><%= item %></span>
+					<span class="filter btn-xs"><%= item %></span>
 				<% }) } else { %>
 					-
 				<% } %>
 			</h4>
 		</div>
 	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<h4><small>Snapshot:</small> <%= snapshot === null ? '-' : snapshot ? 'yes' : 'no' %></h4>
+		</div>
+	</div>
+	<% if (coverage && done) { %>
+		<div class="row">
+		<div class="col-md-12">
+			<h4><small>Coverage reports:</small>
+			<a class="btn btn-xs btn-primary" href="/jobs/<%= id %>/coverage/all/index.html">- combined -</a>
+			<% _.each(browsers, function (browser) { %>
+				<a class="btn btn-xs btn-default" href="/jobs/<%= id %>/coverage/<%= browser %>/index.html"><%= browser %></a>
+			<% }) %>
+			</h4>
+		</div>
+	</div>
+	<% } %>
 	</script>
 
 	<!-- template for a job results section -->

@@ -151,11 +151,14 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.Job = Backbone.Model.extend( _.extend( {}, App.Common.DeferredFetchMixin, {
 		defaults: {
 			id: '',
+			coverage: false,
+			done: false,
 			description: '',
 			created: 0,
 			tempBrowsers: null,
 			browsers: null,
 			filter: null,
+			snapshot: null,
 			tasks: null
 		},
 
