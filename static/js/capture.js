@@ -200,7 +200,7 @@
 				} );
 			} )
 			.on( 'disconnect', function() {
-				this.stop();
+				that.stop();
 				clearTestTimeout();
 			} )
 			.on( 'run', handleRun );
