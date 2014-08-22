@@ -112,7 +112,11 @@
 			if ( summary ) {
 				parsed = JSON.parse( summary );
 				parsed.id = this.current;
-				parsed.success = parsed.success || ( parsed.failed === 0 && parsed.errors === 0 && parsed.passed > 0 );
+				parsed.success = parsed.success ||
+					( parsed.failed === 0 &&
+					parsed.errors === 0 &&
+					( parsed.passed > 0 || parsed.ignored > 0 )
+				);
 				parsed.results = this.results;
 				this.emit( 'update', parsed );
 				this.results = null;
