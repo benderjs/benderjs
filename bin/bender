@@ -40,6 +40,11 @@ scmd
 		abbr: 'c',
 		default: constants.CONFIG_NAME,
 		desc: 'Alternative path to Bender.js configuration file'
+	} )
+	.option( 'debug', {
+		abbr: 'd',
+		description: 'Enable debug logs',
+		flag: true
 	} );
 
 server = scmd
