@@ -92,7 +92,7 @@ moduleMocks = {
 
 			basePaths: [ 'test/fixtures/tests/' ],
 
-			browsers: [ 'Chrome', 'Firefox', 'Opera', 'IE11' ],
+			browsers: [ 'chrome', 'firefox', 'opera', 'ie11' ],
 
 			tests: {
 				'Test': {

@@ -19,7 +19,7 @@ var mocks = require( './fixtures/_mocks' ),
 
 describe( 'Browsers', function() {
 	var configs = {
-			invalidBrowser: [ 'Chrome35', '123IE' ]
+			invalidBrowser: [ 'chrome35', '123ie' ]
 		},
 		clients = {
 			Chrome: {
@@ -66,8 +66,8 @@ describe( 'Browsers', function() {
 		bender.browsers.build( configs.invalidBrowser );
 
 		expect( bender.browsers.get() ).to.have.length( 1 );
-		expect( bender.browsers.findOne( 'id', 'Chrome35' ) ).to.exist;
-		expect( bender.browsers.findOne( 'id', '123IE' ) ).to.not.exist;
+		expect( bender.browsers.findOne( 'id', 'chrome35' ) ).to.exist;
+		expect( bender.browsers.findOne( 'id', '123ie' ) ).to.not.exist;
 	} );
 
 	it( 'should return a single item if passed a string to .get() function', function() {
@@ -75,7 +75,7 @@ describe( 'Browsers', function() {
 
 		bender.browsers.build( bender.conf.browsers );
 
-		result = bender.browsers.get( 'Chrome' );
+		result = bender.browsers.get( 'chrome' );
 
 		expect( result ).to.exist;
 		expect( result ).to.be.an( 'object' );
@@ -86,7 +86,7 @@ describe( 'Browsers', function() {
 
 		bender.browsers.build( bender.conf.browsers );
 
-		result = bender.browsers.get( [ 'Chrome', 'Firefox' ] );
+		result = bender.browsers.get( [ 'chrome', 'firefox' ] );
 
 		expect( result ).to.have.length( 2 );
 	} );
@@ -97,7 +97,7 @@ describe( 'Browsers', function() {
 		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.Chrome );
 
-		result = bender.browsers.get( 'Chrome' ).clients;
+		result = bender.browsers.get( 'chrome' ).clients;
 
 		expect( result.get() ).to.have.length( 1 );
 		expect( result.get( clients.Chrome.id ) ).to.exist;
@@ -106,7 +106,7 @@ describe( 'Browsers', function() {
 	it( 'should emit "change" event when client is added', function( done ) {
 		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.on( 'change', function handleChange( browsers ) {
-			var result = bender.browsers.get( 'Firefox' ).clients;
+			var result = bender.browsers.get( 'firefox' ).clients;
 
 			expect( browsers ).to.have.length( 4 );
 			expect( result.get() ).to.have.length( 1 );
@@ -154,7 +154,7 @@ describe( 'Browsers', function() {
 		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.Firefox );
 		bender.browsers.on( 'change', function handleChange() {
-			var result = bender.browsers.get( 'Firefox' ).clients;
+			var result = bender.browsers.get( 'firefox' ).clients;
 
 			expect( result.get() ).to.be.empty;
 
@@ -172,7 +172,7 @@ describe( 'Browsers', function() {
 		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.Chrome );
 
-		results = bender.browsers.get( 'Chrome' ).clients,
+		results = bender.browsers.get( 'chrome' ).clients,
 
 		expect( results.get( id ).ready ).to.be.true;
 
@@ -194,7 +194,7 @@ describe( 'Browsers', function() {
 		bender.browsers.build( bender.conf.browsers );
 		bender.browsers.addClient( clients.Chrome );
 
-		client = bender.browsers.get( 'Chrome' ).clients.get( id );
+		client = bender.browsers.get( 'chrome' ).clients.get( id );
 
 		bender.browsers.on( 'client:change', function handleClient( result ) {
 			expect( result ).to.equal( client );
