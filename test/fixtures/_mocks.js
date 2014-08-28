@@ -429,6 +429,9 @@ moduleMocks = {
 		bender.utils = {
 			mkdirp: function( path, callback ) {
 				callback();
+			},
+			stripParams: function( url ) {
+				return url;
 			}
 		};
 	}
@@ -519,4 +522,19 @@ module.exports.attachPagebuilder = function( bender, builder ) {
 			bender.pagebuilders.push( builder.build );
 		}
 	};
+};
+
+module.exports.createFakeResponse = function( callback ) {
+	var resp = {
+		writeHead: function( head ) {
+			resp.head = head;
+		},
+
+		end: function( data ) {
+			resp.data = data;
+			callback( data );
+		}
+	};
+
+	return resp;
 };
