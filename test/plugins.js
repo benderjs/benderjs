@@ -189,6 +189,20 @@ describe( 'Plugins', function() {
 		expect( bender.middlewares ).to.contain( testPlugin.build );
 	} );
 
+	it( 'should load preprocessor plugin', function() {
+		var bender = mocks.getBender(),
+			testPlugin = require( path.resolve( 'node_modules/preprocessor-test/' ) );
+
+		bender.conf = {
+			plugins: [ 'preprocessor-test' ]
+		};
+
+		bender.use( plugins );
+		bender.plugins.load();
+
+		expect( bender.preprocessors ).to.contain( testPlugin.process );
+	} );
+
 	it( 'should load advanced plugin containing its own attach function', function() {
 		var bender = mocks.getBender();
 

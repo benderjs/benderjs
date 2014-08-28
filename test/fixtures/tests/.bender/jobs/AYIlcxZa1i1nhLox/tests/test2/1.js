@@ -1,5 +1,4 @@
-/* bender-tags: foo, bar, baz */
-/* bender-ui: collapsed */
+/* bender-tags: foo, foo, foo, bar, baz, fixtures */
 
 if ( global.bender ) {
 	bender.test( {

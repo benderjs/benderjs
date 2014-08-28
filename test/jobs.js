@@ -17,13 +17,11 @@ var mocks = require( './fixtures/_mocks' ),
 	rimraf = require( 'rimraf' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
-	util = require( 'util' ),
 	nodeCall = require( 'when/node' ).call,
 	applications = rewire( '../lib/applications' ),
+	database = rewire( '../lib/database' ),
 	browsers = rewire( '../lib/browsers' ),
-	queues = rewire( '../lib/queues' ),
-	jobs = rewire( '../lib/jobs' ),
-	datastores = {};
+	jobs = rewire( '../lib/jobs' );
 
 describe( 'Jobs', function() {
 	var job = {
@@ -45,51 +43,32 @@ describe( 'Jobs', function() {
 			filter: [ 'foo' ],
 			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
 		},
-		job3 = {
-			browsers: [ 'firefox', 'chrome', 'opera', 'ie11' ],
-			description: 'test job 3',
-			filter: [ 'foo' ],
-			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
-		},
-		job4 = {
-			browsers: [ 'firefox', 'chrome', 'opera', 'ie11' ],
-			description: 'test job 4',
-			filter: [ 'foo' ],
-			tests: [ 'test/fixtures/tests/test/1' ]
-		},
+		// job3 = {
+		// 	browsers: [ 'firefox', 'chrome', 'opera', 'ie11' ],
+		// 	description: 'test job 3',
+		// 	filter: [ 'foo' ],
+		// 	tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2', 'test/fixtures/tests/test/3' ]
+		// },
+		// job4 = {
+		// 	browsers: [ 'firefox', 'chrome', 'opera', 'ie11' ],
+		// 	description: 'test job 4',
+		// 	filter: [ 'foo' ],
+		// 	tests: [ 'test/fixtures/tests/test/1' ]
+		// },
 		client = {
 			id: 12345,
 			browser: 'chrome',
 			version: 35
 		},
-		OldDatastore,
 		bender;
 
 	before( function() {
 		jobs.__set__( 'cwd', path.resolve( 'test/fixtures/jobs/' ) );
 		jobs.__set__( 'logger', mocks.logger );
 		jobs.__set__( 'jobsDir', path.resolve( 'test/fixtures/jobs/store/' ) );
-
-		OldDatastore = jobs.__get__( 'Datastore' );
-
-		function Datastore( options ) {
-			// keep a reference to the datastore
-			datastores[ options.filename.split( path.sep ).pop() ] = this;
-
-			OldDatastore.call( this, {
-				autoload: true
-			} );
-		}
-
-		util.inherits( Datastore, OldDatastore );
-
-		jobs.__set__( 'Datastore', Datastore );
 	} );
 
 	after( function( done ) {
-		datastores = null;
-		jobs.__set__( 'Datastore', OldDatastore );
-
 		rimraf( jobs.__get__( 'jobsDir' ), function() {
 			done();
 		} );
@@ -97,10 +76,9 @@ describe( 'Jobs', function() {
 
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'applications', 'tests', 'utils' );
-		bender.use( [ applications, jobs, browsers, queues ] );
+		bender.use( [ applications, database, jobs, browsers ] );
+		bender.database.mode = bender.database.MODES.MEMORY;
 		bender.init();
-
-		bender.queues.buildQueues( bender.conf.browsers );
 	} );
 
 	it( 'should attach jobs to bender', function() {
@@ -125,11 +103,16 @@ describe( 'Jobs', function() {
 		process.exit.restore();
 	} );
 
-	it( 'should attach listeners during bender initialization', function() {
-		sinon.spy( bender.jobs, 'completeTask' );
+	it( 'should listen to client:afterRegister event', function( done ) {
+		bender.on( 'client:getTask', function( data ) {
+			expect( data ).to.deep.equal( client );
+			done();
+		} );
 
-		bender.init();
+		bender.emit( 'client:afterRegister', client );
+	} );
 
+	it( 'should listen to client:complete event', function( done ) {
 		bender.emit( 'client:complete', {
 			success: true,
 			duration: 0,
@@ -138,20 +121,18 @@ describe( 'Jobs', function() {
 			jobId: 12345
 		} );
 
-		expect( bender.jobs.completeTask.calledOnce ).to.be.true;
-		bender.jobs.completeTask.restore();
+		bender.on( 'client:getTask', function( data ) {
+			expect( data ).to.deep.equal( client );
+			done();
+		} );
 	} );
 
 	it( 'should create new job', function() {
-		var spy = sinon.spy();
-
-		bender.on( 'tasks:add', spy );
-
 		return bender.jobs.create( job )
 			.then( function( id ) {
 				expect( id ).to.be.a( 'string' );
 
-				return nodeCall( datastores[ 'jobs.db' ].find, {} );
+				return nodeCall( bender.jobs.db.jobs.find, {} );
 			} )
 			.then( function( results ) {
 				expect( results ).to.be.an( 'array' );
@@ -160,18 +141,17 @@ describe( 'Jobs', function() {
 					[ '_id', 'description', 'browsers', 'filter', 'created' ]
 				);
 
-				return nodeCall( datastores[ 'tasks.db' ].find, {} );
+				return nodeCall( bender.jobs.db.tasks.find, {} );
 			} )
 			.then( function( results ) {
 				expect( results ).to.be.an( 'array' );
 				expect( results ).to.have.length( 3 );
 
-				return nodeCall( datastores[ 'browser_tasks.db' ].find, {} );
+				return nodeCall( bender.jobs.db.browserTasks.find, {} );
 			} )
 			.then( function( results ) {
 				expect( results ).to.be.an( 'array' );
 				expect( results ).to.have.length( 18 );
-				expect( spy.callCount ).to.equal( job.browsers.length );
 			} );
 	} );
 
@@ -260,10 +240,7 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should delete an existing job', function() {
-		var spy = sinon.spy(),
-			id;
-
-		bender.on( 'tasks:remove', spy );
+		var id;
 
 		return bender.jobs.create( job )
 			.then( function( result ) {
@@ -272,31 +249,26 @@ describe( 'Jobs', function() {
 				return bender.jobs.delete( id );
 			} )
 			.then( function() {
-				return nodeCall( datastores[ 'jobs.db' ].find, {
+				return nodeCall( bender.jobs.db.jobs.find, {
 					_id: id
 				} );
 			} )
 			.then( function( results ) {
 				expect( results ).to.be.empty;
 
-				return nodeCall( datastores[ 'tasks.db' ].find, {
+				return nodeCall( bender.jobs.db.tasks.find, {
 					jobId: id
 				} );
 			} )
 			.then( function( results ) {
 				expect( results ).to.be.empty;
 
-				return nodeCall( datastores[ 'browser_tasks.db' ].find, {
+				return nodeCall( bender.jobs.db.browserTasks.find, {
 					jobId: id
 				} );
 			} )
 			.then( function( results ) {
 				expect( results ).to.be.empty;
-				expect( spy.callCount ).to.equal( job.browsers.length );
-				spy.args.forEach( function( arg ) {
-					expect( arg[ 0 ] ).to.be.a.string;
-					expect( arg[ 1 ].length ).to.equal( job.tests.length );
-				} );
 			} );
 	} );
 
@@ -307,13 +279,10 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should restart an existing job', function() {
-		var store = datastores[ 'browser_tasks.db' ],
-			spy = sinon.spy();
+		var store = bender.jobs.db.browserTasks;
 
 		return bender.jobs.create( job )
 			.then( function( id ) {
-				bender.on( 'tasks:add', spy );
-
 				return bender.jobs.restart( id )
 					.then( function() {
 						return id;
@@ -334,11 +303,6 @@ describe( 'Jobs', function() {
 					expect( result.total ).to.equal( 0 );
 					expect( result.testedVersion ).to.equal( 0 );
 					expect( result.testedUA ).to.equal( null );
-					expect( spy.callCount ).to.equal( job.browsers.length );
-					spy.args.forEach( function( arg ) {
-						expect( arg[ 0 ] ).to.be.a.string;
-						expect( arg[ 1 ].length ).to.equal( job.tests.length );
-					} );
 				} );
 			} );
 	} );
@@ -351,15 +315,10 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should edit existing job', function() {
-		var store = datastores[ 'browser_tasks.db' ],
-			addSpy = sinon.spy(),
-			removeSpy = sinon.spy();
+		var store = bender.jobs.db.browserTasks;
 
 		return bender.jobs.create( job )
 			.then( function( id ) {
-				bender.on( 'tasks:add', addSpy );
-				bender.on( 'tasks:remove', removeSpy );
-
 				return bender.jobs.edit( id, {
 					description: 'new description',
 					browsers: [ 'chrome', 'firefox' ]
@@ -375,15 +334,6 @@ describe( 'Jobs', function() {
 					expect( task ).to.contain.keys(
 						[ 'name', 'version', 'taskId', 'taskName', 'jobId', 'status', 'retries', 'created', '_id' ]
 					);
-				} );
-
-				expect( addSpy.callCount ).to.equal( 1 );
-				expect( addSpy.args[ 0 ][ 0 ] ).to.equal( 'chrome0' );
-				expect( addSpy.args[ 0 ][ 1 ].length ).to.equal( job.tests.length );
-				expect( removeSpy.callCount ).to.equal( 5 );
-				removeSpy.args.forEach( function( arg ) {
-					expect( arg[ 0 ] ).to.be.a.string;
-					expect( arg[ 1 ].length ).to.equal( job.tests.length );
 				} );
 			} );
 	} );
@@ -407,7 +357,7 @@ describe( 'Jobs', function() {
 	} );
 
 	it( 'should not alter job tasks if no change in job\'s browsers list is made while editing', function() {
-		var store = datastores[ 'browser_tasks.db' ],
+		var store = bender.jobs.db.browserTasks,
 			addSpy = sinon.spy(),
 			removeSpy = sinon.spy(),
 			tasks,
@@ -563,242 +513,242 @@ describe( 'Jobs', function() {
 		expect( results[ 3 ].status ).to.equal( bender.jobs.STATUS.PASSED );
 	} );
 
-	it( 'should prepare queues from unhandled tests', function() {
-		return bender.jobs.create( job3 )
-			.then( function() {
-				return bender.jobs.buildQueues();
-			} )
-			.then( function() {
-				job3.browsers.forEach( function( browser ) {
-					var queue = bender.queues.findQueue( browser );
+	// it( 'should prepare queues from unhandled tests', function() {
+	// 	return bender.jobs.create( job3 )
+	// 		.then( function() {
+	// 			return bender.jobs.buildQueues();
+	// 		} )
+	// 		.then( function() {
+	// 			job3.browsers.forEach( function( browser ) {
+	// 				var queue = bender.queues.findQueue( browser );
 
-					expect( queue ).to.exist;
-					expect( queue.tests.length ).to.equal( job3.tests.length );
-				} );
-			} );
-	} );
+	// 				expect( queue ).to.exist;
+	// 				expect( queue.tests.length ).to.equal( job3.tests.length );
+	// 			} );
+	// 		} );
+	// } );
 
-	it( 'should start a waiting task', function() {
-		var startTask;
+	// it( 'should start a waiting task', function() {
+	// 	var startTask;
 
-		return bender.jobs.create( job3 )
-			.then( function() {
-				return bender.jobs.buildQueues();
-			} )
-			.then( function() {
-				startTask = bender.queues.getTest( client );
-				return bender.jobs.startTask( startTask );
-			} )
-			.then( function( task ) {
-				expect( task ).to.have.keys( [ 'tbId', 'jobId', 'id' ] );
-				expect( task.tbId ).to.equal( startTask._id );
-				expect( task.jobId ).to.equal( startTask.jobId );
-				expect( task.id ).to.equal( '/jobs/' + startTask.jobId + '/tests/' + startTask.id );
+	// 	return bender.jobs.create( job3 )
+	// 		.then( function() {
+	// 			return bender.jobs.buildQueues();
+	// 		} )
+	// 		.then( function() {
+	// 			startTask = bender.queues.getTest( client );
+	// 			return bender.jobs.startTask( startTask );
+	// 		} )
+	// 		.then( function( task ) {
+	// 			expect( task ).to.have.keys( [ 'tbId', 'jobId', 'id' ] );
+	// 			expect( task.tbId ).to.equal( startTask._id );
+	// 			expect( task.jobId ).to.equal( startTask.jobId );
+	// 			expect( task.id ).to.equal( '/jobs/' + startTask.jobId + '/tests/' + startTask.id );
 
-				return nodeCall( datastores[ 'browser_tasks.db' ].findOne, {
-					_id: task.tbId
-				} );
-			} )
-			.then( function( task ) {
-				expect( task.status ).to.equal( bender.jobs.STATUS.PENDING );
-				expect( task.started ).to.be.above( 0 );
-			} );
-	} );
+	// 			return nodeCall( bender.jobs.db.browserTasks.findOne, {
+	// 				_id: task.tbId
+	// 			} );
+	// 		} )
+	// 		.then( function( task ) {
+	// 			expect( task.status ).to.equal( bender.jobs.STATUS.PENDING );
+	// 			expect( task.started ).to.be.above( 0 );
+	// 		} );
+	// } );
 
-	it( 'should restart a failed task', function() {
-		var startTask,
-			task;
+	// it( 'should restart a failed task', function() {
+	// 	var startTask,
+	// 		task;
 
-		return bender.jobs.create( job4 )
-			.then( function() {
-				return bender.jobs.buildQueues();
-			} )
-			.then( function() {
-				task = bender.queues.getTest( client );
+	// 	return bender.jobs.create( job4 )
+	// 		.then( function() {
+	// 			return bender.jobs.buildQueues();
+	// 		} )
+	// 		.then( function() {
+	// 			task = bender.queues.getTest( client );
 
-				return bender.jobs.completeTask( {
-					_id: task._id,
-					tbId: task._id,
-					client: client,
-					id: task.id,
-					jobId: task.jobId,
-					success: false,
-					results: {
-						'test sample': {
-							success: false,
-							error: 'failure message'
-						},
-						'test sample 2': {
-							success: true,
-							error: null
-						}
-					}
-				} );
-			} )
-			.then( function() {
-				startTask = bender.queues.getTest( client );
+	// 			return bender.jobs.completeTask( {
+	// 				_id: task._id,
+	// 				tbId: task._id,
+	// 				client: client,
+	// 				id: task.id,
+	// 				jobId: task.jobId,
+	// 				success: false,
+	// 				results: {
+	// 					'test sample': {
+	// 						success: false,
+	// 						error: 'failure message'
+	// 					},
+	// 					'test sample 2': {
+	// 						success: true,
+	// 						error: null
+	// 					}
+	// 				}
+	// 			} );
+	// 		} )
+	// 		.then( function() {
+	// 			startTask = bender.queues.getTest( client );
 
-				expect( startTask.retries ).to.equal( 1 );
-				expect( startTask.status ).to.equal( bender.jobs.STATUS.FAILED );
+	// 			expect( startTask.retries ).to.equal( 1 );
+	// 			expect( startTask.status ).to.equal( bender.jobs.STATUS.FAILED );
 
-				return bender.jobs.startTask( startTask );
-			} )
-			.then( function( task ) {
-				expect( task ).to.have.keys( [ 'tbId', 'jobId', 'id' ] );
-				expect( task.tbId ).to.equal( startTask._id );
-				expect( task.jobId ).to.equal( startTask.jobId );
-				expect( task.id ).to.equal( '/jobs/' + startTask.jobId + '/tests/' + startTask.taskName );
+	// 			return bender.jobs.startTask( startTask );
+	// 		} )
+	// 		.then( function( task ) {
+	// 			expect( task ).to.have.keys( [ 'tbId', 'jobId', 'id' ] );
+	// 			expect( task.tbId ).to.equal( startTask._id );
+	// 			expect( task.jobId ).to.equal( startTask.jobId );
+	// 			expect( task.id ).to.equal( '/jobs/' + startTask.jobId + '/tests/' + startTask.taskName );
 
-				return nodeCall( datastores[ 'browser_tasks.db' ].findOne, {
-					_id: task.tbId
-				} );
-			} )
-			.then( function( task ) {
-				expect( task.status ).to.equal( bender.jobs.STATUS.PENDING );
-				expect( task.started ).to.be.above( 0 );
-			} );
-	} );
+	// 			return nodeCall( bender.jobs.db.browserTasks.findOne, {
+	// 				_id: task.tbId
+	// 			} );
+	// 		} )
+	// 		.then( function( task ) {
+	// 			expect( task.status ).to.equal( bender.jobs.STATUS.PENDING );
+	// 			expect( task.started ).to.be.above( 0 );
+	// 		} );
+	// } );
 
 
-	it( 'shouldn\'t restart a failed task if retries count exceeded', function() {
-		var startTask,
-			task;
+	// it( 'shouldn\'t restart a failed task if retries count exceeded', function() {
+	// 	var startTask,
+	// 		task;
 
-		bender.conf.testRetries = 0;
+	// 	bender.conf.testRetries = 0;
 
-		return bender.jobs.create( job4 )
-			.then( function() {
-				return bender.jobs.buildQueues();
-			} )
-			.then( function() {
-				task = bender.queues.getTest( client );
+	// 	return bender.jobs.create( job4 )
+	// 		.then( function() {
+	// 			return bender.jobs.buildQueues();
+	// 		} )
+	// 		.then( function() {
+	// 			task = bender.queues.getTest( client );
 
-				return bender.jobs.completeTask( {
-					_id: task._id,
-					tbId: task._id,
-					client: client,
-					id: task.id,
-					jobId: task.jobId,
-					success: false,
-					results: {
-						'test sample': {
-							success: false,
-							error: 'failure message'
-						},
-						'test sample 2': {
-							success: true,
-							error: null
-						}
-					}
-				} );
-			} )
-			.then( function() {
-				startTask = bender.queues.getTest( client );
+	// 			return bender.jobs.completeTask( {
+	// 				_id: task._id,
+	// 				tbId: task._id,
+	// 				client: client,
+	// 				id: task.id,
+	// 				jobId: task.jobId,
+	// 				success: false,
+	// 				results: {
+	// 					'test sample': {
+	// 						success: false,
+	// 						error: 'failure message'
+	// 					},
+	// 					'test sample 2': {
+	// 						success: true,
+	// 						error: null
+	// 					}
+	// 				}
+	// 			} );
+	// 		} )
+	// 		.then( function() {
+	// 			startTask = bender.queues.getTest( client );
 
-				expect( startTask.retries ).to.equal( 1 );
-				expect( startTask.status ).to.equal( bender.jobs.STATUS.FAILED );
+	// 			expect( startTask.retries ).to.equal( 1 );
+	// 			expect( startTask.status ).to.equal( bender.jobs.STATUS.FAILED );
 
-				return bender.jobs.startTask( startTask );
-			} )
-			.then( function( task ) {
-				expect( task ).to.be.null;
-			} );
-	} );
+	// 			return bender.jobs.startTask( startTask );
+	// 		} )
+	// 		.then( function( task ) {
+	// 			expect( task ).to.be.null;
+	// 		} );
+	// } );
 
-	it( 'should complete a successful task', function( done ) {
-		bender.jobs.create( job3 )
-			.then( function() {
-				return bender.jobs.buildQueues();
-			} )
-			.then( function() {
-				var task = bender.queues.getTest( client ),
-					result = {
-						_id: task._id,
-						tbId: task._id,
-						client: client,
-						id: task.id,
-						jobId: task.jobId,
-						success: true,
-						results: {
-							'test sample': {
-								success: true,
-								error: null
-							},
-							'test sample 2': {
-								success: true,
-								error: null
-							}
-						}
-					};
+	// it( 'should complete a successful task', function( done ) {
+	// 	bender.jobs.create( job3 )
+	// 		.then( function() {
+	// 			return bender.jobs.buildQueues();
+	// 		} )
+	// 		.then( function() {
+	// 			var task = bender.queues.getTest( client ),
+	// 				result = {
+	// 					_id: task._id,
+	// 					tbId: task._id,
+	// 					client: client,
+	// 					id: task.id,
+	// 					jobId: task.jobId,
+	// 					success: true,
+	// 					results: {
+	// 						'test sample': {
+	// 							success: true,
+	// 							error: null
+	// 						},
+	// 						'test sample 2': {
+	// 							success: true,
+	// 							error: null
+	// 						}
+	// 					}
+	// 				};
 
-				bender.on( 'job:update', function( id ) {
-					expect( id ).to.equal( task.jobId );
-					done();
-				} );
+	// 			bender.on( 'job:update', function( id ) {
+	// 				expect( id ).to.equal( task.jobId );
+	// 				done();
+	// 			} );
 
-				bender.jobs.completeTask( result );
-			} );
-	} );
+	// 			bender.jobs.completeTask( result );
+	// 		} );
+	// } );
 
-	it( 'should complete a failed task', function( done ) {
-		bender.jobs.create( job3 )
-			.then( function() {
-				return bender.jobs.buildQueues();
-			} )
-			.then( function() {
-				var task = bender.queues.getTest( client ),
-					result = {
-						_id: task._id,
-						tbId: task._id,
-						client: client,
-						id: task.id,
-						jobId: task.jobId,
-						success: false,
-						results: {
-							'test sample': {
-								success: false,
-								error: 'failure message'
-							},
-							'test sample 2': {
-								success: true,
-								error: null
-							}
-						}
-					};
+	// it( 'should complete a failed task', function( done ) {
+	// 	bender.jobs.create( job3 )
+	// 		.then( function() {
+	// 			return bender.jobs.buildQueues();
+	// 		} )
+	// 		.then( function() {
+	// 			var task = bender.queues.getTest( client ),
+	// 				result = {
+	// 					_id: task._id,
+	// 					tbId: task._id,
+	// 					client: client,
+	// 					id: task.id,
+	// 					jobId: task.jobId,
+	// 					success: false,
+	// 					results: {
+	// 						'test sample': {
+	// 							success: false,
+	// 							error: 'failure message'
+	// 						},
+	// 						'test sample 2': {
+	// 							success: true,
+	// 							error: null
+	// 						}
+	// 					}
+	// 				};
 
-				bender.on( 'job:update', function( id ) {
-					expect( id ).to.equal( task.jobId );
-					done();
-				} );
+	// 			bender.on( 'job:update', function( id ) {
+	// 				expect( id ).to.equal( task.jobId );
+	// 				done();
+	// 			} );
 
-				bender.jobs.completeTask( result );
-			} );
-	} );
+	// 			bender.jobs.completeTask( result );
+	// 		} );
+	// } );
 
-	it( 'should complete an ignored task', function( done ) {
-		bender.jobs.create( job3 )
-			.then( function() {
-				return bender.jobs.buildQueues();
-			} )
-			.then( function() {
-				var task = bender.queues.getTest( client ),
-					result = {
-						_id: task._id,
-						tbId: task._id,
-						client: client,
-						id: task.id,
-						jobId: task.jobId,
-						success: true,
-						ignored: true,
-						results: {}
-					};
+	// it( 'should complete an ignored task', function( done ) {
+	// 	bender.jobs.create( job3 )
+	// 		.then( function() {
+	// 			return bender.jobs.buildQueues();
+	// 		} )
+	// 		.then( function() {
+	// 			var task = bender.queues.getTest( client ),
+	// 				result = {
+	// 					_id: task._id,
+	// 					tbId: task._id,
+	// 					client: client,
+	// 					id: task.id,
+	// 					jobId: task.jobId,
+	// 					success: true,
+	// 					ignored: true,
+	// 					results: {}
+	// 				};
 
-				bender.on( 'job:update', function( id ) {
-					expect( id ).to.equal( task.jobId );
-					done();
-				} );
+	// 			bender.on( 'job:update', function( id ) {
+	// 				expect( id ).to.equal( task.jobId );
+	// 				done();
+	// 			} );
 
-				bender.jobs.completeTask( result );
-			} );
-	} );
+	// 			bender.jobs.completeTask( result );
+	// 		} );
+	// } );
 } );

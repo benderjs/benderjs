@@ -20,6 +20,7 @@ var mocks = require( '../fixtures/_mocks' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
 	jobs = rewire( '../../lib/middlewares/jobs' ),
+	filesModule = require( '../../lib/files' ),
 	serverModule = require( '../../lib/server' ),
 	utilsModule = require( '../../lib/utils' );
 
@@ -29,9 +30,10 @@ describe( 'Middleware - Jobs', function() {
 		instance;
 
 	beforeEach( function() {
-		bender = mocks.getBender( 'conf', 'utils', 'sockets', 'jobs', 'template' );
+		bender = mocks.getBender( 'conf', 'utils', 'applications', 'sockets', 'jobs', 'template' );
 		bender.middlewares = [ jobs.build ];
-		bender.use( [ serverModule, utilsModule ] );
+		bender.preprocessors = [];
+		bender.use( [ filesModule, serverModule, utilsModule ] );
 		bender.init();
 		instance = bender.server.create();
 
@@ -120,14 +122,12 @@ describe( 'Middleware - Jobs', function() {
 	} );
 
 	it( 'should serve task assets', function( done ) {
-		var url = 'AYIlcxZa1i1nhLox/tests/test/fixtures/tests/_assets/asset.js',
-			oldCwd = process.cwd,
+		var url = 'AYIlcxZa1i1nhLox/tests/_assets/asset.js',
+			oldCwd = process.cwd(),
 			cwd = path.resolve( 'test/fixtures/tests/' ),
 			file = path.resolve( path.join( 'test/fixtures/tests/', '.bender/jobs/', url ) );
 
-		process.cwd = function() {
-			return cwd;
-		};
+		jobs.__set__( 'cwd', cwd );
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
@@ -136,7 +136,7 @@ describe( 'Middleware - Jobs', function() {
 				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( assetFile );
 
-				process.cwd = oldCwd;
+				jobs.__set__( 'cwd', oldCwd );
 
 				done();
 			} );
@@ -144,8 +144,12 @@ describe( 'Middleware - Jobs', function() {
 	} );
 
 	it( 'should serve task assets for jobs with no snapshot taken', function( done ) {
-		var url = 'ECNtxgcMzm94aQc9/tests/test/fixtures/tests/_assets/asset.js',
-			file = path.resolve( 'test/fixtures/tests/_assets/asset.js' );
+		var url = 'ECNtxgcMzm94aQc9/tests/_assets/asset.js',
+			file = path.resolve( 'test/fixtures/tests/_assets/asset.js' ),
+			oldCwd = process.cwd(),
+			cwd = path.resolve( 'test/fixtures/tests/' );
+
+		jobs.__set__( 'cwd', cwd );
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
@@ -153,6 +157,8 @@ describe( 'Middleware - Jobs', function() {
 
 				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( assetFile );
+
+				jobs.__set__( 'cwd', oldCwd );
 
 				done();
 			} );
@@ -160,14 +166,12 @@ describe( 'Middleware - Jobs', function() {
 	} );
 
 	it( 'should serve app files from the job\'s snapshot', function( done ) {
-		var url = 'AYIlcxZa1i1nhLox/apps/test.js',
-			oldCwd = process.cwd,
+		var url = 'AYIlcxZa1i1nhLox/apps/test/test.js',
+			oldCwd = process.cwd(),
 			cwd = path.resolve( 'test/fixtures/tests/' ),
-			file = path.resolve( path.join( 'test/fixtures/tests/', '.bender/jobs/', url ) );
+			file = path.resolve( path.join( 'test/fixtures/tests/.bender/jobs/', url ) );
 
-		process.cwd = function() {
-			return cwd;
-		};
+		jobs.__set__( 'cwd', cwd );
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
@@ -176,7 +180,7 @@ describe( 'Middleware - Jobs', function() {
 				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( assetFile );
 
-				process.cwd = oldCwd;
+				jobs.__set__( 'cwd', oldCwd );
 
 				done();
 			} );

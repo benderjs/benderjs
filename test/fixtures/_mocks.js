@@ -52,6 +52,10 @@ moduleMocks = {
 				css: []
 			}
 		};
+
+		bender.applications.get = function( name ) {
+			return bender.applications[ name ] || null;
+		};
 	},
 
 	frameworks: function( bender ) {
@@ -322,6 +326,7 @@ moduleMocks = {
 		};
 		bender.pagebuilders = bender.pagebuilders || [];
 		bender.testbuilders = bender.testbuilders || [];
+		bender.preprocessors = bender.preprocessors || [];
 		bender.reporters = {};
 	},
 

@@ -51,4 +51,24 @@ describe( 'Logger', function() {
 		expect( log.transports.console.level ).to.equal( 'silly' );
 		expect( log.transports.console.colorize ).to.be.false;
 	} );
+
+	it( 'should set the log level to "debug" for newly created loggers', function() {
+		bender.logger.setDebug( true );
+
+		var log = bender.logger.create( 'testdebug' );
+
+		expect( log.transports.console.level ).to.equal( 'debug' );
+	} );
+
+	it( 'should set the log level back to "info" for newly created loggers', function() {
+		var log;
+
+		bender.logger.setDebug( true );
+		log = bender.logger.create( 'testdebug' );
+		expect( log.transports.console.level ).to.equal( 'debug' );
+
+		bender.logger.setDebug( false );
+		log = bender.logger.create( 'testinfo' );
+		expect( log.transports.console.level ).to.equal( 'info' );
+	} );
 } );
