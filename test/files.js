@@ -26,8 +26,8 @@ describe( 'Files', function() {
 		fileUnknown = 'test/fixtures/files/unknown.js',
 		filesDir = 'test/fixtures/files/test/',
 		patterns = [
-			'test/',
-			'!test/fixtures/files/test/'
+			'test/**/*.*',
+			'!test/**/test/*.*'
 		],
 		bender;
 
