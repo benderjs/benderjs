@@ -29,6 +29,7 @@
 	"requireBlocksOnNewline": true,
 	"requireSpacesInsideObjectBrackets": "all",
 	"requireSpacesInsideArrayBrackets": "all",
+	"requireSpacesInsideParentheses": "all",
 	"disallowSpaceAfterObjectKeys": true,
 	"requireCommaBeforeLineBreak": true,
 	"requireOperatorBeforeLineBreak": [
