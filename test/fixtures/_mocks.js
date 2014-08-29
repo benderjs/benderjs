@@ -452,7 +452,7 @@ App.prototype.use = function( modules, options ) {
 			this.plugins[ module.name ] = this._modules[ module.name ] = module;
 
 			if ( typeof module.attach == 'function' ) {
-				module.attach.call( this );
+				module.attach.call( this, options );
 			}
 		}, this );
 	}
