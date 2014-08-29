@@ -80,7 +80,7 @@ describe( 'Middleware - Plugins', function() {
 	} );
 
 	it( 'should respond with valid plugin\'s file', function( done ) {
-		var file = path.resolve( 'framework-test/adapter.js' ),
+		var file = require( path.resolve( 'framework-test/' ) ).files[ 0 ],
 			url = 'http://localhost:1031/plugins/' + file.split( path.sep ).join( '/' );
 
 		instance.listen( 1031, function() {

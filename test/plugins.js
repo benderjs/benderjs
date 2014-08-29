@@ -221,7 +221,7 @@ describe( 'Plugins', function() {
 
 	it( 'should check if a file was defined in plugins', function() {
 		var bender = mocks.getBender(),
-			validFile = path.resolve( 'framework-test/adapter.js' ),
+			validFile = require( path.resolve( 'framework-test/' ) ).files[ 0 ],
 			invalidFile = path.resolve( 'framework-test/invalid-file.js' );
 
 		bender.conf = {

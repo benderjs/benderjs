@@ -449,9 +449,7 @@ App.prototype.use = function( modules, options ) {
 	// array of modules added
 	if ( Array.isArray( modules ) ) {
 		modules.forEach( function( module ) {
-			this.plugins[ module.name ] = module;
-
-			this._modules[ module.name ] = module;
+			this.plugins[ module.name ] = this._modules[ module.name ] = module;
 
 			if ( typeof module.attach == 'function' ) {
 				module.attach.call( this );
