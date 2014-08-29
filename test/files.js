@@ -15,6 +15,7 @@ var mocks = require( './fixtures/_mocks' ),
 	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	fs = require( 'fs' ),
+	path = require( 'path' ),
 	rewire = require( 'rewire' ),
 	files = rewire( '../lib/files' );
 
@@ -23,7 +24,11 @@ describe( 'Files', function() {
 		file2 = 'test/fixtures/files/2.js',
 		file3 = 'test/fixtures/files/3.js',
 		fileUnknown = 'test/fixtures/files/unknown.js',
-		// filesDir = 'test/fixtures/files/',
+		filesDir = 'test/fixtures/files/test/',
+		patterns = [
+			'test/',
+			'!test/fixtures/files/test/'
+		],
 		bender;
 
 	beforeEach( function() {
@@ -35,7 +40,7 @@ describe( 'Files', function() {
 		expect( bender.files ).to.exist;
 		expect( bender.files ).to.have.keys( [
 			'add', 'get', 'find', 'remove', 'update', 'watch', 'send', 'isValidPath',
-			'store', 'File'
+			'store', 'File', 'watcher'
 		] );
 	} );
 
@@ -140,19 +145,52 @@ describe( 'Files', function() {
 		} );
 	} );
 
-	// it( 'should attach a file watcher on a given path', function() {
-	// 	var addSpy = sinon.spy( bender.files, 'add' ),
-	// 		updateSpy = sinon.spy( bender.files, 'update' ),
-	// 		removeSpy = sinon.spy( bender.files, 'remove' );
+	it( 'should attach a file watcher on a given path', function( done ) {
+		var addSpy = sinon.spy( bender.files, 'add' ),
+			removeSpy = sinon.spy( bender.files, 'remove' ),
+			updateSpy = sinon.spy( bender.files, 'update' ),
+			newContent = 'var foo = \'2\';',
+			file = path.join( filesDir, '1.js' ),
+			fileContent = fs.readFileSync( file );
 
-	// 	bender.files.watch( filesDir );
+		bender.files.watch( filesDir );
 
-	// 	expect( addSpy.called ).to.be.true;
+		function checkAdd() {
+			expect( addSpy.called ).to.be.true;
 
-	// 	bender.files.add.restore();
-	// 	bender.files.update.restore();
-	// 	bender.files.remove.restore();
-	// } );
+			fs.writeFileSync( file, newContent );
+		}
+
+		function checkChange() {
+			expect( updateSpy.called ).to.be.true;
+
+			fs.unlinkSync( file );
+		}
+
+		function checkUnlink() {
+			expect( removeSpy.called ).to.be.true;
+
+			fs.writeFileSync( file, fileContent );
+
+			bender.files.add.restore();
+			bender.files.remove.restore();
+			bender.files.update.restore();
+
+			done();
+		}
+
+		bender.files.watcher.on( 'add', checkAdd );
+		bender.files.watcher.on( 'change', checkChange );
+		bender.files.watcher.on( 'unlink', checkUnlink );
+	} );
+
+	it( 'should check if the given path matches given patterns', function() {
+		var f1 = path.resolve( file1 ),
+			f2 = path.resolve( 'test/fixtures/files/test/1.js' );
+
+		expect( bender.files.isValidPath( f1, patterns ) ).to.be.true;
+		expect( bender.files.isValidPath( f2, patterns ) ).to.be.false;
+	} );
 
 	describe( 'File', function() {
 		it( 'should read its content from the FS and return it', function() {
