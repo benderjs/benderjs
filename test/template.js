@@ -99,14 +99,14 @@ describe( 'Template', function() {
 	} );
 
 	it( 'should build HTML for a job\'s task where no snapshot was taken', function() {
-		var jobId = 'foo',
+		var jobId = 'ECNtxgcMzm94aQc9',
 			task = _.extend( {
 				jobId: jobId,
 				snapshot: false,
 			}, bender.tests.tests[ 0 ] ),
 			expected =
 			'<!DOCTYPE html><html><head></head><body>' +
-			'<img src="/jobs/foo/tests/test/fixtures/tests/_assets/img.jpg"></body></html>',
+			'<img src="/jobs/' + jobId + '/tests/test/fixtures/tests/_assets/img.jpg"></body></html>',
 			promise = bender.template.build( task );
 
 		return expect( promise ).to.eventually.equal( expected );

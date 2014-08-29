@@ -165,8 +165,58 @@ describe( 'Middleware - Jobs', function() {
 		} );
 	} );
 
-	it( 'should serve app files from the job\'s snapshot', function( done ) {
+	it( 'should serve app files from the job\'s snapshot if it was taken', function( done ) {
 		var url = 'AYIlcxZa1i1nhLox/apps/test/test.js',
+			oldCwd = process.cwd(),
+			cwd = path.resolve( 'test/fixtures/tests/' ),
+			file = path.resolve( path.join( 'test/fixtures/tests/.bender/jobs/', url ) );
+
+		jobs.__set__( 'cwd', cwd );
+
+		instance.listen( 1031, function() {
+			request.get( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
+				var assetFile = fs.readFileSync( file ).toString();
+
+				expect( res.statusCode ).to.equal( 200 );
+				expect( body ).to.equal( assetFile );
+
+				jobs.__set__( 'cwd', oldCwd );
+
+				done();
+			} );
+		} );
+	} );
+
+	it( 'should serve app files from the apps directory if no snapshot was taken', function( done ) {
+		var url = 'ECNtxgcMzm94aQc9/apps/test/test.js',
+			file = path.resolve( 'test/fixtures/apps/test.js' );
+
+		instance.listen( 1031, function() {
+			request.get( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
+				var assetFile = fs.readFileSync( file ).toString();
+
+				expect( res.statusCode ).to.equal( 200 );
+				expect( body ).to.equal( assetFile );
+
+				done();
+			} );
+		} );
+	} );
+
+	it( 'should resume if no app was found', function( done ) {
+		var url = 'ECNtxgcMzm94aQc9/apps/unknown/test.js';
+
+		instance.listen( 1031, function() {
+			request.get( 'http://localhost:1031/jobs/' + url, function( err, res ) {
+				expect( res.statusCode ).to.equal( 404 );
+
+				done();
+			} );
+		} );
+	} );
+
+	it( 'should serve job files from the job\'s directory', function( done ) {
+		var url = 'AYIlcxZa1i1nhLox/test.js',
 			oldCwd = process.cwd(),
 			cwd = path.resolve( 'test/fixtures/tests/' ),
 			file = path.resolve( path.join( 'test/fixtures/tests/.bender/jobs/', url ) );

@@ -85,7 +85,16 @@ moduleMocks = {
 						'test.js',
 						'unknown'
 					]
-				}
+				},
+
+				test3: {
+					url: 'test3/',
+					path: 'test/fixtures/apps/',
+					files: [
+						'test.js',
+						'test.css'
+					]
+				},
 			},
 
 			framework: 'test',
@@ -213,17 +222,13 @@ moduleMocks = {
 					status: 0,
 					retries: 0
 				} ]
-			} ],
-			snapshots = {
-				AYIlcxZa1i1nhLox: true,
-				ECNtxgcMzm94aQc9: false
-			};
+			} ];
 
 		bender.jobs = {
 			jobs: jobs,
 
 			getApp: function( jobId, name ) {
-				return when.resolve( snapshots[ jobId ] ? bender.applications.get( name ) : null );
+				return when.resolve( ( name === 'test' || name === 'test2' ) ? bender.applications.get( name ) : null );
 			},
 
 			getTask: function( jobId, taskId ) {
@@ -376,7 +381,7 @@ moduleMocks = {
 			html: 'test/fixtures/tests/test/1.html',
 			tags: [ 'foo', 'bar', 'baz' ],
 			framework: 'yui',
-			applications: [ 'test', 'test2' ],
+			applications: [ 'test', 'test2', 'test3' ],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/1?foo=bar',

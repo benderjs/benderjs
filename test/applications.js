@@ -86,7 +86,7 @@ describe( 'Applications', function() {
 		result = bender.applications.get();
 
 		expect( result ).to.be.an( 'array' );
-		expect( result ).to.have.length( 2 );
+		expect( result ).to.have.length( 3 );
 	} );
 
 	it( 'should use application\'s name as url if no url specified', function() {
