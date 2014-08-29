@@ -1,70 +1,70 @@
 {
-  "name": "benderjs",
-  "version": "0.1.7",
-  "description": "The anti-human approach to JavaScript testing",
-  "keywords": [
-    "test",
-    "unit",
-    "cli",
-    "JavaScript"
-  ],
-  "homepage": "http://benderjs.com/",
-  "scripts": {
-    "test": "istanbul test node_modules/mocha/bin/_mocha -- --reporter list --check-leaks --recursive",
-    "lint": "jshint lib/ test/ && jscs ."
-  },
-  "bin": {
-    "bender": "./bin/bender"
-  },
-  "repository": {
-    "type": "git",
-    "url": "http://github.com/benderjs/benderjs.git"
-  },
-  "bugs": {
-    "url": "https://github.com/benderjs/benderjs/issues"
-  },
-  "author": "CKSource (http://cksource.com/)",
-  "license": "MIT",
-  "dependencies": {
-    "broadway": "~0.2.9",
-    "browser-launcher2": "^0.4.1",
-    "chalk": "^0.5.1",
-    "chokidar": "^0.8.4",
-    "connect": "~2.21.1",
-    "dom-combiner": "~0.1.1",
-    "forever": "~0.11.1",
-    "gerard": "~0.1.0",
-    "glob": "^4.0.5",
-    "graceful-fs": "~3.0.2",
-    "lodash": "~2.4.1",
-    "mime": "^1.2.11",
-    "minimatch": "^1.0.0",
-    "ncp": "~0.6.0",
-    "nedb": "~0.10.7",
-    "node-uuid": "~1.4.1",
-    "osenv": "^0.1.0",
-    "request": "~2.40.0",
-    "rimraf": "~2.2.8",
-    "send": "~0.8.0",
-    "socket.io": "^0.9.17",
-    "subcommander": "^0.1.0",
-    "tv4": "~1.1.0",
-    "useragent": "~2.0.9",
-    "when": "~3.4.3",
-    "winston": "~0.7.3"
-  },
-  "devDependencies": {
-    "chai": "*",
-    "chai-as-promised": "*",
-    "eventemitter2": "^0.4.14",
-    "istanbul": "*",
-    "jscs": "^1.5.9",
-    "jsdoc": "*",
-    "jshint": "^2.5.2",
-    "mocha": "*",
-    "nodetime": "*",
-    "rewire": "*",
-    "sinon": "*",
-    "socket.io-client": "^0.9.17"
-  }
+	"name": "benderjs",
+	"version": "0.1.8",
+	"description": "The anti-human approach to JavaScript testing",
+	"keywords": [
+		"test",
+		"unit",
+		"cli",
+		"JavaScript"
+	],
+	"homepage": "http://benderjs.com/",
+	"scripts": {
+		"test": "istanbul test node_modules/mocha/bin/_mocha -- --reporter list --check-leaks --recursive",
+		"lint": "jshint lib/ test/ && jscs ."
+	},
+	"bin": {
+		"bender": "./bin/bender"
+	},
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/benderjs/benderjs.git"
+	},
+	"bugs": {
+		"url": "https://github.com/benderjs/benderjs/issues"
+	},
+	"author": "CKSource (http://cksource.com/)",
+	"license": "MIT",
+	"dependencies": {
+		"broadway": "~0.2.9",
+		"browser-launcher2": "^0.4.1",
+		"chalk": "^0.5.1",
+		"chokidar": "^0.8.4",
+		"connect": "~2.21.1",
+		"dom-combiner": "~0.1.1",
+		"forever": "~0.11.1",
+		"gerard": "~0.1.0",
+		"glob": "^4.0.5",
+		"graceful-fs": "~3.0.2",
+		"lodash": "~2.4.1",
+		"mime": "^1.2.11",
+		"minimatch": "^1.0.0",
+		"ncp": "~0.6.0",
+		"nedb": "~0.10.7",
+		"node-uuid": "~1.4.1",
+		"osenv": "^0.1.0",
+		"request": "~2.40.0",
+		"rimraf": "~2.2.8",
+		"send": "~0.8.0",
+		"socket.io": "^0.9.17",
+		"subcommander": "^0.1.0",
+		"tv4": "~1.1.0",
+		"useragent": "~2.0.9",
+		"when": "~3.4.3",
+		"winston": "~0.7.3"
+	},
+	"devDependencies": {
+		"chai": "*",
+		"chai-as-promised": "*",
+		"eventemitter2": "^0.4.14",
+		"istanbul": "*",
+		"jscs": "^1.5.9",
+		"jsdoc": "*",
+		"jshint": "^2.5.2",
+		"mocha": "*",
+		"nodetime": "*",
+		"rewire": "*",
+		"sinon": "*",
+		"socket.io-client": "^0.9.17"
+	}
 }
