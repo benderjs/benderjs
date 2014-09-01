@@ -86,7 +86,7 @@ describe( 'Jobs', function() {
 	} );
 
 	beforeEach( function() {
-		bender = mocks.getBender( 'conf', 'applications', 'tests', 'utils' );
+		bender = mocks.getBender( 'conf', 'applications', 'tests', 'utils', 'files' );
 		bender.use( [ applications, database, jobs, browsers ] );
 		bender.database.mode = bender.database.MODES.MEMORY;
 		bender.init();
@@ -403,6 +403,36 @@ describe( 'Jobs', function() {
 				expect( addSpy.called ).to.be.false;
 				expect( removeSpy.called ).to.be.false;
 			} );
+	} );
+
+	it( 'should update existing job', function() {
+		var newDescription = 'new description',
+			id;
+
+		return bender.jobs.create( job )
+			.then( function( result ) {
+				id = result;
+
+				return bender.jobs.update( id, {
+					description: newDescription
+				} );
+			} )
+			.then( function() {
+				return nodeCall( bender.jobs.db.jobs.findOne, {
+					_id: id
+				} );
+			} )
+			.then( function( result ) {
+				expect( result.description ).to.equal( newDescription );
+			} );
+	} );
+
+	it( 'should return an error when trying to update non-existent job', function() {
+		var promise = bender.jobs.update( 'unknown', {
+			description: 'new description'
+		} );
+
+		return expect( promise ).to.be.rejectedWith( 'There\'s no such job' );
 	} );
 
 	it( 'should compact results of a given job', function() {
