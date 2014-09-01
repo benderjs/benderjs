@@ -59,7 +59,7 @@ describe( 'Applications', function() {
 		bender;
 
 	beforeEach( function() {
-		bender = mocks.getBender( 'conf', 'utils' );
+		bender = mocks.getBender( 'conf', 'utils', 'files' );
 		bender.use( applications );
 	} );
 

@@ -27,7 +27,7 @@ describe( 'Template', function() {
 		bender;
 
 	beforeEach( function() {
-		bender = mocks.getBender( 'conf', 'jobs', 'pagebuilders', 'plugins', 'tests', 'utils' );
+		bender = mocks.getBender( 'conf', 'jobs', 'pagebuilders', 'plugins', 'tests', 'utils', 'files' );
 		bender.use( [ applications, utils, template ] );
 		bender.init();
 	} );

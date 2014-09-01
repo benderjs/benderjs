@@ -129,6 +129,12 @@ moduleMocks = {
 		};
 	},
 
+	files: function( bender ) {
+		bender.files = {
+			watch: nop
+		};
+	},
+
 	jobs: function( bender ) {
 		var jobs = [ {
 				browsers: [ 'chrome' ],

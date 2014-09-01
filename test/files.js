@@ -153,7 +153,7 @@ describe( 'Files', function() {
 			file = path.join( filesDir, '1.js' ),
 			fileContent = fs.readFileSync( file );
 
-		bender.files.watch( filesDir );
+		bender.files.watch( filesDir + '**' );
 
 		function checkAdd() {
 			expect( addSpy.called ).to.be.true;
