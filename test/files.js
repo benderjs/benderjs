@@ -126,6 +126,7 @@ describe( 'Files', function() {
 		var file = bender.files.add( file1 ),
 			resp = mocks.createFakeResponse( function() {
 				expect( file.oldPath ).to.equal( file2 );
+				expect( bender.files.store ).to.have.keys( [ file2 ] );
 				done();
 			} );
 
