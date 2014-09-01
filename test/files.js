@@ -48,7 +48,7 @@ describe( 'Files', function() {
 		var file = bender.files.add( file1 );
 
 		expect( file ).to.be.instanceof( bender.files.File );
-		expect( bender.files.store ).to.have.length( 1 );
+		expect( Object.keys( bender.files.store ) ).to.have.length( 1 );
 	} );
 
 	it( 'should return null if no file found', function() {
