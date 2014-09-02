@@ -116,15 +116,34 @@ describe( 'Tests', function() {
 		expect( bender.tests.checkPath( 'invalid/test/file.js' ) ).to.be.false;
 	} );
 
+	it( 'should list all the files found in the test groups basePaths', function() {
+		return bender.tests.readBasePaths()
+			.then( function( files ) {
+				expect( files ).to.have.keys( [ 'test/fixtures/tests/' ] );
+				expect( files[ 'test/fixtures/tests/' ] ).to.have.length( 21 );
+
+				files[ 'test/fixtures/tests/' ].forEach( function( file ) {
+					expect( file ).to.have.keys( [ 'name', 'dir', 'path', 'stats' ] );
+				} );
+			} );
+
+	} );
+
 	it( 'should use group\'s data taken from cache if no changes in files were made since last check', function() {
 		var group = _.merge( {
-			framework: bender.conf.framework,
-			name: 'Test'
-		}, bender.conf.tests.Test );
+				framework: bender.conf.framework,
+				name: 'Test'
+			}, bender.conf.tests.Test ),
+			files;
 
-		return bender.tests.buildGroup( group, 'Test' )
+		return bender.tests.readBasePaths()
+			.then( function( result ) {
+				files = result;
+
+				return bender.tests.buildGroup( group, 'Test', files[ group.basePath ] );
+			} )
 			.then( function() {
-				return bender.tests.buildGroup( group, 'Test' );
+				return bender.tests.buildGroup( group, 'Test', files[ group.basePath ] );
 			} )
 			.then( function( data ) {
 				// returned value should be a reference to cached group
@@ -137,9 +156,15 @@ describe( 'Tests', function() {
 				framework: bender.conf.framework,
 				name: 'Test'
 			}, bender.conf.tests.Test ),
-			id = 'test/fixtures/tests/test/1';
+			id = 'test/fixtures/tests/test/1',
+			files;
 
-		return bender.tests.buildGroup( group, 'Test' )
+		return bender.tests.readBasePaths()
+			.then( function( result ) {
+				files = result;
+
+				return bender.tests.buildGroup( group, 'Test', files[ group.basePath ] );
+			} )
 			.then( function() {
 				return bender.tests.get( id );
 			} )
