@@ -14,7 +14,7 @@
 var mocks = require( './fixtures/_mocks' ),
 	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
-	fs = require( 'fs' ),
+	fs = require( 'when/node' ).liftAll( require( 'fs' ) ),
 	path = require( 'path' ),
 	rewire = require( 'rewire' ),
 	files = rewire( '../lib/files' );
@@ -24,7 +24,6 @@ describe( 'Files', function() {
 		file2 = 'test/fixtures/files/2.js',
 		file3 = 'test/fixtures/files/3.js',
 		fileUnknown = 'test/fixtures/files/unknown.js',
-		filesDir = 'test/fixtures/files/test/',
 		patterns = [
 			'test/**/*.*',
 			'!test/**/test/*.*'
@@ -39,8 +38,8 @@ describe( 'Files', function() {
 	it( 'should expose bender.files namespace and its API', function() {
 		expect( bender.files ).to.exist;
 		expect( bender.files ).to.have.keys( [
-			'add', 'get', 'find', 'remove', 'update', 'watch', 'send', 'isValidPath',
-			'store', 'File', 'watcher'
+			'add', 'get', 'find', 'remove', 'update', 'send', 'isValidPath',
+			'store', 'File'
 		] );
 	} );
 
@@ -146,45 +145,6 @@ describe( 'Files', function() {
 		} );
 	} );
 
-	it( 'should attach a file watcher on a given path', function( done ) {
-		var addSpy = sinon.spy( bender.files, 'add' ),
-			removeSpy = sinon.spy( bender.files, 'remove' ),
-			updateSpy = sinon.spy( bender.files, 'update' ),
-			newContent = 'var foo = \'2\';',
-			file = path.join( filesDir, '1.js' ),
-			fileContent = fs.readFileSync( file );
-
-		bender.files.watch( filesDir + '**' );
-
-		function checkAdd() {
-			expect( addSpy.called ).to.be.true;
-
-			fs.writeFileSync( file, newContent );
-		}
-
-		function checkChange() {
-			expect( updateSpy.called ).to.be.true;
-
-			fs.unlinkSync( file );
-		}
-
-		function checkUnlink() {
-			expect( removeSpy.called ).to.be.true;
-
-			fs.writeFileSync( file, fileContent );
-
-			bender.files.add.restore();
-			bender.files.remove.restore();
-			bender.files.update.restore();
-
-			done();
-		}
-
-		bender.files.watcher.on( 'add', checkAdd );
-		bender.files.watcher.on( 'change', checkChange );
-		bender.files.watcher.on( 'unlink', checkUnlink );
-	} );
-
 	it( 'should check if the given path matches given patterns', function() {
 		var f1 = path.resolve( file1 ),
 			f2 = path.resolve( 'test/fixtures/files/test/1.js' );
@@ -195,33 +155,86 @@ describe( 'Files', function() {
 
 	describe( 'File', function() {
 		it( 'should read its content from the FS and return it', function() {
-			var file = bender.files.add( file1 );
-
-			return file.read()
-				.then( function( content ) {
-					var src = fs.readFileSync( file1 ).toString();
-					expect( content ).to.equal( src );
-				} );
-		} );
-
-		it( 'should return its cached content if possible', function() {
 			var file = bender.files.add( file1 ),
-				newContent = 'var foo = 3;',
 				content;
 
 			return file.read()
 				.then( function( result ) {
 					content = result;
 
-					fs.writeFileSync( file1, newContent );
+					return fs.readFile( file1 );
+				} )
+				.then( function( src ) {
+					expect( content ).to.equal( src.toString() );
+				} );
+		} );
 
+		it( 'should return cached content if not modified', function() {
+			var file = bender.files.add( file1 ),
+				content;
+
+			return file.read()
+				.then( function( result ) {
+					content = result;
 					return file.read();
 				} )
 				.then( function( result ) {
-					expect( result ).to.not.equal( newContent );
+					expect( result ).to.equal( content );
+				} );
+		} );
+
+		it( 'should check if modified', function() {
+			var file = bender.files.add( file1 ),
+				content = 'var foo = 1;',
+				newContent = 'var foo = 3;';
+
+			return fs.writeFile( file1, content )
+				.then( function() {
+					return file.read();
+				} )
+				.then( function( result ) {
 					expect( result ).to.equal( content );
 
-					fs.writeFileSync( file1, content );
+					return file.checkModified();
+				} )
+				.then( function( result ) {
+					expect( result ).to.be.false;
+
+					return fs.writeFile( file1, newContent );
+				} )
+				.delay( 500 )
+				.then( function() {
+					return file.checkModified();
+				} )
+				.then( function( result ) {
+					expect( result ).to.be.true;
+
+					return fs.writeFile( file1, content );
+				} );
+		} );
+
+		it( 'should return new content if modified', function() {
+			var file = bender.files.add( file1 ),
+				content = 'var foo = 1;',
+				newContent = 'var foo = 3;';
+
+			return fs.writeFile( file1, content )
+				.then( function() {
+					return file.read();
+				} )
+				.then( function( result ) {
+					expect( result ).to.equal( content );
+
+					return fs.writeFile( file1, newContent );
+				} )
+				.delay( 500 )
+				.then( function() {
+					return file.read();
+				} )
+				.then( function( result ) {
+					expect( result ).to.equal( newContent );
+
+					return fs.writeFile( file1, content );
 				} );
 		} );
 
