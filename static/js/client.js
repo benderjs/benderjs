@@ -36,11 +36,19 @@
 	 */
 	function prepareResultsEl() {
 		var summaryEl,
-			allEl;
+			allEl,
+			failedEl;
 
 		// summary box that sticks to the top of the window
 		summaryEl = document.createElement( 'div' );
 		summaryEl.className = 'summary';
+
+		// show tests that failed only
+		failedEl = document.createElement( 'a' );
+		failedEl.href = '#';
+		failedEl.className = 'btn failed';
+		failedEl.title = 'Show failed tests';
+		summaryEl.appendChild( failedEl );
 
 		// collapse results button
 		collapseEl = document.createElement( 'a' );
@@ -52,7 +60,7 @@
 		// run all tests button
 		allEl = document.createElement( 'a' );
 		allEl.href = '#';
-		allEl.className = 'btn all';
+		allEl.className = 'btn runall';
 		allEl.title = 'Run all tests';
 		summaryEl.appendChild( allEl );
 
@@ -81,7 +89,9 @@
 		// handle all clicks in results box
 		function handleClick( event ) {
 			var target,
-				collapsed;
+				collapsed,
+				failed,
+				resultsElClassName;
 
 			event = event || window.event;
 
@@ -97,15 +107,30 @@
 				return;
 			}
 
+			resultsElClassName = ( resultsEl.className + '' ).trim();
+
 			if ( target === collapseEl ) {
 				collapsed = isCollapsed();
-				resultsEl.className = 'results' + ( collapsed ? '' : ' collapsed' );
 				collapseEl.className = 'btn ' + ( collapsed ? 'collapse' : 'expand' );
 				collapseEl.title = ( collapsed ? 'Collapse' : 'Expand' ) + ' the results';
+
+				resultsElClassName = resultsElClassName.replace(
+					collapsed ? 'collapsed' : /$/,
+					collapsed ? '' : ' collapsed' );
+			} else if ( target === failedEl ) {
+				failed = isFailed();
+				failedEl.className = 'btn ' + ( failed ? 'failed' : 'all' );
+				failedEl.title = failed ? 'Show failed tests' : 'Show all tests';
+
+				resultsElClassName = resultsElClassName.replace(
+					failed ? 'failed' : /$/,
+					failed ? '' : ' failed' );
 			} else {
 				window.location = target.href;
 				window.location.reload();
 			}
+
+			resultsEl.className = resultsElClassName;
 		}
 
 		if ( resultsEl.addEventListener ) {
@@ -123,6 +148,14 @@
 	 */
 	function isCollapsed() {
 		return ( resultsEl.className + '' ).indexOf( 'collapsed' ) > -1;
+	}
+
+	/**
+	 * Check if the results box shows failed tests only
+	 * @return {Boolean}
+	 */
+	function isFailed() {
+		return ( resultsEl.className + '' ).indexOf( 'failed' ) > -1;
 	}
 
 	/**
