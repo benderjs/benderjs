@@ -13,4 +13,5 @@
 <glyph unicode="&#xe603;" d="M432 416l-240-240-112 112-80-80 192-192 320 320z" />
 <glyph unicode="&#xe604;" d="M96 416l320-192-320-192z" />
 <glyph unicode="&#xe605;" d="M256 48v160l-160-160v352l160-160v160l176-176z" />
+<glyph unicode="&#xe606;" d="M32 384h448v-96h-448zM32 256h448v-96h-448zM32 128h448v-96h-448z" />
 </font></defs></svg>

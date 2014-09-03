@@ -103,7 +103,7 @@ body {
 	border-color: #adadad;
 }
 
-.all:before {
+.runall:before {
 	content: '\e604';
 }
 
@@ -113,6 +113,14 @@ body {
 
 .expand:before {
 	content: '\e600';
+}
+
+.btn.failed:before {
+	content: '\e602';
+}
+
+.btn.all:before {
+	content: '\e606';
 }
 
 .ok {
@@ -156,8 +164,12 @@ body {
 }
 
 .collapsed .summary p,
+.collapsed .runall,
+.collapsed .result,
+.collapsed .failed,
 .collapsed .all,
-.collapsed .result {
+.failed .result.ok,
+.failed .result.warn {
 	display: none;
 }
 
