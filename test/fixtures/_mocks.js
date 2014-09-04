@@ -130,9 +130,7 @@ moduleMocks = {
 	},
 
 	files: function( bender ) {
-		bender.files = {
-			watch: nop
-		};
+		bender.files = {};
 	},
 
 	jobs: function( bender ) {
