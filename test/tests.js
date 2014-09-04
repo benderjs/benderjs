@@ -23,8 +23,8 @@ describe( 'Tests', function() {
 
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'utils', 'testbuilders' );
-
 		bender.use( tests );
+		bender.init();
 	} );
 
 	it( 'should create "tests" namespace in Bender when attached', function() {
@@ -77,7 +77,7 @@ describe( 'Tests', function() {
 			} );
 	} );
 
-	it( 'should return a single test specified in configuration file', function() {
+	it( 'should return a single test specified in the configuration file', function() {
 		return bender.tests.get( 'test/fixtures/tests/test/1' )
 			.then( function( test ) {
 				expect( test ).to.be.an( 'object' );
@@ -91,19 +91,19 @@ describe( 'Tests', function() {
 			} );
 	} );
 
-	it( 'should resolve without result when trying to get test asset', function() {
-		return bender.tests.get( 'test/fixtures/tests/_assets/asset.js' )
+	it( 'should resolve without a result when trying to get a test asset', function() {
+		return bender.tests.get( 'test/fixtures/tests/_assets/asset' )
 			.then( function( test ) {
 				expect( test ).to.not.exist;
 
-				return bender.tests.get( 'test/fixtures/tests/test/_assets/asset.js' );
+				return bender.tests.get( 'test/fixtures/tests/test/_assets/asset' );
 			} )
 			.then( function( test ) {
 				expect( test ).to.not.exist;
 			} );
 	} );
 
-	it( 'should resolve without result when trying to get invalid test or asset', function() {
+	it( 'should resolve without a result when trying to get an invalid test or asset', function() {
 		return bender.tests.get( 'invalid/test/file.js' )
 			.then( function( test ) {
 				expect( test ).to.not.exist;
@@ -116,7 +116,7 @@ describe( 'Tests', function() {
 		expect( bender.tests.checkPath( 'invalid/test/file.js' ) ).to.be.false;
 	} );
 
-	it( 'should list all the files found in the test groups basePaths', function() {
+	it( 'should list all files found in the test groups basePaths', function() {
 		return bender.tests.readBasePaths()
 			.then( function( files ) {
 				expect( files ).to.have.keys( [ 'test/fixtures/tests/' ] );
