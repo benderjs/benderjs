@@ -560,10 +560,10 @@ describe( 'Jobs', function() {
 				return bender.jobs.startTask( client );
 			} )
 			.then( function( task ) {
-				expect( task ).to.have.keys( [ 'tbId', 'jobId', 'id' ] );
+				expect( task ).to.have.keys( [ 'btId', 'jobId', 'id' ] );
 
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( task ) {
@@ -583,8 +583,8 @@ describe( 'Jobs', function() {
 				task = result;
 
 				return bender.jobs.completeTask( {
-					_id: task.tbId,
-					tbId: task.tbId,
+					_id: task.btId,
+					btId: task.btId,
 					client: client,
 					id: task.id,
 					jobId: task.jobId,
@@ -603,7 +603,7 @@ describe( 'Jobs', function() {
 			} )
 			.then( function() {
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( result ) {
@@ -616,7 +616,7 @@ describe( 'Jobs', function() {
 				expect( result ).to.deep.equal( task );
 
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( task ) {
@@ -638,8 +638,8 @@ describe( 'Jobs', function() {
 				task = result;
 
 				return bender.jobs.completeTask( {
-					_id: task.tbId,
-					tbId: task.tbId,
+					_id: task.btId,
+					btId: task.btId,
 					client: client,
 					id: task.id,
 					jobId: task.jobId,
@@ -658,7 +658,7 @@ describe( 'Jobs', function() {
 			} )
 			.then( function() {
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( result ) {
@@ -671,7 +671,7 @@ describe( 'Jobs', function() {
 				expect( result ).to.not.exist;
 
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( result ) {
@@ -686,7 +686,7 @@ describe( 'Jobs', function() {
 			} )
 			.then( function( task ) {
 				return nodeCall( bender.jobs.db.browserTasks.update, {
-					_id: task.tbId
+					_id: task.btId
 				}, {
 					$set: {
 						started: 0
@@ -698,7 +698,7 @@ describe( 'Jobs', function() {
 			} )
 			.then( function( task ) {
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( task ) {
@@ -720,7 +720,7 @@ describe( 'Jobs', function() {
 				task = result;
 
 				return nodeCall( bender.jobs.db.browserTasks.update, {
-					_id: task.tbId
+					_id: task.btId
 				}, {
 					$set: {
 						started: 0,
@@ -735,7 +735,7 @@ describe( 'Jobs', function() {
 				expect( result ).to.not.exist;
 
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( task ) {
@@ -758,8 +758,8 @@ describe( 'Jobs', function() {
 				task = data;
 
 				var result = {
-					_id: task.tbId,
-					tbId: task.tbId,
+					_id: task.btId,
+					btId: task.btId,
 					client: client,
 					id: task.id,
 					jobId: task.jobId,
@@ -786,7 +786,7 @@ describe( 'Jobs', function() {
 			} )
 			.then( function() {
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( result ) {
@@ -805,8 +805,8 @@ describe( 'Jobs', function() {
 				task = data;
 
 				var result = {
-					_id: task.tbId,
-					tbId: task.tbId,
+					_id: task.btId,
+					btId: task.btId,
 					client: client,
 					id: task.id,
 					jobId: task.jobId,
@@ -833,7 +833,7 @@ describe( 'Jobs', function() {
 			} )
 			.then( function() {
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( result ) {
@@ -852,8 +852,8 @@ describe( 'Jobs', function() {
 				task = data;
 
 				var result = {
-					_id: task.tbId,
-					tbId: task.tbId,
+					_id: task.btId,
+					btId: task.btId,
 					client: client,
 					id: task.id,
 					jobId: task.jobId,
@@ -871,7 +871,7 @@ describe( 'Jobs', function() {
 			} )
 			.then( function() {
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( result ) {
@@ -890,8 +890,8 @@ describe( 'Jobs', function() {
 				task = data;
 
 				var result = {
-					_id: task.tbId,
-					tbId: task.tbId,
+					_id: task.btId,
+					btId: task.btId,
 					client: client,
 					id: task.id,
 					jobId: task.jobId,
@@ -918,7 +918,7 @@ describe( 'Jobs', function() {
 			} )
 			.then( function() {
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
-					_id: task.tbId
+					_id: task.btId
 				} );
 			} )
 			.then( function( result ) {

@@ -27,7 +27,7 @@ describe( 'Sockets', function() {
 		id = 'bdf3ebc3-d783-4ab0-b4d2-aa590d55c533',
 		result = {
 			id: 'tests/test/1',
-			tbId: 'foo',
+			btId: 'foo',
 			jobId: 'bar',
 			success: true
 		},
@@ -173,7 +173,7 @@ describe( 'Sockets', function() {
 			} ),
 			task = {
 				id: 'tests/test/1',
-				tbId: 'foo',
+				btId: 'foo',
 				jobId: 'bar'
 			};
 
@@ -204,7 +204,7 @@ describe( 'Sockets', function() {
 		bender.on( 'client:complete', function( data ) {
 			expect( data ).to.be.an( 'object' );
 			expect( data.id ).to.equal( result.id );
-			expect( data.tbId ).to.equal( result.tbId );
+			expect( data.btId ).to.equal( result.btId );
 			expect( data.jobId ).to.equal( result.jobId );
 			expect( data.success ).to.equal( result.success );
 			socket.disconnect();

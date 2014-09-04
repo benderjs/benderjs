@@ -71,4 +71,21 @@ describe( 'Logger', function() {
 		log = bender.logger.create( 'testinfo' );
 		expect( log.transports.console.level ).to.equal( 'info' );
 	} );
+
+	it( 'should patch winston to log error stacks properly', function() {
+		var log = bender.logger.create( 'testerror' ),
+			error = new Error( 'test error' ),
+			oldWrite = process.stderr.write,
+			result;
+
+		process.stderr.write = function( data ) {
+			result = data;
+		};
+
+		log.error( error );
+
+		process.stderr.write = oldWrite;
+
+		expect( result ).to.match( /Error: test error\s+at[\w\.<>\s\(\)\/]+:\d+:\d+\)/ );
+	} );
 } );
