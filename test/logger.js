@@ -72,7 +72,7 @@ describe( 'Logger', function() {
 		expect( log.transports.console.level ).to.equal( 'info' );
 	} );
 
-	it( 'should patch winston to log error stacks properly', function() {
+	it( 'should patch Winston to log error stacks properly', function() {
 		var log = bender.logger.create( 'testerror' ),
 			error = new Error( 'test error' ),
 			oldWrite = process.stderr.write,
@@ -87,5 +87,37 @@ describe( 'Logger', function() {
 		process.stderr.write = oldWrite;
 
 		expect( result ).to.match( /Error: test error\s+at[\w\.<>\s\(\)\/]+:\d+:\d+\)/ );
+	} );
+
+	it( 'should patch Winston to log objects properly', function() {
+		var log = bender.logger.create( 'testobj' ),
+			oldWrite = process.stderr.write,
+			result;
+
+		process.stderr.write = function( data ) {
+			result = data;
+		};
+
+		log.error( {
+			foo: 1
+		} );
+
+		expect( result ).to.contain( '{"foo":1}' );
+
+		log.error( [ 1, 2, 3 ] );
+
+		expect( result ).to.contain( '[1,2,3]' );
+
+		var date = new Date();
+
+		log.error( date );
+
+		expect( result ).to.contain( date.toString() );
+
+		log.error( /^foo(\d+)$/gi );
+
+		expect( result ).to.contain( '/^foo(\\d+)$/gi' );
+
+		process.stderr.write = oldWrite;
 	} );
 } );
