@@ -185,15 +185,12 @@ describe( 'Files', function() {
 
 		it( 'should check if modified', function() {
 			var file = bender.files.add( file1 ),
-				content = 'var foo = 1;',
-				newContent = 'var foo = 3;';
+				newContent = 'var foo = 3;',
+				content;
 
-			return fs.writeFile( file1, content )
-				.then( function() {
-					return file.read();
-				} )
+			return file.read()
 				.then( function( result ) {
-					expect( result ).to.equal( content );
+					content = result;
 
 					return file.checkModified();
 				} )
@@ -202,12 +199,11 @@ describe( 'Files', function() {
 
 					return fs.writeFile( file1, newContent );
 				} )
-				.delay( 500 )
 				.then( function() {
 					return file.checkModified();
 				} )
 				.then( function( result ) {
-					expect( result ).to.be.true;
+					expect( result ).to.be.truthy;
 
 					return fs.writeFile( file1, content );
 				} );
@@ -215,20 +211,27 @@ describe( 'Files', function() {
 
 		it( 'should return new content if modified', function() {
 			var file = bender.files.add( file1 ),
-				content = 'var foo = 1;',
-				newContent = 'var foo = 3;';
+				newContent = 'var foo = 3;',
+				content;
 
-			return fs.writeFile( file1, content )
-				.then( function() {
-					return file.read();
-				} )
+			return file.read()
 				.then( function( result ) {
-					expect( result ).to.equal( content );
+					content = result;
+
+					return file.checkModified();
+				} )
+				.delay( 1000 )
+				.then( function( result ) {
+					expect( result ).to.be.false;
 
 					return fs.writeFile( file1, newContent );
 				} )
-				.delay( 500 )
 				.then( function() {
+					return file.checkModified();
+				} )
+				.then( function( result ) {
+					expect( result ).to.be.truthy;
+
 					return file.read();
 				} )
 				.then( function( result ) {
