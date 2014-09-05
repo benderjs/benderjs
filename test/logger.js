@@ -86,7 +86,7 @@ describe( 'Logger', function() {
 
 		process.stderr.write = oldWrite;
 
-		expect( result ).to.match( /Error: test error\s+at[\w\.<>\s\(\)\/]+:\d+:\d+\)/ );
+		expect( result ).to.match( /Error: test error\s+at[\w\.<>\s\(\)\/\\\:]+:\d+:\d+\)/ );
 	} );
 
 	it( 'should patch Winston to log objects properly', function() {
