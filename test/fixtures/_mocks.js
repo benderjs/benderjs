@@ -531,15 +531,32 @@ module.exports.attachPagebuilder = function( bender, builder ) {
 	};
 };
 
+module.exports.createFakeRequest = function( headers ) {
+	var req = {
+		headers: headers || {}
+	};
+
+	return req;
+};
+
 module.exports.createFakeResponse = function( callback ) {
 	var resp = {
-		writeHead: function( head ) {
-			resp.head = head;
+		status: 0,
+
+		headers: {},
+
+		writeHead: function( status, headers ) {
+			resp.status = status;
+			resp.headers = _.merge( resp.headers, headers );
+		},
+
+		setHeader: function( name, value ) {
+			resp.headers[ name ] = value;
 		},
 
 		end: function( data ) {
 			resp.data = data;
-			callback( data );
+			callback( data, resp );
 		}
 	};
 

@@ -113,17 +113,19 @@ describe( 'Files', function() {
 
 	it( 'should send a file in the response', function( done ) {
 		var file = bender.files.add( file1 ),
-			resp = mocks.createFakeResponse( function( data ) {
+			req = mocks.createFakeRequest(),
+			res = mocks.createFakeResponse( function( data ) {
 				expect( data ).to.equal( file.content );
 				done();
 			} );
 
-		bender.files.send( file1, resp );
+		bender.files.send( file1, req, res );
 	} );
 
 	it( 'should override oldPath while sending a file', function( done ) {
 		var file = bender.files.add( file1 ),
-			resp = mocks.createFakeResponse( function() {
+			req = mocks.createFakeRequest(),
+			res = mocks.createFakeResponse( function() {
 				expect( file.oldPath ).to.equal( file2 );
 				expect( bender.files.store ).to.have.keys( [ file2 ] );
 				done();
@@ -131,15 +133,16 @@ describe( 'Files', function() {
 
 		expect( file.oldPath ).to.equal( file1 );
 
-		bender.files.send( file1, resp, function() {}, file2 );
+		bender.files.send( file1, req, res, function() {}, file2 );
 	} );
 
 
 	it( 'should execute error callback if no file found to be send', function( done ) {
 		var spy = sinon.spy(),
-			resp = mocks.createFakeResponse( spy );
+			req = mocks.createFakeRequest(),
+			res = mocks.createFakeResponse( spy );
 
-		bender.files.send( fileUnknown, resp, function() {
+		bender.files.send( fileUnknown, req, res, function() {
 			expect( spy.called ).to.be.false;
 			done();
 		} );
@@ -255,20 +258,42 @@ describe( 'Files', function() {
 
 		it( 'should send it\'s contents in the HTTP response', function( done ) {
 			var file = bender.files.add( file1 ),
-				resp = mocks.createFakeResponse( function( data ) {
+				req = mocks.createFakeRequest(),
+				res = mocks.createFakeResponse( function( data ) {
 					expect( data ).to.equal( file.content );
 					done();
 				} );
 
-			file.send( resp );
+			file.send( req, res );
+		} );
+
+		it( 'should send 304 not modified if no change in the file and proper request headers were sent', function( done ) {
+			var file = bender.files.add( file1 ),
+				req = mocks.createFakeRequest(),
+				res = mocks.createFakeResponse( function() {
+					req = mocks.createFakeRequest( {
+						'if-modified-since': file.mtime.toUTCString()
+					} );
+
+					res = mocks.createFakeResponse( function( data, resp ) {
+						expect( resp.status ).to.equal( 304 );
+						expect( resp.headers ).to.have.keys( [ 'Cache-Control', 'Date', 'Last-Modified', 'Pragma' ] );
+						done();
+					} );
+
+					file.send( req, res );
+				} );
+
+			file.send( req, res );
 		} );
 
 		it( 'should call errCallback if something goes wrong while sending', function( done ) {
 			var file = bender.files.add( fileUnknown ),
 				spySuccess = sinon.spy(),
-				resp = mocks.createFakeResponse( spySuccess );
+				req = mocks.createFakeRequest(),
+				res = mocks.createFakeResponse( spySuccess );
 
-			file.send( resp, function() {
+			file.send( req, res, function() {
 				expect( spySuccess.called ).to.be.false;
 				done();
 			} );
