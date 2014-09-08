@@ -163,7 +163,7 @@ describe( 'Files', function() {
 
 			return file.read()
 				.then( function( result ) {
-					content = result;
+					content = result.toString();
 
 					return fs.readFile( file1 );
 				} )
@@ -178,11 +178,11 @@ describe( 'Files', function() {
 
 			return file.read()
 				.then( function( result ) {
-					content = result;
+					content = result.toString();
 					return file.read();
 				} )
 				.then( function( result ) {
-					expect( result ).to.equal( content );
+					expect( result.toString() ).to.equal( content );
 				} );
 		} );
 
@@ -238,7 +238,7 @@ describe( 'Files', function() {
 					return file.read();
 				} )
 				.then( function( result ) {
-					expect( result ).to.equal( newContent );
+					expect( result.toString() ).to.equal( newContent );
 
 					return fs.writeFile( file1, content );
 				} );
