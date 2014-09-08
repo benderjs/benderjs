@@ -248,4 +248,19 @@ describe( 'Plugins', function() {
 
 		expect( bender.frameworks ).to.include.key( 'test' );
 	} );
+
+	it( 'should support wildcards in plugin definition list', function() {
+		var bender = mocks.getBender(),
+			testPlugin = require( path.resolve( 'node_modules/middleware-test/' ) );
+
+		bender.conf = {
+			plugins: [ 'middleware-*', 'reporter-test' ]
+		};
+
+		bender.use( plugins );
+		bender.plugins.load();
+
+		expect( bender.middlewares ).to.contain( testPlugin.build );
+		expect( bender.reporters ).to.include.key( 'test' );
+	} );
 } );
