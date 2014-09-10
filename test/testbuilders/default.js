@@ -36,7 +36,7 @@ describe( 'Test Builders - Default', function() {
 				'test/fixtures/tests/test2/2.js',
 				'test/fixtures/tests/test2/3.js',
 				'test/fixtures/tests/test2/template.js',
-				'test/fixtures/tests/test2/template.html',
+				'test/fixtures/tests/test2/__template__.html',
 			],
 			tests: {}
 		},
@@ -109,9 +109,9 @@ describe( 'Test Builders - Default', function() {
 		expect( result.files ).to.be.empty;
 	} );
 
-	it( 'should not strip template.html files from data\'s file list', function() {
+	it( 'should not strip __template__.html files from data\'s file list', function() {
 		var expected = {
-				files: [ 'test/fixtures/tests/test2/template.html' ],
+				files: [ 'test/fixtures/tests/test2/__template__.html' ],
 				tests: {
 					'test/fixtures/tests/test2/1': {
 						id: 'test/fixtures/tests/test2/1',
@@ -127,15 +127,14 @@ describe( 'Test Builders - Default', function() {
 					},
 					'test/fixtures/tests/test2/template': {
 						id: 'test/fixtures/tests/test2/template',
-						js: 'test/fixtures/tests/test2/template.js',
-						html: 'test/fixtures/tests/test2/template.html'
+						js: 'test/fixtures/tests/test2/template.js'
 					}
 				}
 			},
 			result = defaultBuilder.build( sampleData2 );
 
 		expect( result ).to.deep.equal( expected );
-		expect( result.files ).to.contain( 'test/fixtures/tests/test2/template.html' );
+		expect( result.files ).to.contain( 'test/fixtures/tests/test2/__template__.html' );
 	} );
 
 	it( 'should not build tests if no .js file specified', function() {
