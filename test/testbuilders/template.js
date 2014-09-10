@@ -61,6 +61,28 @@ describe( 'Test Builders - Template', function() {
 				}
 			}
 		},
+		sampleData3 = {
+			files: [
+				'test/fixtures/tests/test2/__template__.js',
+			],
+			tests: {
+				'test/fixtures/tests/1': {
+					id: 'test/fixtures/tests/1',
+					js: 'test/fixtures/tests/1.js',
+					html: 'test/fixtures/tests/1.html'
+				},
+				'test/fixtures/tests/test2/1': {
+					id: 'test/fixtures/tests/test2/1',
+					js: 'test/fixtures/tests/test2/1.js',
+					html: 'test/fixtures/tests/test2/1.html'
+				},
+				'test/fixtures/tests/test2/2': {
+					id: 'test/fixtures/tests/test2/2',
+					js: 'test/fixtures/tests/test2/2.js',
+					include: '%BASE_PATH%foo.js'
+				}
+			}
+		},
 		oldAttach,
 		bender;
 
@@ -126,6 +148,30 @@ describe( 'Test Builders - Template', function() {
 				}
 			},
 			result = template.build( sampleData2 );
+
+		expect( result.tests ).to.deep.equal( expected );
+	} );
+
+	it( 'should include __template__.js file if found in the same directory level', function() {
+		var expected = {
+				'test/fixtures/tests/1': {
+					id: 'test/fixtures/tests/1',
+					js: 'test/fixtures/tests/1.js',
+					html: 'test/fixtures/tests/1.html'
+				},
+				'test/fixtures/tests/test2/1': {
+					id: 'test/fixtures/tests/test2/1',
+					js: 'test/fixtures/tests/test2/1.js',
+					html: 'test/fixtures/tests/test2/1.html',
+					include: '%TEST_DIR%__template__.js'
+				},
+				'test/fixtures/tests/test2/2': {
+					id: 'test/fixtures/tests/test2/2',
+					js: 'test/fixtures/tests/test2/2.js',
+					include: '%BASE_PATH%foo.js,%TEST_DIR%__template__.js'
+				}
+			},
+			result = template.build( sampleData3 );
 
 		expect( result.tests ).to.deep.equal( expected );
 	} );
