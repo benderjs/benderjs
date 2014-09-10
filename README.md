@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/benderjs/benderjs.svg?branch=master)](https://travis-ci.org/benderjs/benderjs)
+
 Bender.js
 =========
 
