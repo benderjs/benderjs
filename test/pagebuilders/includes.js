@@ -21,6 +21,7 @@ var mocks = require( '../fixtures/_mocks' ),
 
 describe( 'Page Builders - Includes', function() {
 	var oldAttach,
+		builder,
 		bender;
 
 	before( function() {
@@ -28,6 +29,7 @@ describe( 'Page Builders - Includes', function() {
 		bender = mocks.getBender( 'applications', 'plugins', 'conf', 'jobs' );
 		includes.attach = oldAttach || mocks.attachPagebuilder( bender, includes );
 		bender.use( [ utils, template, includes ] );
+		builder = bender.pagebuilders[ 0 ];
 	} );
 
 	after( function() {
@@ -36,6 +38,7 @@ describe( 'Page Builders - Includes', function() {
 
 	it( 'should expose build function', function() {
 		expect( includes.build ).to.be.a( 'function' );
+		expect( builder ).to.be.a( 'function' );
 	} );
 
 	it( 'should not alter data if no includes defined in data', function() {
@@ -47,7 +50,7 @@ describe( 'Page Builders - Includes', function() {
 			parts: []
 		};
 
-		expect( includes.build( data ) ).to.deep.equal( _.cloneDeep( data ) );
+		expect( builder( data ) ).to.deep.equal( _.cloneDeep( data ) );
 	} );
 
 	it( 'should add a script tag for each source defined in data.include array', function() {
@@ -60,7 +63,7 @@ describe( 'Page Builders - Includes', function() {
 				parts: []
 			},
 			expected = '<head>\n<script src="foo/bar.js"></script>\n<script src="baz/test.js"></script>\n</head>',
-			result = includes.build( data );
+			result = builder( data );
 
 		expect( result.parts ).to.have.length( 1 );
 		expect( result.parts[ 0 ] ).to.equal( expected );
@@ -77,7 +80,7 @@ describe( 'Page Builders - Includes', function() {
 			},
 			expected = '<head>\n<script src="/test/fixtures/tests/bar/foo/bar.js"></script>\n' +
 			'<script src="/test/fixtures/tests/baz/test.js"></script>\n</head>',
-			result = includes.build( data );
+			result = builder( data );
 
 		expect( result.parts ).to.have.length( 1 );
 		expect( result.parts[ 0 ] ).to.equal( expected );

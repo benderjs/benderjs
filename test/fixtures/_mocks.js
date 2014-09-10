@@ -331,6 +331,12 @@ moduleMocks = {
 				files: [],
 				js: [ 'framework-test/adapter.js' ],
 				name: 'test'
+			},
+			test2: {
+				css: [ 'framework-test/test.css' ],
+				files: [],
+				js: [],
+				name: 'test2'
 			}
 		};
 		bender.pagebuilders = bender.pagebuilders || [];
@@ -524,9 +530,9 @@ module.exports.attachPagebuilder = function( bender, builder ) {
 
 		// add plugin before pagebuilder-html
 		if ( html && ( idx = bender.pagebuilders.indexOf( html.build ) ) > -1 ) {
-			bender.pagebuilders.splice( idx, 0, builder.build );
+			bender.pagebuilders.splice( idx, 0, builder.build.bind( bender ) );
 		} else {
-			bender.pagebuilders.push( builder.build );
+			bender.pagebuilders.push( builder.build.bind( bender ) );
 		}
 	};
 };

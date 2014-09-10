@@ -19,6 +19,7 @@ var mocks = require( '../fixtures/_mocks' ),
 
 describe( 'Page Builders - Framework', function() {
 	var oldAttach,
+		builder,
 		bender;
 
 	before( function() {
@@ -26,6 +27,7 @@ describe( 'Page Builders - Framework', function() {
 		bender = mocks.getBender( 'applications', 'plugins' );
 		framework.attach = oldAttach || mocks.attachPagebuilder( bender, framework );
 		bender.use( framework );
+		builder = bender.pagebuilders[ 0 ];
 	} );
 
 	after( function() {
@@ -34,20 +36,16 @@ describe( 'Page Builders - Framework', function() {
 
 	it( 'should expose build function', function() {
 		expect( framework.build ).to.be.a( 'function' );
+		expect( builder ).to.be.a( 'function' );
 	} );
 
 	it( 'should return <script> tag for defined framework library\'s script', function() {
 		var data = {
-				framework: {
-					name: 'test',
-					files: [ 'test.js' ],
-					js: [ 'test.js' ],
-					css: []
-				},
+				framework: 'test',
 				parts: []
 			},
-			expected = '<head><script src="test.js"></script></head>',
-			result = framework.build( data );
+			expected = '<head><script src="framework-test/adapter.js"></script></head>',
+			result = builder( data );
 
 		expect( result.parts ).to.have.length( 1 );
 		expect( result.parts[ 0 ] ).to.equal( expected );
@@ -55,16 +53,11 @@ describe( 'Page Builders - Framework', function() {
 
 	it( 'should return <link> tag for each defined framework library\'s stylesheet', function() {
 		var data = {
-				framework: {
-					name: 'test',
-					files: [ 'test.css' ],
-					js: [],
-					css: [ 'test.css' ]
-				},
+				framework: 'test2',
 				parts: []
 			},
-			expected = '<head><link rel="stylesheet" href="test.css"></head>',
-			result = framework.build( data );
+			expected = '<head><link rel="stylesheet" href="framework-test/test.css"></head>',
+			result = builder( data );
 
 		expect( result.parts ).to.have.length( 1 );
 		expect( result.parts[ 0 ] ).to.equal( expected );

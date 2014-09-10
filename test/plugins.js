@@ -126,8 +126,7 @@ describe( 'Plugins', function() {
 	} );
 
 	it( 'should always load pagebuilders before bender-pagebuilder-html', function() {
-		var bender = mocks.getBender( 'utils' ),
-			testPlugin = require( path.resolve( 'node_modules/pagebuilder-test/' ) );
+		var bender = mocks.getBender( 'utils' );
 
 		bender.conf = {
 			plugins: [ 'pagebuilder-test' ]
@@ -135,10 +134,15 @@ describe( 'Plugins', function() {
 
 		bender.use( plugins );
 		bender.plugins.add( htmlbuilder );
+
+		var html = bender.pagebuilders[ 0 ];
+
 		bender.plugins.load();
 
 		expect( bender.pagebuilders ).to.have.length( 2 );
-		expect( bender.pagebuilders[ 0 ] ).to.equal( testPlugin.build );
+
+		// workaround for an error thrown while comparing two bound functions
+		expect( bender.pagebuilders[ 1 ] === html ).to.be.truthy;
 	} );
 
 	it( 'should load testbuilder plugin', function() {

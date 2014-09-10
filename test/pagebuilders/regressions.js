@@ -19,6 +19,7 @@ var mocks = require( '../fixtures/_mocks' ),
 
 describe( 'Page Builders - Regressions', function() {
 	var oldAttach,
+		builder,
 		bender;
 
 	before( function() {
@@ -26,6 +27,7 @@ describe( 'Page Builders - Regressions', function() {
 		bender = mocks.getBender( 'applications', 'plugins', 'conf' );
 		regressions.attach = oldAttach || mocks.attachPagebuilder( bender, regressions );
 		bender.use( regressions );
+		builder = bender.pagebuilders[ 0 ];
 	} );
 
 	after( function() {
@@ -34,6 +36,7 @@ describe( 'Page Builders - Regressions', function() {
 
 	it( 'should expose build function', function() {
 		expect( regressions.build ).to.be.a( 'function' );
+		expect( builder ).to.be.a( 'function' );
 	} );
 
 	it( 'should add a script to data parts containing regression information', function() {
@@ -45,7 +48,7 @@ describe( 'Page Builders - Regressions', function() {
 			'bender.regressions = ' + JSON.stringify( bender.conf.tests.Test.regressions ) + ';\n' +
 			'})();\n</script>\n</head>';
 
-		data = regressions.build( data );
+		data = builder( data );
 
 		expect( data.parts ).to.have.length( 1 );
 		expect( data.parts[ 0 ] ).to.equal( expected );
@@ -56,7 +59,7 @@ describe( 'Page Builders - Regressions', function() {
 				group: 'Test2',
 				parts: []
 			},
-			result = _.cloneDeep( regressions.build( data ) );
+			result = _.cloneDeep( builder( data ) );
 
 		expect( result ).to.deep.equal( data );
 	} );
