@@ -73,6 +73,11 @@ server.command( 'restart', {
 	desc: 'Restart the server'
 } );
 
+server.command( 'list', {
+	callback: cli.serverList,
+	desc: 'List running bender servers'
+} );
+
 server.command( 'run', {
 	callback: cli.runServer,
 	desc: 'Run the server in a verbose mode'

@@ -11,7 +11,7 @@
 	"homepage": "http://benderjs.com/",
 	"scripts": {
 		"test": "istanbul test node_modules/mocha/bin/_mocha -- --reporter list --check-leaks --recursive",
-		"lint": "jshint lib/ test/ && jscs ."
+		"lint": "jshint lib/ test/ bin/ && jscs ."
 	},
 	"bin": {
 		"bender": "./bin/bender"
