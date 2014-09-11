@@ -267,4 +267,21 @@ describe( 'Plugins', function() {
 		expect( bender.middlewares ).to.contain( testPlugin.build );
 		expect( bender.reporters ).to.include.key( 'test' );
 	} );
+
+	it( 'should save files to include in the test context', function() {
+		var bender = mocks.getBender(),
+			result;
+
+		bender.conf = {
+			plugins: [ 'include-test' ]
+		};
+
+		bender.use( plugins );
+		bender.plugins.load();
+
+		result = bender.plugins.getIncludes();
+
+		expect( result.js ).to.have.length( 1 );
+		expect( result.css ).to.have.length( 1 );
+	} );
 } );

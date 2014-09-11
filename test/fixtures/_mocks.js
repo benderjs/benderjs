@@ -324,7 +324,16 @@ moduleMocks = {
 	},
 
 	plugins: function( bender ) {
-		bender.plugins = bender.plugins || {};
+		bender.plugins = _.extend( {
+			_include: {
+				css: [ '/plugins/framework-test/test.css' ],
+				js: [ '/plugins/framework-test/adapter.js' ]
+			},
+			getIncludes: function() {
+				return bender.plugins._include;
+			}
+		}, bender.plugins || {} );
+
 		bender.frameworks = {
 			test: {
 				css: [],

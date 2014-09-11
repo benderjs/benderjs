@@ -50,7 +50,7 @@ describe( 'Page Builders - Includes', function() {
 			parts: []
 		};
 
-		expect( builder( data ) ).to.deep.equal( _.cloneDeep( data ) );
+		expect( builder( _.cloneDeep( data ) ) ).to.deep.equal( data );
 	} );
 
 	it( 'should add a script tag for each source defined in data.include array', function() {

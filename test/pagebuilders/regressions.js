@@ -59,7 +59,7 @@ describe( 'Page Builders - Regressions', function() {
 				group: 'Test2',
 				parts: []
 			},
-			result = _.cloneDeep( builder( data ) );
+			result = builder( _.cloneDeep( data ) );
 
 		expect( result ).to.deep.equal( data );
 	} );

@@ -95,7 +95,7 @@ describe( 'Page Builders - Script', function() {
 		var data = {
 				parts: []
 			},
-			result = _.cloneDeep( script.build( data ) );
+			result = script.build( _.cloneDeep( data ) );
 
 		expect( result ).to.deep.equal( data );
 	} );

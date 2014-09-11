@@ -63,11 +63,11 @@ describe( 'Page Builders - Framework', function() {
 		expect( result.parts[ 0 ] ).to.equal( expected );
 	} );
 
-	it( 'should not modify data if no apps defined', function() {
+	it( 'should not modify data if no framework defined', function() {
 		var data = {
 				parts: []
 			},
-			result = _.cloneDeep( framework.build( data ) );
+			result = framework.build( _.cloneDeep( data ) );
 
 		expect( result ).to.deep.equal( data );
 	} );

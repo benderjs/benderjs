@@ -98,7 +98,7 @@ describe( 'Page Builders - Html', function() {
 		var data = {
 				parts: []
 			},
-			result = _.cloneDeep( html.build( data ) );
+			result = html.build( _.cloneDeep( data ) );
 
 		expect( result ).to.deep.equal( data );
 	} );

@@ -76,7 +76,7 @@ describe( 'Page Builders - Applications', function() {
 		var data = {
 				parts: []
 			},
-			result = _.cloneDeep( applications.build( data ) );
+			result = applications.build( _.cloneDeep( data ) );
 
 		expect( result ).to.deep.equal( data );
 	} );
