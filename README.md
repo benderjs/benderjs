@@ -40,19 +40,30 @@ var config = {};
 module.exports = config;
 ```
 
+For more information on Bender configuration, check out the Wiki - [Configuration](https://github.com/benderjs/benderjs/wiki/Configuration) page.
+
 Usage
 -----
 
 Type `bender` to see available commands:
 
 ```
-Usage: bender <command>
+Usage: bender <command> [options]
 
-command
-  init        Initialize Bender.js for this directory
-  clean       Clean all Bender.js local files except the configuration
-  server      Start Bender.js server
-  version     Print Bender.js version
+Commands:
+
+  clean    Clean all Bender.js local files except the configuration
+  init     Initialize Bender.js for this directory
+  run      Run the tests in a browser and output the results to the console
+  server   Handle Bender.js server
+  version  Print Bender.js version
+
+Options:
+
+  -c, --config    Alternative path to Bender.js configuration file [bender.js]
+  -d, --debug     
+  -H, --hostname  Hostname used to run the server
+  -p, --port      Port on which the server will listen
 ```
 
 In order to run Bender in your project, open the console in project's directory and type:
@@ -83,6 +94,8 @@ If you want, you can specify a port or a hostname where Bender.js runs:
 -p, --port      The port on which the server will run (default: 1030).
 -H, --hostname  The hostname used to run the server (default: 0.0.0.0).
 ```
+
+For more information on Bender command line interface, check out the Wiki - [Command line](https://github.com/benderjs/benderjs/wiki/Command-line) page.
 
 Running tests for Bender.js
 -------------
