@@ -43,7 +43,7 @@ scmd
 	} )
 	.option( 'debug', {
 		abbr: 'd',
-		description: 'Enable debug logs',
+		desc: 'Enable debug logs',
 		flag: true
 	} );
 
