@@ -1,0 +1,70 @@
+/**
+ * Copyright (c) 2014, CKSource - Frederico Knabben. All rights reserved.
+ * Licensed under the terms of the MIT License (see LICENSE.md).
+ *
+ * @file Bender server daemon monitor
+ */
+
+var forever = require( 'forever' ),
+	path = require( 'path' ),
+	fs = require( 'graceful-fs' ),
+	utile = require( 'utile' ),
+
+	pidFile = path.resolve( '.bender/bender.pid' ),
+	started = false;
+
+function writePid( pid ) {
+	fs.writeFileSync( pidFile, pid, 'utf8' );
+}
+
+function cleanUp() {
+	try {
+		fs.unlinkSync( pidFile );
+	} catch ( e ) {}
+}
+
+function start( data ) {
+	var monitor = new forever.Monitor( process.argv[ 2 ], {
+		max: 1,
+		silent: false,
+		fork: true,
+		outFile: 'bender-out.log',
+		errFile: 'bender-err.log',
+		pidFile: pidFile,
+		options: data,
+		uid: utile.randomString( 4 ).replace( /^\-/, '_' )
+	} );
+
+	monitor.on( 'message', function( msg ) {
+		forever.startServer( monitor );
+		writePid( monitor.child.pid );
+
+		process.send( msg );
+		process.disconnect();
+	} );
+
+	monitor.on( 'restart', function() {
+		writePid( monitor.child.pid );
+	} );
+
+	monitor.on( 'error', function( err ) {
+		console.error( 'Server daemon error:', err );
+		cleanUp();
+		process.exit( 1 );
+	} );
+
+	monitor.on( 'exit:code', function stop( code ) {
+		console.error( 'Server daemon stopped with code:', code );
+		cleanUp();
+		process.exit( code || 1 );
+	} );
+
+	monitor.start();
+}
+
+process.on( 'message', function( data ) {
+	if ( !started ) {
+		start( JSON.parse( data ) );
+		started = true;
+	}
+} );
