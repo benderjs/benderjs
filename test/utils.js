@@ -17,7 +17,7 @@ var mocks = require( './fixtures/_mocks' ),
 	rewire = require( 'rewire' ),
 	fs = require( 'fs' ),
 	path = require( 'path' ),
-	rimraf = require( 'rimraf' ),
+	rimraf = require( 'utile' ).rimraf,
 	utils = rewire( '../lib/utils' );
 
 // rewire logger

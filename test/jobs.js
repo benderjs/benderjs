@@ -14,7 +14,7 @@
 var mocks = require( './fixtures/_mocks' ),
 	sinon = require( 'sinon' ),
 	path = require( 'path' ),
-	rimraf = require( 'rimraf' ),
+	rimraf = require( 'utile' ).rimraf,
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	nodeCall = require( 'when/node' ).call,
