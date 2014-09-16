@@ -111,7 +111,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			'click @ui.run': 'runTests',
 			'click @ui.create': 'showCreateJob',
 			'change @ui.filter': 'updateFilter',
-			'change @ui.all, @ui.failed': 'filterFailed'
+			'change @ui.all, @ui.failed': 'updateFailedFilter'
 		},
 
 		templateHelpers: App.Common.templateHelpers,
@@ -146,6 +146,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				App.vent.trigger( 'tests:start' );
 
+				// show all filtered
+				App.header.currentView.filterAll();
 				this.model.start( ids.length );
 				bender.run( ids );
 			} else {
@@ -180,7 +182,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
 		},
 
-		filterFailed: function() {
+		updateFailedFilter: function() {
 			if ( this.ui.all.is( ':checked' ) ) {
 				this.model.set( 'onlyFailed', false );
 				$( '.tests' ).removeClass( 'only-failed' );
@@ -188,6 +190,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				this.model.set( 'onlyFailed', true );
 				$( '.tests' ).addClass( 'only-failed' );
 			}
+		},
+
+		filterAll: function() {
+			this.ui.all.parent().button( 'toggle' );
 		}
 	} );
 
@@ -242,8 +248,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		onRender: function() {
 			var model = this.model.toJSON();
 
-			this.el.className = 'test ' +
-				( model.status ? model.status + ' bg-' + model.status + ' text-' + model.status : '' ) +
+			// TODO hide if doesn't match the filter
+			this.el.className = 'test' +
+				( model.status ? ' ' + model.status + ' bg-' + model.status + ' text-' + model.status : '' ) +
 				( model.visible ? '' : ' hidden' );
 
 			// scroll window to make result visible if needed
@@ -366,7 +373,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		getIds: function() {
 			return _.map( this.filter( function( test ) {
-				return test.get( 'visible' );
+				// test is included by the filter
+				return test.get( 'visible' ) &&
+					// "Show Failed" is checked and the test contains erros
+					( Tests.testStatus.get( 'onlyFailed' ) ? test.get( 'errors' ) : true );
 			} ), function( test ) {
 				return test.get( 'id' );
 			} );
@@ -585,7 +595,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				reset: true
 			} ).done( function() {
 				Tests.testStatus.parseFilter();
-				Tests.testsList.filterTests( Tests.testStatus.get( 'filter' ) );
+				App.vent.trigger( 'filter:tests', Tests.testStatus.get( 'filter' ) );
 			} );
 		},
 
