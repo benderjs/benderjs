@@ -31,7 +31,8 @@ function start( data ) {
 		outFile: 'bender-out.log',
 		errFile: 'bender-err.log',
 		pidFile: pidFile,
-		options: data,
+		options: data.args,
+		cwd: data.cwd,
 		uid: utile.randomString( 4 ).replace( /^\-/, '_' )
 	} );
 
