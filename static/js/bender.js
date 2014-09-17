@@ -118,6 +118,7 @@
 					( parsed.passed > 0 || parsed.ignored > 0 )
 				);
 				parsed.results = this.results;
+				parsed.state = 'done';
 				this.emit( 'update', parsed );
 				this.results = null;
 			}
@@ -128,7 +129,10 @@
 				id = '/' + this.current + '#child';
 				runs++;
 
-				this.emit( 'update', this.current );
+				this.emit( 'update', {
+					id: this.current,
+					state: 'started'
+				} );
 
 				if ( isIE ) {
 					if ( runs >= 20 && testWindow ) {

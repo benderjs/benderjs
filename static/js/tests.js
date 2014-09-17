@@ -198,27 +198,112 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	} );
 
 	/**
-	 * Test model
+	 * Test result model
 	 */
-	Tests.Test = Backbone.Model.extend( {
+	Tests.Result = Backbone.Model.extend( {
 		defaults: {
 			id: '',
-			group: '',
-			tags: null,
-			result: '',
-			status: '',
+			style: '',
+			state: 'waiting',
+			passed: 0,
+			failed: 0,
+			ignored: 0,
+			duration: 0,
+			broken: false,
 			errors: null,
-			visible: true,
 			slow: false
 		},
 
 		reset: function() {
-			this.set( {
-				result: '',
-				status: '',
-				errors: null,
-				slow: false
+			this.set( this.defaults );
+		},
+
+		parse: function( data ) {
+			return {
+				style: data.success ? data.ignored === true ? 'warning' : 'success' : 'danger',
+				state: data.state || 'waiting',
+				passed: data.passed,
+				failed: data.failed,
+				ignored: data.ignored,
+				duration: data.duration,
+				broken: data.broken,
+				errors: this.getErrors( data ),
+				slow: this.isSlow( data )
+			};
+		},
+
+		update: function( data ) {
+			this.set( this.parse( data ) );
+		},
+
+		getErrors: function( data ) {
+			var errors = [];
+
+			_.each( data.results, function( result, name ) {
+				if ( !result.error ) {
+					return;
+				}
+
+				errors.push( {
+					name: name,
+					error: result.error
+				} );
 			} );
+
+			return errors.length ? errors : null;
+		},
+
+		isSlow: function( data ) {
+			// average duration above the threshold
+			return ( Math.round( data.duration / data.total ) > bender.config.slowAvgThreshold ) ||
+				// total duration above the threshold
+				( data.duration > bender.config.slowThreshold );
+		}
+	} );
+
+	/**
+	 * Test result view
+	 */
+	Tests.ResultView = Backbone.Marionette.ItemView.extend( {
+		template: '#test-result',
+
+		initialize: function() {
+			this.listenTo( this.model, 'change', this.render );
+		},
+
+		templateHelpers: {
+			getIconStyle: function( style ) {
+				return 'glyphicon' + ( style ?
+					' glyphicon-' + ( style === 'success' ? 'ok' : style === 'warning' ? 'forward' : 'remove' ) :
+					'' );
+			}
+		}
+	} );
+
+	/**
+	 * Test model
+	 */
+	Tests.Test = Backbone.Model.extend( {
+		defaults: {
+			// base properties
+			id: '',
+			group: '',
+			tags: null,
+
+			// result properties
+			result: null,
+
+			// visibility filter
+			visible: true
+		},
+
+		parse: function( data ) {
+			// create an instance of Result model for the result
+			data.result = new Tests.Result( data, {
+				parse: true
+			} );
+
+			return data;
 		}
 	} );
 
@@ -228,35 +313,36 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	Tests.TestView = Marionette.ItemView.extend( {
 		template: '#test',
 		tagName: 'tr',
-		className: 'test',
-		templateHelpers: {
-			getIconStyle: function( status ) {
-				return 'glyphicon' + ( status ?
-					' glyphicon-' + ( status === 'success' ? 'ok' : status === 'warning' ? 'forward' : 'remove' ) :
-					'' );
-			}
+
+		resultView: null,
+
+		ui: {
+			result: '.result'
 		},
 
 		events: {
-			'click .result': 'showErrors'
+			'click @ui.result': 'showErrors'
 		},
 
 		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
+			this.resultView = new Tests.ResultView( {
+				model: this.model.get( 'result' ),
+				el: this.$el.find( '.result' )[ 0 ]
+			} );
 		},
 
 		onRender: function() {
-			var model = this.model.toJSON();
+			// var model = this.model.toJSON(),
+			// 	s = model.status;
 
-			// TODO hide if doesn't match the filter
-			this.el.className = 'test' +
-				( model.status ? ' ' + model.status + ' bg-' + model.status + ' text-' + model.status : '' ) +
-				( model.visible ? '' : ' hidden' );
+			// // TODO hide if doesn't match the filter
+			// this.el.className = ( s ? ' ' + s + ' bg-' + s + ' text-' + s : '' ) +
+			// 	( model.visible ? '' : ' hidden' );
 
-			// scroll window to make result visible if needed
-			if ( model.result ) {
-				this.scrollTo();
-			}
+			// // scroll window to make result visible if needed
+			// if ( model.result ) {
+			// 	this.scrollTo();
+			// }
 		},
 
 		scrollTo: function() {
@@ -385,16 +471,33 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		clearCurrentResult: function() {
 			var current = this.get( bender.current );
 			if ( current ) {
-				current.set( 'result', '' );
+				current.get( 'result' ).reset();
 			}
 		},
 
 		clearResults: function() {
 			this.each( function( test ) {
-				test.reset();
+				test.get( 'result' ).reset();
 			} );
+		},
+
+		update: function( data ) {
+			var model = this.get( data.id );
+
+			if ( model ) {
+				model.get( 'result' ).update( data );
+			}
+
 		}
 	} ) )();
+
+	Tests.filteredTests = new Backbone.VirtualCollection( Tests.testsList, {
+		filter: function( test ) {
+			var tags = test.get( 'tags' );
+
+			return tags;
+		}
+	} );
 
 	Tests.NoTestsView = Marionette.ItemView.extend( {
 		template: '#no-tests',
@@ -599,74 +702,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 		},
 
-		updateStatus: function( data ) {
-			var model;
-
-			function buildResult( data ) {
-				var result = [];
-
-				// test was executed
-				if ( data.ignored !== true & !data.broken ) {
-					result.push( data.passed, 'passed', '/' );
-					result.push( data.failed, 'failed' );
-					if ( data.ignored ) {
-						result.push( '/', data.ignored, 'ignored' );
-					}
-					result.push( 'in', data.duration + 'ms' );
-					// test was ignored as a whole
-				} else if ( data.ignored === true ) {
-					result.push( 'IGNORED' );
-					// test was marked as broken
-				} else if ( data.broken ) {
-					result.push( 'BROKEN' );
-				}
-
-				return result.join( ' ' );
-			}
-
-			function getErrors( data ) {
-				var errors = [];
-
-				_.each( data.results, function( result, name ) {
-					if ( !result.error ) {
-						return;
-					}
-
-					errors.push( {
-						name: name,
-						error: result.error
-					} );
-				} );
-
-				return errors.length ? errors : null;
-			}
-
-			if ( typeof data == 'string' ) {
-				model = Tests.testsList.get( data );
-
-				if ( model ) {
-					model.set( 'result', 'Running...' );
-				}
-			} else if ( typeof data == 'object' && data !== null ) {
-				model = Tests.testsList.get( data.id );
-
-				if ( model ) {
-					model
-						.set( 'result', buildResult( data ) )
-						.set( 'errors', getErrors( data ) )
-						.set( 'status', data.success ? data.ignored === true ? 'warning' : 'success' : 'danger' );
-
-					// mark slow tests
-					// average duration above the threshold
-					if ( ( Math.round( data.duration / data.total ) > bender.config.slowAvgThreshold ) ||
-						// total duration above the threshold
-						( data.duration > bender.config.slowThreshold ) ) {
-						model.set( 'slow', true );
-					}
-				}
-			}
-
+		update: function( data ) {
 			Tests.testStatus.update( data );
+			Tests.testsList.update( data );
 		}
 	};
 
@@ -685,7 +723,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			Tests.controller.listTests();
 		} );
 
-		bender.on( 'update', Tests.controller.updateStatus );
+		bender.on( 'update', Tests.controller.update );
 
 		bender.on( 'complete', function() {
 			App.vent.trigger( 'tests:stop' );

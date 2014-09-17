@@ -99,11 +99,17 @@ th:last-child {
     cursor: pointer;
 }
 
+.test-counter {
+	padding: 8px;
+	text-align: right;
+	color: #ccc;
+}
+
 .tests .result {
     margin-left: .5em;
 }
 
-.only-failed .test,
+.only-failed tbody tr,
 .only-failed .task {
 	display: none !important;
 }

@@ -64,6 +64,12 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	</script>
 
 
+	<!-- template for a tests counter -->
+	<script type="text/html" id="tests-counter">
+	Showing <strong class="tests-shown">0</strong> of <strong class="tests-count">0</strong> tests
+	</script>
+
+
 	<!-- template for tests table -->
 	<script type="text/html" id="tests">
 	<table class="table table-hover tests">
@@ -90,16 +96,56 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<!-- template for a single test row -->
 	<script type="text/html" id="test">
 	<td><a href="/<%= id %>" title="<%= id %>" target="_blank"><%= id %></a></td>
-	<td><span title="<%= group %>"><%= group %></span></td>
+	<td title="<%= group %>"><%= group %></td>
 	<td title="<%= tags.join(', ') %>"><%= tags.join(', ') %></td>
-	<td>
-		<span class="<%= getIconStyle(status) %>"></span>
+	<td class="result"></td>
+	</script>
+
+	<!-- template for a test result -->
+	<script type="text/html" id="test-result">
+	<% if (state === 'done') { %>
+		<span class="<%= getIconStyle(style) %>"></span>
 		<% if (slow) { %>
 		<span class="glyphicon glyphicon-exclamation-sign" title="Slow test"></span>
 		<% } %>
-		<span class="result<%= errors && errors.length ? ' clickable' : ''%>"><%= result %></span>
-	</td>
+		<span class="result">
+		<% if (broken) { %>
+			BROKEN
+		<% } else if (ignored === true) { %>
+			IGNORED
+		<% } else { %>
+		    <%= passed %> passed / <%= failed %> failed / <%= ignored %> ignored in <%= duration %>ms
+		<% } %>
+		</span>
+	<% } else if (state === 'started') { %>
+		Running...
+	<% } %>
 	</script>
+
+
+	<!-- template for a tests status -->
+	<script type="text/html" id="tests-status">
+	<p class="test-status">
+		<strong class="passed"><%= passed %></strong> passed /
+		<strong class="failed"><%= failed %></strong> failed in
+		<strong class="time"><%= timeToText(time) %></strong> -
+		<strong class="percent"><%= getPercent(completed, total) %></strong>
+	</p>
+	</script>
+
+
+	<!-- template for a test filter -->
+	<script type="text/html" id="test-filter">
+	<div class="form-group input-append btn-group">
+		<select data-placeholder="Filter tests..." multiple
+		class="tag-filter form-control" <%= running ? 'disabled="disabled"' : '' %>>
+			<% _.each(tags, function (tag) { %>
+			<option value="<%= tag %>" <%= _.indexOf(filter, tag) > -1 ? 'selected' : '' %>><%= tag %></option>
+			<% }) %>
+		</select>
+	</div>
+	</script>
+
 
 	<!-- template for tests tab header -->
 	<script type="text/html" id="test-header">
