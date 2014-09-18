@@ -150,35 +150,28 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<!-- template for tests tab header -->
 	<script type="text/html" id="test-header">
 	<div class="col-md-6">
+		<div class="filter-form">
+			<span class="glyphicon glyphicon-search filter-icon"></span>
+			<select data-placeholder="Filter tests..." multiple
+			class="tag-filter form-control" <%= running ? 'disabled="disabled"' : '' %>>
+				<% _.each(tags, function (tag) { %>
+				<option value="<%= tag %>" <%= _.indexOf(filter, tag) > -1 ? 'selected' : '' %>><%= tag %></option>
+				<% }) %>
+			</select>
+		</div>
+	</div>
+	<div class="col-md-6">
 		<p class="test-status">
 			<strong class="passed"><%= passed %></strong> passed /
 			<strong class="failed"><%= failed %></strong> failed in
 			<strong class="time"><%= timeToText(time) %></strong> -
 			<strong class="percent"><%= getPercent(completed, total) %></strong>
 		</p>
-	</div>
-	<div class="col-md-6">
-		<div class="form-inline filter-form" role="form">
-			<div class="btn-group" data-toggle="buttons">
-				<label class="btn btn-primary btn-sm <%= onlyFailed ? '' : 'active' %>" title="Show all tests">
-					<input type="radio" name="show-mode" class="check-all" <%= onlyFailed ? '' : 'checked' %>> All
-				</label>
-				<label class="btn btn-danger btn-sm <%= onlyFailed ? 'active' : '' %>" title="Show failed tests">
-					<input type="radio" name="show-mode" class="check-failed" <%= onlyFailed ? 'checked' : '' %>> Failed
-				</label>
-			</div>
-			<div class="form-group input-append btn-group">
-				<select data-placeholder="Filter tests..." multiple
-				class="tag-filter form-control" <%= running ? 'disabled="disabled"' : '' %>>
-					<% _.each(tags, function (tag) { %>
-					<option value="<%= tag %>" <%= _.indexOf(filter, tag) > -1 ? 'selected' : '' %>><%= tag %></option>
-					<% }) %>
-				</select>
-			</div>
+		<div class="form-inline test-controls" role="form">
 			<button type="button" class="btn btn-primary btn-sm run-button" title="<%= running ? 'Stop' : 'Start' %> tests">
 				<span class="glyphicon glyphicon-<%= running ? 'stop' : 'play' %>"></span>
 			</button>
-			<button type="button" class="btn btn-primary btn-sm create-button" title="Create a job">
+			<button type="button" class="btn btn-primary btn-sm create-button" title="Create a job from selected tests" <%= running ? 'disabled' : '' %>>
 				<span class="glyphicon glyphicon-file"></span> Create a job
 			</button>
 		</div>

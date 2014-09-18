@@ -78,21 +78,35 @@ th:last-child {
     padding: .3em .6em;
 }
 
-.filter-form {
-    text-align: right;
+
+.test-controls {
+	float: right;
 }
 
-.filter-form ul {
-    text-align: left;
-}
-
-.filter-form .btn,
-.filter-form .btn-group {
+.test-controls .btn,
+.test-controls .btn-group {
 	vertical-align: top;
+}
+
+.filter-form {
+	position: relative;
+	margin-left: 30px;
+	line-height: 34px;
 }
 
 .filter-form label {
 	max-width: none;
+}
+
+.filter-icon {
+	position: absolute;
+	top: 0;
+	left: -30px;
+	width: 30px;
+	height: 34px;
+	line-height: 34px;
+	font-size: 1.5em;
+	color: #ccc;
 }
 
 .clickable {
@@ -134,13 +148,11 @@ th:last-child {
 }
 
 .test-status {
+    float: left;
     margin: 0;
     line-height: 34px;
     font-size: 18px;
     color: #555;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .browsers th:first-child {

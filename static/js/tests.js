@@ -62,7 +62,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		update: function( data ) {
-			if ( typeof data == 'object' && data !== null ) {
+			if ( typeof data == 'object' && data.state === 'done' ) {
 				this.increment( 'passed', data.passed || 0 );
 				this.increment( 'failed', data.failed || 0 );
 				this.set( 'time', new Date() - this.get( 'start' ) );
@@ -122,7 +122,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		onRender: function() {
 			this.ui.filter.chosen( {
-				width: '250px'
+				width: '100%'
 			} );
 
 			App.navigate( 'tests/' + this.model.get( 'filter' ).join( ',' ), {

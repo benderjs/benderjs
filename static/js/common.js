@@ -102,7 +102,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			return childView.prototype.template;
 		},
 
-		_onCollectionAdd: function( child, collection, options ) {
+		_onCollectionAdd: function( child ) {
 			this.destroyEmptyView();
 
 			var childTemplate = this.getChildTemplate(),
@@ -138,7 +138,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 				div = document.createElement( 'div' ),
 				html = [ '<table><tbody>' ];
 
-			this.collection.each( function( child, index ) {
+			this.collection.each( function( child ) {
 				html.push(
 					this.createEl(
 						this.childView,
@@ -207,7 +207,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 				view.render();
 			}
 			this.attachHtml( this, view, index );
-		},
+		}
 	} );
 
 
