@@ -128,6 +128,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			App.navigate( 'tests/' + this.model.get( 'filter' ).join( ',' ), {
 				trigger: false
 			} );
+
+			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
 		},
 
 		runTests: function() {
@@ -175,11 +177,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 
 			this.model.set( 'filter', filter );
+
 			App.vent.trigger( 'tests:filter', filter );
+
 			App.navigate( 'tests/' + filter.join( ',' ), {
 				trigger: false
 			} );
-			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+
+			// defer that update to execute after the filter input updates
+			_.defer( function() {
+				App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+			} );
 		},
 
 		updateFailedFilter: function() {
@@ -219,8 +227,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		parse: function( data ) {
+			var style = !data.state || data.state === 'started' ? '' :
+				data.success ? data.ignored === true ? 'warning' :
+				'success' : 'danger';
+
 			return {
-				style: data.success ? data.ignored === true ? 'warning' : 'success' : 'danger',
+				style: style,
 				state: data.state || 'waiting',
 				passed: data.passed,
 				failed: data.failed,
@@ -267,15 +279,42 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	Tests.ResultView = Backbone.Marionette.ItemView.extend( {
 		template: '#test-result',
 
-		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
-		},
-
 		templateHelpers: {
 			getIconStyle: function( style ) {
 				return 'glyphicon' + ( style ?
 					' glyphicon-' + ( style === 'success' ? 'ok' : style === 'warning' ? 'forward' : 'remove' ) :
 					'' );
+			}
+		},
+
+		initialize: function() {
+			this.listenTo( this.model, 'change', this.render );
+		},
+
+		onRender: function() {
+			var s = this.model.get( 'style' );
+
+			this.parent.el.className = s ? ' ' + s + ' bg-' + s + ' text-' + s : '';
+
+			if ( this.model.get( 'state' ) === 'done' ) {
+				this.scrollTo();
+			}
+		},
+
+		scrollTo: function() {
+			var top = this.parent.$el.offset().top,
+				bottom = top + this.parent.$el.height(),
+				$window = $( window ),
+				scroll = $( window ).scrollTop(),
+				height = $window.height();
+
+
+			// item is hidden at the bottom
+			if ( scroll + height < bottom ) {
+				$window.scrollTop( bottom - height );
+				// item is hidden at the top
+			} else if ( scroll + App.$navbar.height() > top ) {
+				$( window ).scrollTop( top - App.$navbar.height() - 1 );
 			}
 		}
 	} );
@@ -314,52 +353,32 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		template: '#test',
 		tagName: 'tr',
 
+		result: null,
 		resultView: null,
 
-		ui: {
-			result: '.result'
-		},
-
 		events: {
-			'click @ui.result': 'showErrors'
+			'click .result': 'showErrors'
 		},
 
 		initialize: function() {
+			this.result = this.model.get( 'result' );
+
 			this.resultView = new Tests.ResultView( {
-				model: this.model.get( 'result' ),
+				model: this.result,
 				el: this.$el.find( '.result' )[ 0 ]
 			} );
+
+			this.resultView.parent = this;
+
+			this.listenTo( this.model, 'change:visible', this.updateVisible );
+		},
+
+		updateVisible: function( model ) {
+			this.$el.toggleClass( 'hidden', !model.get( 'visible' ) );
 		},
 
 		onRender: function() {
-			// var model = this.model.toJSON(),
-			// 	s = model.status;
-
-			// // TODO hide if doesn't match the filter
-			// this.el.className = ( s ? ' ' + s + ' bg-' + s + ' text-' + s : '' ) +
-			// 	( model.visible ? '' : ' hidden' );
-
-			// // scroll window to make result visible if needed
-			// if ( model.result ) {
-			// 	this.scrollTo();
-			// }
-		},
-
-		scrollTo: function() {
-			var top = this.$el.offset().top,
-				bottom = top + this.$el.height(),
-				$window = $( window ),
-				scroll = $( window ).scrollTop(),
-				height = $window.height();
-
-
-			// item is hidden at the bottom
-			if ( scroll + height < bottom ) {
-				$window.scrollTop( bottom - height );
-				// item is hidden at the top
-			} else if ( scroll + App.$navbar.height() > top ) {
-				$( window ).scrollTop( top - App.$navbar.height() - 1 );
-			}
+			this.updateVisible( this.model );
 		},
 
 		showErrors: function() {
@@ -698,7 +717,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				reset: true
 			} ).done( function() {
 				Tests.testStatus.parseFilter();
-				App.vent.trigger( 'filter:tests', Tests.testStatus.get( 'filter' ) );
+				App.vent.trigger( 'tests:filter', Tests.testStatus.get( 'filter' ) );
 			} );
 		},
 
