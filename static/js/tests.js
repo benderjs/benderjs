@@ -21,9 +21,129 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	} );
 
 	/**
+	 * Tests filter model
+	 */
+	Tests.Filter = Backbone.Model.extend( {
+		defaults: {
+			filter: [],
+			tokens: null
+		},
+
+		initialize: function() {
+			App.vent.on( 'tests:loaded', this.buildFilters, this );
+
+			this.on( 'change:filter', function( model ) {
+				App.vent.trigger( 'tests:filter', model.get( 'filter' ) );
+			} );
+		},
+
+		buildFilters: function( tests, filter ) {
+			var tokens = [];
+
+			tests.each( function( item ) {
+				item = item.toJSON();
+
+				var group = 'group:' + item.group;
+
+				_.each( item.tags, function( tag ) {
+					tag = 'tag:' + tag;
+
+					if ( _.indexOf( tokens, tag ) < 0 ) {
+						tokens.push( tag );
+					}
+				} );
+
+				if ( _.indexOf( tokens, group ) < 0 ) {
+					tokens.push( group );
+				}
+
+				var path = 'path:/' + item.id.substr( 0, item.id.lastIndexOf( '/' ) );
+
+				if ( _.indexOf( tokens, path ) < 0 ) {
+					tokens.push( path );
+				}
+
+				var name = 'name:' + item.id.slice( item.id.lastIndexOf( '/' ) > -1 ? item.id.lastIndexOf( '/' ) + 1 : 0 );
+
+				if ( _.indexOf( tokens, name ) < 0 ) {
+					tokens.push( name );
+				}
+
+			} );
+
+			this.set( 'tokens', tokens.sort() );
+
+			this.setFilter( filter );
+		},
+
+		setFilter: function( filter ) {
+			var tokens = this.get( 'tokens' ),
+				parsed = _.filter( filter, function( value ) {
+					return _.indexOf( tokens, value ) > -1;
+				} );
+
+			this.set( 'filter', parsed );
+
+			// some invalid tokens were stripped
+			if ( filter.length && !parsed.length ) {
+				App.vent.trigger( 'tests:filter', filter );
+			}
+		}
+	} );
+
+	Tests.FilterView = Marionette.ItemView.extend( {
+		template: '#test-filter',
+		className: 'filter-form',
+
+		ui: {
+			filter: '.test-filter'
+		},
+
+		events: {
+			'change @ui.filter': 'updateFilter'
+		},
+
+		initialize: function() {
+			this.listenTo( this.model, 'change', this.render );
+
+			App.vent.on( 'tests:start', function() {
+				this.updateInput( false );
+			}, this );
+
+			App.vent.on( 'tests:stop', function() {
+				this.updateInput( true );
+			}, this );
+		},
+
+		updateInput: function( enabled ) {
+			this.ui.filter.attr( 'disabled', !enabled );
+		},
+
+		onRender: function() {
+			this.ui.filter.chosen( {
+				width: '100%',
+				search_contains: true
+			} );
+		},
+
+		updateFilter: function( event, params ) {
+			var filter = _.clone( this.model.get( 'filter' ) );
+
+			if ( params.selected ) {
+				filter.push( params.selected );
+			} else if ( params.deselected ) {
+				filter.splice( _.indexOf( filter, params.deselected ), 1 );
+			}
+
+			this.model.set( 'filter', filter );
+		}
+	} );
+
+
+	/**
 	 * Tests status model
 	 */
-	Tests.testStatus = new( Backbone.Model.extend( {
+	Tests.TestStatus = Backbone.Model.extend( {
 		defaults: {
 			passed: 0,
 			failed: 0,
@@ -31,18 +151,16 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			start: 0,
 			completed: 0,
 			total: 0,
-			tags: null,
+
 			filter: null,
-			running: false,
-			onlyFailed: false
+
+			running: false
 		},
 
 		initialize: function() {
-			this
-				.set( 'tags', [] )
-				.set( 'filter', [] );
-
+			this.set( 'filter', new Tests.Filter() );
 			App.vent.on( 'tests:stop', this.stop, this );
+			App.vent.on( 'tests:update', this.update, this );
 		},
 
 		increment: function( name, value ) {
@@ -79,129 +197,70 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.set( 'running', false );
 		},
 
-		parseFilter: function() {
-			var model = this.toJSON(),
-				existing;
-
-			existing = _.filter( model.filter, function( val ) {
-				return _.indexOf( model.tags, val ) > -1;
-			} );
-
-			this.set( 'filter', existing );
+		setFilter: function( filter ) {
+			this.get( 'filter' ).setFilter( filter );
 		}
-	} ) )();
+	} );
+
+	Tests.TestStatusView = Marionette.ItemView.extend( {
+		template: '#test-status',
+		tagName: 'p',
+		className: 'test-status',
+
+		templateHelpers: App.Common.templateHelpers,
+
+		initialize: function() {
+			this.listenTo( this.model, 'change', this.render, this );
+		},
+
+	} );
 
 	/**
 	 * Tests header view
 	 */
-	Tests.TestHeaderView = Marionette.ItemView.extend( {
+	Tests.TestHeaderView = Marionette.LayoutView.extend( {
 		template: '#test-header',
 		className: 'row',
 
+		regions: {
+			left: '.header-left',
+			right: '.header-right'
+		},
+
 		ui: {
 			'run': '.run-button',
-			'create': '.create-button',
-			'filter': '.tag-filter',
-			'clear': '.clear-filter',
-			'all': '.check-all',
-			'failed': '.check-failed'
+			'create': '.create-button'
 		},
 
 		events: {
-			'click @ui.run': 'runTests',
-			'click @ui.create': 'showCreateJob',
-			'change @ui.filter': 'updateFilter',
-			'change @ui.all, @ui.failed': 'updateFailedFilter'
+			'click @ui.run': 'clickRun',
+			'click @ui.create': 'clickCreateJob'
 		},
 
 		templateHelpers: App.Common.templateHelpers,
 
 		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
+			App.vent.on( 'tests:start', function() {
+				this.updateButtons( false );
+			}, this );
+
+			App.vent.on( 'tests:stop', function() {
+				this.updateButtons( true );
+			}, this );
 		},
 
-		onRender: function() {
-			this.ui.filter.chosen( {
-				width: '100%'
-			} );
-
-			App.navigate( 'tests/' + this.model.get( 'filter' ).join( ',' ), {
-				trigger: false
-			} );
-
-			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+		updateButtons: function( enabled ) {
+			this.ui.run.attr( 'title', ( enabled ? 'Start' : 'Stop' ) + ' tests' );
+			this.ui.run.find( 'span' ).toggleClass( 'glyphicon-play', enabled ).toggleClass( 'glyphicon-stop', !enabled );
+			this.ui.create.attr( 'disabled', !enabled );
 		},
 
-		runTests: function() {
-			var ids;
-
-			if ( !this.model.get( 'running' ) ) {
-				ids = Tests.testsList.getIds();
-
-				if ( !ids.length ) {
-					return App.Alerts.Manager.add(
-						'danger',
-						'There are no tests to run, aborting.',
-						'Error:'
-					);
-				}
-
-				App.vent.trigger( 'tests:start' );
-
-				// show all filtered
-				App.header.currentView.filterAll();
-				this.model.start( ids.length );
-				bender.run( ids );
-			} else {
-				App.vent.trigger( 'tests:stop' );
-				bender.stop();
-				this.model.stop();
-			}
+		clickRun: function() {
+			Tests.controller.runTests();
 		},
 
-		showCreateJob: function() {
-			App.modal.show(
-				new Tests.CreateJobView( {
-					model: new Tests.NewJob()
-				} )
-			);
-		},
-
-		updateFilter: function( event, params ) {
-			var filter = this.model.get( 'filter' );
-
-			if ( params.selected ) {
-				filter.push( params.selected );
-			} else if ( params.deselected ) {
-				filter.splice( _.indexOf( filter, params.deselected ), 1 );
-			}
-
-			this.model.set( 'filter', filter );
-
-			App.vent.trigger( 'tests:filter', filter );
-
-			App.navigate( 'tests/' + filter.join( ',' ), {
-				trigger: false
-			} );
-
-			// defer that update to execute after the filter input updates
-			_.defer( function() {
-				App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
-			} );
-		},
-
-		updateFailedFilter: function() {
-			if ( this.ui.all.is( ':checked' ) ) {
-				this.model.set( 'onlyFailed', false );
-				$( '.tests' ).removeClass( 'only-failed' );
-			} else if ( this.ui.failed.is( ':checked' ) ) {
-				this.model.set( 'onlyFailed', true );
-				$( '.tests' ).addClass( 'only-failed' );
-			}
-		},
-
-		filterAll: function() {
-			this.ui.all.parent().button( 'toggle' );
+		clickCreateJob: function() {
+			Tests.controller.showCreateJob();
 		}
 	} );
 
@@ -227,11 +286,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		parse: function( data ) {
-			var style = !data.state || data.state === 'started' ? '' :
+			var style = ( !data.state || data.state === 'started' ) ? '' :
 				data.success ? data.ignored === true ? 'warning' :
 				'success' : 'danger';
 
 			return {
+				id: data.id,
 				style: style,
 				state: data.state || 'waiting',
 				passed: data.passed,
@@ -276,7 +336,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	/**
 	 * Test result view
 	 */
-	Tests.ResultView = Backbone.Marionette.ItemView.extend( {
+	Tests.ResultView = Marionette.ItemView.extend( {
 		template: '#test-result',
 
 		templateHelpers: {
@@ -329,11 +389,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			group: '',
 			tags: null,
 
-			// result properties
-			result: null,
-
-			// visibility filter
-			visible: true
+			// result sub-model
+			result: null
 		},
 
 		parse: function( data ) {
@@ -347,200 +404,247 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	} );
 
 	/**
-	 * Test view
+	 * Tests collection
 	 */
-	Tests.TestView = Marionette.ItemView.extend( {
-		template: '#test',
-		tagName: 'tr',
-
-		result: null,
-		resultView: null,
-
-		events: {
-			'click .result': 'showErrors'
-		},
-
-		initialize: function() {
-			this.result = this.model.get( 'result' );
-
-			this.resultView = new Tests.ResultView( {
-				model: this.result,
-				el: this.$el.find( '.result' )[ 0 ]
-			} );
-
-			this.resultView.parent = this;
-
-			this.listenTo( this.model, 'change:visible', this.updateVisible );
-		},
-
-		updateVisible: function( model ) {
-			this.$el.toggleClass( 'hidden', !model.get( 'visible' ) );
-		},
-
-		onRender: function() {
-			this.updateVisible( this.model );
-		},
-
-		showErrors: function() {
-			var errors = this.model.get( 'errors' );
-
-			if ( !errors || !errors.length ) {
-				return;
-			}
-
-			App.modal.show(
-				new App.Common.TestErrorsView( {
-					model: this.model
-				} )
-			);
-		}
-
+	Tests.TestsList = Backbone.Collection.extend( {
+		model: Tests.Test
 	} );
 
 	/**
-	 * Tests collection
+	 * Tests and filtered tests collections
 	 */
-	Tests.testsList = new( Backbone.Collection.extend( {
-		model: Tests.Test,
+	Tests.Tests = Backbone.Model.extend( {
 		url: '/tests',
 
+		defaults: {
+			tests: null,
+			filtered: null
+		},
+
+		filters: {},
+
 		initialize: function() {
-			App.vent.on( 'tests:filter', this.filterTests, this );
+			App.vent.on( 'tests:filter', this.setFilters, this );
 			App.vent.on( 'tests:start', this.clearResults, this );
 			App.vent.on( 'tests:stop', this.clearCurrentResult, this );
+			App.vent.on( 'tests:update', this.updateResult, this );
+
+			this.set( 'tests', new Tests.TestsList() );
+			this.set( 'filtered', new Backbone.VirtualCollection( this.get( 'tests' ) ) );
 		},
 
 		parse: function( response ) {
-			this.getTags( response.test );
+			response.tests = new Tests.TestsList( response.test, {
+				parse: true
+			} );
+			response.filtered = new Backbone.VirtualCollection( response.tests );
 
-			return response.test;
+			delete response.test;
+
+			return response;
 		},
 
-		filterTests: function( filter ) {
-			var includes = [],
-				excludes = [];
+		needsFiltering: function() {
+			return _.some( this.filters, function( filter ) {
+				return filter.length;
+			} );
+		},
 
-			// show all
-			if ( !filter ) {
-				this.each( function( test ) {
-					test.set( 'visible', true );
-				} );
+		setFilters: function( filters ) {
+			var that = this,
+				name;
 
-				return;
+			for ( name in this.filters ) {
+				this.filters[ name ] = [];
 			}
 
-			_.each( filter, function( tag ) {
-				if ( tag.charAt( 0 ) === '-' ) {
-					excludes.push( tag.slice( 1 ) );
-				} else if ( tag ) {
-					includes.push( tag );
+			_.each( filters, function( filter ) {
+				filter = filter.split( ':' );
+
+				var name = filter[ 0 ];
+
+				if ( !that.filters[ name ] ) {
+					that.filters[ name ] = [];
 				}
+
+				that.filters[ name ].push( filter[ 1 ] );
 			} );
 
-			this.each( function( test ) {
-				var tags = test.get( 'tags' ),
-					result = true;
+			var filtered = this.get( 'filtered' );
 
-				if ( includes.length ) {
-					result = _.any( tags, function( tag ) {
-						return _.indexOf( includes, tag ) > -1;
-					} );
-				}
-
-				if ( excludes.length ) {
-					result = result && !_.any( tags, function( tag ) {
-						return _.indexOf( excludes, tag ) > -1;
-					} );
-				}
-
-				test.set( 'visible', result );
-			} );
+			filtered.updateFilter( this.needsFiltering() && _.bind( this.filterFunc, this ) );
+			this.trigger( 'change', this );
 		},
 
-		getTags: function( tests ) {
-			var tags = [],
-				negTags = [];
+		filterFunc: function( item ) {
+			item = item.toJSON();
 
-			_.each( tests, function( test ) {
-				tags = tags.concat( test.tags );
-			} );
+			function escape( string ) {
+				return string.replace( /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&' );
+			}
 
-			tags = _.uniq( tags ).sort();
+			function checkProperty( filters, name ) {
+				if ( !filters.length ) {
+					return false;
+				}
 
-			negTags = _.map( tags, function( tag ) {
-				return '-' + tag;
-			} );
+				if ( name === 'name' ) {
+					return _.some( filters, function( filter ) {
+						return ( new RegExp( escape( '/' + filter ) + '$' ) ).test( item.id );
+					} );
+				}
 
-			tags = tags.concat( negTags );
+				if ( name === 'path' ) {
+					return _.some( filters, function( filter ) {
+						return item.id.indexOf( filter.substr( 1 ) ) === 0;
+					} );
+				}
 
-			Tests.testStatus.set( 'tags', tags );
+				if ( name === 'group' ) {
+					return _.indexOf( filters, item.group ) > -1;
+				}
+
+				if ( name === 'tag' ) {
+					return _.some( filters, function( filter ) {
+						return _.indexOf( item.tags, filter ) > -1;
+					} );
+				}
+			}
+
+			return _.some( this.filters, checkProperty );
+		},
+
+		toJSON: function() {
+			var attr = this.attributes,
+				json = {},
+				name;
+
+			for ( name in attr ) {
+				json[ name ] = attr[ name ].toJSON();
+			}
+
+			return json;
 		},
 
 		getIds: function() {
-			return _.map( this.filter( function( test ) {
-				// test is included by the filter
-				return test.get( 'visible' ) &&
-					// "Show Failed" is checked and the test contains erros
-					( Tests.testStatus.get( 'onlyFailed' ) ? test.get( 'errors' ) : true );
-			} ), function( test ) {
-				return test.get( 'id' );
+			return this.get( 'filtered' ).map( function( item ) {
+				return item.id;
 			} );
 		},
 
 		clearCurrentResult: function() {
-			var current = this.get( bender.current );
+			var current = this.get( 'tests' ).get( bender.current );
+
 			if ( current ) {
 				current.get( 'result' ).reset();
+				this.trigger( 'updateResult', bender.current );
 			}
 		},
 
 		clearResults: function() {
-			this.each( function( test ) {
+			this.get( 'tests' ).each( function( test ) {
 				test.get( 'result' ).reset();
 			} );
+
+			this.trigger( 'change', this );
 		},
 
-		update: function( data ) {
-			var model = this.get( data.id );
+		updateResult: function( data ) {
+			var model = this.get( 'tests' ).get( data.id );
 
 			if ( model ) {
 				model.get( 'result' ).update( data );
+				this.trigger( 'updateResult', data.id );
 			}
-
-		}
-	} ) )();
-
-	Tests.filteredTests = new Backbone.VirtualCollection( Tests.testsList, {
-		filter: function( test ) {
-			var tags = test.get( 'tags' );
-
-			return tags;
 		}
 	} );
 
-	Tests.NoTestsView = Marionette.ItemView.extend( {
-		template: '#no-tests',
-		tagName: 'tr'
-	} );
-
-	/**
-	 * Test list view
-	 */
-	Tests.TestsListView = App.Common.TableView.extend( {
+	Tests.TestsView = Marionette.ItemView.extend( {
 		template: '#tests',
-		childTemplate: '#test',
-		childView: Tests.TestView,
-		emptyView: Tests.NoTestsView,
+		testTemplate: null,
+		resultTemplate: null,
+		className: 'panel panel-default',
+
+		templateHelpers: {
+			getIconStyle: function( style ) {
+				return 'glyphicon' + ( style ?
+					' glyphicon-' + ( style === 'success' ? 'ok' : style === 'warning' ? 'forward' : 'remove' ) :
+					'' );
+			},
+
+			getClass: function( result ) {
+				var s = result.get( 'style' );
+
+				return s ? ' ' + s + ' bg-' + s + ' text-' + s : '';
+			}
+		},
+
+		ui: {
+			container: 'tbody'
+		},
+
+		initialize: function() {
+			var that = this;
+
+			this.listenTo( this.model, 'change', this.render, this );
+			this.listenTo( this.model, 'updateResult', this.renderResult, this );
+			this.testTemplate = _.template( $( '#test' ).html() );
+			this.resultTemplate = _.template( $( '#test-result' ).html() );
+
+			this.templateHelpers.renderResult = function( result ) {
+				return that.resultTemplate( _.extend( {}, result.toJSON(), that.templateHelpers ) );
+			};
+		},
 
 		onRender: function() {
-			var status = Tests.testStatus.toJSON();
+			this.ui.container.html( this.renderChildren() );
+		},
 
-			if ( status.onlyFailed ) {
-				this.$el.find( '.tests' ).addClass( 'only-failed' );
+		renderChildren: function() {
+			var filtered = this.model.get( 'filtered' ),
+				html = [];
+
+			filtered.each( function( test ) {
+				html.push( this.testTemplate( _.extend( {}, test.toJSON(), this.templateHelpers ) ) );
+			}, this );
+
+			html = html.join( '' );
+
+			return html;
+		},
+
+		renderResult: function( id ) {
+			var result = this.model.get( 'tests' ).get( id ),
+				row;
+
+			if ( result ) {
+				result = result.get( 'result' ).toJSON();
+
+				row = this.$el.find( '[data-id="' + id + '"]' );
+
+				var s = result.style;
+
+				row[ 0 ].className = s ? ' ' + s + ' bg-' + s + ' text-' + s : '';
+
+				row.find( '.result' ).html( this.resultTemplate( _.extend( {}, result, this.templateHelpers ) ) );
+				this.scrollTo( row );
 			}
+		},
 
-			if ( status.filter.length ) {
-				App.vent.trigger( 'tests:filter', status.filter );
+		scrollTo: function( elem ) {
+			var top = elem.offset().top,
+				bottom = top + elem.height(),
+				$window = $( window ),
+				scroll = $( window ).scrollTop(),
+				height = $window.height();
+
+
+			// item is hidden at the bottom
+			if ( scroll + height < bottom ) {
+				$window.scrollTop( bottom - height );
+				// item is hidden at the top
+			} else if ( scroll + App.$navbar.height() > top ) {
+				$( window ).scrollTop( top - App.$navbar.height() - 1 );
 			}
 		}
 	} );
@@ -559,7 +663,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		initialize: function() {
 			this.set( 'browsers', [] )
-				.set( 'tests', Tests.testsList.getIds() )
+				.set( 'tests', Tests.tests.getIds() )
 				.set( 'filter', Tests.testStatus.get( 'filter' ) );
 		},
 
@@ -703,27 +807,72 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	 */
 	Tests.controller = {
 		listTests: function( filter ) {
-			Tests.testStatus.set( 'filter', filter ? filter.split( ',' ) : [] );
+			Tests.tests = new Tests.Tests();
 
-			App.header.show( new Tests.TestHeaderView( {
+			Tests.testStatus = new Tests.TestStatus();
+
+			var headerView = new Tests.TestHeaderView();
+
+			App.header.show( headerView );
+
+			headerView.left.show( new Tests.FilterView( {
+				model: new Tests.Filter()
+			} ) );
+
+			headerView.right.show( new Tests.TestStatusView( {
 				model: Tests.testStatus
 			} ) );
 
-			App.content.show( new Tests.TestsListView( {
-				collection: Tests.testsList
+			App.content.show( new Tests.TestsView( {
+				model: Tests.tests
 			} ) );
 
-			Tests.testsList.fetch( {
-				reset: true
-			} ).done( function() {
-				Tests.testStatus.parseFilter();
-				App.vent.trigger( 'tests:filter', Tests.testStatus.get( 'filter' ) );
+			Tests.tests.fetch().done( function( data ) {
+				App.vent.trigger( 'tests:loaded', data.tests, filter ? filter.split( ',' ) : [] );
 			} );
 		},
 
-		update: function( data ) {
-			Tests.testStatus.update( data );
-			Tests.testsList.update( data );
+		runTests: function() {
+			var ids;
+
+			if ( !Tests.testStatus.get( 'running' ) ) {
+				ids = Tests.tests.getIds();
+
+				if ( !ids.length ) {
+					return App.Alerts.Manager.add(
+						'danger',
+						'There are no tests to run, aborting.',
+						'Error:'
+					);
+				}
+
+				App.vent.trigger( 'tests:start' );
+
+				// show all filtered
+				Tests.testStatus.start( ids.length );
+				bender.run( ids );
+			} else {
+				bender.stop();
+				Tests.testStatus.stop();
+			}
+		},
+
+		showCreateJob: function() {
+			App.modal.show(
+				new Tests.CreateJobView( {
+					model: new Tests.NewJob()
+				} )
+			);
+		},
+
+		updateURL: function( filter ) {
+			App.navigate( 'tests/' + filter.join( ',' ), {
+				trigger: false
+			} );
+
+			_.defer( function() {
+				App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+			} );
 		}
 	};
 
@@ -736,13 +885,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			controller: Tests.controller
 		} );
 
+		App.vent.on( 'tests:filter', Tests.controller.updateURL );
+
 		// attach event listeners
-		Tests.on( 'tests:list', function() {
+		App.vent.on( 'tests:list', function() {
 			App.navigate( 'tests' );
 			Tests.controller.listTests();
 		} );
 
-		bender.on( 'update', Tests.controller.update );
+		bender.on( 'update', function( data ) {
+			App.vent.trigger( 'tests:update', data );
+		} );
 
 		bender.on( 'complete', function() {
 			App.vent.trigger( 'tests:stop' );

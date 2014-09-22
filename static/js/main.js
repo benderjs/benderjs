@@ -93,7 +93,7 @@
 		Backbone.history.start();
 
 		if ( this.getCurrentRoute() === '' ) {
-			App.Tests.trigger( 'tests:list' );
+			App.vent.trigger( 'tests:list' );
 		}
 	} );
 

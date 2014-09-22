@@ -64,12 +64,6 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	</script>
 
 
-	<!-- template for a tests counter -->
-	<script type="text/html" id="tests-counter">
-	Showing <strong class="tests-shown">0</strong> of <strong class="tests-count">0</strong> tests
-	</script>
-
-
 	<!-- template for tests table -->
 	<script type="text/html" id="tests">
 	<table class="table table-hover tests">
@@ -84,98 +78,79 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<tbody>
 		</tbody>
 	</table>
-	</script>
-
-
-	<!-- template for empty tests table -->
-	<script type="text/html" id="no-tests">
-	<td colspan="4">No tests found. Check your configuration file</td>
+	<div class="test-counter">
+		Showing <strong><%= filtered.length %></strong> of <strong><%= tests.length %></strong> tests
+	</div>
 	</script>
 
 
 	<!-- template for a single test row -->
 	<script type="text/html" id="test">
-	<td><a href="/<%= id %>" title="<%= id %>" target="_blank"><%= id %></a></td>
-	<td title="<%= group %>"><%= group %></td>
-	<td title="<%= tags.join(', ') %>"><%= tags.join(', ') %></td>
-	<td class="result"></td>
+	<tr data-id="<%= id %>" class="<%= getClass(result) %>">
+		<td><a href="/<%= id %>" title="<%= id %>" target="_blank"><%= id %></a></td>
+		<td title="<%= group %>"><%= group %></td>
+		<td title="<%= tags.join( ', ' ) %>"><%= tags.join( ', ' ) %></td>
+		<td class="result"><%= renderResult( result ) %></td>
+	</tr>
 	</script>
 
 	<!-- template for a test result -->
 	<script type="text/html" id="test-result">
-	<% if (state === 'done') { %>
-		<span class="<%= getIconStyle(style) %>"></span>
-		<% if (slow) { %>
+	<% if ( state === 'done' ) { %>
+		<span class="<%= getIconStyle( style ) %>"></span>
+		<% if ( slow ) { %>
 		<span class="glyphicon glyphicon-exclamation-sign" title="Slow test"></span>
 		<% } %>
 		<span class="result">
-		<% if (broken) { %>
+		<% if ( broken ) { %>
 			BROKEN
-		<% } else if (ignored === true) { %>
+		<% } else if ( ignored === true ) { %>
 			IGNORED
 		<% } else { %>
 		    <%= passed %> passed / <%= failed %> failed / <%= ignored %> ignored in <%= duration %>ms
 		<% } %>
 		</span>
-	<% } else if (state === 'started') { %>
+	<% } else if ( state === 'started' ) { %>
 		Running...
 	<% } %>
 	</script>
 
 
+	<!-- template for tests tab header -->
+	<script type="text/html" id="test-header">
+	<div class="col-md-6 header-left"></div>
+	<div class="col-md-6">
+		<div class="header-right"></div>
+
+		<div class="form-inline test-controls" role="form">
+			<button type="button" class="btn btn-primary btn-sm run-button" title="Start tests">
+				<span class="glyphicon glyphicon-play"></span>
+			</button>
+			<button type="button" class="btn btn-primary btn-sm create-button" title="Create a job from selected tests">
+				<span class="glyphicon glyphicon-file"></span> Create a job
+			</button>
+		</div>
+	</div>
+	</script>
+
+
 	<!-- template for a tests status -->
-	<script type="text/html" id="tests-status">
-	<p class="test-status">
-		<strong class="passed"><%= passed %></strong> passed /
-		<strong class="failed"><%= failed %></strong> failed in
-		<strong class="time"><%= timeToText(time) %></strong> -
-		<strong class="percent"><%= getPercent(completed, total) %></strong>
-	</p>
+	<script type="text/html" id="test-status">
+	<strong class="passed"><%= passed %></strong> passed /
+	<strong class="failed"><%= failed %></strong> failed in
+	<strong class="time"><%= timeToText( time ) %></strong> -
+	<strong class="percent"><%= getPercent( completed, total ) %></strong>
 	</script>
 
 
 	<!-- template for a test filter -->
 	<script type="text/html" id="test-filter">
-	<div class="form-group input-append btn-group">
-		<select data-placeholder="Filter tests..." multiple
-		class="tag-filter form-control" <%= running ? 'disabled="disabled"' : '' %>>
-			<% _.each(tags, function (tag) { %>
-			<option value="<%= tag %>" <%= _.indexOf(filter, tag) > -1 ? 'selected' : '' %>><%= tag %></option>
-			<% }) %>
-		</select>
-	</div>
-	</script>
-
-
-	<!-- template for tests tab header -->
-	<script type="text/html" id="test-header">
-	<div class="col-md-6">
-		<div class="filter-form">
-			<span class="glyphicon glyphicon-search filter-icon"></span>
-			<select data-placeholder="Filter tests..." multiple
-			class="tag-filter form-control" <%= running ? 'disabled="disabled"' : '' %>>
-				<% _.each(tags, function (tag) { %>
-				<option value="<%= tag %>" <%= _.indexOf(filter, tag) > -1 ? 'selected' : '' %>><%= tag %></option>
-				<% }) %>
-			</select>
-		</div>
-	</div>
-	<div class="col-md-6">
-		<p class="test-status">
-			<strong class="passed"><%= passed %></strong> passed /
-			<strong class="failed"><%= failed %></strong> failed in
-			<strong class="time"><%= timeToText(time) %></strong> -
-			<strong class="percent"><%= getPercent(completed, total) %></strong>
-		</p>
-		<div class="form-inline test-controls" role="form">
-			<button type="button" class="btn btn-primary btn-sm run-button" title="<%= running ? 'Stop' : 'Start' %> tests">
-				<span class="glyphicon glyphicon-<%= running ? 'stop' : 'play' %>"></span>
-			</button>
-			<button type="button" class="btn btn-primary btn-sm create-button" title="Create a job from selected tests" <%= running ? 'disabled' : '' %>>
-				<span class="glyphicon glyphicon-file"></span> Create a job
-			</button>
-		</div>
-	</div>
+	<span class="glyphicon glyphicon-search filter-icon"></span>
+	<select data-placeholder="Filter tests..." multiple class="test-filter form-control">
+		<% _.each( tokens, function ( token ) { %>
+		<option value="<%= token %>" <%= _.indexOf( filter, token ) > -1 ? 'selected' : '' %>><%= token %></option>
+		<% } ) %>
+	</select>
 	</script>
 
 
