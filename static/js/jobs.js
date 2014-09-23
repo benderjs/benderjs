@@ -242,6 +242,10 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 		},
 
+		onRender: function() {
+			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+		},
+
 		removeJob: function() {
 			var that = this;
 
