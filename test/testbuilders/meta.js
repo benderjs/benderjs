@@ -85,7 +85,7 @@ describe( 'Test Builders - Meta', function() {
 			id: 'test/fixtures/tests/test/1',
 			js: 'test/fixtures/tests/test/1.js',
 			html: 'test/fixtures/tests/test/1.html',
-			tags: [ 'fixtures', 'tests', 'test', 'foo', 'bar', 'baz' ],
+			tags: [ 'foo', 'bar', 'baz' ],
 			ui: 'collapsed',
 			include: 'http://foo.com/bar/baz.js'
 		};
@@ -102,7 +102,7 @@ describe( 'Test Builders - Meta', function() {
 			id: 'test/fixtures/tests/test/2',
 			js: 'test/fixtures/tests/test/2.js',
 			html: 'test/fixtures/tests/test/2.htm',
-			tags: [ 'fixtures', 'tests', 'test', 'foo', 'bar', 'baz' ],
+			tags: [ 'foo', 'bar', 'baz' ],
 			testPlugin: {
 				flag: 'foo'
 			}
@@ -119,11 +119,7 @@ describe( 'Test Builders - Meta', function() {
 		expected[ test3 ] = {
 			id: 'test/fixtures/tests/test/3',
 			js: 'test/fixtures/tests/test/3.js',
-			tags: [
-				'fixtures',
-				'tests',
-				'test'
-			]
+			tags: []
 		};
 
 		return meta.build( sampleData3 ).then( function( result ) {
@@ -139,12 +135,10 @@ describe( 'Test Builders - Meta', function() {
 			id: 'test/fixtures/tests/test2/1',
 			js: 'test/fixtures/tests/test2/1.js',
 			tags: [
-				'fixtures',
-				'tests',
-				'test2',
 				'foo',
 				'bar',
-				'baz'
+				'baz',
+				'fixtures'
 			]
 		};
 
@@ -161,9 +155,6 @@ describe( 'Test Builders - Meta', function() {
 			id: 'test/fixtures/tests/test2/2',
 			js: 'test/fixtures/tests/test2/2.js',
 			tags: [
-				'fixtures',
-				'tests',
-				'test2',
 				'foo',
 				'bar',
 				'baz'
