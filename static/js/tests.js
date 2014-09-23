@@ -91,6 +91,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		}
 	} );
 
+	/**
+	 * Test filter view
+	 */
 	Tests.FilterView = Marionette.ItemView.extend( {
 		template: '#test-filter',
 		className: 'filter-form',
@@ -202,6 +205,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		}
 	} );
 
+	/**
+	 * Test status view
+	 */
 	Tests.TestStatusView = Marionette.ItemView.extend( {
 		template: '#test-status',
 		tagName: 'p',
@@ -393,13 +399,18 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			result: null
 		},
 
-		parse: function( data ) {
-			// create an instance of Result model for the result
-			data.result = new Tests.Result( data, {
-				parse: true
-			} );
+		getResult: function() {
+			var result;
 
-			return data;
+			if ( !( result = this.get( 'result' ) ) ) {
+				result = new Tests.Result( this.toJSON(), {
+					parse: true
+				} );
+
+				this.set( 'result', result );
+			}
+
+			return result;
 		}
 	} );
 
@@ -434,9 +445,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		parse: function( response ) {
-			response.tests = new Tests.TestsList( response.test, {
-				parse: true
-			} );
+			response.tests = new Tests.TestsList( response.test );
 			response.filtered = new Backbone.VirtualCollection( response.tests );
 
 			delete response.test;
@@ -536,14 +545,14 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			var current = this.get( 'tests' ).get( bender.current );
 
 			if ( current ) {
-				current.get( 'result' ).reset();
+				current.getResult().reset();
 				this.trigger( 'updateResult', bender.current );
 			}
 		},
 
 		clearResults: function() {
 			this.get( 'tests' ).each( function( test ) {
-				test.get( 'result' ).reset();
+				test.getResult().reset();
 			} );
 
 			this.trigger( 'change', this );
@@ -553,12 +562,15 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			var model = this.get( 'tests' ).get( data.id );
 
 			if ( model ) {
-				model.get( 'result' ).update( data );
+				model.getResult().update( data );
 				this.trigger( 'updateResult', data.id );
 			}
 		}
 	} );
 
+	/**
+	 * Test list view
+	 */
 	Tests.TestsView = Marionette.ItemView.extend( {
 		template: '#tests',
 		testTemplate: null,
@@ -573,7 +585,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			},
 
 			getClass: function( result ) {
-				var s = result.get( 'style' );
+				var s = result && result.get( 'style' );
 
 				return s ? ' ' + s + ' bg-' + s + ' text-' + s : '';
 			}
@@ -592,7 +604,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.resultTemplate = _.template( $( '#test-result' ).html() );
 
 			this.templateHelpers.renderResult = function( result ) {
-				return that.resultTemplate( _.extend( {}, result.toJSON(), that.templateHelpers ) );
+				return result ? that.resultTemplate( _.extend( {}, result.toJSON(), that.templateHelpers ) ) : '';
 			};
 		},
 
@@ -885,9 +897,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			controller: Tests.controller
 		} );
 
+		// attach event listeners
 		App.vent.on( 'tests:filter', Tests.controller.updateURL );
 
-		// attach event listeners
 		App.vent.on( 'tests:list', function() {
 			App.navigate( 'tests' );
 			Tests.controller.listTests();
