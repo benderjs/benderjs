@@ -108,18 +108,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
-
-			App.vent.on( 'tests:start', function() {
-				this.updateInput( false );
-			}, this );
-
-			App.vent.on( 'tests:stop', function() {
-				this.updateInput( true );
-			}, this );
-		},
-
-		updateInput: function( enabled ) {
-			this.ui.filter.attr( 'disabled', !enabled );
 		},
 
 		onRender: function() {
@@ -246,18 +234,26 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		templateHelpers: App.Common.templateHelpers,
 
 		initialize: function() {
-			App.vent.on( 'tests:start', function() {
+			this.listenTo( App.vent, 'tests:start', function() {
 				this.updateButtons( false );
-			}, this );
+			} );
 
-			App.vent.on( 'tests:stop', function() {
+			this.listenTo( App.vent, 'tests:stop', function() {
 				this.updateButtons( true );
-			}, this );
+			} );
+		},
+
+		bindUIElements: function() {
+			Marionette.LayoutView.prototype.bindUIElements.apply( this, arguments );
 		},
 
 		updateButtons: function( enabled ) {
-			this.ui.run.attr( 'title', ( enabled ? 'Start' : 'Stop' ) + ' tests' );
-			this.ui.run.find( 'span' ).toggleClass( 'glyphicon-play', enabled ).toggleClass( 'glyphicon-stop', !enabled );
+			this.ui.run
+				.attr( 'title', ( enabled ? 'Start' : 'Stop' ) + ' tests' )
+				.find( 'span' )
+				.toggleClass( 'glyphicon-play', enabled )
+				.toggleClass( 'glyphicon-stop', !enabled );
+
 			this.ui.create.attr( 'disabled', !enabled );
 		},
 
