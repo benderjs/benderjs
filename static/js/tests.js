@@ -43,8 +43,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			tests.each( function( item ) {
 				item = item.toJSON();
 
-				var group = 'group:' + item.group;
-
 				_.each( item.tags, function( tag ) {
 					tag = 'tag:' + tag;
 
@@ -52,6 +50,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 						tokens.push( tag );
 					}
 				} );
+
+				var group = 'group:' + item.group;
 
 				if ( _.indexOf( tokens, group ) < 0 ) {
 					tokens.push( group );
@@ -70,6 +70,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				}
 
 			} );
+
+			tokens.push( 'is:failed', 'is:manual', 'is:unit' );
 
 			this.set( 'tokens', tokens.sort() );
 
@@ -243,10 +245,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 		},
 
-		bindUIElements: function() {
-			Marionette.LayoutView.prototype.bindUIElements.apply( this, arguments );
-		},
-
 		updateButtons: function( enabled ) {
 			this.ui.run
 				.attr( 'title', ( enabled ? 'Start' : 'Stop' ) + ' tests' )
@@ -280,7 +278,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			duration: 0,
 			broken: false,
 			errors: null,
-			slow: false
+			slow: false,
+			success: true
 		},
 
 		reset: function() {
@@ -288,22 +287,16 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		parse: function( data ) {
-			var style = ( !data.state || data.state === 'started' ) ? '' :
+			data.style = ( !data.state || data.state === 'started' ) ? '' :
 				data.success ? data.ignored === true ? 'warning' :
 				'success' : 'danger';
 
-			return {
-				id: data.id,
-				style: style,
-				state: data.state || 'waiting',
-				passed: data.passed,
-				failed: data.failed,
-				ignored: data.ignored,
-				duration: data.duration,
-				broken: data.broken,
-				errors: this.getErrors( data ),
-				slow: this.isSlow( data )
-			};
+			data.state = data.state || 'waiting';
+			data.errors = data.results ? this.getErrors( data ) : null;
+			data.slow = data.total && this.isSlow( data );
+			data.success = data.success || false;
+
+			return data;
 		},
 
 		update: function( data ) {
@@ -391,8 +384,20 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			group: '',
 			tags: null,
 
+			// test type
+			unit: true,
+			manual: false,
+
 			// result sub-model
 			result: null
+		},
+
+		parse: function( data ) {
+			data.result = new Tests.Result( this.attributes, {
+				parse: true
+			} );
+
+			return data;
 		},
 
 		getResult: function() {
@@ -441,7 +446,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		parse: function( response ) {
-			response.tests = new Tests.TestsList( response.test );
+			response.tests = new Tests.TestsList( response.test, {
+				parse: false
+			} );
 			response.filtered = new Backbone.VirtualCollection( response.tests );
 
 			delete response.test;
@@ -490,7 +497,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			function checkProperty( filters, name ) {
 				if ( !filters.length ) {
-					return false;
+					return true;
 				}
 
 				if ( name === 'name' ) {
@@ -516,7 +523,38 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				}
 			}
 
-			return _.some( this.filters, checkProperty );
+			function checkFlags( filters ) {
+				if ( !filters || !filters.length ) return true;
+
+				return _.every( filters, function( filter ) {
+					if ( filter === 'failed' ) {
+						return item.result && !item.result.toJSON().success;
+					} else {
+						return item[ filter ];
+					}
+				} );
+			}
+
+			function checkProperties( filters ) {
+				var result = false,
+					keys = _.keys( filters );
+
+				if ( keys.length === 1 && filters.is && filters.is.length ) return true;
+
+				_.each( filters, function( filter, name ) {
+					if ( name === 'is' ) {
+						return;
+					}
+
+					if ( checkProperty( filter, name ) ) {
+						result = true;
+					}
+				} );
+
+				return result;
+			}
+
+			return checkFlags( this.filters.is ) && checkProperties( this.filters );
 		},
 
 		toJSON: function() {
@@ -672,7 +710,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		initialize: function() {
 			this.set( 'browsers', [] )
 				.set( 'tests', Tests.tests.getIds() )
-				.set( 'filter', Tests.testStatus.get( 'filter' ) );
+				.set( 'filter', Tests.testStatus.get( 'filter' ).get( 'filter' ) );
 		},
 
 		validate: function( attrs ) {
@@ -824,7 +862,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			App.header.show( headerView );
 
 			headerView.left.show( new Tests.FilterView( {
-				model: new Tests.Filter()
+				model: Tests.testStatus.get( 'filter' )
 			} ) );
 
 			headerView.right.show( new Tests.TestStatusView( {
@@ -834,6 +872,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			App.content.show( new Tests.TestsView( {
 				model: Tests.tests
 			} ) );
+
+			if ( !filter ) {
+				filter = 'is:unit';
+			}
 
 			Tests.tests.fetch().done( function( data ) {
 				App.vent.trigger( 'tests:loaded', data.tests, filter ? filter.split( ',' ) : [] );
