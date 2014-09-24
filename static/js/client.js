@@ -43,19 +43,19 @@
 		summaryEl = document.createElement( 'div' );
 		summaryEl.className = 'summary';
 
-		// show tests that failed only
-		failedEl = document.createElement( 'a' );
-		failedEl.href = '#';
-		failedEl.className = 'btn failed';
-		failedEl.title = 'Show failed tests';
-		summaryEl.appendChild( failedEl );
-
 		// collapse results button
 		collapseEl = document.createElement( 'a' );
 		collapseEl.href = '#';
 		collapseEl.className = 'btn collapse';
 		collapseEl.title = 'Collapse the results';
 		summaryEl.appendChild( collapseEl );
+
+		// show tests that failed only
+		failedEl = document.createElement( 'a' );
+		failedEl.href = '#';
+		failedEl.className = 'btn failed';
+		failedEl.title = 'Show failed tests';
+		summaryEl.appendChild( failedEl );
 
 		// run all tests button
 		allEl = document.createElement( 'a' );
