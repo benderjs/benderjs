@@ -88,7 +88,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			// some invalid tokens were stripped
 			if ( filter.length && !parsed.length ) {
-				App.vent.trigger( 'tests:filter', filter );
+				App.vent.trigger( 'tests:filter', parsed );
 			}
 		}
 	} );
@@ -944,7 +944,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		App.vent.on( 'tests:list', function() {
 			App.navigate( 'tests' );
-			Tests.controller.listTests();
 		} );
 
 		bender.on( 'update', function( data ) {
