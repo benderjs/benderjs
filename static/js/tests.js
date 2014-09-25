@@ -524,7 +524,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 
 			function checkFlags( filters ) {
-				if ( !filters || !filters.length ) return true;
+				if ( !filters || !filters.length ) {
+					return true;
+				}
 
 				return _.every( filters, function( filter ) {
 					if ( filter === 'failed' ) {
@@ -539,7 +541,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				var result = false,
 					keys = _.keys( filters );
 
-				if ( keys.length === 1 && filters.is && filters.is.length ) return true;
+				if ( keys.length === 1 && filters.is && filters.is.length ) {
+					return true;
+				}
 
 				_.each( filters, function( filter, name ) {
 					if ( name === 'is' ) {
