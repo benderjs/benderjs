@@ -109,7 +109,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
+			this.listenTo( this.model, 'change:tokens', this.render );
 		},
 
 		onRender: function() {
