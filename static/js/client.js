@@ -211,6 +211,27 @@
 	}
 
 	/**
+	 * Formats a timestap given in milliseconds to a readable form
+	 * @param  {Number} ms Timestamp
+	 * @return {String}
+	 */
+	function formatTime( ms ) {
+		var h, m, s;
+
+		s = Math.floor( ms / 1000 );
+		ms %= 1000;
+		m = Math.floor( s / 60 );
+		s %= 60;
+		h = Math.floor( m / 60 );
+		m %= 60;
+
+		return ( h ? ( h + 'h ' ) : '' ) +
+			( m ? ( ( m < 10 ? '0' : '' ) + m + 'm ' ) : '' ) +
+			( s ? ( ( s < 10 ? '0' : '' ) + s + 's ' ) : '' ) +
+			( ms < 10 ? '00' : ms < 100 ? '0' : '' ) + ms + 'ms';
+	}
+
+	/**
 	 * Local Bender class
 	 * @constructor
 	 */
@@ -278,7 +299,7 @@
 			statusEl.innerHTML = '<strong>Testing Done:</strong> ' +
 				result.passed + ' passed, ' + result.failed + ' failed' +
 				( result.ignored ? ', ' + result.ignored + ' ignored ' : ' ' ) +
-				'in ' + result.duration + 'ms';
+				'in ' + formatTime( result.duration );
 
 			expandUI();
 		};
