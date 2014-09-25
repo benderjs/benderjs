@@ -1,110 +1,6 @@
 <html>
 <head>
-	<style>
-		html {
-			height: 100%;
-		}
-
-		body {
-			position: relative;
-			margin-left: 300px;
-			height: 100%;
-		}
-
-		.summary {
-			left: 300px;
-		}
-
-		.manual-sidebar {
-			font-family: 'Arial', 'Helvetica', sans-serif;
-			position: absolute;
-			top: 0;
-			left: -300px;
-			width: 300px;
-			height: 100%;
-			border-right: 1px solid #e7e7e7;
-			background: #f8f8f8;
-		}
-
-		.manual-sidebar h1 {
-			font-size: 1.5em;
-			margin: 0 0 10px 0;
-			color: #777;
-		}
-
-		.manual-sidebar p {
-			line-height: 1.25em;
-		}
-
-		.manual-sidebar code {
-			padding: 5px;
-			background: #fff;
-			border: 1px solid #e7e7e7;
-			border-radius: 3px;
-		}
-
-		.manual-sidebar p code {
-			padding: 2px 0 2px;
-			font-size: 85%;
-		}
-
-		.manual-sidebar p code:before,
-		.manual-sidebar p code:after {
-			letter-spacing: -0.2em;
-			content: '\00a0';
-		}
-
-		.manual-sidebar ol,
-		.manual-sidebar ul {
-			padding-left: 25px;
-		}
-
-		.manual-sidebar .script {
-			overflow-y: scroll;
-			position: absolute;
-			top: 0;
-			bottom: 50px;
-			left: 0;
-			right: 0;
-			color: #333;
-			padding: 10px;
-		}
-
-		.manual-sidebar .controls {
-			position: absolute;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			height: 50px;
-			padding: 0 10px 0;
-			text-align: center;
-			line-height: 50px
-		}
-
-		.manual-sidebar .controls .ok {
-			color: #090;
-		}
-
-		.manual-sidebar .controls .ok:hover {
-			background: #efe;
-		}
-
-		.manual-sidebar .controls .fail {
-			color: #900;
-		}
-
-		.manual-sidebar .controls .fail:hover {
-			background: #fee;
-		}
-
-		.manual-sidebar .controls button {
-			font-size: 16px;
-			line-height: 28px;
-			border-radius: 3px;
-			text-align: center;
-			cursor: pointer;
-		}
-	</style>
+	<link rel="stylesheet" href="/css/manual.css">
 </head>
 <body>
 	<div id="manual-sidebar" class="manual-sidebar">
@@ -113,9 +9,11 @@
 			%SCRIPT%
 		</div>
 		<div class="controls">
-			<button class="ok">Passed</button>
-			<button class="fail">Failed</button>
+			<button class="ok btn-pass">Pass</button>
+			<button class="fail btn-fail visible">Fail</button>
+			<button class="btn-finish">Finish</button>
 		</div>
 	</div>
+	<script src="/js/manual.js"></script>
 </body>
 </html>
