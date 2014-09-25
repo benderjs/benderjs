@@ -133,13 +133,7 @@
 			resultsEl.className = resultsElClassName;
 		}
 
-		if ( resultsEl.addEventListener ) {
-			resultsEl.addEventListener( 'click', handleClick, false );
-		} else if ( resultsEl.attachEvent ) {
-			resultsEl.attachEvent( 'onclick', handleClick );
-		} else {
-			resultsEl.onclick = handleClick;
-		}
+		bender.addListener( resultsEl, 'click', handleClick );
 	}
 
 	/**
