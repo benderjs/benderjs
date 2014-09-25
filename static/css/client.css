@@ -55,6 +55,7 @@ body {
 
 .result pre {
 	margin-bottom: 0;
+	word-wrap: break-word;
 }
 
 .results p {
