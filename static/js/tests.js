@@ -509,10 +509,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 
 			function checkProperty( filters, name ) {
-				if ( !filters.length ) {
-					return true;
-				}
-
 				if ( name === 'name' ) {
 					return _.some( filters, function( filter ) {
 						return ( new RegExp( escape( '/' + filter ) + '$' ) ).test( item.id );
@@ -552,7 +548,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			function checkProperties( filters ) {
 				var result = false,
-					keys = _.keys( filters );
+					keys = _.keys( filters ),
+					empty = true;
 
 				if ( keys.length === 1 && filters.is && filters.is.length ) {
 					return true;
@@ -563,12 +560,16 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 						return;
 					}
 
-					if ( checkProperty( filter, name ) ) {
-						result = true;
+					if ( filter.length ) {
+						empty = false;
+
+						if ( checkProperty( filter, name ) ) {
+							result = true;
+						}
 					}
 				} );
 
-				return result;
+				return empty || result;
 			}
 
 			return checkFlags( this.filters.is ) && checkProperties( this.filters );
