@@ -79,7 +79,7 @@ describe( 'Test Builders - Template', function() {
 				'test/fixtures/tests/test2/2': {
 					id: 'test/fixtures/tests/test2/2',
 					js: 'test/fixtures/tests/test2/2.js',
-					include: '%BASE_PATH%foo.js'
+					include: [ '%BASE_PATH%foo.js' ]
 				}
 			}
 		},
@@ -163,12 +163,12 @@ describe( 'Test Builders - Template', function() {
 					id: 'test/fixtures/tests/test2/1',
 					js: 'test/fixtures/tests/test2/1.js',
 					html: 'test/fixtures/tests/test2/1.html',
-					include: '%TEST_DIR%__template__.js'
+					include: [ '%TEST_DIR%__template__.js' ]
 				},
 				'test/fixtures/tests/test2/2': {
 					id: 'test/fixtures/tests/test2/2',
 					js: 'test/fixtures/tests/test2/2.js',
-					include: '%BASE_PATH%foo.js,%TEST_DIR%__template__.js'
+					include: [ '%BASE_PATH%foo.js', '%TEST_DIR%__template__.js' ]
 				}
 			},
 			result = template.build( sampleData3 );
