@@ -3,6 +3,8 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
+/*global console */
+
 ( function() {
 	'use strict';
 
@@ -343,7 +345,7 @@
 	}
 
 	window.onerror = bender.error;
-	bender.config = BENDER_CONFIG;
+	bender.config = window.BENDER_CONFIG;
 
 	bender.addListener = function( target, event, handler ) {
 		if ( target.addEventListener ) {
