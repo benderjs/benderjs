@@ -71,7 +71,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			} );
 
-			tokens.push( 'is:failed', 'is:manual', 'is:unit' );
+			tokens.push( 'is:failed', 'is:passed', 'is:manual', 'is:unit' );
 
 			this.set( 'tokens', tokens.sort() );
 
@@ -525,6 +525,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				return _.every( filters, function( filter ) {
 					if ( filter === 'failed' ) {
 						return item.result && !item.result.toJSON().success;
+					} else if (filter === 'passed') {
+						return !item.result || item.result.toJSON().success;
 					} else {
 						return item[ filter ];
 					}
