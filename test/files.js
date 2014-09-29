@@ -14,7 +14,7 @@
 var mocks = require( './fixtures/_mocks' ),
 	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
-	fs = require( 'when/node' ).liftAll( require( 'fs' ) ),
+	fs = require( 'when/node' ).liftAll( require( 'graceful-fs' ) ),
 	path = require( 'path' ),
 	rewire = require( 'rewire' ),
 	files = rewire( '../lib/files' );
@@ -38,7 +38,7 @@ describe( 'Files', function() {
 	it( 'should expose bender.files namespace and its API', function() {
 		expect( bender.files ).to.exist;
 		expect( bender.files ).to.have.keys( [
-			'add', 'get', 'find', 'remove', 'update', 'send', 'isValidPath',
+			'add', 'get', 'find', 'remove', 'update', 'send', 'read', 'readString', 'isValidPath',
 			'store', 'File'
 		] );
 	} );
@@ -154,6 +154,32 @@ describe( 'Files', function() {
 
 		expect( bender.files.isValidPath( f1, patterns ) ).to.be.true;
 		expect( bender.files.isValidPath( f2, patterns ) ).to.be.false;
+	} );
+
+	it( 'should read a file', function() {
+		return fs.readFile( file1 )
+			.then( function( content ) {
+				return bender.files.read( file1 )
+					.then( function( data ) {
+						expect( data.toString() ).to.equal( content.toString() );
+					} );
+			} );
+	} );
+
+	it( 'should read a file as a string', function() {
+		return fs.readFile( file1 )
+			.then( function( content ) {
+				return bender.files.readString( file1 )
+					.then( function( data ) {
+						expect( data ).to.equal( content.toString() );
+					} );
+			} );
+	} );
+
+	it( 'should reject with file not found error', function() {
+		var promise = bender.files.read( fileUnknown );
+
+		return expect( promise ).to.be.rejectedWith( 'File not found: ' + fileUnknown );
 	} );
 
 	describe( 'File', function() {
