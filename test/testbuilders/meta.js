@@ -15,7 +15,8 @@ var mocks = require( '../fixtures/_mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	normalize = require( 'path' ).normalize,
-	meta = rewire( '../../lib/testbuilders/meta' );
+	meta = rewire( '../../lib/testbuilders/meta' ),
+	files = require( '../../lib/files' );
 
 describe( 'Test Builders - Meta', function() {
 	var test1 = normalize( 'test/fixtures/tests/test/1' ),
@@ -35,39 +36,44 @@ describe( 'Test Builders - Meta', function() {
 	sampleData.tests[ test1 ] = {
 		id: 'test/fixtures/tests/test/1',
 		js: 'test/fixtures/tests/test/1.js',
-		html: 'test/fixtures/tests/test/1.html'
+		html: 'test/fixtures/tests/test/1.html',
+		unit: true
 	};
 
 	sampleData2.tests = {};
 	sampleData2.tests[ test2 ] = {
 		id: 'test/fixtures/tests/test/2',
 		js: 'test/fixtures/tests/test/2.js',
-		html: 'test/fixtures/tests/test/2.htm'
+		html: 'test/fixtures/tests/test/2.htm',
+		unit: true
 	};
 
 	sampleData3.tests = {};
 	sampleData3.tests[ test3 ] = {
 		id: 'test/fixtures/tests/test/3',
-		js: 'test/fixtures/tests/test/3.js'
+		js: 'test/fixtures/tests/test/3.js',
+		unit: true
 	};
 
 	sampleData4.tests = {};
 	sampleData4.tests[ test4 ] = {
 		id: 'test/fixtures/tests/test2/1',
-		js: 'test/fixtures/tests/test2/1.js'
+		js: 'test/fixtures/tests/test2/1.js',
+		unit: true
 	};
 
 	sampleData5.tests = {};
 	sampleData5.tests[ test5 ] = {
 		id: 'test/fixtures/tests/test2/2',
-		js: 'test/fixtures/tests/test2/2.js'
+		js: 'test/fixtures/tests/test2/2.js',
+		unit: true
 	};
 
 	before( function() {
 		oldAttach = meta.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'utils', 'conf' );
 		meta.attach = oldAttach || mocks.attachPagebuilder( bender, meta );
-		bender.use( meta );
+		bender.use( [ meta, files ] );
 	} );
 
 	after( function() {
@@ -87,7 +93,8 @@ describe( 'Test Builders - Meta', function() {
 			html: 'test/fixtures/tests/test/1.html',
 			tags: [ 'foo', 'bar', 'baz' ],
 			ui: 'collapsed',
-			include: 'http://foo.com/bar/baz.js'
+			include: [ 'http://foo.com/bar/baz.js' ],
+			unit: true
 		};
 
 		return meta.build( sampleData ).then( function( result ) {
@@ -105,7 +112,8 @@ describe( 'Test Builders - Meta', function() {
 			tags: [ 'foo', 'bar', 'baz' ],
 			testPlugin: {
 				flag: 'foo'
-			}
+			},
+			unit: true
 		};
 
 		return meta.build( sampleData2 ).then( function( result ) {
@@ -119,7 +127,8 @@ describe( 'Test Builders - Meta', function() {
 		expected[ test3 ] = {
 			id: 'test/fixtures/tests/test/3',
 			js: 'test/fixtures/tests/test/3.js',
-			tags: []
+			tags: [],
+			unit: true
 		};
 
 		return meta.build( sampleData3 ).then( function( result ) {
@@ -139,7 +148,8 @@ describe( 'Test Builders - Meta', function() {
 				'bar',
 				'baz',
 				'fixtures'
-			]
+			],
+			unit: true
 		};
 
 		return meta.build( sampleData4 ).then( function( result ) {
@@ -158,7 +168,8 @@ describe( 'Test Builders - Meta', function() {
 				'foo',
 				'bar',
 				'baz'
-			]
+			],
+			unit: true
 		};
 
 		return meta.build( sampleData5 ).then( function( result ) {
