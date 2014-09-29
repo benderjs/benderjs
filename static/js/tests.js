@@ -525,7 +525,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				return _.every( filters, function( filter ) {
 					if ( filter === 'failed' ) {
 						return item.result && !item.result.toJSON().success;
-					} else if (filter === 'passed') {
+					} else if ( filter === 'passed' ) {
 						return !item.result || item.result.toJSON().success;
 					} else {
 						return item[ filter ];
