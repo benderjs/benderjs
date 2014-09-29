@@ -120,7 +120,7 @@ describe( 'Tests', function() {
 		return bender.tests.readBasePaths()
 			.then( function( files ) {
 				expect( files ).to.have.keys( [ 'test/fixtures/tests/' ] );
-				expect( files[ 'test/fixtures/tests/' ] ).to.have.length( 21 );
+				expect( files[ 'test/fixtures/tests/' ] ).to.have.length( 22 );
 
 				files[ 'test/fixtures/tests/' ].forEach( function( file ) {
 					expect( file ).to.have.keys( [ 'name', 'dir', 'path', 'stats' ] );
