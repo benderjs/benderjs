@@ -104,6 +104,7 @@
 		var checkbox = document.createElement( 'input' );
 		checkbox.type = 'checkbox';
 		checkbox.checked = true;
+		checkbox.className = 'fail-check';
 
 		elem.insertBefore( checkbox, elem.firstChild );
 	}

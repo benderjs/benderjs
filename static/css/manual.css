@@ -68,6 +68,20 @@ body {
 	padding: 10px;
 }
 
+.manual-sidebar .fail-check {
+	float: right;
+	clear: right;
+	visibility: hidden
+}
+
+.manual-sidebar .fail-check:not(:checked) {
+	visibility: visible;
+}
+
+.manual-sidebar li:hover > .fail-check {
+	visibility: visible;
+}
+
 .manual-sidebar .controls {
 	position: absolute;
 	bottom: 0;
