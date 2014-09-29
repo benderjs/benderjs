@@ -95,6 +95,8 @@ body {
 }
 
 .manual-sidebar .controls .ok {
+	background: #dff0d8;
+    border: 1px solid #9c9;
 	color: #090;
 }
 
@@ -103,6 +105,8 @@ body {
 }
 
 .manual-sidebar .controls .fail {
+	background: #f2dede;
+    border: 1px solid #c99;
 	color: #900;
 }
 
