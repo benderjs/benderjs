@@ -86,6 +86,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			this.set( 'filter', parsed );
 
+			this.trigger( 'update:filter', parsed );
+
 			// some invalid tokens were stripped
 			if ( filter.length && !parsed.length ) {
 				App.vent.trigger( 'tests:filter', parsed );
@@ -110,6 +112,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		initialize: function() {
 			this.listenTo( this.model, 'change:tokens', this.render );
+			this.listenTo( this.model, 'update:filter', this.update );
 		},
 
 		onRender: function() {
@@ -117,6 +120,16 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				width: '100%',
 				search_contains: true
 			} );
+		},
+
+		update: function() {
+			var filter = this.model.get( 'filter' );
+
+			_.each( filter, function( value ) {
+				this.ui.filter.find( '[value="' + value + '"]' ).prop( 'selected', true );
+			}, this );
+
+			this.ui.filter.trigger( 'chosen:updated' );
 		},
 
 		updateFilter: function( event, params ) {
