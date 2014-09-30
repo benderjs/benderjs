@@ -320,6 +320,11 @@
 				module: testId
 			} );
 		} else {
+			// maximize the IFRAME containing a test page when running a manual test
+			if ( bender.testData.manual && bender.maximize ) {
+				bender.maximize();
+			}
+
 			bender.start();
 		}
 	}
@@ -345,6 +350,9 @@
 				);
 
 				return true;
+			},
+			maximize: function() {
+				launcher.bender.maximize();
 			}
 		};
 

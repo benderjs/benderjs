@@ -10,21 +10,25 @@
 		scriptEl = document.getElementById( 'manual-script' ),
 		buttonEls = sidebarEl.getElementsByTagName( 'button' ),
 		passBtn = buttonEls[ 0 ],
-		failBtn = buttonEls[ 1 ],
-		finishBtn = buttonEls[ 2 ],
+		finishBtn = buttonEls[ 1 ],
+		failBtn = buttonEls[ 2 ],
 		ignored = 0,
 		errors = 0,
-		total = 1,
 		start = new Date(),
 		oldStart = bender.start,
 		oldNext = bender.next;
 
+	// override default Bender API
 	bender.start = function() {};
 	bender.next = function( data ) {
 		disableButtons();
 		oldNext( data );
 	};
 
+	/**
+	 * Send a manual test result to Bender
+	 * @param {Boolean} passed Flag telling if the test passed
+	 */
 	function sendResult( passed ) {
 		if ( !passed ) {
 			sendErrors();
@@ -36,44 +40,39 @@
 			failed: passed ? 0 : 1,
 			errors: errors,
 			ignored: ignored,
-			total: total,
+			total: 1,
 			coverage: window.__coverage__
 		} );
 	}
 
+	/**
+	 * Send an error message to Bender
+	 */
 	function sendErrors() {
 		var inputs = scriptEl.getElementsByTagName( 'input' ),
-			checkboxes = [],
-			result,
 			input,
 			len,
 			i;
 
-		function getMessage( checkbox ) {
-			return checkbox.parentElement.innerText;
-		}
-
 		for ( i = 0, len = inputs.length; i < len; i++ ) {
-			if ( ( input = inputs[ i ] ) && input.type === 'checkbox' && !input.checked ) {
-				checkboxes.push( input );
+			if ( ( input = inputs[ i ] ) &&
+				input.type === 'checkbox' && !input.checked ) {
+				bender.result( {
+					success: false,
+					errors: 1,
+					error: inputs[ i ].parentElement.innerText,
+					module: bender.testData.id,
+					fullName: bender.testData.id,
+					name: '',
+					duration: 0
+				} );
 			}
-		}
-
-		for ( i = 0, len = checkboxes.length; i < len; i++ ) {
-			result = {
-				success: false,
-				errors: 1,
-				error: getMessage( checkboxes[ i ] ),
-				module: bender.testData.id,
-				fullName: bender.testData.id,
-				name: '',
-				duration: 0
-			};
-
-			bender.result( result );
 		}
 	}
 
+	/**
+	 * Disable manual test controls to avoid doubled submissions
+	 */
 	function disableButtons() {
 		var len = buttonEls.length,
 			i;
@@ -84,6 +83,10 @@
 		}
 	}
 
+	/**
+	 * Handle clicks in the manual test sidebar
+	 * @param {Object} event Click event
+	 */
 	function handleClick( event ) {
 		event = event || window.event;
 
@@ -100,8 +103,13 @@
 		}
 	}
 
+	/**
+	 * Add a checkbox to the element
+	 * @param {Element} elem DOM element
+	 */
 	function addCheckbox( elem ) {
 		var checkbox = document.createElement( 'input' );
+
 		checkbox.type = 'checkbox';
 		checkbox.checked = true;
 		checkbox.className = 'fail-check';
@@ -109,6 +117,9 @@
 		elem.insertBefore( checkbox, elem.firstChild );
 	}
 
+	/**
+	 * Add checkboxes to all list items in the manual test sidebar
+	 */
 	function addCheckboxes() {
 		var elems = scriptEl.getElementsByTagName( 'li' ),
 			len = elems.length,
@@ -119,14 +130,16 @@
 		}
 	}
 
+	// show proper controls depending on type of a test
 	if ( bender.testData.unit ) {
 		finishBtn.className += ' visible';
 	} else {
 		passBtn.className += ' visible';
 	}
 
-	addCheckboxes();
 
+	// bind a click handler
 	bender.addListener( sidebarEl, 'click', handleClick );
 
+	addCheckboxes();
 } )();

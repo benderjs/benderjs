@@ -145,6 +145,27 @@ th:last-child {
     height: 70px;
     filter: alpha(opacity=0);
     opacity: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.maximized {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1100;
+	overflow: hidden;
+	background: #fff;
+}
+
+.maximized .context-frame {
+	position: relative;
+	filter: alpha(opacity=1);
+	opacity: 1;
+	height: 100%;
 }
 
 .test-status {
