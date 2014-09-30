@@ -5,6 +5,8 @@
  * @file Runner code for captured browser
  */
 
+/* global io */
+
 ( function() {
 	'use strict';
 
@@ -26,6 +28,7 @@
 
 		this.running = false;
 		this.results = null;
+		this.config = window.BENDER_CONFIG;
 
 		this.runAsChild = true;
 
@@ -35,8 +38,8 @@
 			}
 		}
 
-		function resetTestTimeout() {
-			if ( !BENDER_CONFIG && !BENDER_CONFIG.testTimeout ) {
+		function resetTestTimeout( timeout ) {
+			if ( !timeout ) {
 				return;
 			}
 
@@ -49,7 +52,7 @@
 					testWindow = null;
 				}
 				window.location.reload();
-			}, BENDER_CONFIG.testTimeout );
+			}, timeout );
 		}
 
 		function handleRun( data ) {
@@ -65,6 +68,25 @@
 			that.running = true;
 
 			that.run( data.id[ 0 ] === '/' ? data.id : '/' + data.id );
+		}
+
+		function addFrame( id ) {
+			var frame = document.createElement( 'iframe' );
+
+			frame.className = 'context-frame';
+			frame.src = id;
+			contextEl.appendChild( frame );
+		}
+
+		function removeFrame() {
+			var frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ];
+
+			contextEl.className = '';
+
+			if ( frame ) {
+				frame.src = 'about:blank';
+				contextEl.removeChild( frame );
+			}
 		}
 
 		this.error = function( error ) {
@@ -89,12 +111,10 @@
 
 			socket.emit( 'result', result );
 
-			resetTestTimeout();
+			resetTestTimeout( that.config && that.config.testTimeout );
 		};
 
 		this.run = function( id ) {
-			var frame;
-
 			if ( typeof id == 'string' ) {
 				runs++;
 
@@ -119,18 +139,11 @@
 						}
 					}
 				} else {
-					if ( ( frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ] ) ) {
-						frame.src = 'about:blank';
-						contextEl.removeChild( frame );
-					}
-
-					frame = document.createElement( 'iframe' );
-					frame.className = 'context-frame';
-					frame.src = id;
-					contextEl.appendChild( frame );
+					removeFrame();
+					addFrame( id );
 				}
 
-				resetTestTimeout();
+				resetTestTimeout( that.config && that.config.testTimeout );
 			}
 		};
 
@@ -142,27 +155,22 @@
 		};
 
 		this.next = this.complete = function( result ) {
-			var parsed = JSON.parse( result ),
-				frame;
+			var parsed = JSON.parse( result );
 
 			clearTestTimeout();
 
 			this.results.duration = parsed.duration;
 			this.results.coverage = parsed.coverage;
 
-			if ( !this.results.resultCount ) {
-				this.results.success = false;
-			}
+			// TODO is it really needed?
+			// if ( !this.results.resultCount ) {
+			// 	this.results.success = false;
+			// }
 
 			socket.emit( 'complete', this.results );
 
 			if ( !isIE ) {
-				frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ];
-
-				if ( frame ) {
-					frame.src = 'about:blank';
-					contextEl.removeChild( frame );
-				}
+				removeFrame();
 			}
 
 			this.running = false;
@@ -174,7 +182,6 @@
 		};
 
 		this.stop = function() {
-			var frame;
 			// close everything on disconnect
 			if ( this.running ) {
 				this.running = false;
@@ -182,12 +189,13 @@
 					testWindow.close();
 					testWindow = null;
 				} else {
-					if ( ( frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ] ) ) {
-						frame.src = 'about:blank';
-						contextEl.removeChild( frame );
-					}
+					removeFrame();
 				}
 			}
+		};
+
+		this.maximize = function() {
+			resetTestTimeout( that.config && that.config.manualTestTimeout );
 		};
 
 		socket

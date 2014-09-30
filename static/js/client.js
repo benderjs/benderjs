@@ -3,7 +3,7 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
-/*global console */
+/* global console */
 
 ( function() {
 	'use strict';
@@ -352,7 +352,9 @@
 				return true;
 			},
 			maximize: function() {
-				launcher.bender.maximize();
+				if ( launcher.bender.maximize ) {
+					launcher.bender.maximize();
+				}
 			}
 		};
 
