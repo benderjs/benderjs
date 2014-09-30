@@ -34,8 +34,8 @@
 			}
 		}
 
-		function resetTestTimeout() {
-			if ( !that.config || !that.config.testTimeout ) {
+		function resetTestTimeout( timeout ) {
+			if ( !timeout ) {
 				return;
 			}
 
@@ -50,7 +50,7 @@
 
 				that.next( JSON.stringify( result ) );
 
-			}, that.config.testTimeout );
+			}, timeout );
 		}
 
 		function addFrame( id ) {
@@ -121,7 +121,7 @@
 				this.results[ parsed.name ] = parsed;
 			}
 
-			resetTestTimeout();
+			resetTestTimeout( that.config && that.config.testTimeout );
 		};
 
 		this.next = function( summary ) {
@@ -176,7 +176,7 @@
 					addFrame( id );
 				}
 
-				resetTestTimeout();
+				resetTestTimeout( that.config && that.config.testTimeout );
 			} else {
 				this.complete();
 			}
@@ -217,6 +217,8 @@
 			if ( !isIE ) {
 				contextEl.className = 'maximized';
 			}
+
+			resetTestTimeout( that.config && that.config.manualTestTimeout );
 		};
 
 		this.stop = this.complete;
