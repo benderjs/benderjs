@@ -11,12 +11,9 @@
 	'use strict';
 
 	var statusEl = document.getElementById( 'status' ),
-		isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1,
-		states = {
-			CONNECT: 0,
-			DISCONNECT: 1
-		},
-		socket;
+		statusLabel = statusEl.getElementsByTagName( 'span' )[ 0 ],
+		selectEl = statusEl.getElementsByTagName( 'select' )[ 0 ],
+		isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1;
 
 	function Bender( socket ) {
 		var contextEl = document.getElementById( 'context' ),
@@ -61,9 +58,6 @@
 			}
 
 			data.results = {};
-			data.success = true;
-			data.resultCount = 0;
-
 			that.results = data;
 			that.running = true;
 
@@ -97,21 +91,51 @@
 		this.result = function( result ) {
 			result = JSON.parse( result );
 
-			if ( !result.success ) {
-				this.results.success = false;
-
-				if ( lastError ) {
-					result.error += '\n\n' + lastError;
-					lastError = null;
-				}
+			if ( !result.success && lastError ) {
+				result.error += '\n\n' + lastError;
+				lastError = null;
 			}
 
 			this.results.results[ result.name ] = result;
-			this.results.resultCount++;
 
 			socket.emit( 'result', result );
 
 			resetTestTimeout( that.config && that.config.testTimeout );
+		};
+
+		this.ignore = function() {
+			this.results.success = true;
+			this.results.ignored = true;
+			this.results.duration = 0;
+			this.complete( '{"duration":0}' );
+		};
+
+		this.next = this.complete = function( result ) {
+			var parsed = JSON.parse( result );
+
+			clearTestTimeout();
+
+			this.results.duration = parsed.duration;
+			this.results.coverage = parsed.coverage;
+
+			this.results.success = parsed.success || (
+				parsed.failed === 0 &&
+				parsed.errors === 0 &&
+				( parsed.passed > 0 || parsed.ignored > 0 )
+			);
+
+			socket.emit( 'complete', this.results );
+
+			if ( !isIE ) {
+				removeFrame();
+			}
+
+			this.running = false;
+			this.results = null;
+		};
+
+		this.log = function() {
+			socket.emit( 'log', Array.prototype.join.call( arguments, ' ' ) );
 		};
 
 		this.run = function( id ) {
@@ -147,40 +171,6 @@
 			}
 		};
 
-		this.ignore = function() {
-			this.results.success = true;
-			this.results.ignored = true;
-			this.results.duration = 0;
-			this.complete( '{"duration":0}' );
-		};
-
-		this.next = this.complete = function( result ) {
-			var parsed = JSON.parse( result );
-
-			clearTestTimeout();
-
-			this.results.duration = parsed.duration;
-			this.results.coverage = parsed.coverage;
-
-			// TODO is it really needed?
-			// if ( !this.results.resultCount ) {
-			// 	this.results.success = false;
-			// }
-
-			socket.emit( 'complete', this.results );
-
-			if ( !isIE ) {
-				removeFrame();
-			}
-
-			this.running = false;
-			this.results = null;
-		};
-
-		this.log = function() {
-			socket.emit( 'log', Array.prototype.join.call( arguments, ' ' ) );
-		};
-
 		this.stop = function() {
 			// close everything on disconnect
 			if ( this.running ) {
@@ -200,11 +190,12 @@
 
 		socket
 			.on( 'connect', function() {
-				var id = /\/clients\/([^\/]+)/.exec( window.location )[ 1 ];
+				var id = /\/clients\/([^\/#]+)/.exec( window.location )[ 1 ];
 
 				socket.emit( 'register', {
 					id: id,
-					ua: navigator.userAgent
+					ua: navigator.userAgent,
+					mode: mode
 				} );
 			} )
 			.on( 'disconnect', function() {
@@ -214,14 +205,46 @@
 			.on( 'run', handleRun );
 	}
 
-	function setStatus( status ) {
+	function setStatus( connect ) {
 		return function() {
-			statusEl.innerHTML = status === states.CONNECT ? 'Connected' : 'Disconnected';
-			statusEl.className = status === states.CONNECT ? 'ok' : 'fail';
+			statusLabel.innerHTML = connect ? 'Connected' : 'Disconnected';
+			statusEl.className = connect ? 'ok' : 'fail';
 		};
 	}
 
-	socket = io.connect( '/client', {
+	function addListener( target, event, handler ) {
+		if ( target.addEventListener ) {
+			target.addEventListener( event, handler, false );
+		} else if ( target.attachEvent ) {
+			target.attachEvent( 'on' + event, handler );
+		} else {
+			target[ 'on' + event ] = handler;
+		}
+	}
+
+	function changeMode( event ) {
+		event = event || window.event;
+
+		var target = event.target || event.srcElement,
+			mode = target.options[ target.selectedIndex ].value;
+
+		window.location.hash = mode;
+		window.location.reload();
+	}
+
+	function setMode( mode ) {
+		var options = selectEl.options,
+			i;
+
+		for ( i = 0; i < options.length; i++ ) {
+			if ( options[ i ].value === mode ) {
+				selectEl.selectedIndex = i;
+				return;
+			}
+		}
+	}
+
+	var socket = io.connect( '/client', {
 		'reconnection delay': 2000,
 		'reconnection limit': 2000,
 		'max reconnection attempts': Infinity
@@ -229,20 +252,22 @@
 
 	// handle socket connection status
 	socket
-		.on( 'connect', setStatus( states.CONNECT ) )
-		.on( 'disconnect', setStatus( states.DISCONNECT ) );
+		.on( 'connect', setStatus( true ) )
+		.on( 'disconnect', setStatus() );
 
 	window.bender = new Bender( socket );
 
-	function disconnect() {
+	addListener( window, 'unload', function() {
 		socket.disconnect();
+	} );
+
+	var mode = window.location.hash && window.location.hash.substr( 1 );
+
+	if ( mode !== 'unit' && mode !== 'manual' && mode !== 'all' ) {
+		mode = 'unit';
 	}
 
-	if ( window.addEventListener ) {
-		window.addEventListener( 'unload', disconnect, false );
-	} else if ( window.attachEvent ) {
-		window.attachEvent( 'onunload', disconnect );
-	} else {
-		window.onunload = disconnect;
-	}
+	setMode( mode );
+
+	addListener( selectEl, 'change', changeMode );
 } )();
