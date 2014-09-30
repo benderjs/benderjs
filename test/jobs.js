@@ -930,7 +930,7 @@ describe( 'Jobs', function() {
 		bender.browsers.addClient( chrome );
 
 		bender.on( 'client:getTask', function handle( client, next ) {
-			expect( client ).to.have.keys( [ 'ua', 'browser', 'version', 'addr', 'id', 'ready' ] );
+			expect( client ).to.have.keys( [ 'ua', 'browser', 'version', 'addr', 'id', 'ready', 'mode' ] );
 			expect( next ).to.be.a( 'function' );
 			done();
 		} );
