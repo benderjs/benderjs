@@ -103,7 +103,7 @@ moduleMocks = {
 
 			browsers: [ 'chrome', 'firefox', 'opera', 'ie11' ],
 
-			manualBrowsers: [ 'chrome', 'firefox', 'opera', 'ie11' ],
+			manualBrowsers: [ 'chrome' ],
 
 			manualTestTimeout: 60000,
 

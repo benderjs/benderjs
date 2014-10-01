@@ -62,6 +62,12 @@ describe( 'Jobs', function() {
 			filter: [ 'foo' ],
 			tests: [ 'test/fixtures/tests/test/1' ]
 		},
+		job6 = {
+			browsers: [ 'chrome', 'firefox' ],
+			description: 'test job 6',
+			filter: [ 'foo' ],
+			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2' ]
+		},
 		client = {
 			id: 12345,
 			browser: 'chrome',
@@ -171,6 +177,48 @@ describe( 'Jobs', function() {
 			.then( function( results ) {
 				expect( results ).to.be.an( 'array' );
 				expect( results ).to.have.length( 18 );
+			} );
+	} );
+
+	it( 'should not create manual tasks for a browser that does not support such', function() {
+		var test = _.find( bender.tests.tests, {
+			id: 'test/fixtures/tests/test/2'
+		} );
+
+		test.manual = true;
+
+		return bender.jobs.create( job6 )
+			.then( function( id ) {
+				expect( id ).to.be.a( 'string' );
+
+				return nodeCall( bender.jobs.db.jobs.find, {} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.an( 'array' );
+				expect( results ).to.have.length( 1 );
+				expect( results[ 0 ] ).to.include.keys(
+					[ '_id', 'description', 'browsers', 'filter', 'created' ]
+				);
+
+				return nodeCall( bender.jobs.db.tasks.find, {} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.an( 'array' );
+				expect( results ).to.have.length( 2 );
+
+				return nodeCall( bender.jobs.db.browserTasks.find, {} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.an( 'array' );
+				expect( results ).to.have.length( 3 );
+
+				expect( _.where( results, {
+					name: 'firefox'
+				} ) ).to.have.length( 1 );
+
+				expect( _.where( results, {
+					name: 'chrome'
+				} ) ).to.have.length( 2 );
 			} );
 	} );
 
