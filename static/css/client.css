@@ -124,32 +124,32 @@ body {
 	content: '\e606';
 }
 
-.ok {
+.results .ok {
     background: #dff0d8;
     border: 1px solid #9c9;
 }
 
-.ok .icon:before {
+.results .ok .icon:before {
 	content: '\e603';
     color: #090;
 }
 
-.warn {
+.results .warn {
     background: #fcf8e3;
     border: 1px solid #cc9;
 }
 
-.warn .icon:before {
+.results .warn .icon:before {
 	content: '\e605';
     color: #960;
 }
 
-.fail {
+.results .fail {
     background: #f2dede;
     border: 1px solid #c99;
 }
 
-.fail .icon:before {
+.results .fail .icon:before {
 	content: '\e602';
     color: #900;
     font-size: 14px;
