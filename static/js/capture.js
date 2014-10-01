@@ -192,10 +192,17 @@
 			.on( 'connect', function() {
 				var id = /\/clients\/([^\/#]+)/.exec( window.location )[ 1 ];
 
+				// register a client
 				socket.emit( 'register', {
 					id: id,
 					ua: navigator.userAgent,
 					mode: mode
+				}, function( passed ) {
+					// force a client to reconnect with new UUID
+					if ( !passed ) {
+						var mode = window.location.hash ? '/' + window.location.hash.substr( 1 ) : '';
+						window.location.pathname = '/capture' + mode;
+					}
 				} );
 			} )
 			.on( 'disconnect', function() {
