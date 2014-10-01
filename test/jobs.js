@@ -14,6 +14,7 @@
 var mocks = require( './fixtures/_mocks' ),
 	sinon = require( 'sinon' ),
 	path = require( 'path' ),
+	_ = require( 'lodash' ),
 	rimraf = require( 'utile' ).rimraf,
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
@@ -64,7 +65,14 @@ describe( 'Jobs', function() {
 		client = {
 			id: 12345,
 			browser: 'chrome',
-			version: 35
+			version: 35,
+			mode: 'unit'
+		},
+		clientManual = {
+			id: 12345,
+			browser: 'chrome',
+			version: 35,
+			mode: 'manual'
 		},
 		chrome = {
 			ua: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36',
@@ -572,6 +580,45 @@ describe( 'Jobs', function() {
 			} );
 	} );
 
+	it( 'should not start a unit task on a manual client', function() {
+		return bender.jobs.create( job3 )
+			.then( function() {
+				return bender.jobs.startTask( {
+					id: 12345,
+					browser: 'chrome',
+					version: 35,
+					mode: 'manual'
+				} );
+			} )
+			.then( function( task ) {
+				expect( task ).to.be.null;
+			} );
+	} );
+
+	it( 'should start a manual task on a manual client', function() {
+		var test = _.find( bender.tests.tests, {
+			id: 'test/fixtures/tests/test/1'
+		} );
+
+		test.manual = true;
+
+		return bender.jobs.create( job5 )
+			.then( function() {
+				return bender.jobs.startTask( clientManual );
+			} )
+			.then( function( task ) {
+				expect( task ).to.have.keys( [ 'btId', 'jobId', 'id', 'manual' ] );
+
+				return nodeCall( bender.jobs.db.browserTasks.findOne, {
+					_id: task.btId
+				} );
+			} )
+			.then( function( task ) {
+				expect( task.status ).to.equal( bender.jobs.STATUS.PENDING );
+				expect( task.started ).to.be.above( 0 );
+			} );
+	} );
+
 	it( 'should restart a failed task', function() {
 		var task;
 
@@ -663,6 +710,67 @@ describe( 'Jobs', function() {
 			} )
 			.then( function( result ) {
 				expect( result.retries ).to.equal( 1 );
+				expect( result.status ).to.equal( bender.jobs.STATUS.FAILED );
+
+				return bender.jobs.startTask( client );
+			} )
+			.then( function( result ) {
+				expect( result ).to.not.exist;
+
+				return nodeCall( bender.jobs.db.browserTasks.findOne, {
+					_id: task.btId
+				} );
+			} )
+			.then( function( result ) {
+				expect( result.status ).to.equal( bender.jobs.STATUS.FAILED );
+			} );
+	} );
+
+	it( 'should not restart a failed manual task', function() {
+		var test = _.find( bender.tests.tests, {
+			id: 'test/fixtures/tests/test/1'
+		} );
+
+		test.manual = true;
+
+		var task;
+
+		bender.conf.testRetries = 1;
+
+		return bender.jobs.create( job5 )
+			.then( function() {
+				return bender.jobs.startTask( clientManual );
+			} )
+			.then( function( result ) {
+				task = result;
+
+				return bender.jobs.completeTask( {
+					_id: task.btId,
+					btId: task.btId,
+					client: client,
+					id: task.id,
+					jobId: task.jobId,
+					success: false,
+					manual: true,
+					results: {
+						'test sample': {
+							success: false,
+							error: 'failure message'
+						},
+						'test sample 2': {
+							success: true,
+							error: null
+						}
+					}
+				} );
+			} )
+			.then( function() {
+				return nodeCall( bender.jobs.db.browserTasks.findOne, {
+					_id: task.btId
+				} );
+			} )
+			.then( function( result ) {
+				expect( result.retries ).to.equal( 2 );
 				expect( result.status ).to.equal( bender.jobs.STATUS.FAILED );
 
 				return bender.jobs.startTask( client );

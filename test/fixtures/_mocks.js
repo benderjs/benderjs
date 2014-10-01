@@ -427,15 +427,15 @@ moduleMocks = {
 		} ];
 
 		bender.tests = {
-			tests: tests
+			tests: _.cloneDeep( tests )
 		};
 
 		bender.tests.list = function() {
-			return when.resolve( tests );
+			return when.resolve( bender.tests.tests );
 		};
 
 		bender.tests.get = function( id ) {
-			return when.resolve( _.where( tests, {
+			return when.resolve( _.where( bender.tests.tests, {
 				id: id
 			} )[ 0 ] );
 		};
