@@ -342,52 +342,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	} );
 
 	/**
-	 * Test result view
-	 */
-	Tests.ResultView = Marionette.ItemView.extend( {
-		template: '#test-result',
-
-		templateHelpers: {
-			getIconStyle: function( style ) {
-				return 'glyphicon' + ( style ?
-					' glyphicon-' + ( style === 'success' ? 'ok' : style === 'warning' ? 'forward' : 'remove' ) :
-					'' );
-			}
-		},
-
-		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
-		},
-
-		onRender: function() {
-			var s = this.model.get( 'style' );
-
-			this.parent.el.className = s ? ' ' + s + ' bg-' + s + ' text-' + s : '';
-
-			if ( this.model.get( 'state' ) === 'done' ) {
-				this.scrollTo();
-			}
-		},
-
-		scrollTo: function() {
-			var top = this.parent.$el.offset().top,
-				bottom = top + this.parent.$el.height(),
-				$window = $( window ),
-				scroll = $( window ).scrollTop(),
-				height = $window.height();
-
-
-			// item is hidden at the bottom
-			if ( scroll + height < bottom ) {
-				$window.scrollTop( bottom - height );
-				// item is hidden at the top
-			} else if ( scroll + App.$navbar.height() > top ) {
-				$( window ).scrollTop( top - App.$navbar.height() - 1 );
-			}
-		}
-	} );
-
-	/**
 	 * Test model
 	 */
 	Tests.Test = Backbone.Model.extend( {
@@ -619,6 +573,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				model.getResult().update( data );
 				this.trigger( 'updateResult', data.id );
 			}
+		},
+
+		getResult: function( id ) {
+			var model = this.get( 'tests' ).get( id );
+
+			return model ? model.getResult() : null;
 		}
 	} );
 
@@ -643,6 +603,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				return s ? ' ' + s + ' bg-' + s + ' text-' + s : '';
 			}
+		},
+
+		events: {
+			'click .result .result': 'showErrors'
 		},
 
 		ui: {
@@ -712,6 +676,28 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} else if ( scroll + App.$navbar.height() > top ) {
 				$( window ).scrollTop( top - App.$navbar.height() - 1 );
 			}
+		},
+
+		showErrors: function( event ) {
+			var id = $( event.target ).parent().parent().data( 'id' ),
+				result = this.model.getResult( id ),
+				errors;
+
+			if ( !result ) {
+				return;
+			}
+
+			errors = result.get( 'errors' );
+
+			if ( !errors || !errors.length ) {
+				return;
+			}
+
+			App.modal.show(
+				new App.Common.TestErrorsView( {
+					model: result
+				} )
+			);
 		}
 	} );
 

@@ -101,7 +101,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<% if ( slow ) { %>
 		<span class="glyphicon glyphicon-exclamation-sign" title="Slow test"></span>
 		<% } %>
-		<span class="result">
+		<span class="result <%= errors ? 'clickable' : '' %>">
 		<% if ( broken ) { %>
 			BROKEN
 		<% } else if ( ignored === true ) { %>
