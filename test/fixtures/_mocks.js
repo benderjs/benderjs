@@ -377,14 +377,23 @@ moduleMocks = {
 				var id = file.split( '.' )[ 0 ],
 					ext = file.split( '.' )[ 1 ];
 
-				if ( ext !== 'js' ) {
+				if ( ext !== 'js' && ext !== 'md' ) {
 					return;
 				}
 
-				data.tests[ id ] = {
-					id: id,
-					js: file
+				var test = {
+					id: id
 				};
+
+				if ( ext === 'js' ) {
+					test.js = file;
+				}
+
+				if ( ext === 'md' ) {
+					test.script = file;
+				}
+
+				data.tests[ id ] = _.merge( {}, test, data.tests[ id ] || {} );
 			} );
 
 			return when.resolve( data );
