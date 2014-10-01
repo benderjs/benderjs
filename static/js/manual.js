@@ -50,6 +50,7 @@
 	 */
 	function sendErrors() {
 		var inputs = scriptEl.getElementsByTagName( 'input' ),
+			sent = false,
 			input,
 			len,
 			i;
@@ -57,16 +58,33 @@
 		for ( i = 0, len = inputs.length; i < len; i++ ) {
 			if ( ( input = inputs[ i ] ) &&
 				input.type === 'checkbox' && !input.checked ) {
+
+				if ( !sent ) {
+					sent = true;
+				}
+
 				bender.result( {
 					success: false,
 					errors: 1,
 					error: inputs[ i ].parentElement.innerText,
 					module: bender.testData.id,
 					fullName: bender.testData.id,
-					name: '',
+					name: 'Failed manual step',
 					duration: 0
 				} );
 			}
+		}
+
+		if ( !sent ) {
+			bender.result( {
+				success: false,
+				errors: 1,
+				error: 'unknown reason',
+				module: bender.testData.id,
+				fullName: bender.testData.id,
+				name: 'Failed manual test',
+				duration: 0
+			} );
 		}
 	}
 
@@ -104,6 +122,7 @@
 
 		if ( target.className === 'fail-check' ) {
 			target.parentElement.className = target.checked ? '' : 'fail';
+			target.title = 'Mark as ' + ( target.checked ? 'failed' : 'passed' );
 		}
 	}
 
@@ -117,6 +136,7 @@
 		checkbox.type = 'checkbox';
 		checkbox.checked = true;
 		checkbox.className = 'fail-check';
+		checkbox.title = 'Mark as failed';
 
 		elem.insertBefore( checkbox, elem.firstChild );
 	}
