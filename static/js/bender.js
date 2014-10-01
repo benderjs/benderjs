@@ -34,8 +34,8 @@
 			}
 		}
 
-		function resetTestTimeout( timeout ) {
-			if ( !timeout ) {
+		function resetTestTimeout() {
+			if ( !that.config || !that.config.testTimeout ) {
 				return;
 			}
 
@@ -50,7 +50,7 @@
 
 				that.next( JSON.stringify( result ) );
 
-			}, timeout );
+			}, that.config.testTimeout );
 		}
 
 		function addFrame( id ) {
@@ -121,7 +121,7 @@
 				this.results[ parsed.name ] = parsed;
 			}
 
-			resetTestTimeout( that.config && that.config.testTimeout );
+			resetTestTimeout();
 		};
 
 		this.next = function( summary ) {
@@ -176,7 +176,7 @@
 					addFrame( id );
 				}
 
-				resetTestTimeout( that.config && that.config.testTimeout );
+				resetTestTimeout();
 			} else {
 				this.complete();
 			}
@@ -218,7 +218,8 @@
 				contextEl.className = 'maximized';
 			}
 
-			resetTestTimeout( that.config && that.config.manualTestTimeout );
+			// clear timeout for manual tests
+			clearTestTimeout();
 		};
 
 		this.stop = this.complete;
