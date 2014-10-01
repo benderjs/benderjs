@@ -185,10 +185,9 @@ th:last-child {
 }
 
 .browsers .browser {
-    background-position: 8px 50%;
+    background-position: 4px 50%;
     background-repeat: no-repeat;
-    padding-left: 48px;
-    text-transform: capitalize;
+    padding-left: 44px;
 }
 
 .jobs tbody tr td,

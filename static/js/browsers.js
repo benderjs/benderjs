@@ -41,6 +41,14 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 		template: '#browser',
 		tagName: 'tr',
 
+		templateHelpers: {
+			formatName: function( name, version ) {
+				name = name === 'ie' ? 'IE' : name.charAt( 0 ).toUpperCase() + name.slice( 1 );
+
+				return name + ( version ? ' ' + version : '' );
+			}
+		},
+
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
 		}
