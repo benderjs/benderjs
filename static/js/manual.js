@@ -101,6 +101,10 @@
 		if ( target === finishBtn && bender.testData.unit ) {
 			oldStart();
 		}
+
+		if ( target.className === 'fail-check' ) {
+			target.parentElement.className = target.checked ? '' : 'fail';
+		}
 	}
 
 	/**
