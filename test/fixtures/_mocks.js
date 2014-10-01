@@ -103,6 +103,10 @@ moduleMocks = {
 
 			browsers: [ 'chrome', 'firefox', 'opera', 'ie11' ],
 
+			manualBrowsers: [ 'chrome', 'firefox', 'opera', 'ie11' ],
+
+			manualTestTimeout: 60000,
+
 			tests: {
 				'Test': {
 					basePath: 'test/fixtures/tests/',
