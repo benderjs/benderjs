@@ -560,7 +560,7 @@ describe( 'Jobs', function() {
 				return bender.jobs.startTask( client );
 			} )
 			.then( function( task ) {
-				expect( task ).to.have.keys( [ 'btId', 'jobId', 'id' ] );
+				expect( task ).to.have.keys( [ 'btId', 'jobId', 'id', 'manual' ] );
 
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
 					_id: task.btId
