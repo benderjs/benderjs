@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/benderjs/benderjs.svg?branch=master)](https://travis-ci.org/benderjs/benderjs)
+[![NPM Version](http://img.shields.io/npm/v/benderjs.svg)](https://www.npmjs.org/package/benderjs)
 
 Bender.js
 =========
@@ -61,7 +62,7 @@ Commands:
 Options:
 
   -c, --config    Alternative path to Bender.js configuration file [bender.js]
-  -d, --debug     
+  -d, --debug
   -H, --hostname  Hostname used to run the server
   -p, --port      Port on which the server will listen
 ```
