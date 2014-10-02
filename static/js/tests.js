@@ -71,9 +71,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			} );
 
-			tokens.push( 'is:failed', 'is:passed', 'is:manual', 'is:unit' );
+			tokens.sort();
 
-			this.set( 'tokens', tokens.sort() );
+			// add exclusion filters
+			tokens = tokens.concat( _.map( tokens, function( token ) {
+				return '-' + token;
+			} ) );
+
+			// add flag filters
+			tokens.unshift( 'is:failed', 'is:passed', 'is:manual', 'is:unit' );
+
+			this.set( 'tokens', tokens );
 
 			this.setFilter( filter );
 		},
@@ -400,6 +408,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			filtered: null
 		},
 
+		excludes: {},
 		filters: {},
 
 		initialize: function() {
@@ -433,8 +442,13 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			var that = this,
 				name;
 
+			// reset filters
 			for ( name in this.filters ) {
 				this.filters[ name ] = [];
+			}
+
+			for ( name in this.excludes ) {
+				this.excludes[ name ] = [];
 			}
 
 			_.each( filters, function( filter ) {
@@ -442,11 +456,21 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				var name = filter[ 0 ];
 
-				if ( !that.filters[ name ] ) {
-					that.filters[ name ] = [];
-				}
+				if ( name.charAt( 0 ) === '-' ) {
+					name = name.substr( 1 );
 
-				that.filters[ name ].push( filter[ 1 ] );
+					if ( !that.excludes[ name ] ) {
+						that.excludes[ name ] = [];
+					}
+
+					that.excludes[ name ].push( filter[ 1 ] );
+				} else {
+					if ( !that.filters[ name ] ) {
+						that.filters[ name ] = [];
+					}
+
+					that.filters[ name ].push( filter[ 1 ] );
+				}
 			} );
 
 			var filtered = this.get( 'filtered' );
@@ -528,7 +552,27 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				return empty || result;
 			}
 
-			return checkFlags( this.filters.is ) && checkProperties( this.filters );
+			function checkExcludes( filters ) {
+				var result = true;
+
+				_.each( filters, function( filter, name ) {
+					if ( name === 'is' ) {
+						return;
+					}
+
+					if ( filter.length ) {
+						if ( checkProperty( filter, name ) ) {
+							result = false;
+						}
+					}
+				} );
+
+				return result;
+			}
+
+			return checkFlags( this.filters.is ) &&
+				checkExcludes( this.excludes ) &&
+				checkProperties( this.filters );
 		},
 
 		toJSON: function() {
