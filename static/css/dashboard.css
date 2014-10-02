@@ -94,10 +94,6 @@ th:last-child {
 	line-height: 34px;
 }
 
-.filter-form label {
-	max-width: none;
-}
-
 .filter-icon {
 	position: absolute;
 	top: 0;
