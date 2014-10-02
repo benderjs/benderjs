@@ -26,7 +26,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<div class="navbar navbar-fixed-top">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand app-title" href="#">Bender Dashboard</a>
+				<span class="navbar-brand app-title">Bender Dashboard</span>
 				<p class="navbar-text" id="socket-status"></p>
 				<a class="btn btn-default navbar-btn btn-sm capture-button" href="/capture" title="Capture browser">
 					<span class="glyphicon glyphicon-download"></span> Capture browser
@@ -60,7 +60,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 
 	<!-- template for a single tab -->
 	<script type="text/html" id="tab">
-		<a title="<%= label %>"><%= label %></a>
+		<a title="<%= label %>" href="#<%= label.toLowerCase() %>"><%= label %></a>
 	</script>
 
 

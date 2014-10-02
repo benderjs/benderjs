@@ -82,11 +82,17 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 			this.listenTo( this.model, 'change', this.changeState );
 		},
 
-		navigate: function() {
+		navigate: function( event ) {
 			var model = this.model.toJSON();
 
 			if ( !model.active && !model.disabled ) {
 				App.navigate( model.id );
+			}
+
+			if ( event.preventDefault ) {
+				event.preventDefault();
+			} else {
+				event.returnValue = false;
 			}
 		},
 

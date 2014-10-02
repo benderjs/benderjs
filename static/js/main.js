@@ -63,6 +63,8 @@
 				backdrop: 'static',
 				show: true
 			} );
+
+			this.$el.find('button').first().focus();
 		},
 
 		onEmpty: function() {
