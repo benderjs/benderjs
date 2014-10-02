@@ -89,6 +89,21 @@ describe( 'Middleware - Default', function() {
 		} );
 	} );
 
+	it( 'should redirect /capture/<mode> request to client capture page in specified mode', function( done ) {
+		var pattern = /^\/clients\/[\w]{8}(-[\w]{4}){3}-[\w]{12}#manual$/;
+
+		instance.listen( 1031, function() {
+			request.get( 'http://localhost:1031/capture/manual', {
+				followRedirect: false
+			}, function( err, res ) {
+				expect( res.statusCode ).to.equal( 302 );
+				expect( res.headers.location ).to.match( pattern );
+
+				done();
+			} );
+		} );
+	} );
+
 	it( 'should respond to /clients/<uuid> requests with capture.html file', function( done ) {
 		instance.listen( 1031, function() {
 			request.get(

@@ -103,6 +103,10 @@ moduleMocks = {
 
 			browsers: [ 'chrome', 'firefox', 'opera', 'ie11' ],
 
+			manualBrowsers: [ 'chrome' ],
+
+			manualTestTimeout: 60000,
+
 			tests: {
 				'Test': {
 					basePath: 'test/fixtures/tests/',
@@ -377,14 +381,23 @@ moduleMocks = {
 				var id = file.split( '.' )[ 0 ],
 					ext = file.split( '.' )[ 1 ];
 
-				if ( ext !== 'js' ) {
+				if ( ext !== 'js' && ext !== 'md' ) {
 					return;
 				}
 
-				data.tests[ id ] = {
-					id: id,
-					js: file
+				var test = {
+					id: id
 				};
+
+				if ( ext === 'js' ) {
+					test.js = file;
+				}
+
+				if ( ext === 'md' ) {
+					test.script = file;
+				}
+
+				data.tests[ id ] = _.merge( {}, test, data.tests[ id ] || {} );
 			} );
 
 			return when.resolve( data );
@@ -427,15 +440,15 @@ moduleMocks = {
 		} ];
 
 		bender.tests = {
-			tests: tests
+			tests: _.cloneDeep( tests )
 		};
 
 		bender.tests.list = function() {
-			return when.resolve( tests );
+			return when.resolve( bender.tests.tests );
 		};
 
 		bender.tests.get = function( id ) {
-			return when.resolve( _.where( tests, {
+			return when.resolve( _.where( bender.tests.tests, {
 				id: id
 			} )[ 0 ] );
 		};

@@ -101,7 +101,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<% if ( slow ) { %>
 		<span class="glyphicon glyphicon-exclamation-sign" title="Slow test"></span>
 		<% } %>
-		<span class="result">
+		<span class="result <%= errors ? 'clickable' : '' %>">
 		<% if ( broken ) { %>
 			BROKEN
 		<% } else if ( ignored === true ) { %>
@@ -442,10 +442,10 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<table class="table table-hover table-condensed browsers">
 		<thead>
 			<tr>
-				<th class="col-md-2">Browser</th>
-				<th class="col-md-4">ID</th>
-				<th class="col-md-3">UA</th>
+				<th class="col-md-4">Browser</th>
+				<th class="col-md-4">UA</th>
 				<th class="col-md-2">Address</th>
+				<th class="col-md-1">Mode</th>
 				<th class="col-md-1">Status</th>
 			</tr>
 		</thead>
@@ -464,13 +464,17 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<!-- template for a single browser row -->
 	<script type="text/html" id="browser">
 	<% if (header) { %>
-		<th class="browser <%= name %>"><%= id %></th>
+		<th class="browser <%= name %>"><%= formatName( name, version ) %></th>
 		<th colspan="4"></th>
 	<% } else { %>
-		<td></td>
 		<td><%= id %></td>
 		<td><%= ua %></td>
 		<td><%= addr %></td>
+		<td>
+			<span class="label label-default">
+				<%= mode %>
+			</span>
+		</td>
 		<td>
 			<span class="label label-<%= ready ? 'success' : 'warning' %>">
 				<%= ready ? 'ready' : 'busy' %>

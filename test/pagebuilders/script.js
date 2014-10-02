@@ -20,17 +20,20 @@ var mocks = require( '../fixtures/_mocks' ),
 	srcScript = require( 'fs' ).readFileSync(
 		require( 'path' ).join( __dirname, '../fixtures/tests/test/1.js' )
 	).toString(),
+	filesModule = require( '../../lib/files' ),
 	script = rewire( '../../lib/pagebuilders/script' );
 
 describe( 'Page Builders - Script', function() {
 	var oldAttach,
+		builder,
 		bender;
 
 	before( function() {
 		oldAttach = script.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'pagebuilders', 'utils' );
 		script.attach = oldAttach || mocks.attachPagebuilder( bender, script );
-		bender.use( script );
+		bender.use( [ script, filesModule ] );
+		builder = bender.pagebuilders[ 1 ].bind( bender );
 	} );
 
 	after( function() {
@@ -47,7 +50,7 @@ describe( 'Page Builders - Script', function() {
 			parts: []
 		};
 
-		data = script.build( data );
+		data = builder( data );
 
 		expect( data.parts[ 0 ] ).to.exist;
 		expect( data.parts[ 0 ] ).to.be.instanceof( when.Promise );
@@ -59,7 +62,7 @@ describe( 'Page Builders - Script', function() {
 			parts: []
 		};
 
-		data = script.build( data );
+		data = builder( data );
 
 		return data.parts[ 0 ].then( function( result ) {
 			expect( result ).to.equal( '<script>\n(function (bender) {\n' + srcScript +
@@ -81,12 +84,10 @@ describe( 'Page Builders - Script', function() {
 		}
 
 		function handle( err ) {
-			expect( err ).to.be.an( 'object' );
-			expect( err.code ).to.equal( 'ENOENT' );
-			expect( err.path ).to.equal( expected );
+			expect( err ).to.equal( 'File not found: ' + expected );
 		}
 
-		data = script.build( data );
+		data = builder( data );
 
 		return data.parts[ 0 ].done( handle, handle );
 	} );
@@ -95,7 +96,7 @@ describe( 'Page Builders - Script', function() {
 		var data = {
 				parts: []
 			},
-			result = script.build( _.cloneDeep( data ) );
+			result = builder( _.cloneDeep( data ) );
 
 		expect( result ).to.deep.equal( data );
 	} );

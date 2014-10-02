@@ -14,6 +14,7 @@
 var mocks = require( './fixtures/_mocks' ),
 	sinon = require( 'sinon' ),
 	path = require( 'path' ),
+	_ = require( 'lodash' ),
 	rimraf = require( 'utile' ).rimraf,
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
@@ -61,10 +62,23 @@ describe( 'Jobs', function() {
 			filter: [ 'foo' ],
 			tests: [ 'test/fixtures/tests/test/1' ]
 		},
+		job6 = {
+			browsers: [ 'chrome', 'firefox' ],
+			description: 'test job 6',
+			filter: [ 'foo' ],
+			tests: [ 'test/fixtures/tests/test/1', 'test/fixtures/tests/test/2' ]
+		},
 		client = {
 			id: 12345,
 			browser: 'chrome',
-			version: 35
+			version: 35,
+			mode: 'unit'
+		},
+		clientManual = {
+			id: 12345,
+			browser: 'chrome',
+			version: 35,
+			mode: 'manual'
 		},
 		chrome = {
 			ua: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36',
@@ -163,6 +177,48 @@ describe( 'Jobs', function() {
 			.then( function( results ) {
 				expect( results ).to.be.an( 'array' );
 				expect( results ).to.have.length( 18 );
+			} );
+	} );
+
+	it( 'should not create manual tasks for a browser that does not support such', function() {
+		var test = _.find( bender.tests.tests, {
+			id: 'test/fixtures/tests/test/2'
+		} );
+
+		test.manual = true;
+
+		return bender.jobs.create( job6 )
+			.then( function( id ) {
+				expect( id ).to.be.a( 'string' );
+
+				return nodeCall( bender.jobs.db.jobs.find, {} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.an( 'array' );
+				expect( results ).to.have.length( 1 );
+				expect( results[ 0 ] ).to.include.keys(
+					[ '_id', 'description', 'browsers', 'filter', 'created' ]
+				);
+
+				return nodeCall( bender.jobs.db.tasks.find, {} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.an( 'array' );
+				expect( results ).to.have.length( 2 );
+
+				return nodeCall( bender.jobs.db.browserTasks.find, {} );
+			} )
+			.then( function( results ) {
+				expect( results ).to.be.an( 'array' );
+				expect( results ).to.have.length( 3 );
+
+				expect( _.where( results, {
+					name: 'firefox'
+				} ) ).to.have.length( 1 );
+
+				expect( _.where( results, {
+					name: 'chrome'
+				} ) ).to.have.length( 2 );
 			} );
 	} );
 
@@ -560,7 +616,46 @@ describe( 'Jobs', function() {
 				return bender.jobs.startTask( client );
 			} )
 			.then( function( task ) {
-				expect( task ).to.have.keys( [ 'btId', 'jobId', 'id' ] );
+				expect( task ).to.have.keys( [ 'btId', 'jobId', 'id', 'manual' ] );
+
+				return nodeCall( bender.jobs.db.browserTasks.findOne, {
+					_id: task.btId
+				} );
+			} )
+			.then( function( task ) {
+				expect( task.status ).to.equal( bender.jobs.STATUS.PENDING );
+				expect( task.started ).to.be.above( 0 );
+			} );
+	} );
+
+	it( 'should not start a unit task on a manual client', function() {
+		return bender.jobs.create( job3 )
+			.then( function() {
+				return bender.jobs.startTask( {
+					id: 12345,
+					browser: 'chrome',
+					version: 35,
+					mode: 'manual'
+				} );
+			} )
+			.then( function( task ) {
+				expect( task ).to.be.null;
+			} );
+	} );
+
+	it( 'should start a manual task on a manual client', function() {
+		var test = _.find( bender.tests.tests, {
+			id: 'test/fixtures/tests/test/1'
+		} );
+
+		test.manual = true;
+
+		return bender.jobs.create( job5 )
+			.then( function() {
+				return bender.jobs.startTask( clientManual );
+			} )
+			.then( function( task ) {
+				expect( task ).to.have.keys( [ 'btId', 'jobId', 'id', 'manual' ] );
 
 				return nodeCall( bender.jobs.db.browserTasks.findOne, {
 					_id: task.btId
@@ -663,6 +758,67 @@ describe( 'Jobs', function() {
 			} )
 			.then( function( result ) {
 				expect( result.retries ).to.equal( 1 );
+				expect( result.status ).to.equal( bender.jobs.STATUS.FAILED );
+
+				return bender.jobs.startTask( client );
+			} )
+			.then( function( result ) {
+				expect( result ).to.not.exist;
+
+				return nodeCall( bender.jobs.db.browserTasks.findOne, {
+					_id: task.btId
+				} );
+			} )
+			.then( function( result ) {
+				expect( result.status ).to.equal( bender.jobs.STATUS.FAILED );
+			} );
+	} );
+
+	it( 'should not restart a failed manual task', function() {
+		var test = _.find( bender.tests.tests, {
+			id: 'test/fixtures/tests/test/1'
+		} );
+
+		test.manual = true;
+
+		var task;
+
+		bender.conf.testRetries = 1;
+
+		return bender.jobs.create( job5 )
+			.then( function() {
+				return bender.jobs.startTask( clientManual );
+			} )
+			.then( function( result ) {
+				task = result;
+
+				return bender.jobs.completeTask( {
+					_id: task.btId,
+					btId: task.btId,
+					client: client,
+					id: task.id,
+					jobId: task.jobId,
+					success: false,
+					manual: true,
+					results: {
+						'test sample': {
+							success: false,
+							error: 'failure message'
+						},
+						'test sample 2': {
+							success: true,
+							error: null
+						}
+					}
+				} );
+			} )
+			.then( function() {
+				return nodeCall( bender.jobs.db.browserTasks.findOne, {
+					_id: task.btId
+				} );
+			} )
+			.then( function( result ) {
+				expect( result.retries ).to.equal( 2 );
 				expect( result.status ).to.equal( bender.jobs.STATUS.FAILED );
 
 				return bender.jobs.startTask( client );
@@ -930,7 +1086,7 @@ describe( 'Jobs', function() {
 		bender.browsers.addClient( chrome );
 
 		bender.on( 'client:getTask', function handle( client, next ) {
-			expect( client ).to.have.keys( [ 'ua', 'browser', 'version', 'addr', 'id', 'ready' ] );
+			expect( client ).to.have.keys( [ 'ua', 'browser', 'version', 'addr', 'id', 'ready', 'mode' ] );
 			expect( next ).to.be.a( 'function' );
 			done();
 		} );

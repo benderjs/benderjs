@@ -1,0 +1,150 @@
+body {
+	position: relative;
+	margin-left: 300px;
+	height: 100%;
+}
+
+.summary {
+	left: 300px;
+}
+
+.manual-sidebar {
+	font-family: 'Arial', 'Helvetica', sans-serif;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 300px;
+	height: 100%;
+	border-right: 1px solid #e7e7e7;
+	background: #f8f8f8;
+	overflow: hidden;
+}
+
+.manual-sidebar h1 {
+	font-size: 1.5em;
+	margin: 0 0 10px 0;
+	color: #777;
+}
+
+.manual-sidebar p {
+	line-height: 1.25em;
+}
+
+.manual-sidebar code {
+	display: inline-block;
+	padding: 5px;
+	background: #fff;
+	border: 1px solid #e7e7e7;
+	border-radius: 3px;
+}
+
+.manual-sidebar p code {
+	padding: 2px 0 2px;
+	font-size: 85%;
+}
+
+.manual-sidebar p code:before,
+.manual-sidebar p code:after {
+	letter-spacing: -0.2em;
+	content: '\00a0';
+}
+
+.manual-sidebar ol,
+.manual-sidebar ul {
+	padding-left: 25px;
+}
+
+.manual-sidebar .script {
+	overflow-y: scroll;
+	position: absolute;
+	top: 0;
+	bottom: 50px;
+	left: 0;
+	right: 0;
+	color: #333;
+	padding: 10px;
+}
+
+.manual-sidebar .script .fail {
+	background: #f2dede;
+}
+
+.manual-sidebar .fail-check {
+	float: right;
+	clear: right;
+	visibility: hidden
+}
+
+.manual-sidebar .fail-check:not(:checked) {
+	visibility: visible;
+}
+
+.manual-sidebar li:hover > .fail-check {
+	visibility: visible;
+}
+
+.manual-sidebar .controls {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 50px;
+	padding: 0 10px 0;
+	text-align: center;
+	line-height: 50px;
+	box-shadow: 0 0 10px 5px #f8f8f8;
+}
+
+.manual-sidebar .controls .ok {
+	background: #dff0d8;
+    border: 1px solid #9c9;
+	color: #090;
+}
+
+.manual-sidebar .controls .ok:hover {
+	background: #efe;
+}
+
+.manual-sidebar .controls .fail {
+	background: #f2dede;
+    border: 1px solid #c99;
+	color: #900;
+}
+
+.manual-sidebar .controls .fail:hover {
+	background: #fee;
+}
+
+.manual-sidebar .controls .btn-finish {
+	background: #def;
+	color: #36c;
+	border: 1px solid #36c;
+}
+
+.manual-sidebar .controls .btn-finish:hover {
+	background: #eff;
+}
+
+.manual-sidebar .controls button {
+	font-size: 16px;
+	line-height: 28px;
+	border-radius: 3px;
+	text-align: center;
+	cursor: pointer;
+	display: none;
+}
+
+.manual-sidebar .controls .visible {
+	display: inline;
+}
+
+.manual-sidebar .controls .disabled {
+	color: #ccc;
+	background: #efefef;
+	border: 1px solid #ccc;
+	cursor: default;
+}
+
+.manual-sidebar .controls .disabled:hover {
+	background: #efefef;
+}

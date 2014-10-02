@@ -5,6 +5,8 @@
  * @file Runner code for test launched in dashboard
  */
 
+/* global console */
+
 ( function( window ) {
 	'use strict';
 
@@ -22,7 +24,7 @@
 		this.current = null;
 		this.suite = null;
 		this.runAsChild = true;
-		this.config = BENDER_CONFIG;
+		this.config = window.BENDER_CONFIG;
 
 		this.results = null;
 
@@ -49,6 +51,25 @@
 				that.next( JSON.stringify( result ) );
 
 			}, that.config.testTimeout );
+		}
+
+		function addFrame( id ) {
+			var frame = document.createElement( 'iframe' );
+
+			frame.className = 'context-frame';
+			frame.src = id;
+			contextEl.appendChild( frame );
+		}
+
+		function removeFrame() {
+			var frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ];
+
+			contextEl.className = '';
+
+			if ( frame ) {
+				frame.src = 'about:blank';
+				contextEl.removeChild( frame );
+			}
 		}
 
 		this.emit = function( name ) {
@@ -89,7 +110,6 @@
 			}
 		};
 
-		// stubbed for compatibility
 		this.result = function( result ) {
 			var parsed = JSON.parse( result );
 
@@ -105,15 +125,14 @@
 		};
 
 		this.next = function( summary ) {
-			var id,
-				frame,
-				parsed;
+			var parsed,
+				id;
 
 			if ( summary ) {
 				parsed = JSON.parse( summary );
 				parsed.id = this.current;
-				parsed.success = parsed.success ||
-					( parsed.failed === 0 &&
+				parsed.success = parsed.success || (
+					parsed.failed === 0 &&
 					parsed.errors === 0 &&
 					( parsed.passed > 0 || parsed.ignored > 0 )
 				);
@@ -153,15 +172,8 @@
 						}
 					}
 				} else {
-					if ( ( frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ] ) ) {
-						frame.src = 'about:blank';
-						contextEl.removeChild( frame );
-					}
-
-					frame = document.createElement( 'iframe' );
-					frame.className = 'context-frame';
-					frame.src = id;
-					contextEl.appendChild( frame );
+					removeFrame();
+					addFrame( id );
 				}
 
 				resetTestTimeout();
@@ -171,7 +183,6 @@
 		};
 
 		this.complete = function() {
-			var frame;
 			this.emit( 'complete' );
 
 			this.suite = [];
@@ -181,12 +192,7 @@
 				testWindow.close();
 				testWindow = null;
 			} else {
-				frame = contextEl.getElementsByTagName( 'iframe' )[ 0 ];
-
-				if ( frame ) {
-					frame.src = 'about:blank';
-					contextEl.removeChild( frame );
-				}
+				removeFrame();
 			}
 
 			clearTestTimeout();
@@ -205,6 +211,15 @@
 		this.run = function( tests ) {
 			this.suite = tests;
 			this.next();
+		};
+
+		this.maximize = function() {
+			if ( !isIE ) {
+				contextEl.className = 'maximized';
+			}
+
+			// clear timeout for manual tests
+			clearTestTimeout();
 		};
 
 		this.stop = this.complete;

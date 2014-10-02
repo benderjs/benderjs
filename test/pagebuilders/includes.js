@@ -59,7 +59,7 @@ describe( 'Page Builders - Includes', function() {
 				framework: 'bar',
 				applications: {},
 				group: 'Test',
-				include: 'foo/bar.js, baz/test.js',
+				include: [ 'foo/bar.js', 'baz/test.js' ],
 				parts: []
 			},
 			expected = '<head>\n<script src="foo/bar.js"></script>\n<script src="baz/test.js"></script>\n</head>',
@@ -75,7 +75,7 @@ describe( 'Page Builders - Includes', function() {
 				framework: 'bar',
 				applications: {},
 				group: 'Test',
-				include: '%TEST_DIR%foo/bar.js, %BASE_PATH%baz/test.js',
+				include: [ '%TEST_DIR%foo/bar.js', '%BASE_PATH%baz/test.js' ],
 				parts: []
 			},
 			expected = '<head>\n<script src="/test/fixtures/tests/bar/foo/bar.js"></script>\n' +

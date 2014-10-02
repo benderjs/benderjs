@@ -71,9 +71,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			} );
 
-			tokens.push( 'is:failed', 'is:passed', 'is:manual', 'is:unit' );
+			tokens.sort();
 
-			this.set( 'tokens', tokens.sort() );
+			// add exclusion filters
+			tokens = tokens.concat( _.map( tokens, function( token ) {
+				return '-' + token;
+			} ) );
+
+			// add flag filters
+			tokens.unshift( 'is:failed', 'is:passed', 'is:manual', 'is:unit' );
+
+			this.set( 'tokens', tokens );
 
 			this.setFilter( filter );
 		},
@@ -342,52 +350,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	} );
 
 	/**
-	 * Test result view
-	 */
-	Tests.ResultView = Marionette.ItemView.extend( {
-		template: '#test-result',
-
-		templateHelpers: {
-			getIconStyle: function( style ) {
-				return 'glyphicon' + ( style ?
-					' glyphicon-' + ( style === 'success' ? 'ok' : style === 'warning' ? 'forward' : 'remove' ) :
-					'' );
-			}
-		},
-
-		initialize: function() {
-			this.listenTo( this.model, 'change', this.render );
-		},
-
-		onRender: function() {
-			var s = this.model.get( 'style' );
-
-			this.parent.el.className = s ? ' ' + s + ' bg-' + s + ' text-' + s : '';
-
-			if ( this.model.get( 'state' ) === 'done' ) {
-				this.scrollTo();
-			}
-		},
-
-		scrollTo: function() {
-			var top = this.parent.$el.offset().top,
-				bottom = top + this.parent.$el.height(),
-				$window = $( window ),
-				scroll = $( window ).scrollTop(),
-				height = $window.height();
-
-
-			// item is hidden at the bottom
-			if ( scroll + height < bottom ) {
-				$window.scrollTop( bottom - height );
-				// item is hidden at the top
-			} else if ( scroll + App.$navbar.height() > top ) {
-				$( window ).scrollTop( top - App.$navbar.height() - 1 );
-			}
-		}
-	} );
-
-	/**
 	 * Test model
 	 */
 	Tests.Test = Backbone.Model.extend( {
@@ -446,6 +408,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			filtered: null
 		},
 
+		excludes: {},
 		filters: {},
 
 		initialize: function() {
@@ -479,8 +442,13 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			var that = this,
 				name;
 
+			// reset filters
 			for ( name in this.filters ) {
 				this.filters[ name ] = [];
+			}
+
+			for ( name in this.excludes ) {
+				this.excludes[ name ] = [];
 			}
 
 			_.each( filters, function( filter ) {
@@ -488,11 +456,21 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				var name = filter[ 0 ];
 
-				if ( !that.filters[ name ] ) {
-					that.filters[ name ] = [];
-				}
+				if ( name.charAt( 0 ) === '-' ) {
+					name = name.substr( 1 );
 
-				that.filters[ name ].push( filter[ 1 ] );
+					if ( !that.excludes[ name ] ) {
+						that.excludes[ name ] = [];
+					}
+
+					that.excludes[ name ].push( filter[ 1 ] );
+				} else {
+					if ( !that.filters[ name ] ) {
+						that.filters[ name ] = [];
+					}
+
+					that.filters[ name ].push( filter[ 1 ] );
+				}
 			} );
 
 			var filtered = this.get( 'filtered' );
@@ -574,7 +552,27 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				return empty || result;
 			}
 
-			return checkFlags( this.filters.is ) && checkProperties( this.filters );
+			function checkExcludes( filters ) {
+				var result = true;
+
+				_.each( filters, function( filter, name ) {
+					if ( name === 'is' ) {
+						return;
+					}
+
+					if ( filter.length ) {
+						if ( checkProperty( filter, name ) ) {
+							result = false;
+						}
+					}
+				} );
+
+				return result;
+			}
+
+			return checkFlags( this.filters.is ) &&
+				checkExcludes( this.excludes ) &&
+				checkProperties( this.filters );
 		},
 
 		toJSON: function() {
@@ -619,6 +617,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				model.getResult().update( data );
 				this.trigger( 'updateResult', data.id );
 			}
+		},
+
+		getResult: function( id ) {
+			var model = this.get( 'tests' ).get( id );
+
+			return model ? model.getResult() : null;
 		}
 	} );
 
@@ -643,6 +647,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				return s ? ' ' + s + ' bg-' + s + ' text-' + s : '';
 			}
+		},
+
+		events: {
+			'click .result .result': 'showErrors'
 		},
 
 		ui: {
@@ -712,6 +720,28 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} else if ( scroll + App.$navbar.height() > top ) {
 				$( window ).scrollTop( top - App.$navbar.height() - 1 );
 			}
+		},
+
+		showErrors: function( event ) {
+			var id = $( event.target ).parent().parent().data( 'id' ),
+				result = this.model.getResult( id ),
+				errors;
+
+			if ( !result ) {
+				return;
+			}
+
+			errors = result.get( 'errors' );
+
+			if ( !errors || !errors.length ) {
+				return;
+			}
+
+			App.modal.show(
+				new App.Common.TestErrorsView( {
+					model: result
+				} )
+			);
 		}
 	} );
 

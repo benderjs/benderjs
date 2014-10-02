@@ -20,17 +20,20 @@ var mocks = require( '../fixtures/_mocks' ),
 	srcHtml = require( 'fs' ).readFileSync(
 		require( 'path' ).join( __dirname, '../fixtures/tests/test/1.html' )
 	).toString(),
+	filesModule = require( '../../lib/files' ),
 	html = rewire( '../../lib/pagebuilders/html' );
 
 describe( 'Page Builders - Html', function() {
 	var oldAttach,
+		builder,
 		bender;
 
 	before( function() {
 		oldAttach = html.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'pagebuilders', 'utils' );
 		html.attach = oldAttach || mocks.attachPagebuilder( bender, html );
-		bender.use( html );
+		bender.use( [ html, filesModule ] );
+		builder = bender.pagebuilders[ 1 ].bind( bender );
 	} );
 
 	after( function() {
@@ -47,7 +50,7 @@ describe( 'Page Builders - Html', function() {
 			parts: []
 		};
 
-		data = html.build( data );
+		data = builder( data );
 
 		expect( data.parts[ 0 ] ).to.exist;
 		expect( data.parts[ 0 ] ).to.be.instanceof( when.Promise );
@@ -63,14 +66,14 @@ describe( 'Page Builders - Html', function() {
 			parts: []
 		};
 
-		data = html.build( data );
+		data = builder( data );
 
 		return data.parts[ 0 ].then( function( result ) {
 			expect( result ).to.equal( srcHtml );
 		} );
 	} );
 
-	it( 'should load job\'s HTML from the job\'s directory', function() {
+	it( 'should load job\'s HTML from the job\'s directory', function( done ) {
 		var data = {
 				jobId: 'foo',
 				snapshot: true,
@@ -84,12 +87,12 @@ describe( 'Page Builders - Html', function() {
 		}
 
 		function handle( err ) {
-			expect( err ).to.be.an( 'object' );
-			expect( err.code ).to.equal( 'ENOENT' );
-			expect( err.path ).to.equal( expected );
+			expect( err ).to.equal( 'File not found: .bender/jobs/foo/tests/fixtures/tests/test/1.html' );
+
+			done();
 		}
 
-		data = html.build( data );
+		data = builder( data );
 
 		return data.parts[ 0 ].done( handle, handle );
 	} );
@@ -98,7 +101,7 @@ describe( 'Page Builders - Html', function() {
 		var data = {
 				parts: []
 			},
-			result = html.build( _.cloneDeep( data ) );
+			result = builder( _.cloneDeep( data ) );
 
 		expect( result ).to.deep.equal( data );
 	} );

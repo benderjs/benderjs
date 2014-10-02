@@ -74,28 +74,34 @@ describe( 'Test Builders - Default', function() {
 				'test/fixtures/tests/test/1': {
 					id: 'test/fixtures/tests/test/1',
 					js: 'test/fixtures/tests/test/1.js',
-					html: 'test/fixtures/tests/test/1.html'
+					html: 'test/fixtures/tests/test/1.html',
+					unit: true
 				},
 				'test/fixtures/tests/test/2': {
 					id: 'test/fixtures/tests/test/2',
 					js: 'test/fixtures/tests/test/2.js',
-					html: 'test/fixtures/tests/test/2.htm'
+					html: 'test/fixtures/tests/test/2.htm',
+					unit: true
 				},
 				'test/fixtures/tests/test/3': {
 					id: 'test/fixtures/tests/test/3',
-					js: 'test/fixtures/tests/test/3.js'
+					js: 'test/fixtures/tests/test/3.js',
+					unit: true
 				},
 				'test/fixtures/tests/test2/1': {
 					id: 'test/fixtures/tests/test2/1',
-					js: 'test/fixtures/tests/test2/1.js'
+					js: 'test/fixtures/tests/test2/1.js',
+					unit: true
 				},
 				'test/fixtures/tests/test2/2': {
 					id: 'test/fixtures/tests/test2/2',
-					js: 'test/fixtures/tests/test2/2.js'
+					js: 'test/fixtures/tests/test2/2.js',
+					unit: true
 				},
 				'test/fixtures/tests/test2/3': {
 					id: 'test/fixtures/tests/test2/3',
-					js: 'test/fixtures/tests/test2/3.js'
+					js: 'test/fixtures/tests/test2/3.js',
+					unit: true
 				}
 			},
 			result = defaultBuilder.build( sampleData );
@@ -115,19 +121,23 @@ describe( 'Test Builders - Default', function() {
 				tests: {
 					'test/fixtures/tests/test2/1': {
 						id: 'test/fixtures/tests/test2/1',
-						js: 'test/fixtures/tests/test2/1.js'
+						js: 'test/fixtures/tests/test2/1.js',
+						unit: true
 					},
 					'test/fixtures/tests/test2/2': {
 						id: 'test/fixtures/tests/test2/2',
-						js: 'test/fixtures/tests/test2/2.js'
+						js: 'test/fixtures/tests/test2/2.js',
+						unit: true
 					},
 					'test/fixtures/tests/test2/3': {
 						id: 'test/fixtures/tests/test2/3',
-						js: 'test/fixtures/tests/test2/3.js'
+						js: 'test/fixtures/tests/test2/3.js',
+						unit: true
 					},
 					'test/fixtures/tests/test2/template': {
 						id: 'test/fixtures/tests/test2/template',
-						js: 'test/fixtures/tests/test2/template.js'
+						js: 'test/fixtures/tests/test2/template.js',
+						unit: true
 					}
 				}
 			},

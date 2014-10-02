@@ -53,11 +53,11 @@ describe( 'Sockets', function() {
 		expect( bender.sockets ).to.be.an( 'object' );
 	} );
 
-	it( 'should attach to existing http server', function() {
+	it( 'should attach to the existing http server', function() {
 		expect( bender.sockets ).to.include.keys( [ 'browsers', 'clients', 'dashboards' ] );
 	} );
 
-	it( 'should accept dashboard connection and notify about disconnect', function( done ) {
+	it( 'should accept a dashboard connection and notify about disconnect', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/dashboard', {
 			'force new connection': true
 		} );
@@ -72,7 +72,7 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should accept dashboard registration and emit browsers:update after that', function( done ) {
+	it( 'should accept a dashboard registration and emit browsers:update after that', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/dashboard', {
 				'force new connection': true
 			} ),
@@ -96,7 +96,7 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should notify connected dashboards about job update', function( done ) {
+	it( 'should notify connected dashboards about a job update', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/dashboard', {
 				'force new connection': true
 			} ),
@@ -120,7 +120,7 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should accept client connection and notify about disconnect', function( done ) {
+	it( 'should accept a client connection and notify about disconnect', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/client', {
 			'force new connection': true
 		} );
@@ -135,7 +135,7 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should accept client registration', function( done ) {
+	it( 'should accept a client registration', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/client', {
 			'force new connection': true
 		} );
@@ -144,7 +144,42 @@ describe( 'Sockets', function() {
 			socket.emit( 'register', {
 				id: id,
 				ua: ua
-			}, function callback() {
+			}, function callback( passed ) {
+				expect( passed ).to.be.true;
+				socket.disconnect();
+			} );
+		} );
+
+		bender.on( 'client:register', function( client ) {
+			// argument for this one is the id of the socket
+			expect( client ).to.be.an( 'object' );
+			expect( client.id ).to.equal( id );
+			expect( client.ua ).to.equal( ua );
+		} );
+
+		socket.on( 'disconnect', function() {
+			done();
+		} );
+	} );
+
+	it( 'should not allow a client to register with an existing ID', function( done ) {
+		var socket = io.connect( 'http://localhost:1031/client', {
+			'force new connection': true
+		} );
+
+		bender.browsers.addClient( {
+			id: id,
+			ua: ua,
+			addr: '127.0.0.1:12345',
+			mode: 'all'
+		} );
+
+		socket.on( 'connect', function() {
+			socket.emit( 'register', {
+				id: id,
+				ua: ua
+			}, function callback( passed ) {
+				expect( passed ).to.be.false;
 				socket.disconnect();
 			} );
 		} );
@@ -196,7 +231,7 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should emit complete event on client\'s request', function( done ) {
+	it( 'should emit "complete" event on client\'s request', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/client', {
 			'force new connection': true
 		} );
@@ -224,7 +259,7 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should ignore complete requests from unknown clients', function( done ) {
+	it( 'should ignore "complete" requests from unknown clients', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/client', {
 				'force new connection': true
 			} ),
@@ -281,7 +316,7 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should ignore result requests from unknown clients', function( done ) {
+	it( 'should ignore "result" requests from unknown clients', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/client', {
 				'force new connection': true
 			} ),
@@ -304,30 +339,7 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should ignore fetch requests from unknown clients', function( done ) {
-		var socket = io.connect( 'http://localhost:1031/client', {
-				'force new connection': true
-			} ),
-			spy = sinon.spy();
-
-		bender.on( 'client:fetch', spy );
-
-		socket.on( 'connect', function() {
-			socket.emit( 'register', {
-				id: id,
-				ua: 'unknown'
-			}, function callback() {
-				socket.emit( 'fetch' );
-
-				setTimeout( function() {
-					expect( spy.called ).to.be.false;
-					done();
-				}, 50 );
-			} );
-		} );
-	} );
-
-	it( 'should emit client\'s error', function( done ) {
+	it( 'should emit a client\'s error', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/client', {
 				'force new connection': true
 			} ),
@@ -347,7 +359,7 @@ describe( 'Sockets', function() {
 		} );
 	} );
 
-	it( 'should emit client\'s log', function( done ) {
+	it( 'should emit a client\'s log', function( done ) {
 		var socket = io.connect( 'http://localhost:1031/client', {
 				'force new connection': true
 			} ),

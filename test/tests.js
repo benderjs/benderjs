@@ -32,7 +32,7 @@ describe( 'Tests', function() {
 		expect( bender.tests ).to.include.keys( [ 'list', 'get', 'buildGroup', 'checkPath' ] );
 	} );
 
-	it( 'should list tests specified in configuration file', function() {
+	it( 'should list tests specified in the configuration file', function() {
 		var expected = [ {
 			id: 'test/fixtures/tests/test/1',
 			js: path.normalize( 'test/fixtures/tests/test/1.js' ),
@@ -66,6 +66,13 @@ describe( 'Tests', function() {
 		}, {
 			id: 'test/fixtures/tests/test2/3',
 			js: path.normalize( 'test/fixtures/tests/test2/3.js' ),
+			script: path.normalize( 'test/fixtures/tests/test2/3.md' ),
+			framework: 'test',
+			applications: [ 'test' ],
+			group: 'Test2'
+		}, {
+			id: 'test/fixtures/tests/test2/4',
+			script: path.normalize( 'test/fixtures/tests/test2/4.md' ),
 			framework: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
@@ -77,7 +84,7 @@ describe( 'Tests', function() {
 			} );
 	} );
 
-	it( 'should return a single test specified in the configuration file', function() {
+	it( 'should return a single unit test specified in the configuration file', function() {
 		return bender.tests.get( 'test/fixtures/tests/test/1' )
 			.then( function( test ) {
 				expect( test ).to.be.an( 'object' );
@@ -88,6 +95,14 @@ describe( 'Tests', function() {
 						expect( test ).to.be.an( 'object' );
 						expect( test.group ).to.equal( 'Test2' );
 					} );
+			} );
+	} );
+
+	it( 'should return a single manual test specified in the configuration file', function() {
+		return bender.tests.get( 'test/fixtures/tests/test2/4' )
+			.then( function( test ) {
+				expect( test ).to.be.an( 'object' );
+				expect( test.group ).to.equal( 'Test2' );
 			} );
 	} );
 
@@ -120,7 +135,7 @@ describe( 'Tests', function() {
 		return bender.tests.readBasePaths()
 			.then( function( files ) {
 				expect( files ).to.have.keys( [ 'test/fixtures/tests/' ] );
-				expect( files[ 'test/fixtures/tests/' ] ).to.have.length( 21 );
+				expect( files[ 'test/fixtures/tests/' ] ).to.have.length( 23 );
 
 				files[ 'test/fixtures/tests/' ].forEach( function( file ) {
 					expect( file ).to.have.keys( [ 'name', 'dir', 'path', 'stats' ] );

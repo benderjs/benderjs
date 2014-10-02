@@ -3,7 +3,7 @@
  * Licensed under the terms of the MIT License (see LICENSE.md).
  */
 
-/*global console */
+/* global console */
 
 ( function() {
 	'use strict';
@@ -45,19 +45,19 @@
 		summaryEl = document.createElement( 'div' );
 		summaryEl.className = 'summary';
 
-		// show tests that failed only
-		failedEl = document.createElement( 'a' );
-		failedEl.href = '#';
-		failedEl.className = 'btn failed';
-		failedEl.title = 'Show failed tests';
-		summaryEl.appendChild( failedEl );
-
 		// collapse results button
 		collapseEl = document.createElement( 'a' );
 		collapseEl.href = '#';
 		collapseEl.className = 'btn collapse';
 		collapseEl.title = 'Collapse the results';
 		summaryEl.appendChild( collapseEl );
+
+		// show tests that failed only
+		failedEl = document.createElement( 'a' );
+		failedEl.href = '#';
+		failedEl.className = 'btn failed';
+		failedEl.title = 'Show failed tests';
+		summaryEl.appendChild( failedEl );
 
 		// run all tests button
 		allEl = document.createElement( 'a' );
@@ -135,13 +135,7 @@
 			resultsEl.className = resultsElClassName;
 		}
 
-		if ( resultsEl.addEventListener ) {
-			resultsEl.addEventListener( 'click', handleClick, false );
-		} else if ( resultsEl.attachEvent ) {
-			resultsEl.attachEvent( 'onclick', handleClick );
-		} else {
-			resultsEl.onclick = handleClick;
-		}
+		bender.addListener( resultsEl, 'click', handleClick );
 	}
 
 	/**
@@ -203,7 +197,7 @@
 				'<span class="icon ',
 				result.success ? result.ignored ? 'ignored' : 'passed' : 'failed',
 				'"></span>',
-				result.module, ' - ',
+				result.module, result.name ? ' - ' : '',
 				'<a href="#' + encodeURIComponent( result.fullName || result.name ) + '" class="single">' + result.name + '</a>',
 				'</p>'
 			];
@@ -216,6 +210,29 @@
 		resEl.innerHTML = res.join( '' );
 
 		resultsEl.appendChild( resEl );
+	}
+
+	/**
+	 * Formats a timestap given in milliseconds to a readable form
+	 * @param  {Number} ms Timestamp
+	 * @return {String}
+	 */
+	function formatTime( ms ) {
+		var h, m, s;
+
+		s = Math.floor( ms / 1000 );
+		ms %= 1000;
+		m = Math.floor( s / 60 );
+		s %= 60;
+		h = Math.floor( m / 60 );
+		m %= 60;
+
+		return ( h ? ( h + 'h ' ) : '' ) +
+			( m ? ( ( m < 10 ? '0' : '' ) + m + 'm ' ) : '' ) +
+			( s ? ( ( s < 10 ? '0' : '' ) + s + 's ' ) : '' ) +
+			( ( s || m || h ) ? ms < 10 ?
+				'00' : ms < 100 ? '0' : '' :
+				'' ) + ms + 'ms';
 	}
 
 	/**
@@ -286,7 +303,7 @@
 			statusEl.innerHTML = '<strong>Testing Done:</strong> ' +
 				result.passed + ' passed, ' + result.failed + ' failed' +
 				( result.ignored ? ', ' + result.ignored + ' ignored ' : ' ' ) +
-				'in ' + result.duration + 'ms';
+				'in ' + formatTime( result.duration );
 
 			expandUI();
 		};
@@ -303,6 +320,11 @@
 				module: testId
 			} );
 		} else {
+			// maximize the IFRAME containing a test page when running a manual test
+			if ( bender.testData.manual && bender.maximize ) {
+				bender.maximize();
+			}
+
 			bender.start();
 		}
 	}
@@ -328,6 +350,11 @@
 				);
 
 				return true;
+			},
+			maximize: function() {
+				if ( launcher.bender.maximize ) {
+					launcher.bender.maximize();
+				}
 			}
 		};
 
