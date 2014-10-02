@@ -14,7 +14,6 @@
 		failBtn = buttonEls[ 2 ],
 		ignored = 0,
 		errors = 0,
-		start = new Date(),
 		oldStart = bender.start,
 		oldNext = bender.next;
 
@@ -35,7 +34,7 @@
 		}
 
 		bender.next( {
-			duration: new Date() - start,
+			duration: 1,
 			passed: passed ? 1 : 0,
 			failed: passed ? 0 : 1,
 			errors: errors,
