@@ -21,6 +21,8 @@ var mocks = require( '../fixtures/_mocks' ),
 	fs = require( 'fs' ),
 	_ = require( 'lodash' ),
 	tests = rewire( '../../lib/middlewares/tests' ),
+	filesModule = rewire( '../../lib/files' ),
+	pluginsModule = rewire( '../../lib/plugins' ),
 	serverModule = require( '../../lib/server' ),
 	utilsModule = require( '../../lib/utils' );
 
@@ -31,7 +33,8 @@ describe( 'Middleware - Tests', function() {
 
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets', 'tests', 'template' );
-		bender.use( [ serverModule, utilsModule ] );
+		bender.use( [ utilsModule, filesModule, pluginsModule, serverModule ] );
+		tests.init.bind( bender )( function() {} );
 		bender.init();
 		bender.middlewares = [ tests.build ];
 		instance = bender.server.create();
@@ -43,11 +46,11 @@ describe( 'Middleware - Tests', function() {
 		} catch ( e ) {}
 	} );
 
-	it( 'should expose build function', function() {
+	it( 'should expose a build function', function() {
 		expect( tests.build ).to.be.a( 'function' );
 	} );
 
-	it( 'should throw 404 on missing files', function( done ) {
+	it( 'should throw a 404 error on a missing files', function( done ) {
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/tests/test/unknown.html', function( err, res, body ) {
 				expect( res.statusCode ).to.equal( 404 );
@@ -58,7 +61,7 @@ describe( 'Middleware - Tests', function() {
 		} );
 	} );
 
-	it( 'should redirect to filtered tests list if test directory specified in the URL', function( done ) {
+	it( 'should redirect to a filtered tests list if a test directory was specified in the URL', function( done ) {
 		instance.listen( 1031, function() {
 			request.get(
 				'http://localhost:1031/test/fixtures/tests/test/filter/foo/', {
@@ -66,14 +69,28 @@ describe( 'Middleware - Tests', function() {
 				},
 				function( err, res ) {
 					expect( res.statusCode ).to.equal( 302 );
-					expect( res.headers.location ).to.equal( '/#tests/foo' );
+					expect( res.headers.location ).to.equal( '/#tests/path:/test/fixtures/tests/test/filter/foo' );
 
 					done();
 				} );
 		} );
 	} );
 
-	it( 'should serve test assets', function( done ) {
+	it( 'should not try to serve a test directory', function( done ) {
+		instance.listen( 1031, function() {
+			request.get(
+				'http://localhost:1031/test/fixtures/tests/test', {
+					followRedirect: false
+				},
+				function( err, res ) {
+					expect( res.statusCode ).to.equal( 404 );
+
+					done();
+				} );
+		} );
+	} );
+
+	it( 'should serve a test assets', function( done ) {
 		var file = 'test/fixtures/tests/test/_assets/asset.js';
 
 		instance.listen( 1031, function() {
