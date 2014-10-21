@@ -85,7 +85,7 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		navigate: function( event ) {
 			var model = this.model.toJSON();
 
-			if ( !model.active && !model.disabled ) {
+			if ( !model.disabled ) {
 				App.navigate( model.id );
 			}
 

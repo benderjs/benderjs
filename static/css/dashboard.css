@@ -78,6 +78,12 @@ th:last-child {
     padding: .3em .6em;
 }
 
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+	cursor: pointer;
+}
+
 
 .test-controls {
 	float: right;
