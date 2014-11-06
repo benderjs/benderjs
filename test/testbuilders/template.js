@@ -12,9 +12,32 @@
 'use strict';
 
 var mocks = require( '../fixtures/_mocks' ),
+	path = require( 'path' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	template = rewire( '../../lib/testbuilders/template' );
+
+var sepPattern = /\//g;
+
+function translatePaths( data ) {
+	if ( typeof data == 'string' ) {
+		return data.replace( sepPattern, path.sep );
+	} else if ( Array.isArray( data ) ) {
+		return data.map( function( value ) {
+			return translatePaths( value );
+		} );
+	} else if ( data && typeof data == 'object' ) {
+		var resp = {};
+
+		Object.keys( data ).forEach( function( name ) {
+			resp[ name ] = translatePaths( data[ name ] );
+		} );
+
+		return resp;
+	}
+
+	return data;
+}
 
 describe( 'Test Builders - Template', function() {
 	var sampleData = {
@@ -86,6 +109,12 @@ describe( 'Test Builders - Template', function() {
 		oldAttach,
 		bender;
 
+	if ( path.sep === '\\' ) {
+		sampleData = translatePaths( sampleData );
+		sampleData2 = translatePaths( sampleData2 );
+		sampleData3 = translatePaths( sampleData3 );
+	}
+
 	before( function() {
 		oldAttach = template.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'utils', 'conf' );
@@ -126,6 +155,10 @@ describe( 'Test Builders - Template', function() {
 			},
 			result = template.build( sampleData );
 
+		if ( path.sep === '\\' ) {
+			expected = translatePaths( expected );
+		}
+
 		expect( result.tests ).to.deep.equal( expected );
 	} );
 
@@ -148,6 +181,10 @@ describe( 'Test Builders - Template', function() {
 				}
 			},
 			result = template.build( sampleData2 );
+
+		if ( path.sep === '\\' ) {
+			expected = translatePaths( expected );
+		}
 
 		expect( result.tests ).to.deep.equal( expected );
 	} );
@@ -172,6 +209,10 @@ describe( 'Test Builders - Template', function() {
 				}
 			},
 			result = template.build( sampleData3 );
+
+		if ( path.sep === '\\' ) {
+			expected = translatePaths( expected );
+		}
 
 		expect( result.tests ).to.deep.equal( expected );
 	} );
