@@ -77,19 +77,15 @@ describe( 'Page Builders - Script', function() {
 				js: 'fixtures/tests/test/1.js',
 				parts: []
 			},
-			expected = path.join( '.bender/jobs/', data.jobId, '/tests/', data.js );
-
-		if ( path.sep === '\\' ) {
-			expected = path.resolve( expected );
-		}
+			expected = '.bender/jobs/' + data.jobId + '/tests/' + data.js;
 
 		function handle( err ) {
-			expect( err ).to.equal( 'File not found: ' + expected );
+			expect( err ).to.equal( 'File not found: ' + expected.replace( /\//g, path.sep ) );
 		}
 
 		data = builder( data );
 
-		return data.parts[ 0 ].done( handle, handle );
+		return data.parts[ 0 ].then( handle, handle );
 	} );
 
 	it( 'should not alter data if no script specified', function() {

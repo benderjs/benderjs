@@ -87,7 +87,7 @@ describe( 'Page Builders - Html', function() {
 		}
 
 		function handle( err ) {
-			expect( err ).to.equal( 'File not found: .bender/jobs/foo/tests/fixtures/tests/test/1.html' );
+			expect( err ).to.equal( 'File not found: ' + '.bender/jobs/foo/tests/fixtures/tests/test/1.html'.replace( /\//g, path.sep ) );
 
 			done();
 		}
