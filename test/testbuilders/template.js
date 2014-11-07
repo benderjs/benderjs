@@ -15,9 +15,9 @@ var mocks = require( '../fixtures/_mocks' ),
 	path = require( 'path' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
-	template = rewire( '../../lib/testbuilders/template' );
+	template = rewire( '../../lib/testbuilders/template' ),
+	sepPattern = /\//g;
 
-var sepPattern = /\//g;
 
 function translatePaths( data ) {
 	if ( typeof data == 'string' ) {
@@ -91,7 +91,6 @@ describe( 'Test Builders - Template', function() {
 			tests: {
 				'test/fixtures/tests/1': {
 					id: 'test/fixtures/tests/1',
-					js: 'test/fixtures/tests/1.js',
 					html: 'test/fixtures/tests/1.html'
 				},
 				'test/fixtures/tests/test2/1': {
@@ -106,6 +105,25 @@ describe( 'Test Builders - Template', function() {
 				}
 			}
 		},
+		sampleData4 = {
+			files: [
+				'test/fixtures/tests/test2/__template__.js',
+			],
+			tests: {
+				'test/fixtures/tests/test2/1': {
+					id: 'test/fixtures/tests/test2/1',
+					html: 'test/fixtures/tests/test2/1.html',
+					manual: true,
+					script: 'test/fixtures/tests/test2/1.md'
+				},
+				'test/fixtures/tests/test2/2': {
+					id: 'test/fixtures/tests/test2/2',
+					js: 'test/fixtures/tests/test2/2.js',
+					manual: true,
+					script: 'test/fixtures/tests/test2/2.md'
+				}
+			}
+		},
 		oldAttach,
 		bender;
 
@@ -113,6 +131,7 @@ describe( 'Test Builders - Template', function() {
 		sampleData = translatePaths( sampleData );
 		sampleData2 = translatePaths( sampleData2 );
 		sampleData3 = translatePaths( sampleData3 );
+		sampleData4 = translatePaths( sampleData4 );
 	}
 
 	before( function() {
@@ -189,26 +208,49 @@ describe( 'Test Builders - Template', function() {
 		expect( result.tests ).to.deep.equal( expected );
 	} );
 
-	it( 'should include __template__.js file if found in the same directory level', function() {
+	it( 'should ignore __template__.js file for automatic tests', function() {
 		var expected = {
 				'test/fixtures/tests/1': {
 					id: 'test/fixtures/tests/1',
-					js: 'test/fixtures/tests/1.js',
 					html: 'test/fixtures/tests/1.html'
 				},
 				'test/fixtures/tests/test2/1': {
 					id: 'test/fixtures/tests/test2/1',
 					js: 'test/fixtures/tests/test2/1.js',
-					html: 'test/fixtures/tests/test2/1.html',
-					include: [ '%TEST_DIR%__template__.js' ]
+					html: 'test/fixtures/tests/test2/1.html'
 				},
 				'test/fixtures/tests/test2/2': {
 					id: 'test/fixtures/tests/test2/2',
 					js: 'test/fixtures/tests/test2/2.js',
-					include: [ '%BASE_PATH%foo.js', '%TEST_DIR%__template__.js' ]
+					include: [ '%BASE_PATH%foo.js' ]
 				}
 			},
 			result = template.build( sampleData3 );
+
+		if ( path.sep === '\\' ) {
+			expected = translatePaths( expected );
+		}
+
+		expect( result.tests ).to.deep.equal( expected );
+	} );
+
+	it( 'should include __template__.js file if found in the same directory level', function() {
+		var expected = {
+				'test/fixtures/tests/test2/1': {
+					id: 'test/fixtures/tests/test2/1',
+					html: 'test/fixtures/tests/test2/1.html',
+					manual: true,
+					script: 'test/fixtures/tests/test2/1.md',
+					template: 'test/fixtures/tests/test2/__template__.js'
+				},
+				'test/fixtures/tests/test2/2': {
+					id: 'test/fixtures/tests/test2/2',
+					js: 'test/fixtures/tests/test2/2.js',
+					manual: true,
+					script: 'test/fixtures/tests/test2/2.md'
+				}
+			},
+			result = template.build( sampleData4 );
 
 		if ( path.sep === '\\' ) {
 			expected = translatePaths( expected );

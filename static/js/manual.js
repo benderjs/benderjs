@@ -115,7 +115,7 @@
 			disableButtons();
 		}
 
-		if ( target === finishBtn && bender.testData.unit ) {
+		if ( target === finishBtn && bender.testData.js ) {
 			oldStart();
 		}
 
@@ -154,7 +154,7 @@
 	}
 
 	// show proper controls depending on type of a test
-	if ( bender.testData.unit ) {
+	if ( bender.testData.js ) {
 		finishBtn.className += ' visible';
 	} else {
 		passBtn.className += ' visible';
