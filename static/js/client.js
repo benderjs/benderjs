@@ -109,7 +109,8 @@
 				return;
 			}
 
-			resultsElClassName = ( resultsEl.className + '' ).trim();
+			// Trim className; trim() function is not available on IE8.
+			resultsElClassName = ( resultsEl.className + '' ).replace( /^\s+|\s+$/g, '' );
 
 			if ( target === collapseEl ) {
 				collapsed = isCollapsed();
