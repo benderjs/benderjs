@@ -198,8 +198,10 @@
 				'<span class="icon ',
 				result.success ? result.ignored ? 'ignored' : 'passed' : 'failed',
 				'"></span>',
-				result.module, result.name ? ' - ' : '',
-				'<a href="#' + encodeURIComponent( result.fullName || result.name ) + '" class="single">' + result.name + '</a>',
+				escapeTags( result.module ), result.name ? ' - ' : '',
+				'<a href="#', encodeURIComponent( result.fullName || result.name ), '" class="single">',
+				escapeTags( result.name ),
+				'</a>',
 				'</p>'
 			];
 
@@ -290,7 +292,7 @@
 				throw ( error.error );
 			} else {
 				resEl.className = 'result fail';
-				resEl.innerHTML = '<p><span class="icon failed"></span>Error<pre>' + error + '</pre></p>';
+				resEl.innerHTML = '<p><span class="icon failed"></span>Error<pre>' + escapeTags( error ) + '</pre></p>';
 
 				resultsEl.appendChild( resEl );
 
