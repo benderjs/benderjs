@@ -11,6 +11,9 @@ var forever = require( 'forever' ),
 	utile = require( 'utile' ),
 
 	pidFile = path.resolve( '.bender/bender.pid' ),
+	logFile = path.resolve( '.bender/bender-out.log' ),
+	errorLogFile = path.resolve( '.bender/bender-err.log' ),
+
 	started = false;
 
 function writePid( pid ) {
@@ -28,8 +31,8 @@ function start( data ) {
 		max: 1,
 		silent: false,
 		fork: true,
-		outFile: 'bender-out.log',
-		errFile: 'bender-err.log',
+		outFile: logFile,
+		errFile: errorLogFile,
 		pidFile: pidFile,
 		options: data.args,
 		cwd: data.cwd,
