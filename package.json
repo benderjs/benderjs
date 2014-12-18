@@ -13,9 +13,6 @@
 		"test": "istanbul test node_modules/mocha/bin/_mocha -- --reporter list --check-leaks --recursive",
 		"lint": "jshint lib/ test/ bin/ && jscs ."
 	},
-	"bin": {
-		"bender": "./bin/bender"
-	},
 	"repository": {
 		"type": "git",
 		"url": "http://github.com/benderjs/benderjs.git"
