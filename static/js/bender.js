@@ -99,6 +99,8 @@
 		};
 
 		this.error = function( error ) {
+			this.emit( 'error', error );
+
 			if ( supportsConsole ) {
 				console.log( JSON.parse( error ) );
 			}

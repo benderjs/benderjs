@@ -182,6 +182,10 @@
 			'>': '&gt;'
 		};
 
+		if ( typeof str !== 'string' ) {
+			return str;
+		}
+
 		return str.replace( /[&<>]/g, function( item ) {
 			return replacements[ item ] || item;
 		} );
@@ -318,6 +322,8 @@
 	 * Check for ignored tests and handle test start
 	 */
 	function start() {
+		bender.addListener( window, 'error', bender.error );
+
 		if ( bender.ignoreOldIE && isOldIE ) {
 			bender.ignore( {
 				module: testId
@@ -374,7 +380,6 @@
 		};
 	}
 
-	window.onerror = bender.error;
 	bender.config = window.BENDER_CONFIG;
 
 	bender.addListener = function( target, event, handler ) {
