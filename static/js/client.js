@@ -322,6 +322,8 @@
 	 * Check for ignored tests and handle test start
 	 */
 	function start() {
+		bender.addListener( window, 'error', bender.error );
+
 		if ( bender.ignoreOldIE && isOldIE ) {
 			bender.ignore( {
 				module: testId
@@ -378,7 +380,6 @@
 		};
 	}
 
-	window.onerror = bender.error;
 	bender.config = window.BENDER_CONFIG;
 
 	bender.addListener = function( target, event, handler ) {
