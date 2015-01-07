@@ -182,6 +182,10 @@
 			'>': '&gt;'
 		};
 
+		if ( typeof str !== 'string' ) {
+			return str;
+		}
+
 		return str.replace( /[&<>]/g, function( item ) {
 			return replacements[ item ] || item;
 		} );
