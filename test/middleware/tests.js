@@ -24,7 +24,8 @@ var mocks = require( '../fixtures/_mocks' ),
 	filesModule = rewire( '../../lib/files' ),
 	pluginsModule = rewire( '../../lib/plugins' ),
 	serverModule = require( '../../lib/server' ),
-	utilsModule = require( '../../lib/utils' );
+	utilsModule = require( '../../lib/utils' ),
+	Store = require( '../../lib/store' );
 
 describe( 'Middleware - Tests', function() {
 	var testHtml = fs.readFileSync( path.resolve( 'test/fixtures/tests/test/1.html' ) ).toString(),
@@ -36,7 +37,8 @@ describe( 'Middleware - Tests', function() {
 		bender.use( [ utilsModule, filesModule, pluginsModule, serverModule ] );
 		tests.init.bind( bender )( function() {} );
 		bender.init();
-		bender.middlewares = [ tests.build ];
+		bender.middlewares = new Store();
+		bender.middlewares.add( 'tests', tests.build );
 		instance = bender.server.create();
 	} );
 

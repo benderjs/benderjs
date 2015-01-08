@@ -25,9 +25,9 @@ describe( 'Page Builders - Regressions', function() {
 	before( function() {
 		oldAttach = regressions.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'conf' );
-		regressions.attach = oldAttach || mocks.attachPagebuilder( bender, regressions );
+		regressions.attach = oldAttach || mocks.attachPagebuilder( bender, 'regressions', regressions );
 		bender.use( regressions );
-		builder = bender.pagebuilders[ 0 ];
+		builder = bender.pagebuilders.get( 'regressions' );
 	} );
 
 	after( function() {

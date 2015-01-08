@@ -28,9 +28,9 @@ describe( 'Page Builders - Default', function() {
 	before( function() {
 		oldAttach = defaultBuilder.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'pagebuilders', 'utils' );
-		defaultBuilder.attach = oldAttach || mocks.attachPagebuilder( bender, defaultBuilder );
+		defaultBuilder.attach = oldAttach || mocks.attachPagebuilder( bender, 'default', defaultBuilder );
 		bender.use( [ filesModule, defaultBuilder ] );
-		builder = bender.pagebuilders[ 0 ].bind( bender );
+		builder = bender.pagebuilders.get( 'default' ).bind( bender );
 	} );
 
 	after( function() {

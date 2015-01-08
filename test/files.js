@@ -17,6 +17,7 @@ var mocks = require( './fixtures/_mocks' ),
 	fs = require( 'when/node' ).liftAll( require( 'graceful-fs' ) ),
 	path = require( 'path' ),
 	rewire = require( 'rewire' ),
+	Store = rewire( '../lib/store' ),
 	files = rewire( '../lib/files' );
 
 describe( 'Files', function() {
@@ -274,7 +275,8 @@ describe( 'Files', function() {
 			var file = bender.files.add( file1 ),
 				spy = sinon.spy();
 
-			bender.preprocessors = [ spy ];
+			bender.preprocessors = new Store();
+			bender.preprocessors.add( 'spy', spy );
 
 			return file.process()
 				.then( function() {

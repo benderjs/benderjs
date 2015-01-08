@@ -14,6 +14,7 @@ var moduleMocks,
 	path = require( 'path' ),
 	fs = require( 'fs' ),
 	_ = require( 'lodash' ),
+	Store = require( '../../lib/store' ),
 	EventEmitter = require( 'eventemitter2' ).EventEmitter2,
 	chaiAsPromised = require( 'chai-as-promised' );
 
@@ -59,11 +60,8 @@ moduleMocks = {
 	},
 
 	frameworks: function( bender ) {
-		bender.frameworks = {
-			test: {
-
-			}
-		};
+		bender.frameworks = new Store();
+		bender.frameworks.add( 'test', {} );
 	},
 
 	conf: function( bender ) {
@@ -313,7 +311,8 @@ moduleMocks = {
 			};
 		}
 
-		bender.middlewares = [ testMiddleware ];
+		bender.middlewares = new Store();
+		bender.middlewares.add( 'testMiddleware', testMiddleware );
 	},
 
 	pagebuilders: function( bender ) {
@@ -324,7 +323,8 @@ moduleMocks = {
 			return when.resolve( data );
 		}
 
-		bender.pagebuilders = [ testPagebuilder ];
+		bender.pagebuilders = new Store();
+		bender.pagebuilders.add( 'testPagebuilder', testPagebuilder );
 	},
 
 	plugins: function( bender ) {
@@ -338,24 +338,26 @@ moduleMocks = {
 			}
 		}, bender.plugins || {} );
 
-		bender.frameworks = {
-			test: {
-				css: [],
-				files: [],
-				js: [ 'framework-test/adapter.js' ],
-				name: 'test'
-			},
-			test2: {
-				css: [ 'framework-test/test.css' ],
-				files: [],
-				js: [],
-				name: 'test2'
-			}
-		};
-		bender.pagebuilders = bender.pagebuilders || [];
-		bender.testbuilders = bender.testbuilders || [];
-		bender.preprocessors = bender.preprocessors || [];
-		bender.reporters = {};
+		bender.frameworks = new Store();
+
+		bender.frameworks.add( 'test', {
+			css: [],
+			files: [],
+			js: [ 'framework-test/adapter.js' ],
+			name: 'test'
+		} );
+
+		bender.frameworks.add( 'test2', {
+			css: [ 'framework-test/test.css' ],
+			files: [],
+			js: [],
+			name: 'test2'
+		} );
+
+		bender.pagebuilders = bender.pagebuilders || new Store();
+		bender.testbuilders = bender.testbuilders || new Store();
+		bender.preprocessors = bender.preprocessors || new Store();
+		bender.reporters = new Store();
 	},
 
 	sockets: function( bender ) {
@@ -403,7 +405,8 @@ moduleMocks = {
 			return when.resolve( data );
 		}
 
-		bender.testbuilders = [ testBuilder ];
+		bender.testbuilders = new Store();
+		bender.testbuilders.add( 'testBuilder', testBuilder );
 	},
 
 	tests: function( bender ) {
@@ -545,17 +548,11 @@ module.exports.logger = {
 	debug: nop
 };
 
-module.exports.attachPagebuilder = function( bender, builder ) {
+module.exports.attachPagebuilder = function( bender, name, builder ) {
 	return function() {
-		var html = bender.plugins[ 'bender-pagebuilder-html' ],
-			idx;
+		var priority = bender.pagebuilders.getPriority( 'html' );
 
-		// add plugin before pagebuilder-html
-		if ( html && ( idx = bender.pagebuilders.indexOf( html.build ) ) > -1 ) {
-			bender.pagebuilders.splice( idx, 0, builder.build.bind( bender ) );
-		} else {
-			bender.pagebuilders.push( builder.build.bind( bender ) );
-		}
+		bender.pagebuilders.add( name, builder.build.bind( bender ), priority - 1 );
 	};
 };
 

@@ -23,7 +23,8 @@ var mocks = require( '../fixtures/_mocks' ),
 	appsModule = require( '../../lib/applications' ),
 	filesModule = require( '../../lib/files' ),
 	utilsModule = require( '../../lib/utils' ),
-	serverModule = require( '../../lib/server' );
+	serverModule = require( '../../lib/server' ),
+	Store = require( '../../lib/store' );
 
 describe( 'Middleware - Applications', function() {
 	var testFile = fs.readFileSync( path.resolve( 'test/fixtures/apps/test.js' ) ).toString(),
@@ -46,7 +47,8 @@ describe( 'Middleware - Applications', function() {
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'sockets' );
 		bender.preprocessors = [];
-		bender.middlewares = [ applications.build ];
+		bender.middlewares = new Store();
+		bender.middlewares.add( 'applications', applications.build );
 		bender.use( [ utilsModule, filesModule, serverModule, appsModule ] );
 		bender.init();
 		instance = bender.server.create();

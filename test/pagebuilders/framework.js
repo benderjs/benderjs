@@ -25,9 +25,9 @@ describe( 'Page Builders - Framework', function() {
 	before( function() {
 		oldAttach = framework.attach;
 		bender = mocks.getBender( 'applications', 'plugins' );
-		framework.attach = oldAttach || mocks.attachPagebuilder( bender, framework );
+		framework.attach = oldAttach || mocks.attachPagebuilder( bender, 'framework', framework );
 		bender.use( framework );
-		builder = bender.pagebuilders[ 0 ];
+		builder = bender.pagebuilders.get( 'framework' );
 	} );
 
 	after( function() {

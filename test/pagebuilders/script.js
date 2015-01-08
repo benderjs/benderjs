@@ -31,9 +31,9 @@ describe( 'Page Builders - Script', function() {
 	before( function() {
 		oldAttach = script.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'pagebuilders', 'utils' );
-		script.attach = oldAttach || mocks.attachPagebuilder( bender, script );
+		script.attach = oldAttach || mocks.attachPagebuilder( bender, 'script', script );
 		bender.use( [ script, filesModule ] );
-		builder = bender.pagebuilders[ 1 ].bind( bender );
+		builder = bender.pagebuilders.get( 'script' ).bind( bender );
 	} );
 
 	after( function() {

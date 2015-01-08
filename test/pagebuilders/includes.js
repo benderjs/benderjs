@@ -27,9 +27,9 @@ describe( 'Page Builders - Includes', function() {
 	before( function() {
 		oldAttach = includes.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'conf', 'jobs' );
-		includes.attach = oldAttach || mocks.attachPagebuilder( bender, includes );
+		includes.attach = oldAttach || mocks.attachPagebuilder( bender, 'includes', includes );
 		bender.use( [ utils, template, includes ] );
-		builder = bender.pagebuilders[ 0 ];
+		builder = bender.pagebuilders.get( 'includes' );
 	} );
 
 	after( function() {
