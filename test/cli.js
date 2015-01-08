@@ -16,10 +16,10 @@ var sinon = require( 'sinon' ),
 	rewire = require( 'rewire' ),
 	pkg = require( '../package.json' ),
 	cli = rewire( '../lib/cli' ),
+	main = cli.__get__( 'main' ),
 	oldWrite,
 	writeBuffer;
 
-var main = cli.__get__( 'main' );
 
 describe( 'CLI', function() {
 	before( function() {

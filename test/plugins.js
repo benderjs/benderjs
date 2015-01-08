@@ -178,7 +178,7 @@ describe( 'Plugins', function() {
 
 	it( 'should load middleware plugin', function() {
 		var bender = mocks.getBender(),
-			testPlugin = require( path.resolve( 'node_modules/middleware-test/' ) )
+			testPlugin = require( path.resolve( 'node_modules/middleware-test/' ) );
 
 		bender.conf = {
 			plugins: [ 'middleware-test' ]
