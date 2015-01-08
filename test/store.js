@@ -44,6 +44,21 @@ describe( 'Store', function() {
 		expect( store ).to.have.length( 1 );
 	} );
 
+	it( 'should overwrite an existing item with the same name', function() {
+		var store = new Store();
+
+		store.add( 'item1', item1 );
+		store.add( 'item1', item2 );
+
+		expect( store ).to.have.length( 1 );
+		expect( store.get( 'item1' ) ).to.equal( item2 );
+
+		var list = store.list();
+
+		expect( list ).to.have.length( 1 );
+		expect( list[ 0 ] ).to.equal( item2 );
+	} );
+
 	it( 'should return null if no item found', function() {
 		var store = new Store();
 
