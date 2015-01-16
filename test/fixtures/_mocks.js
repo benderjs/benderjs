@@ -109,8 +109,8 @@ moduleMocks = {
 				'Test': {
 					basePath: 'test/fixtures/tests/',
 					basePaths: [
-						'test',
-						'test*'
+						'test/fixtures/tests/',
+						'test/fixtures/tests/'
 					],
 					paths: [
 						'test*/fixtures/tests/test/**',
@@ -123,7 +123,7 @@ moduleMocks = {
 				'Test2': {
 					applications: [ 'test' ],
 					basePaths: [
-						'test'
+						'test/fixtures/tests/'
 					],
 					paths: [
 						'test/fixtures/tests/test2/**',
@@ -466,6 +466,10 @@ moduleMocks = {
 			return bender.conf.basePaths.some( function( basePath ) {
 				return file.indexOf( basePath ) === 0;
 			} );
+		};
+
+		bender.tests.getBasePaths = function() {
+			return when.resolve( [ 'test/fixtures/tests/' ] );
 		};
 	},
 
