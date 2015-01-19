@@ -15,6 +15,8 @@
 		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
 		supportsConsole = !!( window.console && window.console.log ),
 		launcher = opener || parent,
+		deferred = 0,
+		ready = false,
 		collapseEl,
 		resultsEl,
 		statusEl,
@@ -322,6 +324,8 @@
 	 * Check for ignored tests and handle test start
 	 */
 	function start() {
+		ready = true;
+
 		bender.addListener( window, 'error', bender.error );
 
 		if ( bender.ignoreOldIE && isOldIE ) {
@@ -334,7 +338,10 @@
 				bender.maximize();
 			}
 
-			bender.start();
+			// start test framework if no deferred callbacks
+			if ( !deferred ) {
+				bender.start();
+			}
 		}
 	}
 
@@ -400,6 +407,20 @@
 		} else {
 			target[ 'on' + event ] = null;
 		}
+	};
+
+	function unlock() {
+		deferred--;
+
+		if ( !deferred && ready ) {
+			bender.start();
+		}
+	}
+
+	bender.defer = function() {
+		deferred++;
+
+		return unlock;
 	};
 
 	window.alert = function( msg ) {
