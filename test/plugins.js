@@ -98,6 +98,43 @@ describe( 'Plugins', function() {
 		process.exit.restore();
 	} );
 
+	it( 'should exit Bender if plugin\'s name is wrong', function() {
+		var bender = mocks.getBender(),
+			exit = sinon.stub( process, 'exit' );
+
+		exit.throws();
+
+		bender.conf = {
+			plugins: [ 'invalid-plugin2' ]
+		};
+
+		expect( function() {
+			bender.use( plugins );
+			bender.plugins.load();
+		} ).to.throw();
+
+		process.exit.restore();
+	} );
+
+	it( 'should exit Bender if plugin\'s type is wrong', function() {
+		var bender = mocks.getBender(),
+			exit = sinon.stub( process, 'exit' );
+
+		exit.throws();
+
+		bender.conf = {
+			plugins: [ 'invalid-group' ]
+		};
+
+		expect( function() {
+			bender.use( plugins );
+			bender.plugins.load();
+		} ).to.throw();
+
+		process.exit.restore();
+	} );
+
+
 	it( 'should load framework plugin', function() {
 		var bender = mocks.getBender();
 
