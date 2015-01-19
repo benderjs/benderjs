@@ -109,11 +109,10 @@ moduleMocks = {
 				'Test': {
 					basePath: 'test/fixtures/tests/',
 					basePaths: [
-						'test/fixtures/tests/',
-						'test/fixtures/tests/'
+						'test/fixtures/tests/test/**'
 					],
 					paths: [
-						'test*/fixtures/tests/test/**',
+						'test/**',
 						'!**/_assets/**'
 					],
 					regressions: {
@@ -122,11 +121,12 @@ moduleMocks = {
 				},
 				'Test2': {
 					applications: [ 'test' ],
+					basePath: 'test/fixtures/tests/',
 					basePaths: [
-						'test/fixtures/tests/'
+						'test/fixtures/tests/test2/**'
 					],
 					paths: [
-						'test/fixtures/tests/test2/**',
+						'test2/**',
 						'!**/_assets/**'
 					]
 				}

@@ -176,9 +176,30 @@ describe( 'Tests', function() {
 			} );
 	} );
 
-	it( 'should check if file is located in tests\' directory', function() {
+	it( 'should check if a file is located in the tests directory', function() {
 		expect( bender.tests.checkPath( 'test/fixtures/tests/test/1.js' ) ).to.be.true;
 		expect( bender.tests.checkPath( 'test/fixtures/tests/_assets/file.js' ) ).to.be.true;
 		expect( bender.tests.checkPath( 'invalid/test/file.js' ) ).to.be.false;
+	} );
+
+	it( 'should return basePaths of a test group', function() {
+		var expected = [ 'test/fixtures/tests/test' ],
+			expected2 = [ 'test/fixtures/tests/test2' ];
+
+		return bender.tests.getBasePaths( 'Test' )
+			.then( function( paths ) {
+				expect( paths ).to.deep.equal( expected );
+
+				return bender.tests.getBasePaths( 'Test2' );
+			} )
+			.then( function( paths ) {
+				expect( paths ).to.deep.equal( expected2 );
+			} );
+	} );
+
+	it( 'should reject with an error when no group found for getBasePaths()', function() {
+		var promise = bender.tests.getBasePaths( 'Unknown' );
+
+		return expect( promise ).to.be.rejectedWith( 'There\'s no group: Unknown' );
 	} );
 } );
