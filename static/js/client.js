@@ -15,8 +15,6 @@
 		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
 		supportsConsole = !!( window.console && window.console.log ),
 		launcher = opener || parent,
-		deferred = 0,
-		ready = false,
 		collapseEl,
 		resultsEl,
 		statusEl,
@@ -389,6 +387,12 @@
 
 	bender.config = window.BENDER_CONFIG;
 
+	/**
+	 * Attach an event listener to a target
+	 * @param {Element}  target  Target element
+	 * @param {String}   event   Name of an event to attach to
+	 * @param {Function} handler Handler function
+	 */
 	bender.addListener = function( target, event, handler ) {
 		if ( target.addEventListener ) {
 			target.addEventListener( event, handler, false );
@@ -399,6 +403,12 @@
 		}
 	};
 
+	/**
+	 * Detach an event listener from a target
+	 * @param  {Element}  target  Target element
+	 * @param  {String}   event   Name of an event
+	 * @param  {Function} handler Handler function
+	 */
 	bender.removeListener = function( target, event, handler ) {
 		if ( target.removeEventListener ) {
 			target.removeEventListener( event, handler, false );
@@ -409,17 +419,46 @@
 		}
 	};
 
+	var deferred = 0,
+		ready = false,
+		defermentTimeout;
+
+	/**
+	 * Reset deferment unlock timeout
+	 */
+	function resetDefermentTimeout() {
+		clearTimeout( defermentTimeout );
+
+		defermentTimeout = setTimeout( function() {
+			throw new Error( 'Deferment unlock timeout - please check your plugins' );
+		}, bender.config.defermentTimeout );
+	}
+
+	/**
+	 * Decrease deferred callback counter and start Bender if no more callbacks to wait for
+	 */
 	function unlock() {
 		deferred--;
 
+		// no more deffered callback to wait for and the DOM is ready
 		if ( !deferred && ready ) {
+			clearTimeout( defermentTimeout );
 			bender.start();
 		}
 	}
 
+	/**
+	 * Defer the startup of Bender tests
+	 * @return {Function} Unlock function
+	 */
 	bender.defer = function() {
+		// increase deferred count
 		deferred++;
 
+		// setup a timeout
+		resetDefermentTimeout();
+
+		// return the unlock function
 		return unlock;
 	};
 
