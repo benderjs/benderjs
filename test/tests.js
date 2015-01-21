@@ -183,8 +183,8 @@ describe( 'Tests', function() {
 	} );
 
 	it( 'should return basePaths of a test group', function() {
-		var expected = [ 'test/fixtures/tests/', 'test/fixtures/tests/test' ],
-			expected2 = [ 'test/fixtures/tests/', 'test/fixtures/tests/test2' ];
+		var expected = [ 'test/fixtures/tests/' ],
+			expected2 = [ 'test/fixtures/tests/' ];
 
 		return bender.tests.getBasePaths( 'Test' )
 			.then( function( paths ) {
