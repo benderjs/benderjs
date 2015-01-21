@@ -65,24 +65,11 @@ describe( 'Files', function() {
 	it( 'should get a file from the store', function() {
 		var file = bender.files.add( file1 );
 
-		return bender.files.get( file1 )
-			.then( function( result ) {
-				expect( result ).to.equal( file );
-			} );
+		expect( bender.files.get( file1 ) ).to.equal( file );
 	} );
 
 	it( 'should add a file to the store if not found while getting it but exists in the FS', function() {
-		return bender.files.get( file1 )
-			.then( function( file ) {
-				expect( file ).to.be.instanceof( bender.files.File );
-			} );
-	} );
-
-	it( 'should return null if file not found while getting from the store and does not exist in the FS', function() {
-		return bender.files.get( fileUnknown )
-			.then( function( result ) {
-				expect( result ).to.be.null;
-			} );
+		expect( bender.files.get( file1 ) ).to.be.instanceof( bender.files.File );
 	} );
 
 	it( 'should remove a file from the store', function() {
@@ -123,30 +110,25 @@ describe( 'Files', function() {
 		bender.files.send( file1, req, res );
 	} );
 
-	it( 'should override oldPath while sending a file', function( done ) {
+	it( 'should override originalPath while sending a file', function( done ) {
 		var file = bender.files.add( file1 ),
 			req = mocks.createFakeRequest(),
 			res = mocks.createFakeResponse( function() {
-				expect( file.oldPath ).to.equal( file2 );
-				expect( bender.files.store ).to.have.keys( [ file2 ] );
+				expect( file.originalPath ).to.equal( file2 );
 				done();
 			} );
 
-		expect( file.oldPath ).to.equal( file1 );
+		expect( file.originalPath ).to.equal( file1 );
 
-		bender.files.send( file1, req, res, function() {}, file2 );
+		bender.files.send( file1, req, res, file2 );
 	} );
 
 
-	it( 'should execute error callback if no file found to be send', function( done ) {
-		var spy = sinon.spy(),
-			req = mocks.createFakeRequest(),
-			res = mocks.createFakeResponse( spy );
+	it( 'should reject a promise if no file found to be send', function() {
+		var req = mocks.createFakeRequest(),
+			res = mocks.createFakeResponse();
 
-		bender.files.send( fileUnknown, req, res, function() {
-			expect( spy.called ).to.be.false;
-			done();
-		} );
+		return expect( bender.files.send( fileUnknown, req, res ) ).to.be.rejected;
 	} );
 
 	it( 'should check if the given path matches given patterns', function() {
@@ -177,10 +159,10 @@ describe( 'Files', function() {
 			} );
 	} );
 
-	it( 'should reject with file not found error', function() {
+	it( 'should reject a promise when file not found', function() {
 		var promise = bender.files.read( fileUnknown );
 
-		return expect( promise ).to.be.rejectedWith( 'File not found: ' + fileUnknown );
+		return expect( promise ).to.be.rejected;
 	} );
 
 	describe( 'File', function() {
@@ -315,16 +297,13 @@ describe( 'Files', function() {
 			file.send( req, res );
 		} );
 
-		it( 'should call errCallback if something goes wrong while sending', function( done ) {
+		it( 'should reject a promise if something goes wrong while sending', function() {
 			var file = bender.files.add( fileUnknown ),
 				spySuccess = sinon.spy(),
 				req = mocks.createFakeRequest(),
 				res = mocks.createFakeResponse( spySuccess );
 
-			file.send( req, res, function() {
-				expect( spySuccess.called ).to.be.false;
-				done();
-			} );
+			return expect( file.send( req, res ) ).to.be.rejected;
 		} );
 	} );
 } );
