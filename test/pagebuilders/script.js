@@ -72,20 +72,15 @@ describe( 'Page Builders - Script', function() {
 
 	it( 'should load job\'s script from the job\'s directory', function() {
 		var data = {
-				jobId: 'foo',
-				snapshot: true,
-				js: 'fixtures/tests/test/1.js',
-				parts: []
-			},
-			expected = '.bender/jobs/' + data.jobId + '/tests/' + data.js;
-
-		function handle( err ) {
-			expect( err ).to.equal( 'File not found: ' + expected.replace( /\//g, path.sep ) );
-		}
+			jobId: 'foo',
+			snapshot: true,
+			js: 'fixtures/tests/test/1.js',
+			parts: []
+		};
 
 		data = builder( data );
 
-		return data.parts[ 0 ].then( handle, handle );
+		return expect( data.parts[ 0 ] ).to.be.rejected;
 	} );
 
 	it( 'should not alter data if no script specified', function() {

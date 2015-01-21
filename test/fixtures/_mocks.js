@@ -240,7 +240,9 @@ moduleMocks = {
 			jobs: jobs,
 
 			getApp: function( jobId, name ) {
-				return when.resolve( ( name === 'test' || name === 'test2' ) ? bender.applications.get( name ) : null );
+				return when.resolve( jobId === 'AYIlcxZa1i1nhLox' &&
+					( name === 'test' || name === 'test2' ) ?
+					bender.applications.get( name ) : null );
 			},
 
 			getTask: function( jobId, taskId ) {
