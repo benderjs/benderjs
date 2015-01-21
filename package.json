@@ -5,8 +5,10 @@
 	"keywords": [
 		"test",
 		"unit",
-		"cli",
-		"JavaScript"
+		"remote",
+		"testing",
+		"bender",
+		"benderjs"
 	],
 	"homepage": "http://benderjs.com/",
 	"scripts": {
