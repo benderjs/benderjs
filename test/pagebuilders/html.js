@@ -31,9 +31,9 @@ describe( 'Page Builders - Html', function() {
 	before( function() {
 		oldAttach = html.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'pagebuilders', 'utils' );
-		html.attach = oldAttach || mocks.attachPagebuilder( bender, html );
+		html.attach = oldAttach || mocks.attachPagebuilder( bender, 'html', html );
 		bender.use( [ html, filesModule ] );
-		builder = bender.pagebuilders[ 1 ].bind( bender );
+		builder = bender.pagebuilders.get( 'html' ).bind( bender );
 	} );
 
 	after( function() {
@@ -73,7 +73,7 @@ describe( 'Page Builders - Html', function() {
 		} );
 	} );
 
-	it( 'should load job\'s HTML from the job\'s directory', function( done ) {
+	it( 'should load job\'s HTML from the job\'s directory', function() {
 		var data = {
 				jobId: 'foo',
 				snapshot: true,
@@ -86,17 +86,9 @@ describe( 'Page Builders - Html', function() {
 			expected = path.resolve( expected );
 		}
 
-		function handle( err ) {
-			expect( err ).to.equal(
-				'File not found: ' + '.bender/jobs/foo/tests/fixtures/tests/test/1.html'.replace( /\//g, path.sep )
-			);
-
-			done();
-		}
-
 		data = builder( data );
 
-		return data.parts[ 0 ].done( handle, handle );
+		return expect( data.parts[ 0 ] ).to.be.rejected;
 	} );
 
 	it( 'should not alter data if no html specified', function() {

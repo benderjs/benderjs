@@ -12,10 +12,10 @@
 'use strict';
 
 var mocks = require( './fixtures/_mocks' ),
-	_ = require( 'lodash' ),
 	path = require( 'path' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
+	sinon = require( 'sinon' ),
 	tests = rewire( '../lib/tests' );
 
 describe( 'Tests', function() {
@@ -84,6 +84,34 @@ describe( 'Tests', function() {
 			} );
 	} );
 
+	it( 'should list tests using the cache for the second attempt', function() {
+		var stub = sinon.stub();
+
+		stub.returnsArg( 0 );
+
+		bender.testbuilders.add( 'stub', stub );
+
+		expect( bender.tests.statsCache ).to.be.empty;
+
+		var tmp;
+
+		return bender.tests.list()
+			.then( function( tests ) {
+				expect( tests ).to.be.not.empty;
+
+				tmp = tests;
+
+				expect( stub.callCount ).to.equal( 2 );
+
+				return bender.tests.list();
+			} )
+			.then( function( tests ) {
+				expect( tests ).to.deep.equal( tmp );
+
+				expect( stub.callCount ).to.equal( 2 );
+			} );
+	} );
+
 	it( 'should return a single unit test specified in the configuration file', function() {
 		return bender.tests.get( 'test/fixtures/tests/test/1' )
 			.then( function( test ) {
@@ -95,6 +123,29 @@ describe( 'Tests', function() {
 						expect( test ).to.be.an( 'object' );
 						expect( test.group ).to.equal( 'Test2' );
 					} );
+			} );
+	} );
+
+	it( 'should return a single unit test data from the cache', function() {
+		var stub = sinon.stub();
+
+		stub.returnsArg( 0 );
+
+		bender.testbuilders.add( 'stub', stub );
+
+		expect( bender.tests.statsCache ).to.be.empty;
+
+		return bender.tests.get( 'test/fixtures/tests/test/1' )
+			.then( function( test ) {
+				expect( test ).to.exist;
+				expect( bender.tests.statsCache ).to.not.be.empty;
+				expect( stub.callCount ).to.equal( 1 );
+
+				return bender.tests.get( 'test/fixtures/tests/test/1' );
+			} )
+			.then( function( test ) {
+				expect( test ).to.exist;
+				expect( stub.callCount ).to.equal( 1 );
 			} );
 	} );
 
@@ -125,71 +176,30 @@ describe( 'Tests', function() {
 			} );
 	} );
 
-	it( 'should check if file is located in tests\' directory', function() {
+	it( 'should check if a file is located in the tests directory', function() {
 		expect( bender.tests.checkPath( 'test/fixtures/tests/test/1.js' ) ).to.be.true;
 		expect( bender.tests.checkPath( 'test/fixtures/tests/_assets/file.js' ) ).to.be.true;
 		expect( bender.tests.checkPath( 'invalid/test/file.js' ) ).to.be.false;
 	} );
 
-	it( 'should list all files found in the test groups basePaths', function() {
-		return bender.tests.readBasePaths()
-			.then( function( files ) {
-				expect( files ).to.have.keys( [ 'test/fixtures/tests/' ] );
-				expect( files[ 'test/fixtures/tests/' ] ).to.have.length( 23 );
+	it( 'should return basePaths of a test group', function() {
+		var expected = [ 'test/fixtures/tests/' ],
+			expected2 = [ 'test/fixtures/tests/' ];
 
-				files[ 'test/fixtures/tests/' ].forEach( function( file ) {
-					expect( file ).to.have.keys( [ 'name', 'dir', 'path', 'stats' ] );
-				} );
-			} );
+		return bender.tests.getBasePaths( 'Test' )
+			.then( function( paths ) {
+				expect( paths ).to.deep.equal( expected );
 
-	} );
-
-	it( 'should use group\'s data taken from cache if no changes in files were made since last check', function() {
-		var group = _.merge( {
-				framework: bender.conf.framework,
-				name: 'Test'
-			}, bender.conf.tests.Test ),
-			files;
-
-		return bender.tests.readBasePaths()
-			.then( function( result ) {
-				files = result;
-
-				return bender.tests.buildGroup( group, 'Test', files[ group.basePath ] );
+				return bender.tests.getBasePaths( 'Test2' );
 			} )
-			.then( function() {
-				return bender.tests.buildGroup( group, 'Test', files[ group.basePath ] );
-			} )
-			.then( function( data ) {
-				// returned value should be a reference to cached group
-				expect( data ).to.equal( bender.tests.testsCache.Test );
+			.then( function( paths ) {
+				expect( paths ).to.deep.equal( expected2 );
 			} );
 	} );
 
-	it( 'should use tests\'s data taken from cache if no changes in files were made', function() {
-		var group = _.merge( {
-				framework: bender.conf.framework,
-				name: 'Test'
-			}, bender.conf.tests.Test ),
-			id = 'test/fixtures/tests/test/1',
-			files;
+	it( 'should reject with an error when no group found for getBasePaths()', function() {
+		var promise = bender.tests.getBasePaths( 'Unknown' );
 
-		return bender.tests.readBasePaths()
-			.then( function( result ) {
-				files = result;
-
-				return bender.tests.buildGroup( group, 'Test', files[ group.basePath ] );
-			} )
-			.then( function() {
-				return bender.tests.get( id );
-			} )
-			.then( function( data ) {
-				var expected = _.find( bender.tests.testsCache.Test, {
-					id: id
-				} );
-
-				// returned value should be a reference to cached test
-				expect( data ).to.equal( expected );
-			} );
+		return expect( promise ).to.be.rejectedWith( 'There\'s no group: Unknown' );
 	} );
 } );

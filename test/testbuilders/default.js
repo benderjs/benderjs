@@ -53,7 +53,7 @@ describe( 'Test Builders - Default', function() {
 	before( function() {
 		oldAttach = defaultBuilder.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'testbuilders', 'utils' );
-		defaultBuilder.attach = oldAttach || mocks.attachPagebuilder( bender, defaultBuilder );
+		defaultBuilder.attach = oldAttach || mocks.attachPagebuilder( bender, 'default', defaultBuilder );
 		bender.use( defaultBuilder );
 	} );
 
@@ -66,7 +66,7 @@ describe( 'Test Builders - Default', function() {
 	} );
 
 	it( 'should be attached as a first page builder', function() {
-		expect( bender.testbuilders[ 0 ] ).to.equal( defaultBuilder.build );
+		expect( bender.testbuilders.getPriority( 'default' ) ).to.equal( bender.testbuilders.getHighestPriority() );
 	} );
 
 	it( 'should prepare tests from the given file list', function() {

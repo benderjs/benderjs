@@ -23,7 +23,7 @@ describe( 'Page Builders - Test Data', function() {
 	before( function() {
 		oldAttach = testdata.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'conf' );
-		testdata.attach = oldAttach || mocks.attachPagebuilder( bender, testdata );
+		testdata.attach = oldAttach || mocks.attachPagebuilder( bender, 'testdata', testdata );
 		bender.use( testdata );
 	} );
 

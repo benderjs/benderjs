@@ -25,9 +25,9 @@ describe( 'Page Builders - Plugins', function() {
 	before( function() {
 		oldAttach = plugins.attach;
 		bender = mocks.getBender( 'applications', 'plugins' );
-		plugins.attach = oldAttach || mocks.attachPagebuilder( bender, plugins );
+		plugins.attach = oldAttach || mocks.attachPagebuilder( bender, 'plugins', plugins );
 		bender.use( plugins );
-		builder = bender.pagebuilders[ 0 ];
+		builder = bender.pagebuilders.get( 'plugins' );
 	} );
 
 	after( function() {

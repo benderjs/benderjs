@@ -24,7 +24,7 @@ describe( 'Page Builders - Applications', function() {
 	before( function() {
 		oldAttach = applications.attach;
 		bender = mocks.getBender( 'applications', 'plugins' );
-		applications.attach = oldAttach || mocks.attachPagebuilder( bender, applications );
+		applications.attach = oldAttach || mocks.attachPagebuilder( bender, 'applications', applications );
 		bender.use( applications );
 	} );
 

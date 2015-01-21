@@ -35,7 +35,7 @@ describe( 'Test Builders - Manual', function() {
 	before( function() {
 		oldAttach = manualBuilder.attach;
 		bender = mocks.getBender( 'applications', 'plugins', 'testbuilders', 'utils' );
-		manualBuilder.attach = oldAttach || mocks.attachPagebuilder( bender, manualBuilder );
+		manualBuilder.attach = oldAttach || mocks.attachPagebuilder( bender, 'manual', manualBuilder );
 		bender.use( manualBuilder );
 	} );
 

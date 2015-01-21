@@ -9,9 +9,15 @@ The anti-human approach to JavaScript testing.
 Installation
 ------------
 
+To install Bender.js locally use:
+
 ```
-$ [sudo] npm install -g benderjs
+$ [sudo] npm install benderjs
 ```
+
+To simplify your work with Bender.js we highly encourage you to use [benderjs-cli](https://github.com/benderjs/benderjs-cli) module.
+
+**Warning**: All the following code samples assume you have `benderjs-cli` installed globally.
 
 Configuration
 -------------

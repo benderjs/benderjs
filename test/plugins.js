@@ -98,6 +98,43 @@ describe( 'Plugins', function() {
 		process.exit.restore();
 	} );
 
+	it( 'should exit Bender if plugin\'s name is wrong', function() {
+		var bender = mocks.getBender(),
+			exit = sinon.stub( process, 'exit' );
+
+		exit.throws();
+
+		bender.conf = {
+			plugins: [ 'invalid-plugin2' ]
+		};
+
+		expect( function() {
+			bender.use( plugins );
+			bender.plugins.load();
+		} ).to.throw();
+
+		process.exit.restore();
+	} );
+
+	it( 'should exit Bender if plugin\'s type is wrong', function() {
+		var bender = mocks.getBender(),
+			exit = sinon.stub( process, 'exit' );
+
+		exit.throws();
+
+		bender.conf = {
+			plugins: [ 'invalid-group' ]
+		};
+
+		expect( function() {
+			bender.use( plugins );
+			bender.plugins.load();
+		} ).to.throw();
+
+		process.exit.restore();
+	} );
+
+
 	it( 'should load framework plugin', function() {
 		var bender = mocks.getBender();
 
@@ -108,7 +145,7 @@ describe( 'Plugins', function() {
 		bender.use( plugins );
 		bender.plugins.load();
 
-		expect( bender.frameworks ).to.include.key( 'test' );
+		expect( bender.frameworks.get( 'test' ) ).to.be.an( 'object' );
 	} );
 
 	it( 'should load pagebuilder plugin', function() {
@@ -122,7 +159,7 @@ describe( 'Plugins', function() {
 		bender.plugins.load();
 
 		expect( bender.pagebuilders ).to.have.length( 1 );
-		expect( bender.pagebuilders[ 0 ] ).to.be.a( 'function' );
+		expect( bender.pagebuilders.get( 'test' ) ).to.be.a( 'function' );
 	} );
 
 	it( 'should always load pagebuilders before bender-pagebuilder-html', function() {
@@ -135,14 +172,11 @@ describe( 'Plugins', function() {
 		bender.use( plugins );
 		bender.plugins.add( htmlbuilder );
 
-		var html = bender.pagebuilders[ 0 ];
-
 		bender.plugins.load();
 
 		expect( bender.pagebuilders ).to.have.length( 2 );
 
-		// workaround for an error thrown while comparing two bound functions
-		expect( bender.pagebuilders[ 1 ] === html ).to.be.truthy;
+		expect( bender.pagebuilders.getPriority( 'html' ) ).to.be.above( bender.pagebuilders.getPriority( 'test' ) );
 	} );
 
 	it( 'should load testbuilder plugin', function() {
@@ -156,7 +190,7 @@ describe( 'Plugins', function() {
 		bender.plugins.load();
 
 		expect( bender.testbuilders ).to.have.length( 1 );
-		expect( bender.testbuilders[ 0 ] ).to.be.a( 'function' );
+		expect( bender.testbuilders.get( 'test' ) ).to.be.a( 'function' );
 	} );
 
 	it( 'should load reporter plugin', function() {
@@ -170,7 +204,7 @@ describe( 'Plugins', function() {
 		bender.use( plugins );
 		bender.plugins.load();
 
-		expect( bender.reporters ).to.include.key( 'test' );
+		expect( bender.reporters.get( 'test' ) ).to.be.an( 'object' );
 
 		bender.on( 'test:callback', function( param ) {
 			expect( param ).to.equal( testParam );
@@ -190,7 +224,7 @@ describe( 'Plugins', function() {
 		bender.use( plugins );
 		bender.plugins.load();
 
-		expect( bender.middlewares ).to.contain( testPlugin.build );
+		expect( bender.middlewares.get( 'test' ) ).to.equal( testPlugin.build );
 	} );
 
 	it( 'should load preprocessor plugin', function() {
@@ -204,7 +238,7 @@ describe( 'Plugins', function() {
 		bender.use( plugins );
 		bender.plugins.load();
 
-		expect( bender.preprocessors ).to.contain( testPlugin.process );
+		expect( bender.preprocessors.get( 'test' ) ).to.equal( testPlugin.process );
 	} );
 
 	it( 'should load advanced plugin containing its own attach function', function() {
@@ -218,9 +252,9 @@ describe( 'Plugins', function() {
 		bender.plugins.load();
 
 		expect( bender.pagebuilders ).to.have.length( 1 );
-		expect( bender.pagebuilders[ 0 ] ).to.be.a( 'function' );
+		expect( bender.pagebuilders.get( 'test' ) ).to.be.a( 'function' );
 		expect( bender.testbuilders ).to.have.length( 1 );
-		expect( bender.testbuilders[ 0 ] ).to.be.a( 'function' );
+		expect( bender.testbuilders.get( 'test' ) ).to.be.a( 'function' );
 	} );
 
 	it( 'should check if a file was defined in plugins', function() {
@@ -250,7 +284,7 @@ describe( 'Plugins', function() {
 		bender.use( plugins );
 		bender.plugins.load();
 
-		expect( bender.frameworks ).to.include.key( 'test' );
+		expect( bender.frameworks.get( 'test' ) ).to.be.an( 'object' );
 	} );
 
 	it( 'should support wildcards in plugin definition list', function() {
@@ -264,8 +298,8 @@ describe( 'Plugins', function() {
 		bender.use( plugins );
 		bender.plugins.load();
 
-		expect( bender.middlewares ).to.contain( testPlugin.build );
-		expect( bender.reporters ).to.include.key( 'test' );
+		expect( bender.middlewares.get( 'test' ) ).to.equal( testPlugin.build );
+		expect( bender.reporters.get( 'test' ) ).to.be.an( 'object' );
 	} );
 
 	it( 'should save files to include in the test context', function() {

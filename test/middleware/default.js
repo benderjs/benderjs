@@ -22,7 +22,8 @@ var mocks = require( '../fixtures/_mocks' ),
 	vm = require( 'vm' ),
 	defaultMiddleware = rewire( '../../lib/middlewares/default' ),
 	utils = require( '../../lib/utils' ),
-	serverModule = require( '../../lib/server' );
+	serverModule = require( '../../lib/server' ),
+	Store = require( '../../lib/store' );
 
 describe( 'Middleware - Default', function() {
 	var bender,
@@ -30,7 +31,8 @@ describe( 'Middleware - Default', function() {
 
 	beforeEach( function() {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets' );
-		bender.middlewares = [ defaultMiddleware.build ];
+		bender.middlewares = new Store();
+		bender.middlewares.add( 'default', defaultMiddleware.build );
 		bender.use( [ serverModule, utils ] );
 		bender.init();
 		instance = bender.server.create();

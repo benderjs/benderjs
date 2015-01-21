@@ -20,9 +20,11 @@ var mocks = require( '../fixtures/_mocks' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
 	jobs = rewire( '../../lib/middlewares/jobs' ),
+	applicationsModule = require( '../../lib/applications' ),
 	filesModule = require( '../../lib/files' ),
 	serverModule = require( '../../lib/server' ),
-	utilsModule = require( '../../lib/utils' );
+	utilsModule = require( '../../lib/utils' ),
+	Store = require( '../../lib/store' );
 
 describe( 'Middleware - Jobs', function() {
 	var oldCwd = process.cwd,
@@ -30,10 +32,11 @@ describe( 'Middleware - Jobs', function() {
 		instance;
 
 	beforeEach( function() {
-		bender = mocks.getBender( 'conf', 'utils', 'applications', 'sockets', 'jobs', 'template' );
-		bender.middlewares = [ jobs.build ];
+		bender = mocks.getBender( 'conf', 'utils', 'sockets', 'jobs', 'template' );
+		bender.middlewares = new Store();
+		bender.middlewares.add( 'jobs', jobs.build );
 		bender.preprocessors = [];
-		bender.use( [ filesModule, serverModule, utilsModule ] );
+		bender.use( [ applicationsModule, filesModule, serverModule, utilsModule ] );
 		bender.init();
 		instance = bender.server.create();
 

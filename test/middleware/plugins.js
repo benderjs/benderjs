@@ -23,7 +23,8 @@ var mocks = require( '../fixtures/_mocks' ),
 	filesModule = rewire( '../../lib/files' ),
 	pluginsModule = rewire( '../../lib/plugins' ),
 	utilsModule = rewire( '../../lib/utils' ),
-	serverModule = require( '../../lib/server' );
+	serverModule = require( '../../lib/server' ),
+	Store = require( '../../lib/store' );
 
 describe( 'Middleware - Plugins', function() {
 	var oldCwd,
@@ -53,7 +54,8 @@ describe( 'Middleware - Plugins', function() {
 		bender.conf.plugins = [ 'framework-test' ];
 		bender.use( [ utilsModule, filesModule, pluginsModule, serverModule ] );
 		bender.plugins.load();
-		bender.middlewares = [ plugins.build ];
+		bender.middlewares = new Store();
+		bender.middlewares.add( 'plugins', plugins.build );
 		bender.init();
 		instance = bender.server.create();
 	} );
