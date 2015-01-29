@@ -15,16 +15,25 @@ var mocks = require( '../fixtures/_mocks' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	path = require( 'path' ),
+	marked = require( 'marked' ),
 	_ = require( 'lodash' ),
+	when = require( 'when/node' ),
+	read = when.lift( require( 'graceful-fs' ).readFile ),
 	template = require( '../../lib/template' ),
 	filesModule = require( '../../lib/files' ),
 	utils = require( '../../lib/utils' ),
 	manual = rewire( '../../lib/pagebuilders/manual' );
 
 describe( 'Page Builders - Includes', function() {
-	var oldAttach,
+	var templatePath = 'static/manual.html',
+		directivePattern = /@bender\-([\w\-]+)\:([\w \-\.\/\\\:\?\+\$@~_,=#%';!]+)/gi,
+		oldAttach,
 		builder,
 		bender;
+
+	function normalizeHTML( html ) {
+		return html.replace( /\s+/g, '' );
+	}
 
 	before( function() {
 		oldAttach = manual.attach;
@@ -64,15 +73,44 @@ describe( 'Page Builders - Includes', function() {
 			parts: []
 		};
 
+		var templatePromise = read( templatePath );
+		var template;
+
+		var scriptPromise = read( data.script );
+		var script;
+
 		var result = builder( data );
 
-		var promise = result.parts[ 0 ];
+		expect( result.parts[ 0 ] ).to.exist;
 
-		return promise.then( function( result ) {
-			expect( result ).to.be.a( 'string' );
+		var builderPromise = result.parts[ 0 ];
 
-			// TODO compare the contents
-		} );
+
+		return templatePromise
+			.then( function( content ) {
+				template = content.toString();
+
+				return scriptPromise;
+			} )
+			.then( function( content ) {
+				script = content.toString();
+
+				// remove directives
+				script = script.replace( directivePattern, '' );
+
+				// convert MD to HTML
+				script = marked( script );
+
+				// inject the script into the template
+				template = template.replace( /%SCRIPT%/, script );
+
+				return builderPromise;
+			} )
+			.then( function( result ) {
+				expect( result ).to.be.a( 'string' );
+
+				expect( normalizeHTML( result ) ).to.equal( normalizeHTML( template ) );
+			} );
 	} );
 
 	it( 'should handle a manual test in a job', function() {
@@ -86,7 +124,7 @@ describe( 'Page Builders - Includes', function() {
 		var oldDirname = manual.__get__( '__dirname' );
 
 		manual.__set__( '__dirname', '../' );
-		// <<< a hack to force bender.files to read files form the test fixtures >>>
+		// <<< a hack to force bender.files to read files form the test fixtures
 
 		var data = {
 			id: 'test2/3',
@@ -98,18 +136,48 @@ describe( 'Page Builders - Includes', function() {
 			parts: []
 		};
 
+		var templatePromise = read( templatePath );
+		var template;
+
+		var scriptPromise = read( path.join( 'test/fixtures/tests/', data.script ) );
+		var script;
+
 		var result = builder( data );
 
-		var promise = result.parts[ 0 ];
+		expect( result.parts[ 0 ] ).to.exist;
 
-		return promise.then( function( result ) {
-			expect( result ).to.be.a( 'string' );
+		var builderPromise = result.parts[ 0 ];
 
-			// TODO compare the contents
-		} ).finally( function() {
-			bender.files.get = oldFileGet;
-			manual.__set__( '__dirname', oldDirname );
-		} );
+
+		return templatePromise
+			.then( function( content ) {
+				template = content.toString();
+
+				return scriptPromise;
+			} )
+			.then( function( content ) {
+				script = content.toString();
+
+				// remove directives
+				script = script.replace( directivePattern, '' );
+
+				// convert MD to HTML
+				script = marked( script );
+
+				// inject the script into the template
+				template = template.replace( /%SCRIPT%/, script );
+
+				return builderPromise;
+			} )
+			.then( function( result ) {
+				expect( result ).to.be.a( 'string' );
+
+				expect( normalizeHTML( result ) ).to.equal( normalizeHTML( template ) );
+			} )
+			.finally( function() {
+				bender.files.get = oldFileGet;
+				manual.__set__( '__dirname', oldDirname );
+			} );
 	} );
 
 	it( 'should strip test directives from the produced html', function() {
@@ -120,13 +188,12 @@ describe( 'Page Builders - Includes', function() {
 				script: 'test/fixtures/tests/test2/4.md',
 				parts: []
 			},
-			pattern = /@bender\-([\w\-]+)\:([\w \-\.\/\\\:\?\+\$@~_,=#%';!]+)/gi,
 			result = builder( data ),
 			promise = result.parts[ 0 ];
 
 		return promise.then( function( result ) {
 			expect( result ).to.be.a( 'string' );
-			expect( result ).to.not.match( pattern );
+			expect( result ).to.not.match( directivePattern );
 		} );
 	} );
 } );
