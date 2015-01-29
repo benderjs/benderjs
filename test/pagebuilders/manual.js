@@ -66,25 +66,21 @@ describe( 'Page Builders - Includes', function() {
 
 	it( 'should add a promise for a template for a manual test page', function() {
 		var data = {
-			id: 'test/fixtures/tests/test2/3',
-			js: 'test/fixtures/tests/test2/3.js',
-			manual: true,
-			script: 'test/fixtures/tests/test2/3.md',
-			parts: []
-		};
-
-		var templatePromise = read( templatePath );
-		var template;
-
-		var scriptPromise = read( data.script );
-		var script;
-
-		var result = builder( data );
+				id: 'test/fixtures/tests/test2/3',
+				js: 'test/fixtures/tests/test2/3.js',
+				manual: true,
+				script: 'test/fixtures/tests/test2/3.md',
+				parts: []
+			},
+			templatePromise = read( templatePath ),
+			template,
+			scriptPromise = read( data.script ),
+			script,
+			result = builder( data );
 
 		expect( result.parts[ 0 ] ).to.exist;
 
 		var builderPromise = result.parts[ 0 ];
-
 
 		return templatePromise
 			.then( function( content ) {
@@ -127,22 +123,19 @@ describe( 'Page Builders - Includes', function() {
 		// <<< a hack to force bender.files to read files form the test fixtures
 
 		var data = {
-			id: 'test2/3',
-			js: 'test2/3.js',
-			jobId: 'AYIlcxZa1i1nhLox',
-			manual: true,
-			script: 'test2/3.md',
-			snapshot: true,
-			parts: []
-		};
-
-		var templatePromise = read( templatePath );
-		var template;
-
-		var scriptPromise = read( path.join( 'test/fixtures/tests/', data.script ) );
-		var script;
-
-		var result = builder( data );
+				id: 'test2/3',
+				js: 'test2/3.js',
+				jobId: 'AYIlcxZa1i1nhLox',
+				manual: true,
+				script: 'test2/3.md',
+				snapshot: true,
+				parts: []
+			},
+			templatePromise = read( templatePath ),
+			scriptPromise = read( path.join( 'test/fixtures/tests/', data.script ) ),
+			result = builder( data ),
+			script,
+			template;
 
 		expect( result.parts[ 0 ] ).to.exist;
 
