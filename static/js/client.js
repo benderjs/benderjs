@@ -202,7 +202,7 @@
 				'<span class="icon ',
 				result.success ? result.ignored ? 'ignored' : 'passed' : 'failed',
 				'"></span>',
-				escapeTags( result.module ), result.name ? ' - ' : '',
+				escapeTags( result.module ), result.name ? ' ' : '',
 				'<a href="#', encodeURIComponent( result.fullName || result.name ), '" class="single">',
 				escapeTags( result.name ),
 				'</a>',
@@ -249,7 +249,7 @@
 	function Bender() {
 		this.result = function( result ) {
 			if ( !result.success && supportsConsole ) {
-				console.log( result.module + ' - ' + result.name + ' FAILED\n' + result.error );
+				console.log( result.module + ' ' + result.name + ' FAILED\n' + result.error );
 			}
 			addResult( result );
 		};
