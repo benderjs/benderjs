@@ -446,7 +446,7 @@
 		}
 
 		// the DOM is ready so we can start
-		if ( ready ) {
+		if ( !deferred && ready ) {
 			bender.start();
 		}
 	}
