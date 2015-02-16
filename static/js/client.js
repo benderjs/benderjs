@@ -440,9 +440,13 @@
 	function unlock() {
 		deferred--;
 
-		// no more deffered callback to wait for and the DOM is ready
-		if ( !deferred && ready ) {
+		// no more deffered callback to wait for
+		if ( !deferred ) {
 			clearTimeout( defermentTimeout );
+		}
+
+		// the DOM is ready so we can start
+		if ( ready ) {
 			bender.start();
 		}
 	}
