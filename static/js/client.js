@@ -466,6 +466,10 @@
 		return unlock;
 	};
 
+	// save a reference to the original alert function
+	bender.oldAlert = window.alert;
+
+	// override alerts to throw errors instead of displaying a message and blocking the test execution
 	window.alert = function( msg ) {
 		throw {
 			message: 'window.alert: ' + msg

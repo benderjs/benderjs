@@ -160,6 +160,8 @@
 		passBtn.className += ' visible';
 	}
 
+	// restore the old alert function
+	window.alert = bender.oldAlert;
 
 	// bind a click handler
 	bender.addListener( sidebarEl, 'click', handleClick );
