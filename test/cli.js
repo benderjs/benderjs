@@ -42,11 +42,23 @@ describe( 'CLI', function() {
 
 	function write() {
 		oldWrite.apply( process.stdout, arguments );
-		writeBuffer = Array.prototype.join.call( arguments, '' ).replace( /\n/g, '' );
+		writeBuffer += Array.prototype.join.call( arguments, '' ).replace( /\n/g, '' );
 	}
 
-	it( 'should display current Bender version', function() {
+	it( 'should display current Bender version using version command (depricated)', function() {
 		setArgs( [ 'version' ] );
+		cli.run();
+		expect( writeBuffer ).to.equal( 'Depricated, please use -v/--version flag instead.Bender.js v' + pkg.version );
+	} );
+
+	it( 'should display current Bender version using -v/--version flag', function() {
+		setArgs( [ '--version' ] );
+		cli.run();
+		expect( writeBuffer ).to.equal( 'Bender.js v' + pkg.version );
+
+		writeBuffer = '';
+
+		setArgs( [ '-v' ] );
 		cli.run();
 		expect( writeBuffer ).to.equal( 'Bender.js v' + pkg.version );
 	} );
