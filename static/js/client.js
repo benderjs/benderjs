@@ -451,6 +451,13 @@
 		}
 	}
 
+	// clear the deferment timeout to avoid error stack pollution
+	bender.addListener( window, 'error', function() {
+		if ( defermentTimeout !== undefined ) {
+			clearTimeout( defermentTimeout );
+		}
+	} );
+
 	/**
 	 * Defer the startup of Bender tests
 	 * @return {Function} Unlock function
