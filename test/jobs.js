@@ -260,6 +260,24 @@ describe( 'Jobs', function() {
 		} );
 	} );
 
+	it( 'should sort browsers properly', function() {
+		var promise = bender.jobs.create( job )
+			.then( function( id ) {
+				return bender.jobs.get( id );
+			} );
+
+		return promise.then( function( result ) {
+			expect( result.browsers ).to.deep.equal( [
+				'123unknown',
+				'chrome35',
+				'firefox',
+				'ie8',
+				'ie9',
+				'ie10'
+			] );
+		} );
+	} );
+
 	it( 'should return a task from a given job', function() {
 		return bender.jobs.create( job )
 			.then( function( id ) {
