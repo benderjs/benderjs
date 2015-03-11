@@ -10,9 +10,6 @@
 ( function( window ) {
 	'use strict';
 
-	var isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1,
-		supportsConsole = !!( window.console && window.console.log );
-
 	function Bender() {
 		var contextEl = document.getElementById( 'context' ),
 			that = this,
@@ -101,13 +98,13 @@
 		this.error = function( error ) {
 			this.emit( 'error', error );
 
-			if ( supportsConsole ) {
+			if ( bender.env.supportsConsole ) {
 				console.log( JSON.parse( error ) );
 			}
 		};
 
 		this.log = function( message ) {
-			if ( supportsConsole ) {
+			if ( bender.env.supportsConsole ) {
 				console.log( message );
 			}
 		};
@@ -155,7 +152,7 @@
 					state: 'started'
 				} );
 
-				if ( isIE ) {
+				if ( bender.env.ie ) {
 					if ( runs >= 20 && testWindow ) {
 						testWindow.close();
 						setTimeout( function() {
@@ -190,7 +187,7 @@
 			this.suite = [];
 			this.current = null;
 
-			if ( isIE && testWindow ) {
+			if ( bender.env.ie && testWindow ) {
 				testWindow.close();
 				testWindow = null;
 			} else {
@@ -216,7 +213,7 @@
 		};
 
 		this.maximize = function() {
-			if ( !isIE ) {
+			if ( !bender.env.ie ) {
 				contextEl.className = 'maximized';
 			}
 
@@ -227,5 +224,7 @@
 		this.stop = this.complete;
 	}
 
+	var env = window.bender.env;
 	window.bender = new Bender();
+	window.bender.env = env;
 } )( this );
