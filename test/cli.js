@@ -46,6 +46,7 @@ describe( 'CLI', function() {
 	}
 
 	it( 'should display current Bender version using version command (deprecated)', function() {
+		console.log( cli );
 		setArgs( [ 'version' ] );
 		cli.run();
 		expect( writeBuffer ).to.equal( 'Deprecated, please use -v/--version flag instead.Bender.js v' + pkg.version );
