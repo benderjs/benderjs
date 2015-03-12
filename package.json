@@ -52,17 +52,16 @@
 		"winston": "~0.7.3"
 	},
 	"devDependencies": {
-		"chai": "*",
-		"chai-as-promised": "*",
+		"chai": "~1.9.1",
+		"chai-as-promised": "~4.1.1",
 		"eventemitter2": "~0.4.14",
-		"istanbul": "*",
+		"istanbul": "~0.3.2",
 		"jscs": "~1.5.9",
-		"jsdoc": "*",
+		"jsdoc": "~3.3.0",
 		"jshint": "~2.5.2",
-		"mocha": "*",
-		"nodetime": "*",
-		"rewire": "*",
-		"sinon": "*",
+		"mocha": "~1.21.4",
+		"rewire": "~2.1.0",
+		"sinon": "~1.10.3",
 		"socket.io-client": "~0.9.17"
 	}
 }
