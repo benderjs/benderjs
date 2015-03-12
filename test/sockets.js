@@ -22,6 +22,8 @@ var mocks = require( './fixtures/_mocks' ),
 	browsers = rewire( '../lib/browsers' );
 
 describe( 'Sockets', function() {
+	this.timeout( 5000 );
+
 	var ua = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)' +
 		' Chrome/35.0.1916.153 Safari/537.36',
 		id = 'bdf3ebc3-d783-4ab0-b4d2-aa590d55c533',
