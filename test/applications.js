@@ -55,6 +55,14 @@ describe( 'Applications', function() {
 					}
 				}
 			},
+
+			noFiles: {
+				applications: {
+					foo: {
+						path: 'test/'
+					}
+				}
+			}
 		},
 		bender;
 
@@ -132,5 +140,17 @@ describe( 'Applications', function() {
 		expect( exit.calledThrice ).to.be.true;
 
 		process.exit.restore();
+	} );
+
+	it( 'should accept applications with no files array defined (#181)', function() {
+		var result;
+
+		bender.applications.build( configs.noFiles );
+
+		result = bender.applications.get( 'foo' );
+
+		expect( result.path ).to.equal( 'test/' );
+		expect( result.js ).to.have.length( 0 );
+		expect( result.css ).to.have.length( 0 );
 	} );
 } );
