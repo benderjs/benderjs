@@ -5,17 +5,18 @@
 
 ( function() {
 	var env = {},
-		ua = navigator.userAgent;
+		ua = navigator.userAgent.toLowerCase();
 
 	env.supportsConsole = !!( window.console && window.console.log );
 
-	env.trident = ua.toLowerCase().indexOf( 'trident' ) > -1;
+	env.trident = ua.indexOf( 'trident' ) > -1;
 
-	env.spartan = ( /edge[ \/]\d+.?\d*/ ).test( ua.toLowerCase() );
+	env.spartan = ( /edge[ \/]\d+.?\d*/ ).test( ua );
 
 	env.ie = env.trident || env.spartan;
 
 	var version;
+
 	if ( env.trident ) {
 		version = ua.match( /msie (\d+)/i );
 		env.version = ( version ? Number( version[ 1 ] ) : document.documentMode );
