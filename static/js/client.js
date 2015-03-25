@@ -15,6 +15,10 @@
 		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
 		supportsConsole = !!( window.console && window.console.log ),
 		launcher = opener || parent,
+		defermentId = 0,
+		deferments = [],
+		ready = false,
+		defermentTimeout,
 		collapseEl,
 		resultsEl,
 		statusEl,
@@ -344,7 +348,7 @@
 			}
 
 			// start test framework if no deferred callbacks
-			if ( !deferred ) {
+			if ( !deferments.length ) {
 				bender.start();
 			}
 		}
@@ -426,10 +430,6 @@
 		}
 	};
 
-	var deferred = 0,
-		ready = false,
-		defermentTimeout;
-
 	/**
 	 * Reset deferment unlock timeout
 	 */
@@ -437,23 +437,29 @@
 		clearTimeout( defermentTimeout );
 
 		defermentTimeout = setTimeout( function() {
-			throw new Error( 'Deferment unlock timeout - please check your plugins' );
+			throw new Error( 'Deferment unlock timeout - "' + deferments.join( ', ' ) + '" never unlocked' );
 		}, bender.config.defermentTimeout );
 	}
 
 	/**
-	 * Decrease deferred callback counter and start Bender if no more callbacks to wait for
+	 * Remove a name from the deferred callbacks stack and start Bender if no more callbacks to wait for
+	 * @param {String} name Name of the unlocked deferment
 	 */
-	function unlock() {
-		deferred--;
+	function unlock( name ) {
+		// remove name from the list
+		for ( var i = deferments.length; i >= 0; i-- ) {
+			if ( deferments[ i ] === name ) {
+				deferments.splice( i, 1 );
+			}
+		}
 
 		// no more deffered callback to wait for
-		if ( !deferred ) {
+		if ( !deferments.length ) {
 			clearTimeout( defermentTimeout );
 		}
 
 		// the DOM is ready so we can start
-		if ( !deferred && ready ) {
+		if ( !deferments.length && ready ) {
 			bender.start();
 		}
 	}
@@ -467,17 +473,24 @@
 
 	/**
 	 * Defer the startup of Bender tests
+	 * @param {String} name A unique name of a deferment, should match a plugin's name
 	 * @return {Function} Unlock function
 	 */
-	bender.defer = function() {
-		// increase deferred count
-		deferred++;
+	bender.defer = function( name ) {
+		// use a unique ID if no name was provided
+		// this is a temporary solution until all the plugins have their names defined
+		name = name || defermentId++;
+
+		// add to the deferment list
+		deferments.push( name );
 
 		// setup a timeout
 		resetDefermentTimeout();
 
 		// return the unlock function
-		return unlock;
+		return function() {
+			unlock( name );
+		};
 	};
 
 	// save a reference to the original alert function
