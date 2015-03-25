@@ -263,7 +263,6 @@
 
 	var env = window.bender.env;
 	window.bender = new Bender( socket );
-	window.bender = new Bender( socket );
 	window.bender.env = env;
 
 	addListener( window, 'unload', function() {
