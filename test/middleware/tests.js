@@ -19,6 +19,7 @@ var mocks = require( '../fixtures/_mocks' ),
 	http = require( 'http' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
+	sinon = require( 'sinon' ),
 	_ = require( 'lodash' ),
 	tests = rewire( '../../lib/middlewares/tests' ),
 	filesModule = rewire( '../../lib/files' ),
@@ -176,6 +177,23 @@ describe( 'Middleware - Tests', function() {
 			request.get( 'http://localhost:1031/' + file, function( err, res, body ) {
 				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( testHtml );
+
+				done();
+			} );
+		} );
+	} );
+
+	it( 'should pass information about the user agent when requesting a test', function( done ) {
+		var file = 'test/fixtures/tests/test/1',
+			spy = sinon.spy( bender.template, 'build' );
+
+		instance.listen( 1031, function() {
+			request.get( 'http://localhost:1031/' + file, function( err, res ) {
+				expect( res.statusCode ).to.equal( 200 );
+
+				expect( spy.args[ 0 ][ 0 ].ua ).to.contain.keys( 'family', 'major', 'minor', 'patch', 'source' );
+
+				spy.restore();
 
 				done();
 			} );

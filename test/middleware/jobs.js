@@ -19,6 +19,7 @@ var mocks = require( '../fixtures/_mocks' ),
 	http = require( 'http' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
+	sinon = require( 'sinon' ),
 	jobs = rewire( '../../lib/middlewares/jobs' ),
 	applicationsModule = require( '../../lib/applications' ),
 	filesModule = require( '../../lib/files' ),
@@ -103,6 +104,23 @@ describe( 'Middleware - Jobs', function() {
 
 				expect( res.statusCode ).to.equal( 200 );
 				expect( body ).to.equal( templateFile );
+
+				done();
+			} );
+		} );
+	} );
+
+	it( 'should pass information about the user agent when requesting a job task', function( done ) {
+		var url = 'AYIlcxZa1i1nhLox/tests/test/fixtures/tests/test/1',
+			spy = sinon.spy( bender.template, 'build' );
+
+		instance.listen( 1031, function() {
+			request.get( 'http://localhost:1031/jobs/' + url, function( err, res ) {
+				expect( res.statusCode ).to.equal( 200 );
+
+				expect( spy.args[ 0 ][ 0 ].ua ).to.contain.keys( 'family', 'major', 'minor', 'patch', 'source' );
+
+				spy.restore();
 
 				done();
 			} );
