@@ -177,10 +177,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			App.vent.on( 'tests:update', this.update, this );
 		},
 
-		increment: function( name, value ) {
-			this.set( name, this.get( name ) + value );
-		},
-
 		reset: function() {
 			this.set( {
 				passed: 0,
@@ -195,16 +191,23 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		update: function( data ) {
 			if ( typeof data == 'object' && data.state === 'done' ) {
-				this.increment( 'passed', data.passed || 0 );
-				this.increment( 'failed', data.failed || 0 );
-				this.set( 'time', new Date() - this.get( 'start' ) );
-				this.increment( 'completed', 1 );
+				var model = this.toJSON();
+
+				this.set( {
+					completed: model.completed + 1,
+					failed: model.failed + ( data.failed || 0 ),
+					passed: model.passed + ( data.passed || 0 ),
+					time: new Date() - model.start
+				} );
 			}
 		},
 
 		start: function( total ) {
 			this.reset();
-			this.set( 'running', true ).set( 'total', total );
+			this.set( {
+				running: true,
+				total: total
+			} );
 		},
 
 		stop: function() {
