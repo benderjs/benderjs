@@ -27,7 +27,7 @@
 	"dependencies": {
 		"broadway": "~0.2.9",
 		"browser-launcher2": "~0.4.1",
-		"chalk": "~0.5.1",
+		"chalk": "~1.0.0",
 		"connect": "~2.21.1",
 		"dom-combiner": "~0.1.1",
 		"forever": "~0.11.1",
