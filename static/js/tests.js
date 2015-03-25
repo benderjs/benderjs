@@ -900,6 +900,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		}
 	} );
 
+	// initial document title
+	var oldDocTitle = document.title;
+
 	/**
 	 * Tests controller
 	 * @type {Object}
@@ -909,6 +912,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			Tests.tests = new Tests.Tests();
 
 			Tests.testStatus = new Tests.TestStatus();
+
+			Tests.testStatus.on( 'change', Tests.controller.updateTitle );
 
 			var headerView = new Tests.TestHeaderView();
 
@@ -966,6 +971,16 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					model: new Tests.NewJob()
 				} )
 			);
+		},
+
+		updateTitle: function( model ) {
+			var status = '';
+
+			if ( model && ( model = model.toJSON() ) && model.running ) {
+				status = model.passed + ' passed / ' + model.failed + ' failed - ';
+			}
+
+			document.title = status + oldDocTitle;
 		},
 
 		updateURL: function( filter ) {
