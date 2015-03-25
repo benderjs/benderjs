@@ -8,12 +8,8 @@
 ( function() {
 	'use strict';
 
-	var isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1,
-		ieVersion = navigator.userAgent.match( /msie (\d+)/i ),
-		isOldIE = isIE && ieVersion && Number( ieVersion[ 1 ] ) < 9,
-		testId = window.location.pathname
+	var testId = window.location.pathname
 		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
-		supportsConsole = !!( window.console && window.console.log ),
 		launcher = opener || parent,
 		defermentId = 0,
 		deferments = [],
@@ -252,14 +248,14 @@
 	 */
 	function Bender() {
 		this.result = function( result ) {
-			if ( !result.success && supportsConsole ) {
+			if ( !result.success && bender.env.supportsConsole ) {
 				console.log( result.module + ' ' + result.name + ' FAILED\n' + result.error );
 			}
 			addResult( result );
 		};
 
 		this.log = function( message ) {
-			if ( supportsConsole ) {
+			if ( bender.env.supportsConsole ) {
 				console.log( message );
 			}
 		};
@@ -311,7 +307,7 @@
 
 				resultsEl.appendChild( resEl );
 
-				if ( supportsConsole ) {
+				if ( bender.env.supportsConsole ) {
 					console.log( error.stack ? error.stack : error.error ? error.error : error );
 				}
 			}
@@ -337,7 +333,7 @@
 
 		bender.addListener( window, 'error', bender.error );
 
-		if ( bender.ignoreOldIE && isOldIE ) {
+		if ( bender.ignoreOldIE && bender.env.ie && bender.env.version && bender.env.version < 9 ) {
 			bender.ignore( {
 				module: testId
 			} );
@@ -503,7 +499,9 @@
 		};
 	};
 
+	var env = window.bender.env;
 	window.bender = bender;
+	window.bender.env = env;
 
 	bender.addListener( window, 'load', init );
 } )();

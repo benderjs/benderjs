@@ -12,8 +12,7 @@
 
 	var statusEl = document.getElementById( 'status' ),
 		statusLabel = statusEl.getElementsByTagName( 'span' )[ 0 ],
-		selectEl = statusEl.getElementsByTagName( 'select' )[ 0 ],
-		isIE = navigator.userAgent.toLowerCase().indexOf( 'trident' ) > -1;
+		selectEl = statusEl.getElementsByTagName( 'select' )[ 0 ];
 
 	function Bender( socket ) {
 		var contextEl = document.getElementById( 'context' ),
@@ -126,7 +125,7 @@
 
 			socket.emit( 'complete', this.results );
 
-			if ( !isIE ) {
+			if ( !bender.env.ie ) {
 				removeFrame();
 			}
 
@@ -144,7 +143,7 @@
 
 				id += '#child';
 
-				if ( isIE ) {
+				if ( bender.env.ie ) {
 					if ( runs >= 20 && testWindow ) {
 						testWindow.close();
 						setTimeout( function() {
@@ -175,7 +174,7 @@
 			// close everything on disconnect
 			if ( this.running ) {
 				this.running = false;
-				if ( isIE && testWindow ) {
+				if ( bender.env.ie && testWindow ) {
 					testWindow.close();
 					testWindow = null;
 				} else {
@@ -262,7 +261,10 @@
 		.on( 'connect', setStatus( true ) )
 		.on( 'disconnect', setStatus() );
 
+	var env = window.bender.env;
 	window.bender = new Bender( socket );
+	window.bender = new Bender( socket );
+	window.bender.env = env;
 
 	addListener( window, 'unload', function() {
 		socket.disconnect();
