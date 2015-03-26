@@ -26,6 +26,7 @@ describe( 'Test Builders - Meta', function() {
 		test4 = normalize( 'test/fixtures/tests/test2/1' ),
 		test5 = normalize( 'test/fixtures/tests/test2/2' ),
 		test6 = normalize( 'test/fixtures/tests/test2/3' ),
+		test7 = normalize( 'test/fixtures/tests/test2/4' ),
 		sampleData = {},
 		sampleData2 = {},
 		sampleData3 = {},
@@ -33,6 +34,7 @@ describe( 'Test Builders - Meta', function() {
 		sampleData5 = {},
 		sampleData6 = {},
 		sampleData7 = {},
+		sampleData8 = {},
 		oldAttach,
 		bender;
 
@@ -86,6 +88,14 @@ describe( 'Test Builders - Meta', function() {
 	sampleData7.tests[ test6 ] = {
 		id: 'test/fixtures/tests/test2/3',
 		script: 'test/fixtures/tests/test2/3.md',
+		unit: false,
+		manual: true
+	};
+
+	sampleData8.tests = {};
+	sampleData8.tests[ test7 ] = {
+		id: 'test/fixtures/tests/test2/4',
+		script: 'test/fixtures/tests/test2/4.md',
 		unit: false,
 		manual: true
 	};
@@ -210,6 +220,23 @@ describe( 'Test Builders - Meta', function() {
 		}, sampleData7.tests[ test6 ] );
 
 		return meta.build( sampleData7 ).then( function( result ) {
+			expect( result.tests ).to.deep.equal( expected );
+		} );
+	} );
+
+	it( 'should merge duplicate directives', function() {
+		var expected = {};
+
+		expected[ test7 ] = _.merge( {
+			foo: {
+				bar: 'baz, qux'
+			},
+			include: [ '%BASE_PATH%/foo.js', '%BASE_PATH%/bar.js' ],
+			tags: [ 'foo', 'bar', 'baz', 'qux' ]
+		}, sampleData8.tests[ test7 ] );
+
+
+		return meta.build( sampleData8 ).then( function( result ) {
 			expect( result.tests ).to.deep.equal( expected );
 		} );
 	} );

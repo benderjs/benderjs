@@ -26,7 +26,7 @@ var mocks = require( '../fixtures/_mocks' ),
 
 describe( 'Page Builders - Includes', function() {
 	var templatePath = 'static/manual.html',
-		directivePattern = /@bender\-([\w\-]+)\:([\w \-\.\/\\\:\?\+\$@~_,=#%';!]+)/gi,
+		directivePattern = /(?:\/\*\s*|\@)bender-(\w+(?:\-\w+)*)\:([^\*\n$]+)/gi,
 		oldAttach,
 		builder,
 		bender;
