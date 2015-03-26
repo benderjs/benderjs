@@ -17,10 +17,19 @@
 		oldStart = bender.start,
 		oldNext = bender.next;
 
+	// tearDown function executed after tests
+	bender.tearDown = null;
+
 	// override default Bender API
 	bender.start = function() {};
 	bender.next = function( data ) {
 		disableButtons();
+
+		// execute teardown function
+		if ( typeof bender.tearDown == 'function' ) {
+			bender.tearDown();
+		}
+
 		oldNext( data );
 	};
 
