@@ -1,0 +1,34 @@
+{
+	"name": "benderjs",
+	"version": "0.2.2",
+	"homepage": "http://benderjs.com",
+	"authors": [
+		"CKSource (http://cksource.com/)"
+	],
+	"description": "The anti-human approach to JavaScript testing",
+	"keywords": [
+		"test",
+		"unit",
+		"remote",
+		"testing",
+		"bender",
+		"benderjs"
+	],
+	"license": "MIT",
+	"ignore": [
+		"**/.*",
+		"coverage",
+		"node_modules",
+		"static/vendor",
+		"test"
+	],
+	"dependencies": {
+		"marionette": "~2.4.1",
+		"jquery": "1",
+		"moment": "~2.9.0",
+		"respond": "~1.4.2",
+		"bootstrap": "~3.3.4",
+		"chosen_v1.4.1": "https://github.com/harvesthq/chosen/releases/download/v1.4.1/chosen_v1.4.1.zip",
+		"v0.6.4": "https://github.com/p3drosola/Backbone.VirtualCollection/archive/v0.6.4.zip"
+	}
+}

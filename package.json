@@ -12,8 +12,9 @@
 	],
 	"homepage": "http://benderjs.com/",
 	"scripts": {
-		"test": "istanbul test node_modules/mocha/bin/_mocha -- --reporter list --check-leaks --recursive",
-		"lint": "jshint lib/ test/ && jscs ."
+		"lint": "jshint lib/ test/ && jscs .",
+		"postinstall": "bower install",
+		"test": "istanbul test node_modules/mocha/bin/_mocha -- --reporter list --check-leaks --recursive"
 	},
 	"repository": {
 		"type": "git",
@@ -25,6 +26,7 @@
 	"author": "CKSource (http://cksource.com/)",
 	"license": "MIT",
 	"dependencies": {
+		"bower": "~1.3.12",
 		"broadway": "~0.2.9",
 		"browser-launcher2": "~0.4.1",
 		"chalk": "~1.0.0",
