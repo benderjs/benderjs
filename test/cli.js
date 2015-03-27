@@ -45,6 +45,12 @@ describe( 'CLI', function() {
 		writeBuffer += Array.prototype.join.call( arguments, '' ).replace( /\n/g, '' );
 	}
 
+	it( 'should display usage information if no arguments passed', function() {
+		setArgs( [] );
+		cli.run();
+		expect( writeBuffer ).to.match( /Usage:.*bender.*command.*options/ );
+	} );
+
 	it( 'should display current Bender version using version command (deprecated)', function() {
 		setArgs( [ 'version' ] );
 		cli.run();
