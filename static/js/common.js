@@ -25,12 +25,12 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			return moment( timestamp ).fromNow();
 		},
 
-		getResultStyle: function( result ) {
+		getResultStyle: function( result, noBackground ) {
 			var status = result.status === 2 ? 'success' :
 				result.status === 3 ? 'danger' :
 				result.status === 4 ? 'warning' : 'info';
 
-			return status + ' bg-' + status + ' text-' + status;
+			return status + ( noBackground ? '' : ' bg-' + status ) + ' text-' + status;
 		},
 
 		getResultMessage: function( result ) {
