@@ -620,7 +620,7 @@ describe( 'Jobs', function() {
 				} ],
 				id: 'AYIlcxZa1i1nhLox'
 			},
-			results = bender.jobs.compactResults( job ).results;
+			results = bender.jobs.buildResults( job );
 
 		expect( results[ 0 ].status ).to.equal( bender.jobs.STATUS.WAITING );
 		expect( results[ 1 ].status ).to.equal( bender.jobs.STATUS.PENDING );
