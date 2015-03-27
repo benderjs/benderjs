@@ -8,30 +8,6 @@
 App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	'use strict';
 
-	Jobs.templateHelpers = {
-		// build browser object from a string
-		prepareBrowser: function( browser ) {
-			var match = /^([a-z]+)(\d*)/i.exec( browser );
-
-			return match ? {
-				name: match[ 1 ].toLowerCase(),
-				version: parseInt( match[ 2 ], 10 ) || 0
-			} : browser;
-		},
-
-		getBrowsers: function( browsers ) {
-			return _.map( browsers, function( browser ) {
-				return browser.name + ( browser.version || '' );
-			} ).join( ' ' );
-		},
-
-		findBrowser: function( browsers, browser ) {
-			return _.indexOf( _.map( browsers, function( browser ) {
-				return browser.toLowerCase();
-			} ), browser.toLowerCase() ) > -1;
-		}
-	};
-
 	/**
 	 * Router for Jobs module
 	 */
@@ -150,16 +126,17 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	 */
 	Jobs.Job = Backbone.Model.extend( _.extend( {}, App.Common.DeferredFetchMixin, {
 		defaults: {
-			id: '',
+			browsers: null,
 			coverage: false,
+			created: 0,
 			done: false,
 			description: '',
-			created: 0,
-			tempBrowsers: null,
-			browsers: null,
 			filter: null,
-			snapshot: null,
-			tasks: null
+			id: '',
+			results: null,
+			snapshot: false,
+			tasks: null,
+			tempBrowsers: null
 		},
 
 		urlRoot: '/jobs/',
@@ -167,10 +144,13 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		oldFetch: Backbone.Model.prototype.fetch,
 
 		initialize: function() {
-			this
-				.set( 'browsers', [] )
-				.set( 'filter', [] )
-				.set( 'tasks', [] );
+			this.set( {
+				browsers: [],
+				filter: [],
+				results: [],
+				tasks: [],
+				tempBrowsers: []
+			} );
 
 			App.Common.DeferredFetchMixin.initialize.apply( this, arguments );
 		},
@@ -221,7 +201,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 	Jobs.JobHeaderView = Marionette.ItemView.extend( {
 		template: '#job-header',
-		templateHelpers: _.extend( {}, Jobs.templateHelpers, App.Common.templateHelpers ),
+		templateHelpers: App.Common.templateHelpers,
 
 		ui: {
 			'all': '.check-all',
@@ -350,7 +330,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.JobView = App.Common.TableView.extend( {
 		template: '#job',
 		className: 'panel panel-default',
-		templateHelpers: _.extend( {}, Jobs.templateHelpers, App.Common.templateHelpers ),
+		templateHelpers: App.Common.templateHelpers,
 		childView: Jobs.TaskView,
 
 		initialize: function() {
@@ -395,13 +375,19 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			'click .add-all-button': 'addAll'
 		},
 
-		templateHelpers: Jobs.templateHelpers,
+		templateHelpers: {
+			findBrowser: function( browsers, browser ) {
+				return _.indexOf( _.map( browsers, function( browser ) {
+					return browser.toLowerCase();
+				} ), browser.toLowerCase() ) > -1;
+			}
+		},
 
 		initialize: function() {
 			this.listenTo( this.model, 'invalid', this.showError );
 			this.listenTo( this.model, 'sync', this.handleSave );
 
-			this.model.set( 'tempBrowsers', [].concat( this.model.get( 'browsers' ) ), {
+			this.model.set( 'tempBrowsers', this.model.get( 'browsers' ).slice(), {
 				silent: true
 			} );
 		},
