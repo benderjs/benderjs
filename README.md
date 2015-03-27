@@ -1,32 +1,39 @@
 [![Build Status](https://travis-ci.org/benderjs/benderjs.svg?branch=master)](https://travis-ci.org/benderjs/benderjs)
 [![NPM Version](http://img.shields.io/npm/v/benderjs.svg)](https://www.npmjs.org/package/benderjs)
 
-Bender.js
-=========
+# Bender.js
 
 The anti-human approach to JavaScript testing.
 
-Installation
-------------
+## Installation
 
 To install Bender.js locally use:
 
 ```
-$ [sudo] npm install benderjs
+$ npm install benderjs
 ```
 
-To simplify your work with Bender.js we highly encourage you to use [benderjs-cli](https://github.com/benderjs/benderjs-cli) module.
+To simplify your work with Bender.js we highly encourage you to use [benderjs-cli](https://github.com/benderjs/benderjs-cli) module that registers `bender` command.
 
-**Warning**: All the following code samples assume you have `benderjs-cli` installed globally.
+**Warning**: All the following code samples assume you have `benderjs-cli` installed globally:
 
-Configuration
--------------
+```
+$ [sudo] npm install benderjs-cli -g
+```
+
+## Getting started
+
+To get more insight into testing with Bender, check the [Testing in Bender](https://github.com/benderjs/benderjs/wiki/Testing-in-Bender) wiki page.
+
+If you prefer to see Bender in action, have a look at the [example project](https://github.com/benderjs/benderjs-example-project) showing how to configure Bender and use it to run tests written in [Jasmine](http://jasmine.github.io/).
+
+## Configuration
 
 In order to configure Bender.js for your project, you need to create a configuration file.
 
-Use `bender init` command to create Bender configuration file and local `.bender/` directory.
+Use `bender init` command to create Bender configuration file and its local `.bender/` directory.
 
-Below is an empty config file.
+Below is an empty configuration file:
 
 ```javascript
 /**
@@ -59,8 +66,7 @@ module.exports = config;
 
 For more information on Bender configuration, check out the Wiki - [Configuration](https://github.com/benderjs/benderjs/wiki/Configuration) page.
 
-Usage
------
+## Usage
 
 Type `bender` to see available commands:
 
@@ -114,8 +120,7 @@ If you want, you can specify a port or a hostname where Bender.js runs:
 
 For more information on Bender command line interface, check out the Wiki - [Command line](https://github.com/benderjs/benderjs/wiki/Command-line) page.
 
-Running tests for Bender.js
--------------
+## Running tests for Bender.js
 
 ```
 $ npm install
