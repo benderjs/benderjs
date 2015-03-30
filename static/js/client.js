@@ -296,7 +296,7 @@
 				// temporary solution
 				// log the error event to simplify debugging - V8 has issues with rethrowing errors
 				// that causes the original stack to be lost
-				if ( supportsConsole ) {
+				if ( bender.env.supportsConsole ) {
 					console.log( error );
 				}
 
