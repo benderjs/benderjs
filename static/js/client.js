@@ -8,9 +8,7 @@
 ( function() {
 	'use strict';
 
-	var testId = window.location.pathname
-		.replace( /^(\/(?:tests|single|(?:jobs\/(?:\w+)\/tests))\/)/i, '' ),
-		launcher = opener || parent,
+	var launcher = opener || parent,
 		defermentId = 0,
 		deferments = [],
 		ready = false,
@@ -263,9 +261,17 @@
 		this.ignore = function( result ) {
 			var resEl = document.createElement( 'div' );
 
+			result = result || {
+				module: bender.testData.id
+			};
+
 			resEl.className = 'warn';
 			resEl.innerHTML = '<p><span class="icon ignored"></span>Tests in <strong>' +
 				result.module + '</strong> were ignored for current browser\'s version</p>';
+
+			if ( !resultsEl ) {
+				prepareResultsEl();
+			}
 
 			resultsEl.appendChild( resEl );
 
@@ -335,7 +341,7 @@
 
 		if ( bender.ignoreOldIE && bender.env.ie && bender.env.version && bender.env.version < 9 ) {
 			bender.ignore( {
-				module: testId
+				module: bender.testData.id
 			} );
 		} else {
 			// maximize the IFRAME containing a test page when running a manual test
@@ -360,6 +366,10 @@
 				launcher.bender.next( JSON.stringify( result ) );
 			},
 			ignore: function( result ) {
+				result = result || {
+					module: bender.testData.id
+				};
+
 				launcher.bender.ignore( JSON.stringify( result ) );
 			},
 			log: function( message ) {
