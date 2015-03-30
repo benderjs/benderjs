@@ -93,7 +93,7 @@
 			// standards-compliant mode is enabled
 			isCSS1Compat ? document.documentElement.scrollTop :
 			// otherwise use body.scrollTop
-			document.body.scrollTop ) {
+			document.body.scrollTop && currentHeader.hasClass( 'hidden' ) ) {
 			currentHeader.removeClass( 'hidden' );
 		} else {
 			currentHeader.addClass( 'hidden' );
