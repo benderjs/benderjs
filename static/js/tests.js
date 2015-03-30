@@ -1017,10 +1017,5 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		bender.on( 'complete', function() {
 			App.vent.trigger( 'tests:stop' );
 		} );
-
-		// adjust body padding on window resize
-		$( window ).bind( 'resize', function() {
-			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
-		} );
 	} );
 } );

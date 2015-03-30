@@ -81,19 +81,78 @@
 		alerts: '#alerts'
 	} );
 
+	var currentHeader,
+		headerTop = 0;
+
+	function fixHeader() {
+		var supportPageOffset = window.pageYOffset !== undefined;
+		var isCSS1Compat = ( ( document.compatMode || '' ) === 'CSS1Compat' );
+
+		// pageYOffset is available
+		if ( supportPageOffset ? window.pageYOffset :
+			// standards-compliant mode is enabled
+			isCSS1Compat ? document.documentElement.scrollTop :
+			// otherwise use body.scrollTop
+			document.body.scrollTop ) {
+			currentHeader.removeClass( 'hidden' );
+		} else {
+			currentHeader.addClass( 'hidden' );
+		}
+	}
+
 	// adjust body padding to match header height each time the content is changed
 	App.addInitializer( function() {
 		App.$body = $( 'body' );
 		App.$navbar = $( '.navbar' );
 
 		App.content.on( 'show', function() {
-			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+			App.trigger( 'header:update' );
+			App.trigger( 'header:resize', App.$navbar.height() );
 		} );
+
+		// adjust body padding on window resize
+		$( window ).bind( 'resize', function() {
+			App.trigger( 'header:resize', App.$navbar.height() );
+			fixHeader();
+		} );
+
+		$( window ).bind( 'scroll', fixHeader );
 	} );
 
+	// update the fake header's content
+	App.on( 'header:update', function() {
+		if ( currentHeader ) {
+			currentHeader.remove();
+		}
+
+		var header = App.content.$el.find( '.fixed-header' );
+
+		if ( header.length ) {
+			currentHeader = $( '<div class="fixed hidden"><div class="container"><div class="panel panel-default">' +
+				'<table class="table"></table></div></div></div>' );
+
+			currentHeader.find( '.table' ).append( header.clone() );
+			currentHeader.appendTo( 'body' );
+		} else {
+			currentHeader = null;
+		}
+	} );
+
+	// adjust document.body's top padding and fake header's position
+	App.on( 'header:resize', function( height ) {
+		App.$body.css( 'paddingTop', height + 1 + 'px' );
+
+		if ( currentHeader && headerTop !== height + 1 ) {
+			headerTop = height + 1;
+			currentHeader.css( 'top', headerTop + 'px' );
+		}
+	} );
+
+	// start the router
 	App.on( 'start', function() {
 		Backbone.history.start();
 
+		// navigate to the test list if no route specified
 		if ( this.getCurrentRoute() === '' ) {
 			App.vent.trigger( 'tests:list' );
 		}

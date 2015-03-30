@@ -4,40 +4,40 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 */
 
 body {
-    padding-top: 163px;
+	padding-top: 163px;
 }
 
 a {
-    cursor: pointer;
-    font-weight: bold;
+	cursor: pointer;
+	font-weight: bold;
 }
 
 table.table {
-    table-layout: fixed;
+	table-layout: fixed;
 }
 
 table.table td {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .table thead tr th {
-    vertical-align: middle;
+	vertical-align: middle;
 }
 
 td:last-child,
 th:last-child {
-    width: auto;
-    white-space: normal;
+	width: auto;
+	white-space: normal;
 }
 
 .header {
-    margin: 1em 0;
+	margin: 1em 0;
 }
 
 .content {
-    margin: 0 0 1em;
+	margin: 0 0 1em;
 }
 
 .navbar {
@@ -65,17 +65,17 @@ th:last-child {
 }
 
 .app-title {
-    font-size: 20px;
-    font-weight: bold;
+	font-size: 20px;
+	font-weight: bold;
 }
 
 .socket-status {
-    margin-left: 0;
+	margin-left: 0;
 }
 
 .socket-status .label {
-    font-size: 85.7142857%;
-    padding: .3em .6em;
+	font-size: 85.7142857%;
+	padding: .3em .6em;
 }
 
 .nav-tabs > li.active > a,
@@ -112,7 +112,7 @@ th:last-child {
 }
 
 .clickable {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 .test-counter {
@@ -122,7 +122,7 @@ th:last-child {
 }
 
 .tests .result {
-    margin-left: .5em;
+	margin-left: .5em;
 }
 
 .only-failed tbody tr,
@@ -140,16 +140,16 @@ th:last-child {
 }
 
 .context-frame {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 70px;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    border: 0;
-    padding: 0;
-    margin: 0;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 70px;
+	filter: alpha(opacity=0);
+	opacity: 0;
+	border: 0;
+	padding: 0;
+	margin: 0;
 }
 
 .maximized {
@@ -171,68 +171,68 @@ th:last-child {
 }
 
 .test-status {
-    float: left;
-    margin: 0;
-    line-height: 34px;
-    font-size: 18px;
-    color: #555;
+	float: left;
+	margin: 0;
+	line-height: 34px;
+	font-size: 18px;
+	color: #555;
 }
 
 .browsers th:first-child {
-    min-width: 200px;
+	min-width: 200px;
 }
 
 .browsers tbody tr th {
-    line-height: 32px;
+	line-height: 32px;
 }
 
 .browsers .browser {
-    background-position: 4px 50%;
-    background-repeat: no-repeat;
-    padding-left: 44px;
+	background-position: 4px 50%;
+	background-repeat: no-repeat;
+	padding-left: 44px;
 }
 
 .jobs tbody tr td,
 .jobs tbody tr th {
-    padding-top: 11px;
-    padding-bottom: 11px;
+	padding-top: 11px;
+	padding-bottom: 11px;
 }
 
 .jobs .results {
-    padding-top: 0;
-    padding-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
 .jobs .empty {
 	padding: 8px;
 }
 
-.jobs .browser,
-.jobs .result {
-    float: left;
-    height: 42px;
-    margin: 0 1px 1px 0;
-    line-height: 42px;
-    text-align: center;
-    background-repeat: no-repeat;
-    background-position: 5px 5px;
+.job-browser,
+.task-result {
+	float: left;
+	height: 42px;
+	margin: 0 1px 1px 0;
+	line-height: 42px;
+	text-align: center;
+	background-repeat: no-repeat;
+	background-position: 5px 5px;
 }
 
-.jobs .browser {
-    padding: 5px 5px 5px 42px;
+.job-browser {
+	padding: 5px 5px 5px 42px;
 }
 
-.jobs .result {
-    width: 67px;
+.task-result {
+	width: 67px;
 }
 
-.jobs .result span {
+.task-result span {
 	font-size: 1.5em;
 	line-height: 42px;
 	top: 0;
 }
 
-.jobs .result small {
+.task-result small {
 	float: right;
 	clear: right;
 	width: 20px;
@@ -241,60 +241,60 @@ th:last-child {
 	margin-top: 3px;
 }
 
-.jobs .browser .glyphicon,
-.jobs .browser small {
-    float: left;
-    clear: left;
-    width: 20px;
-    height: 16px;
-    line-height: 16px;
+.job-browser .glyphicon,
+.job-browser small {
+	float: left;
+	clear: left;
+	width: 20px;
+	height: 16px;
+	line-height: 16px;
 }
 
-table tr th.job-browsers {
+table > thead > tr > .job-browsers {
 	padding: 0 8px;
 }
 
 .chrome {
-    background-image: url('../images/logos/chrome_32x32.png');
+	background-image: url('../images/logos/chrome_32x32.png');
 }
 
 .chromium {
-    background-image: url('../images/logos/chromium_32x32.png');
+	background-image: url('../images/logos/chromium_32x32.png');
 }
 
 .firefox {
-    background-image: url('../images/logos/firefox_32x32.png');
+	background-image: url('../images/logos/firefox_32x32.png');
 }
 
 .ie {
-    background-image: url('../images/logos/ie_32x32.png');
+	background-image: url('../images/logos/ie_32x32.png');
 }
 
 .opera {
-    background-image: url('../images/logos/opera_32x32.png');
+	background-image: url('../images/logos/opera_32x32.png');
 }
 
 .phantomjs {
-    background-image: url('../images/logos/phantomjs_32x32.png');
+	background-image: url('../images/logos/phantomjs_32x32.png');
 }
 
 .safari {
-    background-image: url('../images/logos/safari_32x32.png');
+	background-image: url('../images/logos/safari_32x32.png');
 }
 
 .alert-wrapper {
-    z-index: 1060;
-    position: fixed;
-    width: 50%;
-    top: 0;
-    left: 0;
-    right: 0;
-    margin: 50px auto auto;
+	z-index: 1060;
+	position: fixed;
+	width: 50%;
+	top: 0;
+	left: 0;
+	right: 0;
+	margin: 50px auto auto;
 }
 
 .alert-wrapper .alert {
-    box-shadow: 0 0 50px rgba(0, 0, 0, .3);
-    cursor: pointer;
+	box-shadow: 0 0 50px rgba(0, 0, 0, .3);
+	cursor: pointer;
 }
 
 .form-group label {
@@ -302,9 +302,9 @@ table tr th.job-browsers {
 }
 
 .form-group label span:not(.glyphicon) {
-    font-weight: normal;
-    font-style: italic;
-    color: #999;
+	font-weight: normal;
+	font-style: italic;
+	color: #999;
 }
 
 .add-captured-button,
@@ -314,20 +314,20 @@ table tr th.job-browsers {
 }
 
 .moment {
-    white-space: nowrap;
+	white-space: nowrap;
 }
 
 button .loader {
-    display: none;
-    position: relative;
-    top: 2px;
-    width: 16px;
-    height: 16px;
-    background: url('../images/button-loader.gif') no-repeat;
+	display: none;
+	position: relative;
+	top: 2px;
+	width: 16px;
+	height: 16px;
+	background: url('../images/button-loader.gif') no-repeat;
 }
 
 button:disabled .loader {
-    display: inline-block;
+	display: inline-block;
 }
 
 .job-browsers-group {
@@ -358,4 +358,16 @@ button:disabled .loader {
 
 input.job-description {
 	font-size: 13px;
+}
+
+.fixed {
+	left: 0;
+	right: 0;
+	top: 150px;
+	position: fixed;
+	background: #fff;
+}
+
+.fixed .panel {
+	margin-bottom: 0;
 }

@@ -68,7 +68,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<!-- template for tests table -->
 	<script type="text/html" id="tests">
 	<table class="table table-hover tests">
-		<thead>
+		<thead class="fixed-header">
 			<tr>
 				<th class="col-md-5">ID</th>
 				<th class="col-md-1">Group</th>
@@ -158,7 +158,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<!-- template for jobs table -->
 	<script type="text/html" id="jobs">
 	<table class="table table-hover jobs">
-		<thead>
+		<thead class="fixed-header">
 			<tr>
 				<th class="col-md-1">ID</th>
 				<th class="col-md-2">Description</th>
@@ -185,7 +185,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<td><small><%= getTime(created) %></small></td>
 	<td class="results">
 		<% _.each(results, function (result) { %>
-		<div class="browser <%= result.name %> <%= getResultStyle(result) %>" title ="<%= getResultMessage(result) %>">
+		<div class="job-browser <%= result.name %> <%= getResultStyle(result) %>" title ="<%= getResultMessage(result) %>">
 			<span class="glyphicon <%= getIcon(result) %>"></span>
 			<small><%= result.testedVersion && result.testedVersion !== result.version ?
 				result.testedVersion : result.version ? result.version : '*' %></small>
@@ -262,12 +262,12 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<!-- template for a job results section -->
 	<script type="text/html" id="job">
 	<table class="table table-hover jobs">
-		<thead>
+		<thead class="fixed-header">
 			<tr>
 				<th class="col-md-3">Test ID</th>
 				<th class="col-md-9 job-browsers">
 					<% _.each(results, function (result) { %>
-					<div class="browser <%= result.name %> <%= getResultStyle(result, true) %>" title ="<%= getResultMessage(result) %>">
+					<div class="job-browser <%= result.name %> <%= getResultStyle(result, true) %>" title ="<%= getResultMessage(result) %>">
 						<span class="glyphicon <%= getIcon(result) %>"></span>
 						<small><%= result.version ? result.version : '' %></small>
 					</div>
@@ -305,7 +305,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<td><a href="/jobs/<%= jobId %>/tests/<%= id %>" title="<%= id %>" target="_blank"><%= id %></a></td>
 		<td class="results">
 			<% _.each(results, function (result) { %>
-				<div class="result <%= getResultStyle(result) %><%= result.errors ? ' clickable' : '' %><%= isSlow(result) ? ' slow' : '' %>">
+				<div class="task-result <%= getResultStyle(result) %><%= result.errors ? ' clickable' : '' %><%= isSlow(result) ? ' slow' : '' %>">
 					<span class="glyphicon <%= getIcon(result) %>" title="<%= getResultMessage(result) %>"></span>
 					<% if (result.testedVersion && result.testedVersion !== result.version) { %>
 					<small title="<%= result.testedUA %>"><%= result.testedVersion %></small>
@@ -438,8 +438,8 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 
 	<!-- template for browsers table -->
 	<script type="text/html" id="browsers">
-	<table class="table table-hover table-condensed browsers">
-		<thead>
+	<table class="table table-hover browsers">
+		<thead class="fixed-header">
 			<tr>
 				<th class="col-md-4">Browser</th>
 				<th class="col-md-4">UA</th>

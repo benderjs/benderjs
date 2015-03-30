@@ -92,11 +92,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.listenTo( Jobs.controller, 'job:update', _.bind( function() {
 				this.collection.fetch();
 			}, this ) );
-
-			this.collection.fetch( {
-				reset: true,
-				force: true
-			} );
 		},
 
 		appendHtml: function( collectionView, childView, index ) {
@@ -223,7 +218,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		onRender: function() {
-			App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+			App.trigger( 'header:resize' );
 		},
 
 		removeJob: function() {
@@ -345,9 +340,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				}
 			} );
 
-			this.model.fetch( {
-				reset: true
-			} );
+			this.update();
 		},
 
 		update: function() {
@@ -508,9 +501,15 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		listJobs: function() {
 			App.header.empty();
+
 			App.content.show( new Jobs.JobsListView( {
 				collection: Jobs.jobsList
 			} ) );
+
+			Jobs.jobsList.fetch( {
+				reset: true,
+				force: true
+			} );
 		},
 
 		showJob: function( id ) {
@@ -518,15 +517,17 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				id: id
 			} );
 
-			// App.header.empty();
+			job.fetch( {
+				reset: true
+			} ).done( function() {
+				App.header.show( new Jobs.JobHeaderView( {
+					model: job
+				} ) );
 
-			App.header.show( new Jobs.JobHeaderView( {
-				model: job
-			} ) );
-
-			App.content.show( new Jobs.JobView( {
-				model: job
-			} ) );
+				App.content.show( new Jobs.JobView( {
+					model: job
+				} ) );
+			} );
 		}
 	} );
 
