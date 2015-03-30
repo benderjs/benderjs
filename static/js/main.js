@@ -37,13 +37,6 @@
 	};
 
 	/**
-	 * Alias for history.back
-	 */
-	App.back = function() {
-		Backbone.history.history.back();
-	};
-
-	/**
 	 * Main layout region responsible for displaying dialog modals
 	 */
 	App.ModalRegion = Marionette.Region.extend( {
@@ -84,7 +77,8 @@
 	var currentHeader,
 		headerTop = 0;
 
-	function fixHeader() {
+	// show/hide the fake fixed header depending on the document scroll position
+	function toggleHeader() {
 		var supportPageOffset = window.pageYOffset !== undefined;
 		var isCSS1Compat = ( ( document.compatMode || '' ) === 'CSS1Compat' );
 
@@ -113,10 +107,10 @@
 		// adjust body padding on window resize
 		$( window ).bind( 'resize', function() {
 			App.trigger( 'header:resize', App.$navbar.height() );
-			fixHeader();
+			toggleHeader();
 		} );
 
-		$( window ).bind( 'scroll', fixHeader );
+		$( window ).bind( 'scroll', toggleHeader );
 	} );
 
 	// update the fake header's content
@@ -154,7 +148,7 @@
 
 		// navigate to the test list if no route specified
 		if ( this.getCurrentRoute() === '' ) {
-			App.vent.trigger( 'tests:list' );
+			App.navigate( 'tests' );
 		}
 	} );
 
