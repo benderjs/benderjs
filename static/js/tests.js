@@ -9,18 +9,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	'use strict';
 
 	/**
-	 * Tests Router
-	 */
-	Tests.Router = Marionette.AppRouter.extend( {
-		name: 'tests',
-
-		appRoutes: {
-			'tests': 'listTests',
-			'tests/*filters': 'listTests'
-		}
-	} );
-
-	/**
 	 * Tests filter model
 	 */
 	Tests.Filter = Backbone.Model.extend( {
@@ -30,10 +18,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		initialize: function() {
-			App.vent.on( 'tests:loaded', this.buildFilters, this );
+			this.listenTo( Tests.controller, 'tests:loaded', this.buildFilters, this );
 
-			this.on( 'change:filter', function( model ) {
-				App.vent.trigger( 'tests:filter', model.get( 'filter' ) );
+			this.on( 'change:filter', function() {
+				Tests.controller.trigger( 'tests:filter', this.get( 'filter' ) );
 			} );
 		},
 
@@ -98,7 +86,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 			// some invalid tokens were stripped
 			if ( filter.length && !parsed.length ) {
-				App.vent.trigger( 'tests:filter', parsed );
+				Tests.controller.trigger( 'tests:filter', parsed );
 			}
 		}
 	} );
@@ -166,15 +154,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			completed: 0,
 			total: 0,
 
-			filter: null,
-
 			running: false
 		},
 
 		initialize: function() {
-			this.set( 'filter', new Tests.Filter() );
-			App.vent.on( 'tests:stop', this.stop, this );
-			App.vent.on( 'tests:update', this.update, this );
+			this.listenTo( Tests.controller, 'tests:stop', this.stop, this );
+			this.listenTo( Tests.controller, 'tests:update', this.update, this );
 		},
 
 		reset: function() {
@@ -215,7 +200,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		setFilter: function( filter ) {
-			this.get( 'filter' ).setFilter( filter );
+			Tests.testFilter.setFilter( filter );
 		}
 	} );
 
@@ -415,10 +400,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		filters: {},
 
 		initialize: function() {
-			App.vent.on( 'tests:filter', this.setFilters, this );
-			App.vent.on( 'tests:start', this.clearResults, this );
-			App.vent.on( 'tests:stop', this.clearCurrentResult, this );
-			App.vent.on( 'tests:update', this.updateResult, this );
+			this.listenTo( Tests.controller, 'tests:filter', this.setFilters, this );
+			this.listenTo( App.vent, 'tests:start', this.clearResults, this );
+			this.listenTo( App.vent, 'tests:stop', this.clearCurrentResult, this );
+			this.listenTo( Tests.controller, 'tests:update', this.updateResult, this );
 
 			this.set( 'tests', new Tests.TestsList() );
 			this.set( 'filtered', new Backbone.VirtualCollection( this.get( 'tests' ) ) );
@@ -763,7 +748,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		initialize: function() {
 			this.set( 'browsers', [] )
 				.set( 'tests', Tests.tests.getIds() )
-				.set( 'filter', Tests.testStatus.get( 'filter' ).get( 'filter' ) );
+				.set( 'filter', Tests.testFilter.get( 'filter' ) );
 		},
 
 		validate: function( attrs ) {
@@ -905,13 +890,13 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 	/**
 	 * Tests controller
-	 * @type {Object}
 	 */
-	Tests.controller = {
+	Tests.controller = new( Marionette.Controller.extend( {
 		listTests: function( filter ) {
 			Tests.tests = new Tests.Tests();
 
 			Tests.testStatus = new Tests.TestStatus();
+			Tests.testFilter = new Tests.Filter();
 
 			Tests.testStatus.on( 'change', Tests.controller.updateTitle );
 
@@ -920,7 +905,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			App.header.show( headerView );
 
 			headerView.left.show( new Tests.FilterView( {
-				model: Tests.testStatus.get( 'filter' )
+				model: Tests.testFilter
 			} ) );
 
 			headerView.right.show( new Tests.TestStatusView( {
@@ -936,7 +921,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 
 			Tests.tests.fetch().done( function( data ) {
-				App.vent.trigger( 'tests:loaded', data.tests, filter ? filter.split( ',' ) : [] );
+				Tests.controller.trigger( 'tests:loaded', data.tests, filter ? filter.split( ',' ) : [] );
 			} );
 		},
 
@@ -992,7 +977,18 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
 			} );
 		}
-	};
+	} ) )();
+
+	/**
+	 * Tests Router
+	 */
+	Tests.Router = Marionette.AppRouter.extend( {
+		name: 'tests',
+
+		appRoutes: {
+			'tests(/*filters)': 'listTests'
+		}
+	} );
 
 	/**
 	 * Add initialzier for tests module
@@ -1004,14 +1000,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		} );
 
 		// attach event listeners
-		App.vent.on( 'tests:filter', Tests.controller.updateURL );
-
-		App.vent.on( 'tests:list', function() {
-			App.navigate( 'tests' );
-		} );
+		this.listenTo( Tests.controller, 'tests:filter', Tests.controller.updateURL );
 
 		bender.on( 'update', function( data ) {
-			App.vent.trigger( 'tests:update', data );
+			Tests.controller.trigger( 'tests:update', data );
 		} );
 
 		bender.on( 'complete', function() {
