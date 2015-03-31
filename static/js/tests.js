@@ -911,16 +911,18 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				model: Tests.testStatus
 			} ) );
 
-			App.content.show( new Tests.TestsView( {
-				model: Tests.tests
-			} ) );
-
 			if ( !filter ) {
 				filter = 'is:unit';
 			}
 
+			App.content.empty();
+
 			Tests.tests.fetch().done( function( data ) {
-				Tests.controller.trigger( 'tests:loaded', data.tests, filter ? filter.split( ',' ) : [] );
+				Tests.controller.trigger( 'tests:loaded', data.tests, filter.split( ',' ) );
+
+				App.content.show( new Tests.TestsView( {
+					model: Tests.tests
+				} ) );
 			} );
 		},
 
