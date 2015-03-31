@@ -307,14 +307,14 @@ describe( 'Middleware - Jobs', function() {
 		} );
 	} );
 
-	it( 'should handle DELETE:/jobs/<jobId> request to remove a job', function( done ) {
+	it( 'should handle DELETE:/jobs/<jobIds> request to remove a job', function( done ) {
 		instance.listen( 1031, function() {
 			request.del( 'http://localhost:1031/jobs/AYIlcxZa1i1nhLox', function( err, res, body ) {
 				var response = JSON.parse( body );
 
 				expect( res.statusCode ).to.equal( 200 );
 				expect( response.success ).to.be.true;
-				expect( response.id ).to.be.a( 'string' );
+				expect( response.id ).to.be.an( 'array' );
 
 				done();
 			} );
