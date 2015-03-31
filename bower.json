@@ -24,7 +24,7 @@
 	],
 	"dependencies": {
 		"marionette": "~2.4.1",
-		"jquery": "1",
+		"jquery": "~1.11.2",
 		"moment": "~2.9.0",
 		"respond": "~1.4.2",
 		"bootstrap": "~3.3.4",
