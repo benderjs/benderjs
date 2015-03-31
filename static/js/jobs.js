@@ -519,7 +519,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 			job.fetch( {
 				reset: true
-			} ).done( function() {
+			} )
+			.error( function() {
+				App.show404();
+			} )
+			.done( function() {
 				App.header.show( new Jobs.JobHeaderView( {
 					model: job
 				} ) );
