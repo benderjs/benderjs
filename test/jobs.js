@@ -324,32 +324,43 @@ describe( 'Jobs', function() {
 		return expect( promise ).to.become( null );
 	} );
 
-	it( 'should delete an existing job', function() {
-		var id;
+	it( 'should delete existing jobs', function() {
+		var ids = [];
 
 		return bender.jobs.create( job )
 			.then( function( result ) {
-				id = result;
+				ids.push( result );
 
-				return bender.jobs.delete( id );
+				return bender.jobs.create( job2 );
+			} )
+			.then( function( result ) {
+				ids.push( result );
+
+				return bender.jobs.delete( ids );
 			} )
 			.then( function() {
 				return nodeCall( bender.jobs.db.jobs.find, {
-					_id: id
+					_id: {
+						$in: ids
+					}
 				} );
 			} )
 			.then( function( results ) {
 				expect( results ).to.be.empty;
 
 				return nodeCall( bender.jobs.db.tasks.find, {
-					jobId: id
+					jobId: {
+						$in: ids
+					}
 				} );
 			} )
 			.then( function( results ) {
 				expect( results ).to.be.empty;
 
 				return nodeCall( bender.jobs.db.browserTasks.find, {
-					jobId: id
+					jobId: {
+						$in: ids
+					}
 				} );
 			} )
 			.then( function( results ) {
