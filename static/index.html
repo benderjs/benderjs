@@ -137,10 +137,12 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 
 	<!-- template for a tests status -->
 	<script type="text/html" id="test-status">
-	<strong class="passed"><%= passed %></strong> passed /
-	<strong class="failed"><%= failed %></strong> failed in
-	<strong class="time"><%= timeToText( time ) %></strong> -
-	<strong class="percent"><%= getPercent( completed, total ) %></strong>
+	<p>
+		<strong class="passed"><%= passed %></strong> passed /
+		<strong class="failed"><%= failed %></strong> failed in
+		<strong class="time"><%= timeToText( time ) %></strong> -
+		<strong class="percent"><%= getPercent( completed, total ) %></strong>
+	</p>
 	</script>
 
 

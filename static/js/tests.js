@@ -209,7 +209,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	 */
 	Tests.TestStatusView = Marionette.ItemView.extend( {
 		template: '#test-status',
-		tagName: 'p',
 		className: 'test-status',
 
 		templateHelpers: App.Common.templateHelpers,

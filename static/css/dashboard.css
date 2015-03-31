@@ -33,7 +33,7 @@ th:last-child {
 }
 
 .header {
-	margin: 1em 0;
+	margin: 1em 0 0 0;
 }
 
 .content {
@@ -65,12 +65,13 @@ th:last-child {
 }
 
 .app-title {
+	padding: 15px 0 15px 15px;
 	font-size: 20px;
 	font-weight: bold;
 }
 
 .socket-status {
-	margin-left: 0;
+	margin-left: 15px;
 }
 
 .socket-status .label {
@@ -84,8 +85,12 @@ th:last-child {
 	cursor: pointer;
 }
 
+.header-left {
+	margin-bottom: 1em;
+}
 
 .test-controls {
+	margin-bottom: 1em;
 	float: right;
 }
 
@@ -172,10 +177,14 @@ th:last-child {
 
 .test-status {
 	float: left;
-	margin: 0;
+	margin: 0 0 1em;
 	line-height: 34px;
-	font-size: 18px;
 	color: #555;
+}
+
+.test-status p {
+	font-size: 18px;
+	margin: 0;
 }
 
 .browsers th:first-child {
