@@ -973,7 +973,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 
 			_.defer( function() {
-				App.$body.css( 'paddingTop', App.$navbar.height() + 1 + 'px' );
+				App.trigger( 'header:resize' );
 			} );
 		}
 	} ) )();

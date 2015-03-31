@@ -134,6 +134,8 @@
 
 	// adjust document.body's top padding and fake header's position
 	App.on( 'header:resize', function( height ) {
+		height = height !== undefined ? height : App.$navbar.height();
+
 		App.$body.css( 'paddingTop', height + 1 + 'px' );
 
 		if ( currentHeader && headerTop !== height + 1 ) {
