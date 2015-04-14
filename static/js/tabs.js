@@ -38,8 +38,8 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		model: Tabs.Tab,
 
 		initialize: function() {
-			App.vent.on( 'tests:start', this.disableTabs, this );
-			App.vent.on( 'tests:stop', this.enableTabs, this );
+			App.vent.on( 'tabs:disable', this.disableTabs, this );
+			App.vent.on( 'tabs:enable', this.enableTabs, this );
 		},
 
 		activateTab: function( name ) {

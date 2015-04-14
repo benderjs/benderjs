@@ -244,11 +244,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		templateHelpers: App.Common.templateHelpers,
 
 		initialize: function() {
-			this.listenTo( App.vent, 'tests:start', function() {
+			this.listenTo( Tests.controller, 'tests:start', function() {
 				this.updateButtons( false );
 			} );
 
-			this.listenTo( App.vent, 'tests:stop', function() {
+			this.listenTo( Tests.controller, 'tests:stop', function() {
 				this.updateButtons( true );
 			} );
 		},
@@ -400,8 +400,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		initialize: function() {
 			this.listenTo( Tests.controller, 'tests:filter', this.setFilters, this );
-			this.listenTo( App.vent, 'tests:start', this.clearResults, this );
-			this.listenTo( App.vent, 'tests:stop', this.clearCurrentResult, this );
+			this.listenTo( Tests.controller, 'tests:start', this.clearResults, this );
+			this.listenTo( Tests.controller, 'tests:stop', this.clearCurrentResult, this );
 			this.listenTo( Tests.controller, 'tests:update', this.updateResult, this );
 
 			this.set( 'tests', new Tests.TestsList() );
@@ -940,7 +940,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					);
 				}
 
-				App.vent.trigger( 'tests:start' );
+				Tests.controller.trigger( 'tests:start' );
 
 				// show all filtered
 				Tests.testStatus.start( ids.length );
@@ -1003,12 +1003,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		// attach event listeners
 		this.listenTo( Tests.controller, 'tests:filter', Tests.controller.updateURL );
 
+		this.listenTo( Tests.controller, 'tests:start', function() {
+			App.vent.trigger( 'tabs:disable' );
+		} );
+
 		bender.on( 'update', function( data ) {
 			Tests.controller.trigger( 'tests:update', data );
 		} );
 
 		bender.on( 'complete', function() {
-			App.vent.trigger( 'tests:stop' );
+			Tests.controller.trigger( 'tests:stop' );
+			App.vent.trigger( 'tabs:enable' );
 		} );
 	} );
 } );
