@@ -22,12 +22,20 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 		template: '#alert',
 		className: 'alert',
 
-		events: {
-			'click': 'destroy'
+		destroy: function() {
+			$( document ).off( 'click', this._destroy );
+
+			delete this._destroy;
+
+			Marionette.ItemView.prototype.destroy.apply( this, arguments );
 		},
 
 		onRender: function() {
 			this.$el.addClass( 'alert-' + this.model.get( 'type' ) );
+
+			this._destroy = _.bind( this.destroy, this );
+
+			$( document ).on( 'click', this._destroy );
 		}
 	} );
 
