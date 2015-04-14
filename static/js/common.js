@@ -170,6 +170,9 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 					this._updateIndices( view, true, i );
 					this._addChildView( view, i );
+
+					view.bindUIElements();
+
 					m++;
 				}
 			}
