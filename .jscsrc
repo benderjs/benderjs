@@ -1,7 +1,7 @@
 {
 	"excludeFiles": [
 		"node_modules/*",
-		"static/js/libs/*",
+		"static/vendor/*",
 		"coverage/*",
 		"out/*"
 	],

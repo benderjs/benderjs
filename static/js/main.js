@@ -79,8 +79,8 @@
 
 	// show/hide the fake fixed header depending on the document scroll position
 	function toggleHeader() {
-		var supportPageOffset = window.pageYOffset !== undefined;
-		var isCSS1Compat = ( ( document.compatMode || '' ) === 'CSS1Compat' );
+		var supportPageOffset = window.pageYOffset !== undefined,
+			isCSS1Compat = ( ( document.compatMode || '' ) === 'CSS1Compat' );
 
 		// pageYOffset is available
 		if ( supportPageOffset ? window.pageYOffset :
