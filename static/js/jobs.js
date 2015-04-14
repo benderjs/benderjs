@@ -25,9 +25,22 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	 */
 	Jobs.JobRow = Backbone.Model.extend( {
 		defaults: {
+			selected: false,
 			description: '',
 			created: 0,
 			results: []
+		},
+
+		setSelect: function( selected, silent ) {
+			this.set( 'selected', !!selected, {
+				silent: true
+			} );
+
+			if ( !silent ) {
+				this.trigger( 'change:selected', !!selected );
+			}
+
+			this.trigger( 'toggle:selected', !!selected );
 		}
 	} );
 
@@ -37,7 +50,29 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	Jobs.JobRowView = Marionette.ItemView.extend( {
 		template: '#job-row',
 		tagName: 'tr',
-		templateHelpers: App.Common.templateHelpers
+		templateHelpers: App.Common.templateHelpers,
+
+		events: {
+			'change @ui.checkbox': 'changeSelected'
+		},
+
+		ui: {
+			checkbox: 'input[type=checkbox]'
+		},
+
+		initialize: function() {
+			Marionette.ItemView.prototype.initialize.apply( this, arguments );
+
+			this.listenTo( this.model, 'toggle:selected', this.updateSelected );
+		},
+
+		changeSelected: function() {
+			this.model.setSelect( this.ui.checkbox.prop( 'checked' ) );
+		},
+
+		updateSelected: function( selected ) {
+			this.ui.checkbox.prop( 'checked', selected );
+		}
 	} );
 
 	/**
@@ -66,6 +101,12 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					return first < second ? 1 :
 						first > second ? -1 : 0;
 				} );
+			},
+
+			toggleSelectJobs: function( selected ) {
+				this.each( function( item ) {
+					item.setSelect( selected, true );
+				} );
 			}
 		} )
 	) )();
@@ -79,6 +120,85 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	} );
 
 	/**
+	 * Header for the jobs list view
+	 */
+	Jobs.JobsListHeaderView = Marionette.ItemView.extend( {
+		template: '#job-list-header',
+		className: 'row job-list-header',
+		templateHelpers: App.Common.templateHelpers,
+
+		events: {
+			'click @ui.removeButton': 'removeSelected'
+		},
+
+		ui: {
+			removeButton: '.remove-selected-button'
+		},
+
+		initialize: function() {
+			this.listenTo( this.collection, 'toggle:selected', this.updateRemoveButton );
+			this.listenTo( this.collection, 'sync', this.updateRemoveButton );
+		},
+
+		removeSelected: function() {
+			var selected = this.collection.filter( function( item ) {
+					return item.get( 'selected' );
+				} ).map( function( item ) {
+					return item.get( 'id' );
+				} ),
+				that = this;
+
+			if ( !selected.length ) {
+				return;
+			}
+
+			App.showConfirmPopup( {
+				message: 'Do you want to remove selected jobs?',
+				callback: remove
+			} );
+
+			function remove( callback ) {
+				$.ajax( {
+					url: 'jobs/' + selected.join( ',' ),
+					type: 'DELETE',
+					success: function( response ) {
+						App.Alerts.Manager.add(
+							response.success ? 'success' : 'danger',
+							response.success ?
+							'Removed jobs: <strong>' + selected.join( ', ' ) + '</strong>' :
+							response.error,
+							response.success ? 'Success!' : 'Error!'
+						);
+
+						that.collection.fetch( {
+							force: true
+						} );
+
+						callback( true );
+					},
+
+					error: function( response ) {
+						App.Alerts.Manager.add(
+							'danger',
+							response.responseText || 'Error while removing jobs.',
+							'Error!'
+						);
+						callback( false );
+					}
+				} );
+			}
+		},
+
+		updateRemoveButton: function() {
+			var disabled = this.collection.every( function( item ) {
+				return !item.get( 'selected' );
+			} );
+
+			this.ui.removeButton.prop( 'disabled', disabled );
+		}
+	} );
+
+	/**
 	 * Jobs list view
 	 */
 	Jobs.JobsListView = App.Common.TableView.extend( {
@@ -86,8 +206,17 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		childView: Jobs.JobRowView,
 		emptyView: Jobs.NoJobsView,
 
+		events: {
+			'change @ui.selectAll': 'toggleSelectAllJobs'
+		},
+
+		ui: {
+			selectAll: '.select-all-jobs'
+		},
+
 		initialize: function() {
 			this.listenTo( this.collection, 'change', this.render );
+			this.listenTo( this.collection, 'change:selected', this.updateSelectAllCheckbox );
 			// TODO should we disable this on IE8?
 			this.listenTo( Jobs.controller, 'job:update', _.bind( function() {
 				this.collection.fetch();
@@ -113,6 +242,18 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} else {
 				children.eq( index ).before( childView.el );
 			}
+		},
+
+		toggleSelectAllJobs: function( e ) {
+			this.collection.toggleSelectJobs( e.target.checked );
+		},
+
+		updateSelectAllCheckbox: function() {
+			var checked = this.collection.every( function( item ) {
+				return item.get( 'selected' );
+			} );
+
+			this.ui.selectAll.prop( 'checked', checked );
 		}
 	} );
 
@@ -240,7 +381,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					error: function( model, response ) {
 						App.Alerts.Manager.add(
 							'danger',
-							response.error || 'Error while removing a job.',
+							response.responseText || 'Error while removing a job.',
 							'Error!'
 						);
 						callback( false );
@@ -500,7 +641,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		listJobs: function() {
-			App.header.empty();
+			App.header.show( new Jobs.JobsListHeaderView( {
+				collection: Jobs.jobsList
+			} ) );
 
 			App.content.show( new Jobs.JobsListView( {
 				collection: Jobs.jobsList

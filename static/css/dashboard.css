@@ -201,10 +201,20 @@ th:last-child {
 	padding-left: 44px;
 }
 
+.job-list-header {
+	margin-bottom: 1em;
+	text-align: right;
+}
+
 .jobs tbody tr td,
 .jobs tbody tr th {
 	padding-top: 11px;
 	padding-bottom: 11px;
+}
+
+.jobs tr th:first-child,
+.jobs tr td:first-child {
+	padding: 11px 4px;
 }
 
 .jobs .results {
@@ -261,6 +271,10 @@ th:last-child {
 
 table > thead > tr > .job-browsers {
 	padding: 0 8px;
+}
+
+.checkbox-column {
+	width: 21px;
 }
 
 .chrome {

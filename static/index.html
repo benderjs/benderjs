@@ -157,15 +157,16 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	</script>
 
 
-	<!-- template for jobs table -->
+	<!-- template for a jobs table -->
 	<script type="text/html" id="jobs">
 	<table class="table table-hover jobs">
 		<thead class="fixed-header">
 			<tr>
+				<th class="checkbox-column"><input type="checkbox" class="select-all-jobs"></th>
 				<th class="col-md-1">ID</th>
 				<th class="col-md-2">Description</th>
 				<th class="col-md-2">Created</th>
-				<th class="col-md-7">Results</th>
+				<th>Results</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -182,6 +183,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 
 	<!-- template for a single job row -->
 	<script type="text/html" id="job-row">
+	<td><input type="checkbox" <%= selected ? 'checked=checked' : '' %>></td>
 	<td><a href="#jobs/<%= id %>" title="<%= id %>"><%= id %></a></td>
 	<td><span title="<%= description %>"><%= description %></span></td>
 	<td><small><%= getTime(created) %></small></td>
@@ -259,6 +261,15 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		</div>
 	</div>
 	<% } %>
+	</script>
+
+	<!-- template for a job list header -->
+	<script type="text/html" id="job-list-header">
+	<div class="col-md-12">
+		<button type="button" title="Remove selected jobs" disabled="disabled" class="btn btn-sm btn-danger remove-selected-button">
+			<span class="glyphicon glyphicon-remove"></span> Remove selected
+		</button>
+	</div>
 	</script>
 
 	<!-- template for a job results section -->
