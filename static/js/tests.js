@@ -1015,5 +1015,12 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			Tests.controller.trigger( 'tests:stop' );
 			App.vent.trigger( 'tabs:enable' );
 		} );
+
+		// prevent from accidentally closing the dashboard while the tests are running
+		$( window ).on( 'beforeunload', function() {
+			if ( Tests.testStatus && Tests.testStatus.get( 'running' ) ) {
+				return 'The tests are still running.';
+			}
+		} );
 	} );
 } );
