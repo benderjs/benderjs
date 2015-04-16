@@ -487,6 +487,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		update: function() {
 			this.collection.reset( this.model.get( 'tasks' ) );
 			this.render();
+			App.trigger( 'header:update', true );
 		}
 	} );
 
