@@ -114,12 +114,17 @@
 	} );
 
 	// update the fake header's content
-	App.on( 'header:update', function() {
+	App.on( 'header:update', function( contentOnly ) {
+		var header = App.content.$el.find( '.fixed-header' );
+
+		// just replace the contents of the header
+		if ( contentOnly && currentHeader && header.length ) {
+			return currentHeader.find( '.table' ).empty().append( header.clone() );
+		}
+
 		if ( currentHeader ) {
 			currentHeader.remove();
 		}
-
-		var header = App.content.$el.find( '.fixed-header' );
 
 		if ( header.length ) {
 			currentHeader = $( '<div class="fixed hidden"><div class="container"><div class="panel panel-default">' +
