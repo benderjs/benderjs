@@ -212,8 +212,8 @@ th:last-child {
 	padding-bottom: 11px;
 }
 
-.jobs tr th:first-child,
-.jobs tr td:first-child {
+.jobs tr th.checkbox-column,
+.job td:first-child {
 	padding: 11px 4px;
 }
 

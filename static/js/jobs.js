@@ -48,6 +48,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	 * Job table row view
 	 */
 	Jobs.JobRowView = Marionette.ItemView.extend( {
+		className: 'job',
+
 		template: '#job-row',
 		tagName: 'tr',
 		templateHelpers: App.Common.templateHelpers,
