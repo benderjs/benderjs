@@ -337,7 +337,15 @@
 	function start() {
 		ready = true;
 
-		bender.addListener( window, 'error', bender.error );
+		var oldOnError = window.onerror;
+
+		window.onerror = function( error ) {
+			if ( oldOnError ) {
+				oldOnError( error );
+			}
+
+			bender.error( error );
+		};
 
 		if ( bender.ignoreOldIE && bender.env.ie && bender.env.version && bender.env.version < 9 ) {
 			bender.ignore( {
@@ -470,12 +478,19 @@
 		}
 	}
 
-	// clear the deferment timeout to avoid error stack pollution
-	bender.addListener( window, 'error', function() {
+
+	var oldOnError = window.onerror;
+
+	window.onerror = function( error ) {
+		if ( oldOnError ) {
+			oldOnError( error );
+		}
+
+		// clear the deferment timeout to avoid error stack pollution
 		if ( defermentTimeout !== undefined ) {
 			clearTimeout( defermentTimeout );
 		}
-	} );
+	};
 
 	/**
 	 * Defer the startup of Bender tests
