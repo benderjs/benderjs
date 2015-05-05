@@ -12,6 +12,7 @@
 	],
 	"homepage": "http://benderjs.com/",
 	"scripts": {
+		"doc": "jsdoc -r lib/",
 		"lint": "jshint lib/ test/ && jscs .",
 		"postinstall": "bower install",
 		"test": "istanbul test node_modules/mocha/bin/_mocha -- --reporter list --check-leaks --recursive"
