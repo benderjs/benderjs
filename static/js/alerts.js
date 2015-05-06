@@ -14,6 +14,7 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 	 * @memberOf module:Alerts
 	 * @default
 	 * @type {Number}
+	 * @name TIMEOUT
 	 */
 	Alerts.TIMEOUT = 3000;
 
@@ -132,12 +133,11 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 	} );
 
 	/**
-	 * Alert manager
-	 * @memberOf module:Alerts
-	 * @namespace
-	 * @alias manager
+	 * Alert controller
+	 * @constructor module:Alerts.Controller
+	 * @extends {Marionette.Controller}
 	 */
-	Alerts.manager = {
+	Alerts.Controller = Marionette.Controller.extend( /** @lends module:Alerts.Controller.prototype */ {
 		/**
 		 * Add new alert
 		 * @param {String} type    Alert type
@@ -151,7 +151,15 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 				message: message
 			} ) );
 		}
-	};
+	} );
+
+	/**
+	 * Alert controller
+	 * @memberOf module:Alerts
+	 * @type {module:Alerts.Controller}
+	 * @name controller
+	 */
+	Alerts.controller = new Alerts.Controller();
 
 	Alerts.addInitializer( function() {
 		App.alerts.show( new Alerts.AlertListView( {

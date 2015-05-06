@@ -867,14 +867,14 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 */
 		showError: function( model, error ) {
 			this.ui.save.prop( 'disabled', false );
-			App.Alerts.manager.add( 'danger', error, 'Error:' );
+			App.Alerts.controller.add( 'danger', error, 'Error:' );
 		},
 
 		/**
 		 * Handle job save
 		 */
 		handleSave: function() {
-			App.Alerts.manager.add(
+			App.Alerts.controller.add(
 				'success',
 				'Job saved.',
 				'Success!'
@@ -953,7 +953,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			function remove( callback ) {
 				job.destroy( {
 					success: function( model, response ) {
-						App.Alerts.manager.add(
+						App.Alerts.controller.add(
 							response.success ? 'success' : 'danger',
 							response.success ?
 							'Removed a job: <strong>' + response.id + '</strong>' :
@@ -964,7 +964,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 						App.navigate( 'jobs' );
 					},
 					error: function( model, response ) {
-						App.Alerts.manager.add(
+						App.Alerts.controller.add(
 							'danger',
 							response.responseText || 'Error while removing a job.',
 							'Error!'
@@ -990,7 +990,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					url: '/jobs/' + job.id + '/restart',
 					dataType: 'json',
 					success: function( response ) {
-						App.Alerts.manager.add(
+						App.Alerts.controller.add(
 							response.success ? 'success' : 'danger',
 							response.success ?
 							'Restarted a job: <strong>' + response.id + '</strong>' :
@@ -1007,7 +1007,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 						callback( !!response.success );
 					},
 					error: function( response, status ) {
-						App.Alerts.manager.add(
+						App.Alerts.controller.add(
 							'danger',
 							status || 'Error while restarting a job.',
 							'Error!'
@@ -1043,7 +1043,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					url: 'jobs/' + selected.join( ',' ),
 					type: 'DELETE',
 					success: function( response ) {
-						App.Alerts.manager.add(
+						App.Alerts.controller.add(
 							response.success ? 'success' : 'danger',
 							response.success ?
 							'Removed jobs: <strong>' + selected.join( ', ' ) + '</strong>' :
@@ -1059,7 +1059,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					},
 
 					error: function( response ) {
-						App.Alerts.manager.add(
+						App.Alerts.controller.add(
 							'danger',
 							response.responseText || 'Error while removing jobs.',
 							'Error!'

@@ -143,12 +143,11 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	} );
 
 	/**
-	 * Browser module controller
-	 * @memberOf module:Browsers
-	 * @namespace
-	 * @alias controller
+	 * Browser controller
+	 * @constructor module:Browsers.Controller
+	 * @extends {Marionette.Controller}
 	 */
-	Browsers.controller = {
+	Browsers.Controller = Marionette.Controller.extend( {
 		/**
 		 * Show browser list
 		 */
@@ -200,7 +199,7 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 
 		/**
 		 * Update a client
-		 * @param  {Object} data Client data
+		 * @param {Object} data Client data
 		 */
 		updateClient: function( data ) {
 			var client = Browsers.browserList.get( data.id );
@@ -209,7 +208,15 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 				client.set( data );
 			}
 		}
-	};
+	} );
+
+	/**
+	 * Browser controller
+	 * @memberOf module:Browsers
+	 * @type {module:Browsers.Controller}
+	 * @name controller
+	 */
+	Browsers.controller = new Browsers.Controller();
 
 	/**
 	 * Add Browser module initializer

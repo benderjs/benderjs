@@ -1201,7 +1201,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		 */
 		showError: function( model, error ) {
 			this.ui.create.prop( 'disabled', false );
-			App.Alerts.manager.add( 'danger', error, 'Error:' );
+			App.Alerts.controller.add( 'danger', error, 'Error:' );
 		},
 
 		/**
@@ -1209,7 +1209,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		 * @param {Object} model New job model
 		 */
 		handleCreate: function( model ) {
-			App.Alerts.manager.add(
+			App.Alerts.controller.add(
 				'success',
 				'New job added with ID: <a href="/#jobs/' + model.id + '">' + model.id + '</a>.',
 				'Success!'
@@ -1306,7 +1306,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				ids = Tests.tests.getIds();
 
 				if ( !ids.length ) {
-					return App.Alerts.manager.add(
+					return App.Alerts.controller.add(
 						'danger',
 						'There are no tests to run, aborting.',
 						'Error:'
