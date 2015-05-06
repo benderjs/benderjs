@@ -32,6 +32,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.listenTo( Tests.controller, 'tests:loaded', this.buildFilters, this );
 
 			this.on( 'change:filter', function() {
+				/**
+				 * Test filter has changed
+				 * @event module:Tests.Controller#tests:filter
+				 * @type {Array}
+				 */
 				Tests.controller.trigger( 'tests:filter', this.get( 'filter' ) );
 			} );
 		},
@@ -1279,6 +1284,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			App.content.empty();
 
 			Tests.tests.fetch().done( function( data ) {
+				/**
+				 * Tests were loaded
+				 * @event module:Tests.Controller#tests:loaded
+				 */
 				Tests.controller.trigger( 'tests:loaded', data.tests, filter.split( ',' ) );
 
 				App.content.show( new Tests.TestsView( {
@@ -1304,6 +1313,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					);
 				}
 
+				/**
+				 * Testing started
+				 * @event module:Tests.Controller#tests:start
+				 */
 				Tests.controller.trigger( 'tests:start' );
 
 				// show all filtered
@@ -1445,16 +1458,32 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		this.listenTo( Tests.controller, 'tests:filter', Tests.controller.updateURL );
 
 		this.listenTo( Tests.controller, 'tests:start', function() {
-			App.vent.trigger( 'tabs:disable' );
+			/**
+			 * Disable tabs menu
+			 * @event module:App#tabs:disable
+			 */
+			App.trigger( 'tabs:disable' );
 		} );
 
 		bender.on( 'update', function( data ) {
+			/**
+			 * Tests results updated
+			 * @event module:Tests.Controller#tests:update
+			 */
 			Tests.controller.trigger( 'tests:update', data );
 		} );
 
 		bender.on( 'complete', function() {
+			/**
+			 * Tests stopped
+			 * @event module:Tests.Controller#tests:stop
+			 */
 			Tests.controller.trigger( 'tests:stop' );
-			App.vent.trigger( 'tabs:enable' );
+			/**
+			 * Enable tabs menu
+			 * @event module:App#tabs:enable
+			 */
+			App.trigger( 'tabs:enable' );
 		} );
 
 		// prevent from accidentally closing the dashboard while the tests are running

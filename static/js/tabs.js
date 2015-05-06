@@ -37,8 +37,8 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		 * Initialize tab collection
 		 */
 		initialize: function() {
-			App.vent.on( 'tabs:disable', this.disableTabs, this );
-			App.vent.on( 'tabs:enable', this.enableTabs, this );
+			App.on( 'tabs:disable', this.disableTabs, this );
+			App.on( 'tabs:enable', this.enableTabs, this );
 		},
 
 		/**
