@@ -598,6 +598,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * Handle render event
 		 */
 		onRender: function() {
+			/**
+			 * Header was resized
+			 * @event module:App#header:resize
+			 * @type {Number}
+			 */
 			App.trigger( 'header:resize' );
 		},
 
@@ -700,6 +705,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		update: function() {
 			this.collection.reset( this.model.get( 'tasks' ) );
 			this.render();
+			/**
+			 * Header was updated
+			 * @event module:App#header:update
+			 * @type {Boolean}
+			 */
 			App.trigger( 'header:update', true );
 		}
 	} );
@@ -903,6 +913,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 */
 		initialize: function() {
 			App.Sockets.socket.on( 'job:update', _.bind( function( jobId ) {
+				/**
+				 * Job has been updated
+				 * @event module:Jobs.Controller#job:update
+				 * @type {String}
+				 */
 				this.trigger( 'job:update', jobId );
 			}, this ) );
 		},
