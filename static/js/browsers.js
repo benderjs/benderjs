@@ -1,28 +1,48 @@
 /**
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
- *
- * @module App.Browsers
  */
 
+/**
+ * @module Browsers
+ */
 App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	'use strict';
 
 	/**
 	 * Router for Browsers module
+	 * @constructor module:Browsers.BrowserRouter
+	 * @extends {Marionette.AppRouter}
 	 */
-	Browsers.Router = Marionette.AppRouter.extend( {
+	Browsers.BrowserRouter = Marionette.AppRouter.extend( /** @lends module:Browsers.BrowserRouter.prototype */ {
+		/**
+		 * Router name
+		 * @default
+		 * @type {String}
+		 */
 		name: 'browsers',
 
+		/**
+		 * Routes
+		 * @default
+		 * @type {Object}
+		 */
 		appRoutes: {
-			'browsers': 'show'
+			'browsers': 'showBrowsers'
 		}
 	} );
 
 	/**
 	 * Browser model
+	 * @constructor module:Browsers.Browser
+	 * @extends {Backbone.Model}
 	 */
-	Browsers.Browser = Backbone.Model.extend( {
+	Browsers.Browser = Backbone.Model.extend( /** @lends module:Browsers.Browser.prototype */ {
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			id: '',
 			name: '',
@@ -36,12 +56,35 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 
 	/**
 	 * Browser view
+	 * @constructor module:Browsers.BrowserView
+	 * @extends {Marionette.ItemView}
 	 */
-	Browsers.BrowserView = Marionette.ItemView.extend( {
+	Browsers.BrowserView = Marionette.ItemView.extend( /** @lends module:Browsers.BrowserView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#browser',
+
+		/**
+		 * Tag name
+		 * @default
+		 * @type {String}
+		 */
 		tagName: 'tr',
 
+		/**
+		 * Template helpers
+		 * @type {Object}
+		 */
 		templateHelpers: {
+			/**
+			 * Format a browser name
+			 * @param  {String} name    Browser name
+			 * @param  {Number} version Browser version
+			 * @return {String}
+			 */
 			formatName: function( name, version ) {
 				name = name === 'ie' ? 'IE' : name.charAt( 0 ).toUpperCase() + name.slice( 1 );
 
@@ -49,6 +92,9 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Initialize the view
+		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
 		}
@@ -56,35 +102,71 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 
 	/**
 	 * Browser collection
+	 * @constructor module:Browsers.BrowserList
+	 * @extends {Backbone.Collection}
 	 */
-	Browsers.browsersList = new( Backbone.Collection.extend( {
+	Browsers.BrowserList = Backbone.Collection.extend( /** @lends module:Browsers.BrowserList.prototype */ {
+		/**
+		 * Collection model class
+		 * @default
+		 * @type {module:Browsers.Browser}
+		 */
 		model: Browsers.Browser
-	} ) )();
+	} );
+
+	/**
+	 * Browser collection
+	 * @memberOf module:Browsers
+	 * @type {module:Browsers.BrowserList}
+	 * @name browserList
+	 */
+	Browsers.browserList = new Browsers.BrowserList();
 
 	/**
 	 * Browser list view
+	 * @constructor module:Browsers.BrowsersListView
+	 * @extends {module:Common.TableView}
 	 */
-	Browsers.BrowsersListView = App.Common.TableView.extend( {
+	Browsers.BrowsersListView = App.Common.TableView.extend( /** @lends module:Browsers.BrowsersListView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#browsers',
+
+		/**
+		 * Child item view
+		 * @type {module:Browsers.BrowserView}
+		 */
 		childView: Browsers.BrowserView
 	} );
 
 	/**
 	 * Browser module controller
-	 * @type {Object}
+	 * @memberOf module:Browsers
+	 * @namespace
+	 * @alias controller
 	 */
 	Browsers.controller = {
-		show: function() {
+		/**
+		 * Show browser list
+		 */
+		showBrowsers: function() {
 			App.header.empty();
 
 			App.content.show( new Browsers.BrowsersListView( {
-				collection: Browsers.browsersList
+				collection: Browsers.browserList
 			} ) );
 		},
 
+		/**
+		 * Parse browser list
+		 * @param  {Array} data Array of browsers
+		 * @return {Array}
+		 */
 		parseBrowsers: function( data ) {
 			var result = [],
-				browser,
 				clients;
 
 			_.each( data, function( browser ) {
@@ -101,16 +183,27 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 			return result;
 		},
 
+		/**
+		 * Update browser list
+		 * @param {Array} data Array of browsers
+		 */
 		updateBrowsers: function( data ) {
-			Browsers.browsersList.reset( Browsers.controller.parseBrowsers( data ) );
+			Browsers.browserList.reset( Browsers.controller.parseBrowsers( data ) );
 		},
 
+		/**
+		 * Clear browser list
+		 */
 		clearBrowsers: function() {
-			Browsers.browsersList.reset();
+			Browsers.browserList.reset();
 		},
 
+		/**
+		 * Update a client
+		 * @param  {Object} data Client data
+		 */
 		updateClient: function( data ) {
-			var client = Browsers.browsersList.get( data.id );
+			var client = Browsers.browserList.get( data.id );
 
 			if ( client ) {
 				client.set( data );
@@ -124,7 +217,13 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	Browsers.addInitializer( function() {
 		var controller = Browsers.controller;
 
-		Browsers.router = new Browsers.Router( {
+		/**
+		 * Browser router
+		 * @memberOf module:Browsers
+		 * @type {module:Browsers.BrowserRouter}
+		 * @name browserRouter
+		 */
+		Browsers.browserRouter = new Browsers.BrowserRouter( {
 			controller: controller
 		} );
 

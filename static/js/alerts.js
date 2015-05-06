@@ -1,16 +1,33 @@
 /**
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
- *
- * @module App.Alerts
  */
 
+/**
+ * @module Alerts
+ */
 App.module( 'Alerts', function( Alerts, App, Backbone ) {
 	'use strict';
 
+	/**
+	 * Default alert timeout
+	 * @memberOf module:Alerts
+	 * @default
+	 * @type {Number}
+	 */
 	Alerts.TIMEOUT = 3000;
 
-	Alerts.Model = Backbone.Model.extend( {
+	/**
+	 * Alert model
+	 * @constructor module:Alerts.Alert
+	 * @extends {Backbone.Model}
+	 */
+	Alerts.Alert = Backbone.Model.extend( /** @lends module:Alerts.Alert.prototype */ {
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			type: 'info',
 			title: '',
@@ -18,10 +35,29 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 		}
 	} );
 
-	Alerts.View = Marionette.ItemView.extend( {
+	/**
+	 * Alert view
+	 * @constructor module:Alerts.AlertView
+	 * @extends {Marionette.ItemView}
+	 */
+	Alerts.AlertView = Marionette.ItemView.extend( /** @lends module:Alerts.AlertView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#alert',
+
+		/**
+		 * Alert view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'alert',
 
+		/**
+		 * Destroy the view
+		 */
 		destroy: function() {
 			$( document ).off( 'click', this._destroy );
 
@@ -30,6 +66,9 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 			Marionette.ItemView.prototype.destroy.apply( this, arguments );
 		},
 
+		/**
+		 * Handle render event
+		 */
 		onRender: function() {
 			this.$el.addClass( 'alert-' + this.model.get( 'type' ) );
 
@@ -39,9 +78,21 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 		}
 	} );
 
-	Alerts.list = new( Backbone.Collection.extend( {
-		model: Alerts.Model,
+	/**
+	 * Collection of alerts
+	 * @constructor module:Alerts.AlertList
+	 * @extends {Backbone.Collection}
+	 */
+	Alerts.AlertList = Backbone.Collection.extend( /** @lends module:Alerts.AlertList.prototype*/ {
+		/**
+		 * Collection model class
+		 * @type {module:Alerts.Alert}
+		 */
+		model: Alerts.Alert,
 
+		/**
+		 * Initialize the collection
+		 */
 		initialize: function() {
 			// remove a model after a timeout
 			this.on( 'add', function( model, collection ) {
@@ -50,17 +101,51 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 				}, Alerts.TIMEOUT );
 			} );
 		}
+	} );
 
-	} ) )();
+	/**
+	 * Collection of alerts
+	 * @type {module:Alerts.AlertList}
+	 * @memberOf module:Alerts
+	 * @name alertList
+	 */
+	Alerts.alertList = new Alerts.AlertList();
 
-	Alerts.ListView = Marionette.CollectionView.extend( {
-		childView: Alerts.View,
+	/**
+	 * Alert list view
+	 * @constructor module:Alerts.AlertListView
+	 * @extends {Marionette.CollectionView}
+	 */
+	Alerts.AlertListView = Marionette.CollectionView.extend( /** @lends module:Alerts.AlertListView.prototype */ {
+		/**
+		 * Child item view
+		 * @type {module:Alerts.AlertView}
+		 */
+		childView: Alerts.AlertView,
+
+		/**
+		 * Alert list class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'alert-wrapper'
 	} );
 
-	Alerts.Manager = {
+	/**
+	 * Alert manager
+	 * @memberOf module:Alerts
+	 * @namespace
+	 * @alias manager
+	 */
+	Alerts.manager = {
+		/**
+		 * Add new alert
+		 * @param {String} type    Alert type
+		 * @param {String} message Alert message
+		 * @param {String} title   Alert title
+		 */
 		add: function( type, message, title ) {
-			Alerts.list.add( new Alerts.Model( {
+			Alerts.alertList.add( new Alerts.Alert( {
 				type: type,
 				title: title,
 				message: message
@@ -69,9 +154,8 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 	};
 
 	Alerts.addInitializer( function() {
-		App.alerts.show( new Alerts.ListView( {
-			collection: Alerts.list
+		App.alerts.show( new Alerts.AlertListView( {
+			collection: Alerts.alertList
 		} ) );
 	} );
-
 } );
