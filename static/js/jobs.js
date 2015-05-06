@@ -212,15 +212,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		} )
 	);
 
-
-	/**
-	 * Job collection
-	 * @memberOf module:Jobs
-	 * @type {module:Jobs.JobList}
-	 * @name jobList
-	 */
-	Jobs.jobList = new Jobs.JobList();
-
 	/**
 	 * Empty jobs list view
 	 * @constructor module:Jobs.NoJobsView
@@ -1110,9 +1101,17 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	} );
 
 	/**
-	 * Add Jobs module initializer
+	 * Initialize Jobs module
 	 */
-	Jobs.addInitializer( function() {
+	App.on( 'before:start', function() {
+		/**
+		 * Job collection
+		 * @memberOf module:Jobs
+		 * @type {module:Jobs.JobList}
+		 * @name jobList
+		 */
+		Jobs.jobList = new Jobs.JobList();
+
 		/**
 		 * Job controller
 		 * @memberOf module:Jobs
