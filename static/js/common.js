@@ -1,10 +1,11 @@
 /**
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
- *
- * @module App.Common
  */
 
+/**
+ * @module Common
+ */
 App.module( 'Common', function( Common, App, Backbone ) {
 	'use strict';
 
@@ -17,15 +18,28 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	}
 
 	/**
-	 * Helpers used in underscore templates
-	 * @type {Object}
+	 * Helper functions used in underscore templates
+	 * @memberOf module:Common
+	 * @namespace
+	 * @alias templateHelpers
 	 */
 	Common.templateHelpers = {
+		/**
+		 * Get human-readable elapsed time
+		 * @param  {Number} timestamp UTC timestamp
+		 * @return {String}
+		 */
 		getTime: function( timestamp ) {
 			return moment( timestamp ).fromNow();
 		},
 
-		getResultStyle: function( result, noBackground ) {
+		/**
+		 * Get classes for a result element
+		 * @param  {Object}  result       Result object
+		 * @param  {Boolean} noBackground Don't add background flag
+		 * @return {String}
+		 */
+		getResultClass: function( result, noBackground ) {
 			var status = result.status === 2 ? 'success' :
 				result.status === 3 ? 'danger' :
 				result.status === 4 ? 'warning' : 'info';
@@ -33,6 +47,11 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			return status + ( noBackground ? '' : ' bg-' + status ) + ' text-' + status;
 		},
 
+		/**
+		 * Produce a result message
+		 * @param  {Object} result Result object
+		 * @return {String}
+		 */
 		getResultMessage: function( result ) {
 			var message = [
 				'Waiting...',
@@ -49,7 +68,12 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			return message;
 		},
 
-		getIcon: function( result ) {
+		/**
+		 * Get result icon
+		 * @param  {Object} result Result object
+		 * @return {String}
+		 */
+		getResultIcon: function( result ) {
 			return 'glyphicon-' + ( result.status === 0 ? 'time' :
 				result.status === 1 ? 'refresh' :
 				result.status === 2 ? 'ok' :
@@ -57,6 +81,11 @@ App.module( 'Common', function( Common, App, Backbone ) {
 				'forward' );
 		},
 
+		/**
+		 * Convert time in ms to a XXh XXm XXs XXXms string
+		 * @param  {Number} ms Time in milliseconds
+		 * @return {String}
+		 */
 		timeToText: function( ms ) {
 			var h, m, s;
 
@@ -73,10 +102,21 @@ App.module( 'Common', function( Common, App, Backbone ) {
 				( ms < 10 ? '00' : ms < 100 ? '0' : '' ) + ms + 'ms';
 		},
 
+		/**
+		 * Get test completion per cent string
+		 * @param  {Number} completed Number of completed tests
+		 * @param  {Number} total     Total number of tests
+		 * @return {String}
+		 */
 		getPercent: function( completed, total ) {
 			return ( total > 0 ? Math.ceil( completed / total * 100 ) : 0 ) + '%';
 		},
 
+		/**
+		 * Check if a test was "slow"
+		 * @param  {Object}   result Result object
+		 * @return {Boolean}
+		 */
 		isSlow: function( result ) {
 			return result.duration && result.total &&
 				( Math.round( result.duration / result.total ) > bender.config.slowAvgThreshold ) ||
@@ -86,12 +126,28 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 	/**
 	 * Optimized version of CompositeView that parses HTML for children just once when showing the entire collection
+	 * @constructor module:Common.TableView
 	 * @extends {Marionette.CompositeView}
 	 */
-	Common.TableView = Marionette.CompositeView.extend( {
+	Common.TableView = Marionette.CompositeView.extend( /** @lends module:Common.TableView.prototype */ {
+		/**
+		 * Table view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'panel panel-default',
+
+		/**
+		 * Child view container
+		 * @default
+		 * @type {String}
+		 */
 		childViewContainer: 'tbody',
 
+		/**
+		 * Get a child view template
+		 * @return {String}
+		 */
 		getChildTemplate: function() {
 			var childView = this.getOption( 'childView' );
 
@@ -102,6 +158,11 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			return childView.prototype.template;
 		},
 
+		/**
+		 * Handle child addition
+		 * @param {Object} child Child item
+		 * @private
+		 */
 		_onCollectionAdd: function( child ) {
 			this.destroyEmptyView();
 
@@ -111,6 +172,12 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			this.addChild( child, childTemplate, index );
 		},
 
+		/**
+		 * Create a HTML for a view
+		 * @param  {Object} View      View constructor
+		 * @param  {String} innerHTML View's inner HTML
+		 * @return {String}
+		 */
 		createEl: function( View, innerHTML ) {
 			var vp = View.prototype,
 				tagName = vp.tagName,
@@ -133,6 +200,9 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			return html.join( '' );
 		},
 
+		/**
+		 * Show a collection
+		 */
 		showCollection: function() {
 			var childTemplate = this.getChildTemplate(),
 				div = document.createElement( 'div' ),
@@ -179,6 +249,12 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 		},
 
+		/**
+		 * Add a child to the collection
+		 * @param {Object} child         Child data
+		 * @param {String} childTemplate Child template
+		 * @param {Number} index         Child index
+		 */
 		addChild: function( child, childTemplate, index ) {
 			var childViewOptions = this.getOption( 'childViewOptions' );
 
@@ -205,6 +281,11 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			return view;
 		},
 
+		/**
+		 * Render a child view
+		 * @param {Object} view  Child view
+		 * @param {Number} index Child index
+		 */
 		renderChildView: function( view, index ) {
 			if ( !view.el || !view.el.innerHTML ) {
 				view.render();
@@ -216,11 +297,20 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 	/**
 	 * View for displaying bootstrap styled modal dialogs
+	 * @constructor module:Common.ModalView
 	 * @extends {Marionette.ItemView}
 	 */
-	Common.ModalView = Marionette.ItemView.extend( {
+	Common.ModalView = Marionette.ItemView.extend( /** @lends module:Common.ModalView.prototype */ {
+		/**
+		 * Modal view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'modal-content',
 
+		/**
+		 * Handle render event
+		 */
 		onRender: function() {
 			this.undelegateEvents();
 			this.$el.wrap(
@@ -235,32 +325,73 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 	/**
 	 * View for 404 error page
+	 * @constructor module:Common.Error404View
 	 * @extends {Marionette.ItemView}
 	 */
-	Common.Error404View = Marionette.ItemView.extend( {
+	Common.Error404View = Marionette.ItemView.extend( /** @lends module:Common.Error404View.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#error404'
 	} );
 
 	/**
 	 * View for confirmation modals
-	 * @extends {Common.ModalView}
+	 * @constructor module:Common.ConfirmView
+	 * @extends {module:Common.ModalView}
 	 */
-	Common.ConfirmView = Common.ModalView.extend( {
+	Common.ConfirmView = Common.ModalView.extend( /** @lends module:Common.ConfirmView.prototype */ {
+		/**
+		 * Template ID
+		 * @default [value]
+		 * @type {String}
+		 */
 		template: '#modal-tmpl',
+
+		/**
+		 * Confirmation view class name
+		 * @type {String}
+		 */
 		className: 'modal-content modal-confirm',
 
+		/**
+		 * Confirmation callback
+		 * @default
+		 * @type {Function}
+		 */
 		callback: null,
 
+		/**
+		 * Confirmation view size
+		 * @default
+		 * @type {String}
+		 */
 		size: 'small',
 
+		/**
+		 * UI element binding
+		 * @default
+		 * @type {Object}
+		 */
 		ui: {
 			submit: '.submit-button'
 		},
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'click @ui.submit': 'submit'
 		},
 
+		/**
+		 * View initialization
+		 * @param {Object} options Configuration options
+		 */
 		initialize: function( options ) {
 			this.model = new Backbone.Model( {
 				message: options.message || 'Are you sure?',
@@ -270,6 +401,10 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			this.callback = options.callback;
 		},
 
+		/**
+		 * View close handler
+		 * @param {Boolean} doClose Close view flag
+		 */
 		closeHandler: function( doClose ) {
 			this.ui.submit.prop( 'disabled', false );
 
@@ -278,6 +413,9 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Submit a confirmation
+		 */
 		submit: function() {
 			if ( typeof this.callback == 'function' ) {
 				this.callback( _.bind( this.closeHandler, this ) );
@@ -287,11 +425,29 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		}
 	} );
 
-	Common.DisconnectedView = Common.ModalView.extend( {
+	/**
+	 * Server disconnected view
+	 * @constructor module:Common.DisconnectedView
+	 * @extends {module:Common.ModalView}
+	 */
+	Common.DisconnectedView = Common.ModalView.extend( /** @lends module:Common.DisconnectedView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#modal-tmpl',
 
+		/**
+		 * Modal name
+		 * @default
+		 * @type {String}
+		 */
 		name: 'disconnected-modal',
 
+		/**
+		 * Initialize disconnected view
+		 */
 		initialize: function() {
 			this.model = new Backbone.Model( {
 				message: 'You\'ve been disconnected from the server, reconnecting...',
@@ -303,25 +459,63 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 	/**
 	 * Test errors view
+	 * @constructor module:Common.TestErrorsView
+	 * @extends {module:Common.ModalView}
 	 */
-	Common.TestErrorsView = App.Common.ModalView.extend( {
+	Common.TestErrorsView = Common.ModalView.extend( /** @lends module:Common.TestErrorsView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#test-errors'
 	} );
 
 	/**
-	 * Deferred fetch API mixin. This will defer fetching the model/collection
-	 * for specified delay to reduce the amount of requests to the server.
-	 * Plase override oldFetch value accordingly.
-	 * @type {Object}
+	 * Deferred fetch API mixin. This will defer fetching a model/collection for a specified delay
+	 * to reduce the amount of requests to the server and reduce the number of re-renders.
+	 * Please remember to override oldFetch value accordingly.
+	 * @memberOf module:Common
+	 * @mixin
+	 * @alias DeferredFetchMixin
 	 */
 	Common.DeferredFetchMixin = {
+		/**
+		 * Is currently fetching
+		 * @default
+		 * @type {Boolean}
+		 */
 		isFetching: false,
-		deferredFetch: false,
-		fetchDelay: 5000, // TODO adjust
+
+		/**
+		 * Deferred fetch timeout ID
+		 * @type {Number}
+		 */
+		deferredFetch: null,
+
+		/**
+		 * Fetch delay
+		 * @default
+		 * @todo Adjust this value
+		 * @type {Number}
+		 */
+		fetchDelay: 5000,
+
+		/**
+		 * Last fetch timestamp
+		 * @type {Number}
+		 */
 		lastFetch: 0,
 
+		/**
+		 * Old fetch function
+		 * @todo Override
+		 */
 		oldFetch: function() {},
 
+		/**
+		 * Initialize model/collection
+		 */
 		initialize: function() {
 			this.on( 'sync error', function() {
 				this.isFetching = false;
@@ -329,6 +523,9 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			}, this );
 		},
 
+		/**
+		 * Defer a request
+		 */
 		deferFetch: function() {
 			if ( this.deferredFetch ) {
 				clearTimeout( this.deferredFetch );
@@ -340,6 +537,12 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			}, this ), this.fetchDelay );
 		},
 
+		/**
+		 * Fetch data from the server
+		 * @param  {Object}  options Fetch options
+		 * @param  {Boolean} [options.force] Force fetching data without deferment
+		 * @return {jQuery.ajax}
+		 */
 		fetch: function( options ) {
 			options = options || {};
 
@@ -364,6 +567,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 	/**
 	 * Display the 'Error 404' page
+	 * @memberOf module:App
 	 */
 	App.show404 = function() {
 		App.header.empty();
@@ -375,6 +579,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	 * @param {Object}   options          Modal configuration
 	 * @param {String}   options.message  Modal message
 	 * @param {Function} options.callback Callback function executed on modal confirmation
+	 * @memberOf module:App
 	 */
 	App.showConfirmPopup = function( options ) {
 		App.modal.show(
@@ -382,12 +587,20 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		);
 	};
 
+	/**
+	 * Show "server disconnected" popup
+	 * @memberOf module:App
+	 */
 	App.showDisconnectedPopup = function() {
 		App.modal.show(
 			new Common.DisconnectedView()
 		);
 	};
 
+	/**
+	 * Hide "server disconnected" popup
+	 * @memberOf module:App
+	 */
 	App.hideDisconnectedPopup = function() {
 		if ( App.modal.currentView && App.modal.currentView.name === 'disconnected-modal' ) {
 			App.modal.empty();

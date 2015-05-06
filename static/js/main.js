@@ -1,14 +1,14 @@
 /**
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
- *
- * @file Main dashboard script
  */
+
 ( function( window ) {
 	'use strict';
 
 	/**
 	 * Marionette Application
+	 * @module App
 	 */
 	window.App = new Marionette.Application();
 
@@ -18,7 +18,7 @@
 	 * @param {Object}  [options]         Backbone.history.navigate options
 	 * @param {Boolean} [options.trigger] Force triggering route event
 	 * @param {Boolean} [options.replace] Replace current route with new one instead of adding another history item
-	 *
+	 * @memberOf module:App
 	 */
 	App.navigate = function( route, options ) {
 		options = options || {
@@ -31,6 +31,7 @@
 	/**
 	 * Get current route
 	 * @return {String}
+	 * @memberOf module:App
 	 */
 	App.getCurrentRoute = function() {
 		return Backbone.history.fragment;
@@ -38,10 +39,20 @@
 
 	/**
 	 * Main layout region responsible for displaying dialog modals
+	 * @constructor module:App.ModalRegion
+	 * @extends {Marionette.Region}
 	 */
-	App.ModalRegion = Marionette.Region.extend( {
+	App.ModalRegion = Marionette.Region.extend( /** @lends module:App.ModalRegion.prototype */ {
+		/**
+		 * Region element selector
+		 * @default
+		 * @type {String}
+		 */
 		el: '#modal',
 
+		/**
+		 * Modal region constructor, binds to Bootstrap modal events
+		 */
 		constructor: function() {
 			Marionette.Region.prototype.constructor.apply( this, arguments );
 
@@ -49,6 +60,10 @@
 			this.$el.on( 'hidden.bs.modal', _.bind( this.empty, this ) );
 		},
 
+		/**
+		 * Handle show event, display Bootstrap's backdrop
+		 * @param {Object} view View
+		 */
 		onShow: function( view ) {
 			view.once( 'destroy', _.bind( this.onEmpty, this ) );
 
@@ -60,11 +75,18 @@
 			this.$el.find( 'button' ).first().focus();
 		},
 
+		/**
+		 * Handle empty event
+		 */
 		onEmpty: function() {
 			this.$el.modal( 'hide' );
 		}
 	} );
 
+	/**
+	 * Setup application regions
+	 * @type {String}
+	 */
 	App.addRegions( {
 		socketStatus: '#socket-status',
 		tabs: '#tabs',

@@ -1,31 +1,68 @@
 /**
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
- *
- * @file Handles Socket.IO connection and events
- * @module App.Sockets
  */
 
+/**
+ * @module Sockets
+ */
 App.module( 'Sockets', function( Sockets, App, Backbone ) {
 	'use strict';
 
-	Sockets.status = new( Backbone.Model.extend( {
+	/**
+	 * WebSocket status
+	 * @constructor module:Sockets.SocketStatus
+	 * @extends {Backbone.Model}
+	 */
+	Sockets.SocketStatus = Backbone.Model.extend( /** @lends module:Sockets.SocketStatus.prototype */ {
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			status: 'disconnected'
 		},
 
+		/**
+		 * Set the status
+		 * @param {String} status Socket status
+		 */
 		setStatus: function( status ) {
 			this.set( 'status', status );
 		}
-	} ) )();
+	} );
 
-	Sockets.StatusView = Backbone.View.extend( {
+	/**
+	 * Socket status
+	 * @memberOf module:Sockets
+	 * @type {module:Sockets.SocketStatus}
+	 */
+	Sockets.socketStatus = new Sockets.SocketStatus();
+
+	/**
+	 * Socket status view
+	 * @constructor module:Sockets.SocketStatusView
+	 * @extends {Backbone.View}
+	 */
+	Sockets.SocketStatusView = Backbone.View.extend( /** @lends module:Sockets.SocketStatusView.prototype */ {
+		/**
+		 * Status view tag anme
+		 * @default
+		 * @type {String}
+		 */
 		tagName: 'span',
 
+		/**
+		 * Initialize status view
+		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
 		},
 
+		/**
+		 * Render status view
+		 */
 		render: function() {
 			var status = this.model.get( 'status' );
 
@@ -42,6 +79,10 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 			'max reconnection attempts': Infinity
 		} );
 
+		/**
+		 * Reference to a WebSocket
+		 * @type {WebSocket}
+		 */
 		Sockets.socket = socket;
 
 		// expose socket.io emit method
@@ -49,19 +90,19 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 
 		socket.on( 'connect', function() {
 			socket.emit( 'register' );
-			Sockets.status.setStatus( 'connected' );
+			Sockets.socketStatus.setStatus( 'connected' );
 			App.hideDisconnectedPopup();
 		} );
 
 		function handleDisconnect() {
-			Sockets.status.setStatus( 'disconnected' );
+			Sockets.socketStatus.setStatus( 'disconnected' );
 			App.showDisconnectedPopup();
 		}
 
 		socket.on( 'disconnect', handleDisconnect );
 
-		App.socketStatus.show( new Sockets.StatusView( {
-			model: Sockets.status
+		App.socketStatus.show( new Sockets.SocketStatusView( {
+			model: Sockets.socketStatus
 		} ) );
 
 		$( window ).on( 'beforeunload', function() {

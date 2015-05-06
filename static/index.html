@@ -189,8 +189,8 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<td><small><%= getTime(created) %></small></td>
 	<td class="results">
 		<% _.each(results, function (result) { %>
-		<div class="job-browser <%= result.name %> <%= getResultStyle(result) %>" title ="<%= getResultMessage(result) %>">
-			<span class="glyphicon <%= getIcon(result) %>"></span>
+		<div class="job-browser <%= result.name %> <%= getResultClass(result) %>" title ="<%= getResultMessage(result) %>">
+			<span class="glyphicon <%= getResultIcon(result) %>"></span>
 			<small><%= result.testedVersion && result.testedVersion !== result.version ?
 				result.testedVersion : result.version ? result.version : '*' %></small>
 		</div>
@@ -280,8 +280,8 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 				<th class="col-md-3">Test ID</th>
 				<th class="col-md-9 job-browsers">
 					<% _.each(results, function (result) { %>
-					<div class="job-browser <%= result.name %> <%= getResultStyle(result, true) %>" title ="<%= getResultMessage(result) %>">
-						<span class="glyphicon <%= getIcon(result) %>"></span>
+					<div class="job-browser <%= result.name %> <%= getResultClass(result, true) %>" title ="<%= getResultMessage(result) %>">
+						<span class="glyphicon <%= getResultIcon(result) %>"></span>
 						<small><%= result.version ? result.version : '' %></small>
 					</div>
 					<% }) %>
@@ -318,8 +318,8 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<td><a href="/jobs/<%= jobId %>/tests/<%= id %>" title="<%= id %>" target="_blank"><%= id %></a></td>
 		<td class="results">
 			<% _.each(results, function (result) { %>
-				<div class="task-result <%= getResultStyle(result) %><%= result.errors ? ' clickable' : '' %><%= isSlow(result) ? ' slow' : '' %>">
-					<span class="glyphicon <%= getIcon(result) %>" title="<%= getResultMessage(result) %>"></span>
+				<div class="task-result <%= getResultClass(result) %><%= result.errors ? ' clickable' : '' %><%= isSlow(result) ? ' slow' : '' %>">
+					<span class="glyphicon <%= getResultIcon(result) %>" title="<%= getResultMessage(result) %>"></span>
 					<% if (result.testedVersion && result.testedVersion !== result.version) { %>
 					<small title="<%= result.testedUA %>"><%= result.testedVersion %></small>
 					<% } %>
@@ -352,7 +352,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 				</button>
 			</label>
 			<select data-placeholder="Choose..." multiple class="job-browsers form-control" name="job-browsers">
-			<% _.each(App.Browsers.browsersList.models, function (browser) { %>
+			<% _.each(App.Browsers.browserList.models, function (browser) { %>
 				<% if (browser.attributes.header && browser.id !== 'Unknown') { %>
 					<option value="<%= browser.id.toLowerCase() %>"><%= browser.id %></option>
 				<% } %>
@@ -408,7 +408,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 				</button>
 			</label>
 			<select data-placeholder="Choose..." multiple class="job-browsers form-control" name="job-browsers">
-			<% _.each(App.Browsers.browsersList.models, function (browser) { %>
+			<% _.each(App.Browsers.browserList.models, function (browser) { %>
 				<% if (browser.attributes.header && browser.id !== 'Unknown') { %>
 					<option value="<%= browser.id.toLowerCase() %>" <%= findBrowser(browsers, browser.id) ? 'selected' : '' %>><%= browser.id %></option>
 				<% } %>
