@@ -176,7 +176,7 @@
 		Backbone.history.start();
 
 		// navigate to the test list if no route specified
-		if ( this.getCurrentRoute() === '' ) {
+		if ( App.getCurrentRoute() === '' ) {
 			App.navigate( 'tests' );
 		}
 	} );

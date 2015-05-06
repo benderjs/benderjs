@@ -115,14 +115,6 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	} );
 
 	/**
-	 * Browser collection
-	 * @memberOf module:Browsers
-	 * @type {module:Browsers.BrowserList}
-	 * @name browserList
-	 */
-	Browsers.browserList = new Browsers.BrowserList();
-
-	/**
 	 * Browser list view
 	 * @constructor module:Browsers.BrowsersListView
 	 * @extends {module:Common.TableView}
@@ -211,18 +203,24 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	} );
 
 	/**
-	 * Browser controller
-	 * @memberOf module:Browsers
-	 * @type {module:Browsers.Controller}
-	 * @name controller
+	 * Initialize Browsers module
 	 */
-	Browsers.controller = new Browsers.Controller();
+	App.on( 'before:start', function() {
+		/**
+		 * Browser collection
+		 * @memberOf module:Browsers
+		 * @type {module:Browsers.BrowserList}
+		 * @name browserList
+		 */
+		Browsers.browserList = new Browsers.BrowserList();
 
-	/**
-	 * Add Browser module initializer
-	 */
-	Browsers.addInitializer( function() {
-		var controller = Browsers.controller;
+		/**
+		 * Browser controller
+		 * @memberOf module:Browsers
+		 * @type {module:Browsers.Controller}
+		 * @name controller
+		 */
+		var controller = Browsers.controller = new Browsers.Controller();
 
 		/**
 		 * Browser router

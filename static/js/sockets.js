@@ -34,13 +34,6 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 	} );
 
 	/**
-	 * Socket status
-	 * @memberOf module:Sockets
-	 * @type {module:Sockets.SocketStatus}
-	 */
-	Sockets.socketStatus = new Sockets.SocketStatus();
-
-	/**
 	 * Socket status view
 	 * @constructor module:Sockets.SocketStatusView
 	 * @extends {Backbone.View}
@@ -72,12 +65,22 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 		}
 	} );
 
-	Sockets.addInitializer( function() {
+	/**
+	 * Initialize Sockets module
+	 */
+	App.on( 'before:start', function() {
 		var socket = io.connect( '/dashboard', {
 			'reconnection delay': 2000,
 			'reconnection limit': 2000,
 			'max reconnection attempts': Infinity
 		} );
+
+		/**
+		 * Socket status
+		 * @memberOf module:Sockets
+		 * @type {module:Sockets.SocketStatus}
+		 */
+		Sockets.socketStatus = new Sockets.SocketStatus();
 
 		/**
 		 * Reference to a WebSocket

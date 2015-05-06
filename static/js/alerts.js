@@ -105,14 +105,6 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 	} );
 
 	/**
-	 * Collection of alerts
-	 * @type {module:Alerts.AlertList}
-	 * @memberOf module:Alerts
-	 * @name alertList
-	 */
-	Alerts.alertList = new Alerts.AlertList();
-
-	/**
 	 * Alert list view
 	 * @constructor module:Alerts.AlertListView
 	 * @extends {Marionette.CollectionView}
@@ -154,14 +146,25 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 	} );
 
 	/**
-	 * Alert controller
-	 * @memberOf module:Alerts
-	 * @type {module:Alerts.Controller}
-	 * @name controller
+	 * Initialize Alerts module
 	 */
-	Alerts.controller = new Alerts.Controller();
+	App.on( 'before:start', function() {
+		/**
+		 * Collection of alerts
+		 * @type {module:Alerts.AlertList}
+		 * @memberOf module:Alerts
+		 * @name alertList
+		 */
+		Alerts.alertList = new Alerts.AlertList();
 
-	Alerts.addInitializer( function() {
+		/**
+		 * Alert controller
+		 * @memberOf module:Alerts
+		 * @type {module:Alerts.Controller}
+		 * @name controller
+		 */
+		Alerts.controller = new Alerts.Controller();
+
 		App.alerts.show( new Alerts.AlertListView( {
 			collection: Alerts.alertList
 		} ) );

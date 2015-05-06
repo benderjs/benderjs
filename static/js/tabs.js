@@ -76,24 +76,6 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		}
 	} );
 
-	var tabs = [ {
-		label: 'Tests',
-		id: 'tests'
-	}, {
-		label: 'Jobs',
-		id: 'jobs'
-	}, {
-		label: 'Browsers',
-		id: 'browsers'
-	} ];
-
-	/**
-	 *	Tab collection
-	 *	@memberOf module:Tabs
-	 *	@type {module:Tabs.TabList}
-	 */
-	Tabs.tabList = new Tabs.TabList( tabs );
-
 	/**
 	 * Single tab view
 	 * @constructor module:Tabs.TabView
@@ -186,7 +168,28 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		className: 'nav nav-tabs nav-justified'
 	} );
 
-	Tabs.addInitializer( function() {
+	/**
+	 * Initialize Tabs module
+	 */
+	App.on( 'before:start', function() {
+		var tabs = [ {
+			label: 'Tests',
+			id: 'tests'
+		}, {
+			label: 'Jobs',
+			id: 'jobs'
+		}, {
+			label: 'Browsers',
+			id: 'browsers'
+		} ];
+
+		/**
+		 *	Tab collection
+		 *	@memberOf module:Tabs
+		 *	@type {module:Tabs.TabList}
+		 */
+		Tabs.tabList = new Tabs.TabList( tabs );
+
 		App.tabs.show( new Tabs.TabListView( {
 			collection: Tabs.tabList
 		} ) );

@@ -1412,13 +1412,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	} );
 
 	/**
-	 * Test controller
-	 * @memberOf module:Tests
-	 * @type {module:Tests.Controller}
-	 */
-	Tests.controller = new Tests.Controller();
-
-	/**
 	 * Tests Router
 	 * @constructor module:Tests.Router
 	 * @extends {Marionette.AppRouter}
@@ -1442,9 +1435,16 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	} );
 
 	/**
-	 * Add initialzier for tests module
+	 * Initialize Tests module
 	 */
-	Tests.addInitializer( function() {
+	App.on( 'before:start', function() {
+		/**
+		 * Test controller
+		 * @memberOf module:Tests
+		 * @type {module:Tests.Controller}
+		 */
+		Tests.controller = new Tests.Controller();
+
 		/**
 		 * Test router
 		 * @memberOf module:Tests
