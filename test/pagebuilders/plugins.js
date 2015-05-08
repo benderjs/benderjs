@@ -12,6 +12,7 @@
 'use strict';
 
 var mocks = require( '../fixtures/_mocks' ),
+	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	_ = require( 'lodash' ),
@@ -40,17 +41,20 @@ describe( 'Page Builders - Plugins', function() {
 	} );
 
 	it( 'should add files included from plugins to the data parts', function() {
-		var expected = '<head><link rel="stylesheet" href="/plugins/framework-test/test.css">' +
-			'<script src="/plugins/framework-test/adapter.js"></script></head>',
+		var addCSSSpy = sinon.spy(),
+			addJSSpy = sinon.spy(),
 			data = {
-				parts: []
-			},
-			result;
+				addCSS: addCSSSpy,
+				addJS: addJSSpy
+			};
 
-		result = builder( _.cloneDeep( data ) );
+		builder( _.cloneDeep( data ) );
 
-		expect( result.parts ).to.have.length( 1 );
-		expect( result.parts[ 0 ] ).to.equal( expected );
+		sinon.assert.calledOnce( addCSSSpy );
+		sinon.assert.calledWithExactly( addCSSSpy, '/plugins/framework-test/test.css' );
+
+		sinon.assert.calledOnce( addJSSpy );
+		sinon.assert.calledWithExactly( addJSSpy, '/plugins/framework-test/adapter.js' );
 	} );
 
 	it( 'should not modify data if no includes defined', function() {
