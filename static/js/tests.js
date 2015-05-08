@@ -22,6 +22,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		 */
 		defaults: {
 			filter: [],
+			tests: null,
 			tokens: null
 		},
 
@@ -29,15 +30,23 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		 * Initialize a filter
 		 */
 		initialize: function() {
-			this.listenTo( Tests.controller, 'tests:loaded', this.buildFilters, this );
+			this.listenTo( Tests.controller, 'tests:loaded', function( tests, filter ) {
+				this.set( 'tests', tests );
+
+				this.buildFilters( tests, filter );
+			}, this );
 
 			this.on( 'change:filter', function() {
+				var tests = this.get( 'tests' ),
+					filter = this.get( 'filter' );
+
+				this.buildFilters( tests, filter );
 				/**
 				 * Test filter has changed
 				 * @event module:Tests.Controller#tests:filter
 				 * @type {Array}
 				 */
-				Tests.controller.trigger( 'tests:filter', this.get( 'filter' ) );
+				Tests.controller.trigger( 'tests:filter', filter );
 			} );
 		},
 
@@ -49,8 +58,32 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		buildFilters: function( tests, filter ) {
 			var tokens = [];
 
+			function checkFlags( item, filters ) {
+				if ( !filters || !filters.length ) {
+					return true;
+				}
+
+				return _.every( filters, function( filter ) {
+					filter = filter.split( ':' );
+
+					if ( filter[ 0 ] !== 'is' ) {
+						return true;
+					} else if ( filter[ 1 ] === 'failed' ) {
+						return item.result && !item.result.toJSON().success;
+					} else if ( filter[ 1 ] === 'passed' ) {
+						return !item.result || item.result.toJSON().success;
+					} else {
+						return item[ filter[ 1 ] ];
+					}
+				} );
+			}
+
 			tests.each( function( item ) {
 				item = item.toJSON();
+
+				if ( !checkFlags( item, filter ) ) {
+					return;
+				}
 
 				_.each( item.tags, function( tag ) {
 					tag = 'tag:' + tag;
