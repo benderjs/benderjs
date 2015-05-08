@@ -564,46 +564,4 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			return this.oldFetch.call( this, options );
 		},
 	};
-
-	/**
-	 * Display the 'Error 404' page
-	 * @memberOf module:App
-	 */
-	App.show404 = function() {
-		App.header.empty();
-		App.content.show( new Common.Error404View() );
-	};
-
-	/**
-	 * Show confirmation popup
-	 * @param {Object}   options          Modal configuration
-	 * @param {String}   options.message  Modal message
-	 * @param {Function} options.callback Callback function executed on modal confirmation
-	 * @memberOf module:App
-	 */
-	App.showConfirmPopup = function( options ) {
-		App.modal.show(
-			new Common.ConfirmView( options )
-		);
-	};
-
-	/**
-	 * Show "server disconnected" popup
-	 * @memberOf module:App
-	 */
-	App.showDisconnectedPopup = function() {
-		App.modal.show(
-			new Common.DisconnectedView()
-		);
-	};
-
-	/**
-	 * Hide "server disconnected" popup
-	 * @memberOf module:App
-	 */
-	App.hideDisconnectedPopup = function() {
-		if ( App.modal.currentView && App.modal.currentView.name === 'disconnected-modal' ) {
-			App.modal.empty();
-		}
-	};
 } );
