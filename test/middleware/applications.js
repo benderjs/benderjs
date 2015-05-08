@@ -60,6 +60,8 @@ describe( 'Middleware - Applications', function() {
 		} catch ( e ) {}
 	} );
 
+	this.timeout( 5000 );
+
 	it( 'should expose build function', function() {
 		expect( applications.build ).to.be.a( 'function' );
 	} );
