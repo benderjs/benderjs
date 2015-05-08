@@ -35,8 +35,9 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 		/**
 		 * Get classes for a result element
-		 * @param  {Object}  result       Result object
-		 * @param  {Boolean} noBackground Don't add background flag
+		 * @param  {Object}  result        Result object
+		 * @param  {Number}  result.status Test status
+		 * @param  {Boolean} noBackground  Don't add background flag
 		 * @return {String}
 		 */
 		getResultClass: function( result, noBackground ) {
@@ -49,7 +50,9 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 		/**
 		 * Produce a result message
-		 * @param  {Object} result Result object
+		 * @param  {Object} result          Test result object
+		 * @param  {Number} result.duration Test duration
+		 * @param  {Number} result.status   Test status
 		 * @return {String}
 		 */
 		getResultMessage: function( result ) {
@@ -70,7 +73,8 @@ App.module( 'Common', function( Common, App, Backbone ) {
 
 		/**
 		 * Get result icon
-		 * @param  {Object} result Result object
+		 * @param  {Object} result        Result object
+		 * @param  {Number} result.status Test result status
 		 * @return {String}
 		 */
 		getResultIcon: function( result ) {
@@ -86,19 +90,19 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		 * @param  {Number} ms Time in milliseconds
 		 * @return {String}
 		 */
-		timeToText: function( ms ) {
-			var h, m, s;
+		timeToText: function( t ) {
+			var h, m, s, ms;
 
-			s = Math.floor( ms / 1000 );
-			ms %= 1000;
+			s = Math.floor( t / 1000 );
+			ms = t % 1000;
 			m = Math.floor( s / 60 );
 			s %= 60;
 			h = Math.floor( m / 60 );
 			m %= 60;
 
 			return ( h ? ( h + 'h ' ) : '' ) +
-				( m ? ( ( m < 10 ? '0' : '' ) + m + 'm ' ) : '' ) +
-				( s ? ( ( s < 10 ? '0' : '' ) + s + 's ' ) : '' ) +
+				( t >= 60000 ? ( ( m < 10 ? '0' : '' ) + m + 'm ' ) : '' ) +
+				( t >= 1000 ? ( ( s < 10 ? '0' : '' ) + s + 's ' ) : '' ) +
 				( ms < 10 ? '00' : ms < 100 ? '0' : '' ) + ms + 'ms';
 		},
 
