@@ -17,6 +17,7 @@ var mocks = require( './fixtures/_mocks' ),
 	_ = require( 'lodash' ),
 	applications = require( '../lib/applications' ),
 	utils = require( '../lib/utils' ),
+	when = require( 'when' ),
 	template = rewire( '../lib/template' );
 
 describe( 'Template', function() {
@@ -110,5 +111,87 @@ describe( 'Template', function() {
 			promise = bender.template.build( task );
 
 		return expect( promise ).to.eventually.equal( expected );
+	} );
+
+	it( 'should expose data.files, data.addCSS and data.addJS', function() {
+		var testPagebuilder = function( data ) {
+			expect( data ).to.have.property( 'files' );
+			expect( data.files ).to.have.property( 'css' ).that.deep.equal( [] );
+			expect( data.files ).to.have.property( 'js' ).that.deep.equal( [] );
+
+			expect( data ).to.have.property( 'addCSS' ).that.is.a( 'function' );
+			expect( data ).to.have.property( 'addJS' ).that.is.a( 'function' );
+
+			// Error without this.
+			data.parts.push( '' );
+
+			return when.resolve( data );
+		};
+
+		bender.pagebuilders.add( 'testPagebuilder', testPagebuilder );
+
+		var promise = bender.template.build( bender.tests.tests[ 0 ] );
+
+		return promise;
+	} );
+
+	it( 'should have data.files.css filled by data.addCSS', function() {
+		var testPagebuilder = function( data ) {
+			data.addCSS( 'test1.css' );
+			data.addCSS( 'test2.css', { body: true } );
+
+			expect( data.files.css ).to.have.length( 2 );
+
+			expect( data.files.css[ 0 ] ).to.deep.equal( {
+				url: 'test1.css',
+				options: {}
+			} );
+
+			expect( data.files.css[ 1 ] ).to.deep.equal( {
+				url: 'test2.css',
+				options: { body: true }
+			} );
+
+			// Error without this.
+			data.parts.push( '' );
+
+			return when.resolve( data );
+		};
+
+		bender.pagebuilders.add( 'testPagebuilder', testPagebuilder );
+
+		var promise = bender.template.build( bender.tests.tests[ 0 ] );
+
+		return promise;
+	} );
+
+	it( 'should have data.files.js filled by data.addJS', function() {
+		var testPagebuilder = function( data ) {
+			data.addJS( 'test1.js' );
+			data.addJS( 'test2.js', { body: true } );
+
+			expect( data.files.js ).to.have.length( 2 );
+
+			expect( data.files.js[ 0 ] ).to.deep.equal( {
+				url: 'test1.js',
+				options: {}
+			} );
+
+			expect( data.files.js[ 1 ] ).to.deep.equal( {
+				url: 'test2.js',
+				options: { body: true }
+			} );
+
+			// Error without this.
+			data.parts.push( '' );
+
+			return when.resolve( data );
+		};
+
+		bender.pagebuilders.add( 'testPagebuilder', testPagebuilder );
+
+		var promise = bender.template.build( bender.tests.tests[ 0 ] );
+
+		return promise;
 	} );
 } );
