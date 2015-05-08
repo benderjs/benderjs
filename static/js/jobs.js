@@ -1,19 +1,32 @@
 /**
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
- *
- * @module App.Jobs
  */
 
+/**
+ * @module Jobs
+ */
 App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	'use strict';
 
 	/**
 	 * Router for Jobs module
+	 * @constructor module:Jobs.JobRouter
+	 * @extends {Marionette.AppRouter}
 	 */
-	Jobs.Router = Marionette.AppRouter.extend( {
+	Jobs.JobRouter = Marionette.AppRouter.extend( /** @lends module:Jobs.JobRouter.prototype */ {
+		/**
+		 * Router name
+		 * @default
+		 * @type {String}
+		 */
 		name: 'jobs',
 
+		/**
+		 * Routes
+		 * @default
+		 * @type {Object}
+		 */
 		appRoutes: {
 			'jobs': 'listJobs',
 			'jobs/:id': 'showJob'
@@ -21,9 +34,16 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	} );
 
 	/**
-	 * Job row model
+	 * Job list row model
+	 * @constructor module:Jobs.JobRow
+	 * @extends {Backbone.Model}
 	 */
-	Jobs.JobRow = Backbone.Model.extend( {
+	Jobs.JobRow = Backbone.Model.extend( /** @lends module:Jobs.JobRow.prototype */ {
+		/**
+		 * Default values
+		 * @defualt
+		 * @type {Object}
+		 */
 		defaults: {
 			selected: false,
 			description: '',
@@ -31,6 +51,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			results: []
 		},
 
+		/**
+		 * Mark a row as selected
+		 * @param {Boolean} selected Is row selected
+		 * @param {Boolean} silent   Change the selection without triggering 'change:selected' event
+		 */
 		setSelect: function( selected, silent ) {
 			this.set( 'selected', !!selected, {
 				silent: true
@@ -46,30 +71,75 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 	/**
 	 * Job table row view
+	 * @constructor module:Jobs.JobRowView
+	 * @extends {Marionette.ItemView}
 	 */
-	Jobs.JobRowView = Marionette.ItemView.extend( {
+	Jobs.JobRowView = Marionette.ItemView.extend( /** @lends module:Jobs.JobRowView.prototype */ {
+		/**
+		 * Job row view class name
+		 * @default
+		 * @type {String}
+		 */
+		className: 'job',
+
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#job-row',
+
+		/**
+		 * Job row view tag name
+		 * @default
+		 * @type {String}
+		 */
 		tagName: 'tr',
+
+		/**
+		 * Template helpers
+		 * @type {module:Common.templateHelpers}
+		 */
 		templateHelpers: App.Common.templateHelpers,
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'change @ui.checkbox': 'changeSelected'
 		},
 
+		/**
+		 * UI element binding
+		 * @default
+		 * @type {Object}
+		 */
 		ui: {
 			checkbox: 'input[type=checkbox]'
 		},
 
+		/**
+		 * Initialize a job row view
+		 */
 		initialize: function() {
 			Marionette.ItemView.prototype.initialize.apply( this, arguments );
 
 			this.listenTo( this.model, 'toggle:selected', this.updateSelected );
 		},
 
+		/**
+		 * Set a model's selected property to the state of the checkbox
+		 */
 		changeSelected: function() {
 			this.model.setSelect( this.ui.checkbox.prop( 'checked' ) );
 		},
 
+		/**
+		 * Set the state of the checkbox
+		 * @param {Boolean} selected Checkbox selected state
+		 */
 		updateSelected: function( selected ) {
 			this.ui.checkbox.prop( 'checked', selected );
 		}
@@ -77,12 +147,30 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 	/**
 	 * Job collection
+	 * @constructor module:Jobs.JobList
+	 * @extends {Backbone.Collection}
 	 */
-	Jobs.jobsList = new( Backbone.Collection.extend(
-		_.extend( {}, App.Common.DeferredFetchMixin, {
+	Jobs.JobList = Backbone.Collection.extend(
+		_.extend( {}, App.Common.DeferredFetchMixin, /** @lends module:Jobs.JobList.prototype */ {
+			/**
+			 * Collection model class
+			 * @type {module:Jobs.JobRow}
+			 */
 			model: Jobs.JobRow,
+
+			/**
+			 * URL to the jobs API
+			 * @default
+			 * @type {String}
+			 */
 			url: '/jobs',
 
+			/**
+			 * Comparator function used to sort collection modles by creation dates
+			 * @param  {Object} first  First model
+			 * @param  {Object} second Secon model
+			 * @return {Number}
+			 */
 			comparator: function( first, second ) {
 				first = first.attributes.created;
 				second = second.attributes.created;
@@ -91,8 +179,17 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					first > second ? -1 : 0;
 			},
 
+			/**
+			 * Original fetch function, overriden by {@link module:Common.DeferredFetchMixin}
+			 * @type {Function}
+			 */
 			oldFetch: Backbone.Collection.prototype.fetch,
 
+			/**
+			 * Parse a response and sort models
+			 * @param  {Object} response Response object
+			 * @return {Object}
+			 */
 			parse: function( response ) {
 				return response.job.sort( function( first, second ) {
 					first = first.created;
@@ -103,92 +200,100 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				} );
 			},
 
+			/**
+			 * Set all models' selected state
+			 * @param {Boolean} selected Selected state
+			 */
 			toggleSelectJobs: function( selected ) {
 				this.each( function( item ) {
 					item.setSelect( selected, true );
 				} );
 			}
 		} )
-	) )();
+	);
 
 	/**
 	 * Empty jobs list view
+	 * @constructor module:Jobs.NoJobsView
+	 * @extends {Marionette.ItemView}
 	 */
-	Jobs.NoJobsView = Marionette.ItemView.extend( {
+	Jobs.NoJobsView = Marionette.ItemView.extend( /** @lends module:Jobs.NoJobsView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#no-jobs',
+
+		/**
+		 * No jobs view tag name
+		 * @default
+		 * @type {String}
+		 */
 		tagName: 'tr'
 	} );
 
 	/**
 	 * Header for the jobs list view
+	 * @constructor module:Jobs.JobListHeaderView
+	 * @extends {Marionette.ItemView}
 	 */
-	Jobs.JobsListHeaderView = Marionette.ItemView.extend( {
+	Jobs.JobListHeaderView = Marionette.ItemView.extend( /** @lends module:Jobs.JobListHeaderView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#job-list-header',
+
+		/**
+		 * Job list header view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'row job-list-header',
+
+		/**
+		 * Template helpers
+		 * @type {module:Common.templateHelpers}
+		 */
 		templateHelpers: App.Common.templateHelpers,
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'click @ui.removeButton': 'removeSelected'
 		},
 
+		/**
+		 * UI elements binding
+		 * @type {Object}
+		 */
 		ui: {
 			removeButton: '.remove-selected-button'
 		},
 
+		/**
+		 * Initialize the header view
+		 */
 		initialize: function() {
 			this.listenTo( this.collection, 'toggle:selected', this.updateRemoveButton );
 			this.listenTo( this.collection, 'sync', this.updateRemoveButton );
 		},
 
+		/**
+		 * Remove selected jobs
+		 */
 		removeSelected: function() {
-			var selected = this.collection.filter( function( item ) {
-					return item.get( 'selected' );
-				} ).map( function( item ) {
-					return item.get( 'id' );
-				} ),
-				that = this;
-
-			if ( !selected.length ) {
-				return;
-			}
-
-			App.showConfirmPopup( {
-				message: 'Do you want to remove selected jobs?',
-				callback: remove
-			} );
-
-			function remove( callback ) {
-				$.ajax( {
-					url: 'jobs/' + selected.join( ',' ),
-					type: 'DELETE',
-					success: function( response ) {
-						App.Alerts.Manager.add(
-							response.success ? 'success' : 'danger',
-							response.success ?
-							'Removed jobs: <strong>' + selected.join( ', ' ) + '</strong>' :
-							response.error,
-							response.success ? 'Success!' : 'Error!'
-						);
-
-						that.collection.fetch( {
-							force: true
-						} );
-
-						callback( true );
-					},
-
-					error: function( response ) {
-						App.Alerts.Manager.add(
-							'danger',
-							response.responseText || 'Error while removing jobs.',
-							'Error!'
-						);
-						callback( false );
-					}
-				} );
-			}
+			Jobs.controller.removeSelectedJobs();
 		},
 
+		/**
+		 * Update the state of the "remove selected" button
+		 */
 		updateRemoveButton: function() {
 			var disabled = this.collection.every( function( item ) {
 				return !item.get( 'selected' );
@@ -200,20 +305,50 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 	/**
 	 * Jobs list view
+	 * @constructor module:Jobs.JobListView
+	 * @extends {module:Common.TableView}
 	 */
-	Jobs.JobsListView = App.Common.TableView.extend( {
+	Jobs.JobListView = App.Common.TableView.extend( /** @lends module:Jobs.JobListView.prototype */ {
+		/**
+		 * Template ID
+		 * @default [value]
+		 * @type {String}
+		 */
 		template: '#jobs',
+
+		/**
+		 * Child item view
+		 * @type {module:Jobs.JobRowView}
+		 */
 		childView: Jobs.JobRowView,
+
+		/**
+		 * Empty list view
+		 * @type {module:Jobs.NoJobsView}
+		 */
 		emptyView: Jobs.NoJobsView,
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'change @ui.selectAll': 'toggleSelectAllJobs'
 		},
 
+		/**
+		 * UI element binding
+		 * @default
+		 * @type {Object}
+		 */
 		ui: {
 			selectAll: '.select-all-jobs'
 		},
 
+		/**
+		 * Initialize job list view
+		 */
 		initialize: function() {
 			this.listenTo( this.collection, 'change', this.render );
 			this.listenTo( this.collection, 'change:selected', this.updateSelectAllCheckbox );
@@ -244,10 +379,18 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Toggle select all jobs
+		 * @param {Object} e Change event
+		 */
 		toggleSelectAllJobs: function( e ) {
 			this.collection.toggleSelectJobs( e.target.checked );
 		},
 
+		/**
+		 * Update the "select all" checkbox state depending on the collection item selection.
+		 * Check it if all of the items are selected, otherwise uncheck.
+		 */
 		updateSelectAllCheckbox: function() {
 			var checked = this.collection.every( function( item ) {
 				return item.get( 'selected' );
@@ -259,8 +402,15 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 	/**
 	 * Job details model
+	 * @constructor module:Jobs.Job
+	 * @extends {Backbone.Model}
 	 */
-	Jobs.Job = Backbone.Model.extend( _.extend( {}, App.Common.DeferredFetchMixin, {
+	Jobs.Job = Backbone.Model.extend( _.extend( {}, App.Common.DeferredFetchMixin, /** @lends module:Jobs.Job.prototype */ {
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			browsers: null,
 			coverage: false,
@@ -275,10 +425,22 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			tempBrowsers: null
 		},
 
+		/**
+		 * Root URL for job requests
+		 * @default
+		 * @type {String}
+		 */
 		urlRoot: '/jobs/',
 
+		/**
+		 * Original fetch function overriden by {@link module:Common.DefferedFetchMixin}
+		 * @type {Function}
+		 */
 		oldFetch: Backbone.Model.prototype.fetch,
 
+		/**
+		 * Initialize a model
+		 */
 		initialize: function() {
 			this.set( {
 				browsers: [],
@@ -291,6 +453,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			App.Common.DeferredFetchMixin.initialize.apply( this, arguments );
 		},
 
+		/**
+		 * Validate a model, mark it as invalid if there are no browsers defined
+		 * @param  {Object} attrs Model attributes
+		 * @return {String}
+		 */
 		validate: function( attrs ) {
 			if ( !attrs.browsers.length ) {
 				return 'No browsers specified for the job';
@@ -300,50 +467,107 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 	/**
 	 * Task row view
+	 * @constructor module:Jobs.TaskView
+	 * @extends {Marionette.ItemView}
 	 */
-	Jobs.TaskView = Marionette.ItemView.extend( {
+	Jobs.TaskView = Marionette.ItemView.extend( /** @lends module:Jobs.TaskView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#task',
+
+		/**
+		 * Task view tag name
+		 * @default
+		 * @type {String}
+		 */
 		tagName: 'tr',
+
+		/**
+		 * Task view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'task',
+
+		/**
+		 * Template helpers
+		 * @type {module:Common.templateHelpers}
+		 */
 		templateHelpers: App.Common.templateHelpers,
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'click .clickable': 'showError'
 		},
 
+		/**
+		 * Initialize a task view
+		 */
 		initialize: function() {
 			if ( this.model.get( 'failed' ) ) {
 				this.$el.addClass( 'failed' );
 			}
 		},
 
+		/**
+		 * Show task result error details
+		 * @param {Object} event Click event
+		 */
 		showError: function( event ) {
 			var $elem = $( event.currentTarget ),
 				result = this.model.get( 'results' )[ $elem.index() ];
 
 			if ( result && result.errors ) {
-				App.modal.show(
-					new App.Common.TestErrorsView( {
-						model: new Backbone.Model(
-							_.extend( {
-								id: this.model.get( 'id' )
-							}, result )
-						)
-					} )
-				);
+				Jobs.controller.showError( new Backbone.Model(
+					_.extend( {
+						id: this.model.get( 'id' )
+					}, result )
+				) );
 			}
 		}
 	} );
 
-	Jobs.JobHeaderView = Marionette.ItemView.extend( {
+	/**
+	 * Job header view
+	 * @constructor module:Jobs.JobHeaderView
+	 * @extends {Marionette.ItemView}
+	 */
+	Jobs.JobHeaderView = Marionette.ItemView.extend( /** @lends module:Jobs.JobHeaderView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#job-header',
+
+		/**
+		 * Template helpers
+		 * @type {module:Common.templateHelpers}
+		 */
 		templateHelpers: App.Common.templateHelpers,
 
+		/**
+		 * UI element binding
+		 * @default
+		 * @type {Object}
+		 */
 		ui: {
 			'all': '.check-all',
 			'failed': '.check-failed'
 		},
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'click .remove-button': 'removeJob',
 			'click .restart-button': 'restartJob',
@@ -351,6 +575,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			'change @ui.all, @ui.failed': 'filterFailed'
 		},
 
+		/**
+		 * Initialize a job header view
+		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
 			this.model.set( 'onlyFailed', false, {
@@ -358,85 +585,35 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Handle render event
+		 */
 		onRender: function() {
+			/**
+			 * Header was resized
+			 * @event module:App#header:resize
+			 * @type {Number}
+			 */
 			App.trigger( 'header:resize' );
 		},
 
+		/**
+		 * Remove a job
+		 */
 		removeJob: function() {
-			var that = this;
-
-			function remove( callback ) {
-				that.model.destroy( {
-					success: function( model, response ) {
-						App.Alerts.Manager.add(
-							response.success ? 'success' : 'danger',
-							response.success ?
-							'Removed a job: <strong>' + response.id + '</strong>' :
-							response.error,
-							response.success ? 'Success!' : 'Error!'
-						);
-						callback( true );
-						App.navigate( 'jobs' );
-					},
-					error: function( model, response ) {
-						App.Alerts.Manager.add(
-							'danger',
-							response.responseText || 'Error while removing a job.',
-							'Error!'
-						);
-						callback( false );
-					}
-				} );
-			}
-
-			App.showConfirmPopup( {
-				message: 'Do you want to remove this job?',
-				callback: remove
-			} );
+			Jobs.controller.removeJob( this.model );
 		},
 
+		/**
+		 * Restart a job
+		 */
 		restartJob: function() {
-			var that = this;
-
-			function restart( callback ) {
-				$.ajax( {
-					url: '/jobs/' + that.model.id + '/restart',
-					dataType: 'json',
-					success: function( response ) {
-						App.Alerts.Manager.add(
-							response.success ? 'success' : 'danger',
-							response.success ?
-							'Restarted a job: <strong>' + response.id + '</strong>' :
-							response.error,
-							response.success ? 'Success!' : 'Error!'
-						);
-
-						if ( response.success ) {
-							that.model.fetch( {
-								force: true
-							} );
-						}
-
-						callback( !!response.success );
-					},
-					error: function( response, status ) {
-						App.Alerts.Manager.add(
-							'danger',
-							status || 'Error while restarting a job.',
-							'Error!'
-						);
-
-						callback( false );
-					}
-				} );
-			}
-
-			App.showConfirmPopup( {
-				message: 'Do you want to restart this job?',
-				callback: restart
-			} );
+			Jobs.controller.restartJob( this.model );
 		},
 
+		/**
+		 * Edit a job
+		 */
 		editJob: function() {
 			App.modal.show(
 				new Jobs.EditJobView( {
@@ -445,6 +622,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			);
 		},
 
+		/**
+		 * Filter results to toggle show failed tests only
+		 */
 		filterFailed: function() {
 			if ( this.ui.all.is( ':checked' ) ) {
 				this.model.set( 'onlyFailed', false, {
@@ -462,13 +642,39 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 	/**
 	 * Job details view
+	 * @constructor module:Jobs.JobView
+	 * @extends {module:Common.TableView}
 	 */
-	Jobs.JobView = App.Common.TableView.extend( {
+	Jobs.JobView = App.Common.TableView.extend( /** @lends module:Jobs.JobView */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#job',
+
+		/**
+		 * Job view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'panel panel-default',
+
+		/**
+		 * Template helpers
+		 * @type {module:Common.templateHelpers}
+		 */
 		templateHelpers: App.Common.templateHelpers,
+
+		/**
+		 * Job task view
+		 * @type {module:Jobs.TaskView}
+		 */
 		childView: Jobs.TaskView,
 
+		/**
+		 * Initialize a job view
+		 */
 		initialize: function() {
 			this.collection = new Backbone.Collection();
 
@@ -484,24 +690,50 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.update();
 		},
 
+		/**
+		 * Update a job view
+		 */
 		update: function() {
 			this.collection.reset( this.model.get( 'tasks' ) );
 			this.render();
+			/**
+			 * Header was updated
+			 * @event module:App#header:update
+			 * @type {Boolean}
+			 */
+			App.trigger( 'header:update', true );
 		}
 	} );
 
 	/**
 	 * Edit job view
+	 * @constructor module:Jobs.EditJobView
+	 * @extends {module:Common.ModalView}
 	 */
-	Jobs.EditJobView = App.Common.ModalView.extend( {
+	Jobs.EditJobView = App.Common.ModalView.extend( /** @lends module:Jobs.EditJobView */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#edit-job',
 
+		/**
+		 * UI element binding
+		 * @default
+		 * @type {Object}
+		 */
 		ui: {
 			'browsers': '.job-browsers',
 			'description': '.job-description',
 			'save': '.save-button'
 		},
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'change @ui.browsers': 'updateBrowsers',
 			'click @ui.save': 'saveJob',
@@ -509,6 +741,10 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			'click .add-all-button': 'addAll'
 		},
 
+		/**
+		 * Template helpers
+		 * @type {Object}
+		 */
 		templateHelpers: {
 			findBrowser: function( browsers, browser ) {
 				return _.indexOf( _.map( browsers, function( browser ) {
@@ -517,6 +753,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Initialize an edit job view
+		 */
 		initialize: function() {
 			this.listenTo( this.model, 'invalid', this.showError );
 			this.listenTo( this.model, 'sync', this.handleSave );
@@ -526,6 +765,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Handle render event
+		 */
 		onRender: function() {
 			App.Common.ModalView.prototype.onRender.apply( this, arguments );
 
@@ -534,6 +776,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Update list of selected browsers of an edited job
+		 * @param {Object} event  Input change event
+		 * @param {Object} params Event params
+		 */
 		updateBrowsers: function( event, params ) {
 			var browsers = this.model.get( 'tempBrowsers' ),
 				idx;
@@ -550,13 +797,16 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Add all captured browsers to a job
+		 */
 		addCaptured: function() {
 			var current = this.model.get( 'tempBrowsers' ) || [],
 				that = this,
 				captured = [],
 				toAdd;
 
-			App.Browsers.browsersList.each( function( browser ) {
+			App.Browsers.browserList.each( function( browser ) {
 				var clients = browser.get( 'clients' );
 
 				if ( clients && clients.length ) {
@@ -577,11 +827,14 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.ui.browsers.trigger( 'chosen:updated' );
 		},
 
+		/**
+		 * Add all browsers to a job
+		 */
 		addAll: function() {
 			var that = this,
 				browsers = [];
 
-			App.Browsers.browsersList.each( function( browser ) {
+			App.Browsers.browserList.each( function( browser ) {
 				if ( browser.attributes.header && browser.id !== 'Unknown' ) {
 					browsers.push( browser.id.toLowerCase() );
 				}
@@ -598,13 +851,21 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.ui.browsers.trigger( 'chosen:updated' );
 		},
 
+		/**
+		 * Show an error if a model is invalid
+		 * @param {Object} model Validated model
+		 * @param {String} error Error message
+		 */
 		showError: function( model, error ) {
 			this.ui.save.prop( 'disabled', false );
-			App.Alerts.Manager.add( 'danger', error, 'Error:' );
+			App.Alerts.controller.add( 'danger', error, 'Error:' );
 		},
 
+		/**
+		 * Handle job save
+		 */
 		handleSave: function() {
-			App.Alerts.Manager.add(
+			App.Alerts.controller.add(
 				'success',
 				'Job saved.',
 				'Success!'
@@ -617,6 +878,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Save changes to a job
+		 */
 		saveJob: function() {
 			var description = this.ui.description.val().replace( /^\s+|\s+$/g, '' );
 
@@ -631,60 +895,238 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 	/**
 	 * Controller for Jobs module
-	 * @type {Object}
+	 * @constructor module:Jobs.Controller
+	 * @extends {Marionette.Controller}
 	 */
-	Jobs.Controller = Marionette.Controller.extend( {
+	Jobs.Controller = Marionette.Controller.extend( /** @lends module:Jobs.Controller.prototype */ {
+		/**
+		 * Initialize a controller
+		 */
 		initialize: function() {
 			App.Sockets.socket.on( 'job:update', _.bind( function( jobId ) {
+				/**
+				 * Job has been updated
+				 * @event module:Jobs.Controller#job:update
+				 * @type {String}
+				 */
 				this.trigger( 'job:update', jobId );
 			}, this ) );
 		},
 
+		/**
+		 * List all jobs
+		 */
 		listJobs: function() {
-			App.header.show( new Jobs.JobsListHeaderView( {
-				collection: Jobs.jobsList
+			App.header.show( new Jobs.JobListHeaderView( {
+				collection: Jobs.jobList
 			} ) );
 
-			App.content.show( new Jobs.JobsListView( {
-				collection: Jobs.jobsList
+			App.content.show( new Jobs.JobListView( {
+				collection: Jobs.jobList
 			} ) );
 
-			Jobs.jobsList.fetch( {
+			Jobs.jobList.fetch( {
 				reset: true,
 				force: true
 			} );
 		},
 
+		/**
+		 * Remove the given job
+		 * @param {Object} job Job model
+		 */
+		removeJob: function( job ) {
+			App.showConfirmPopup( {
+				message: 'Do you want to remove this job?',
+				callback: remove
+			} );
+
+			function remove( callback ) {
+				job.destroy( {
+					success: function( model, response ) {
+						App.Alerts.controller.add(
+							response.success ? 'success' : 'danger',
+							response.success ?
+							'Removed a job: <strong>' + response.id + '</strong>' :
+							response.error,
+							response.success ? 'Success!' : 'Error!'
+						);
+						callback( true );
+						App.navigate( 'jobs' );
+					},
+					error: function( model, response ) {
+						App.Alerts.controller.add(
+							'danger',
+							response.responseText || 'Error while removing a job.',
+							'Error!'
+						);
+						callback( false );
+					}
+				} );
+			}
+		},
+
+		/**
+		 * Restart the given job
+		 * @param {Object} job Job model
+		 */
+		restartJob: function( job ) {
+			App.showConfirmPopup( {
+				message: 'Do you want to restart this job?',
+				callback: restart
+			} );
+
+			function restart( callback ) {
+				$.ajax( {
+					url: '/jobs/' + job.id + '/restart',
+					dataType: 'json',
+					success: function( response ) {
+						App.Alerts.controller.add(
+							response.success ? 'success' : 'danger',
+							response.success ?
+							'Restarted a job: <strong>' + response.id + '</strong>' :
+							response.error,
+							response.success ? 'Success!' : 'Error!'
+						);
+
+						if ( response.success ) {
+							job.fetch( {
+								force: true
+							} );
+						}
+
+						callback( !!response.success );
+					},
+					error: function( response, status ) {
+						App.Alerts.controller.add(
+							'danger',
+							status || 'Error while restarting a job.',
+							'Error!'
+						);
+
+						callback( false );
+					}
+				} );
+			}
+		},
+
+		/**
+		 * Remove selected jobs
+		 */
+		removeSelectedJobs: function() {
+			var selected = Jobs.jobList.filter( function( item ) {
+				return item.get( 'selected' );
+			} ).map( function( item ) {
+				return item.get( 'id' );
+			} );
+
+			if ( !selected.length ) {
+				return;
+			}
+
+			App.showConfirmPopup( {
+				message: 'Do you want to remove selected jobs?',
+				callback: remove
+			} );
+
+			function remove( callback ) {
+				$.ajax( {
+					url: 'jobs/' + selected.join( ',' ),
+					type: 'DELETE',
+					success: function( response ) {
+						App.Alerts.controller.add(
+							response.success ? 'success' : 'danger',
+							response.success ?
+							'Removed jobs: <strong>' + selected.join( ', ' ) + '</strong>' :
+							response.error,
+							response.success ? 'Success!' : 'Error!'
+						);
+
+						Jobs.jobList.fetch( {
+							force: true
+						} );
+
+						callback( true );
+					},
+
+					error: function( response ) {
+						App.Alerts.controller.add(
+							'danger',
+							response.responseText || 'Error while removing jobs.',
+							'Error!'
+						);
+						callback( false );
+					}
+				} );
+			}
+		},
+
+		/**
+		 * Show test error details
+		 * @param {Object} result Test result
+		 */
+		showError: function( result ) {
+			App.modal.show(
+				new App.Common.TestErrorsView( {
+					model: result
+				} )
+			);
+		},
+
+		/**
+		 * Display job details
+		 * @param {String} id Job ID
+		 */
 		showJob: function( id ) {
 			var job = new Jobs.Job( {
 				id: id
 			} );
 
 			job.fetch( {
-				reset: true
-			} )
-			.error( function() {
-				App.show404();
-			} )
-			.done( function() {
-				App.header.show( new Jobs.JobHeaderView( {
-					model: job
-				} ) );
+					reset: true
+				} )
+				.error( function() {
+					App.show404();
+				} )
+				.done( function() {
+					App.header.show( new Jobs.JobHeaderView( {
+						model: job
+					} ) );
 
-				App.content.show( new Jobs.JobView( {
-					model: job
-				} ) );
-			} );
+					App.content.show( new Jobs.JobView( {
+						model: job
+					} ) );
+				} );
 		}
 	} );
 
 	/**
-	 * Add Jobs module initializer
+	 * Initialize Jobs module
 	 */
-	Jobs.addInitializer( function() {
+	App.on( 'before:start', function() {
+		/**
+		 * Job collection
+		 * @memberOf module:Jobs
+		 * @type {module:Jobs.JobList}
+		 * @name jobList
+		 */
+		Jobs.jobList = new Jobs.JobList();
+
+		/**
+		 * Job controller
+		 * @memberOf module:Jobs
+		 * @type {module:Jobs.Controller}
+		 * @name controller
+		 */
 		Jobs.controller = new Jobs.Controller();
 
-		Jobs.router = new Jobs.Router( {
+		/**
+		 * Job router
+		 * @memberOf module:Jobs
+		 * @type {module:Jobs.JobRouter}
+		 * @name jobRouter
+		 */
+		Jobs.jobRouter = new Jobs.JobRouter( {
 			controller: Jobs.controller
 		} );
 	} );

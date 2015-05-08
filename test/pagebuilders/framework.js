@@ -12,6 +12,7 @@
 'use strict';
 
 var mocks = require( '../fixtures/_mocks' ),
+	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	_ = require( 'lodash' ),
@@ -39,28 +40,30 @@ describe( 'Page Builders - Framework', function() {
 		expect( builder ).to.be.a( 'function' );
 	} );
 
-	it( 'should return <script> tag for defined framework library\'s script', function() {
-		var data = {
+	it( 'should call addJS for defined framework library\'s script', function() {
+		var spy = sinon.spy(),
+			data = {
 				framework: 'test',
-				parts: []
-			},
-			expected = '<head><script src="framework-test/adapter.js"></script></head>',
-			result = builder( data );
+				addJS: spy
+			};
 
-		expect( result.parts ).to.have.length( 1 );
-		expect( result.parts[ 0 ] ).to.equal( expected );
+		builder( data );
+
+		sinon.assert.calledOnce( spy );
+		sinon.assert.calledWithExactly( spy, 'framework-test/adapter.js' );
 	} );
 
-	it( 'should return <link> tag for each defined framework library\'s stylesheet', function() {
-		var data = {
+	it( 'should call addCSS for each defined framework library\'s stylesheet', function() {
+		var spy = sinon.spy(),
+			data = {
 				framework: 'test2',
-				parts: []
-			},
-			expected = '<head><link rel="stylesheet" href="framework-test/test.css"></head>',
-			result = builder( data );
+				addCSS: spy
+			};
 
-		expect( result.parts ).to.have.length( 1 );
-		expect( result.parts[ 0 ] ).to.equal( expected );
+		builder( data );
+
+		sinon.assert.calledOnce( spy );
+		sinon.assert.calledWithExactly( spy, 'framework-test/test.css' );
 	} );
 
 	it( 'should not modify data if no framework defined', function() {

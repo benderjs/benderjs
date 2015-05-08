@@ -2,7 +2,7 @@
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
  *
- * @file Runner code for captured browser
+ * @file Runner code for captured browsers
  */
 
 /* global io */
@@ -24,6 +24,7 @@
 
 		this.running = false;
 		this.results = null;
+		this.current = null;
 		this.config = window.BENDER_CONFIG;
 
 		this.runAsChild = true;
@@ -34,6 +35,17 @@
 			}
 		}
 
+		function handleTimeout() {
+			var result = {
+				name: that.current,
+				error: 'Script error',
+				success: false
+			};
+
+			that.result( JSON.stringify( result ) );
+			that.complete( '{"duration":0}' );
+		}
+
 		function resetTestTimeout( timeout ) {
 			if ( !timeout ) {
 				return;
@@ -41,14 +53,7 @@
 
 			clearTestTimeout();
 
-			testTimeout = setTimeout( function() {
-				// reload the page if frozen
-				if ( testWindow ) {
-					testWindow.close();
-					testWindow = null;
-				}
-				window.location.reload();
-			}, timeout );
+			testTimeout = setTimeout( handleTimeout, timeout );
 		}
 
 		function handleRun( data ) {
@@ -131,6 +136,7 @@
 
 			this.running = false;
 			this.results = null;
+			this.current = null;
 		};
 
 		this.log = function() {
@@ -138,36 +144,40 @@
 		};
 
 		this.run = function( id ) {
-			if ( typeof id == 'string' ) {
-				runs++;
+			if ( typeof id !== 'string' ) {
+				return;
+			}
 
-				id += '#child';
+			this.current = id;
 
-				if ( bender.env.ie ) {
-					if ( runs >= 20 && testWindow ) {
-						testWindow.close();
-						setTimeout( function() {
-							runs = 0;
-							testWindow = window.open( id, 'bendertest' );
-						}, 300 );
+			runs++;
+
+			id += '#child';
+
+			if ( bender.env.ie ) {
+				if ( runs >= 20 && testWindow ) {
+					testWindow.close();
+					setTimeout( function() {
+						runs = 0;
+						testWindow = window.open( id, 'bendertest' );
+					}, 300 );
+				} else {
+					if ( !testWindow || testWindow.closed ) {
+						testWindow = window.open( id, 'bendertest' );
 					} else {
-						if ( !testWindow || testWindow.closed ) {
-							testWindow = window.open( id, 'bendertest' );
+						if ( id === testWindow.location.href.split( testWindow.location.host )[ 1 ] ) {
+							testWindow.location.reload();
 						} else {
-							if ( id === testWindow.location.href.split( testWindow.location.host )[ 1 ] ) {
-								testWindow.location.reload();
-							} else {
-								testWindow.location.href = id;
-							}
+							testWindow.location.href = id;
 						}
 					}
-				} else {
-					removeFrame();
-					addFrame( id );
 				}
-
-				resetTestTimeout( that.config && that.config.testTimeout );
+			} else {
+				removeFrame();
+				addFrame( id );
 			}
+
+			resetTestTimeout( that.config && that.config.testTimeout );
 		};
 
 		this.stop = function() {

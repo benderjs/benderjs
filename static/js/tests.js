@@ -1,30 +1,51 @@
 /**
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
- *
- * @module App.Tests
  */
 
+/**
+ * @module Tests
+ */
 App.module( 'Tests', function( Tests, App, Backbone ) {
 	'use strict';
 
 	/**
 	 * Tests filter model
+	 * @constructor module:Tests.Filter
+	 * @extends {Backbone.Model}
 	 */
-	Tests.Filter = Backbone.Model.extend( {
+	Tests.Filter = Backbone.Model.extend( /** @lends module:Tests.Filter.prototype */ {
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			filter: [],
 			tokens: null
 		},
 
+		/**
+		 * Initialize a filter
+		 */
 		initialize: function() {
 			this.listenTo( Tests.controller, 'tests:loaded', this.buildFilters, this );
 
 			this.on( 'change:filter', function() {
+				/**
+				 * Test filter has changed
+				 * @event module:Tests.Controller#tests:filter
+				 * @type {Array}
+				 */
 				Tests.controller.trigger( 'tests:filter', this.get( 'filter' ) );
 			} );
 		},
 
+		/**
+		 * Build filters for the given tests
+		 * @param {Object} tests  Tests collection
+		 * @param {Array}  filter Test filter
+		 */
 		buildFilters: function( tests, filter ) {
 			var tokens = [];
 
@@ -74,6 +95,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.setFilter( filter );
 		},
 
+		/**
+		 * Set current filter and trigger update if the filter changed
+		 * @param {Array} filter Test filter
+		 */
 		setFilter: function( filter ) {
 			var tokens = this.get( 'tokens' ),
 				parsed = _.filter( filter, function( value ) {
@@ -93,24 +118,53 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 	/**
 	 * Test filter view
+	 * @constructor module:Tests.FilterView
+	 * @extends {Marionette.ItemView}
 	 */
-	Tests.FilterView = Marionette.ItemView.extend( {
+	Tests.FilterView = Marionette.ItemView.extend( /** @lends module:Tests.FilterView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#test-filter',
+
+		/**
+		 * Test filter view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'filter-form',
 
+		/**
+		 * UI element binding
+		 * @default
+		 * @type {Object}
+		 */
 		ui: {
 			filter: '.test-filter'
 		},
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'change @ui.filter': 'updateFilter'
 		},
 
+		/**
+		 * Initialize a filter view
+		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change:tokens', this.render );
 			this.listenTo( this.model, 'update:filter', this.update );
 		},
 
+		/**
+		 * Handle render event
+		 */
 		onRender: function() {
 			this.ui.filter.chosen( {
 				width: '100%',
@@ -118,6 +172,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Update a filter view
+		 */
 		update: function() {
 			var filter = this.model.get( 'filter' );
 
@@ -128,6 +185,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.ui.filter.trigger( 'chosen:updated' );
 		},
 
+		/**
+		 * Update a filter
+		 * @param {Object} event  Change event
+		 * @param {Object} params Event parameters
+		 */
 		updateFilter: function( event, params ) {
 			var filter = _.clone( this.model.get( 'filter' ) );
 
@@ -144,8 +206,15 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 	/**
 	 * Tests status model
+	 * @constructor module:Tests.TestStatus
+	 * @extends {Backbone.Model}
 	 */
-	Tests.TestStatus = Backbone.Model.extend( {
+	Tests.TestStatus = Backbone.Model.extend( /** @lends module:Tests.TestStatus.prototype */ {
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			passed: 0,
 			failed: 0,
@@ -157,11 +226,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			running: false
 		},
 
+		/**
+		 * Initialize a test status
+		 */
 		initialize: function() {
 			this.listenTo( Tests.controller, 'tests:stop', this.stop, this );
 			this.listenTo( Tests.controller, 'tests:update', this.update, this );
 		},
 
+		/**
+		 * Reset a test status
+		 */
 		reset: function() {
 			this.set( {
 				passed: 0,
@@ -174,6 +249,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Update a test status
+		 * @param {Object} data State object
+		 */
 		update: function( data ) {
 			if ( typeof data == 'object' && data.state === 'done' ) {
 				var model = this.toJSON();
@@ -187,6 +266,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Set a test status as started
+		 * @param {Number} total Total test count
+		 */
 		start: function( total ) {
 			this.reset();
 			this.set( {
@@ -195,24 +278,43 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Set a test status as stopped
+		 */
 		stop: function() {
 			this.set( 'running', false );
-		},
-
-		setFilter: function( filter ) {
-			Tests.testFilter.setFilter( filter );
 		}
 	} );
 
 	/**
 	 * Test status view
+	 * @constructor module:Tests.TestStatusView
+	 * @extends {Marionette.ItemView}
 	 */
-	Tests.TestStatusView = Marionette.ItemView.extend( {
+	Tests.TestStatusView = Marionette.ItemView.extend( /** @lends module:Tests.TestStatusView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#test-status',
+
+		/**
+		 * Test status view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'test-status',
 
+		/**
+		 * Template helpers
+		 * @type {module:Common.templateHelpers}
+		 */
 		templateHelpers: App.Common.templateHelpers,
 
+		/**
+		 * Initialize a test status view
+		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render, this );
 		},
@@ -221,28 +323,63 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 	/**
 	 * Tests header view
+	 * @constructor module:Tests.TestHeaderView
+	 * @extends {Marionette.LayoutView}
 	 */
-	Tests.TestHeaderView = Marionette.LayoutView.extend( {
+	Tests.TestHeaderView = Marionette.LayoutView.extend( /** @lends module:Tests.TestHeaderView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#test-header',
+
+		/**
+		 * Test header view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'row',
 
+		/**
+		 * Test header layout regions
+		 * @default
+		 * @type {Object}
+		 */
 		regions: {
 			left: '.header-left',
 			right: '.header-right'
 		},
 
+		/**
+		 * UI element binding
+		 * @default
+		 * @type {Object}
+		 */
 		ui: {
 			'run': '.run-button',
 			'create': '.create-button'
 		},
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
-			'click @ui.run': 'clickRun',
-			'click @ui.create': 'clickCreateJob'
+			'click @ui.run': 'onClickRun',
+			'click @ui.create': 'onClickCreateJob'
 		},
 
+		/**
+		 * Template helpers
+		 * @type {module:Common.templateHelpers}
+		 */
 		templateHelpers: App.Common.templateHelpers,
 
+		/**
+		 * Initialize a test header view
+		 */
 		initialize: function() {
 			this.listenTo( Tests.controller, 'tests:start', function() {
 				this.updateButtons( false );
@@ -253,6 +390,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Update test header buttons
+		 * @param {Boolean} enabled Enabled flag
+		 */
 		updateButtons: function( enabled ) {
 			this.ui.run
 				.attr( 'title', ( enabled ? 'Start' : 'Stop' ) + ' tests' )
@@ -263,19 +404,32 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.ui.create.attr( 'disabled', !enabled );
 		},
 
-		clickRun: function() {
+		/**
+		 * Handle click on the run button
+		 */
+		onClickRun: function() {
 			Tests.controller.runTests();
 		},
 
-		clickCreateJob: function() {
+		/**
+		 * Handle click on the "Create job" button
+		 */
+		onClickCreateJob: function() {
 			Tests.controller.showCreateJob();
 		}
 	} );
 
 	/**
 	 * Test result model
+	 * @constructor module:Tests.Result
+	 * @extends {Backbone.Model}
 	 */
-	Tests.Result = Backbone.Model.extend( {
+	Tests.Result = Backbone.Model.extend( /** @lends module:Tests.Result.prototype */ {
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			id: '',
 			style: '',
@@ -290,10 +444,18 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			success: true
 		},
 
+		/**
+		 * Reset a result
+		 */
 		reset: function() {
 			this.set( this.defaults );
 		},
 
+		/**
+		 * Parse result data
+		 * @param  {Object} data Result data
+		 * @return {Object}
+		 */
 		parse: function( data ) {
 			data.style = ( !data.state || data.state === 'started' ) ? '' :
 				data.success ? data.ignored === true ? 'warning' :
@@ -307,10 +469,19 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			return data;
 		},
 
+		/**
+		 * Update a result
+		 * @param {Object} data Result data
+		 */
 		update: function( data ) {
 			this.set( this.parse( data ) );
 		},
 
+		/**
+		 * Collect errors from a result
+		 * @param  {Object} data Result data
+		 * @return {Array}
+		 */
 		getErrors: function( data ) {
 			var errors = [];
 
@@ -328,6 +499,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			return errors.length ? errors : null;
 		},
 
+		/**
+		 * Check if a test was slow
+		 * @param  {Object}  data Result data
+		 * @return {Boolean}
+		 */
 		isSlow: function( data ) {
 			// average duration above the threshold
 			return ( Math.round( data.duration / data.total ) > bender.config.slowAvgThreshold ) ||
@@ -338,8 +514,15 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 	/**
 	 * Test model
+	 * @constructor module:Tests.Test
+	 * @extends {Backbone.Model}
 	 */
-	Tests.Test = Backbone.Model.extend( {
+	Tests.Test = Backbone.Model.extend( /** @lends module:Tests.Test.prototype */ {
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			// base properties
 			id: '',
@@ -354,6 +537,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			result: null
 		},
 
+		/**
+		 * Parse test data
+		 * @param  {Object} data Test data
+		 * @return {Object}
+		 */
 		parse: function( data ) {
 			data.result = new Tests.Result( this.attributes, {
 				parse: true
@@ -362,6 +550,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			return data;
 		},
 
+		/**
+		 * Return a result for a test
+		 * @return {module:Tests.Result}
+		 */
 		getResult: function() {
 			var result;
 
@@ -379,37 +571,72 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 	/**
 	 * Tests collection
+	 * @constructor module:Tests.TestList
+	 * @extends {Backbone.Collection}
 	 */
-	Tests.TestsList = Backbone.Collection.extend( {
+	Tests.TestList = Backbone.Collection.extend( /** @lends module:Tests.TestList.prototype */ {
+		/**
+		 * Test list model class
+		 * @type {module:Tests.Test}
+		 */
 		model: Tests.Test
 	} );
 
 	/**
 	 * Tests and filtered tests collections
+	 * @constructor module:Tests.Tests
+	 * @extends {Backbone.Model}
 	 */
-	Tests.Tests = Backbone.Model.extend( {
+	Tests.Tests = Backbone.Model.extend( /** @lends module:Tests.Tests.prototype */ {
+		/**
+		 * URL to the tests API
+		 * @default
+		 * @type {String}
+		 */
 		url: '/tests',
 
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			tests: null,
 			filtered: null
 		},
 
+		/**
+		 * Test exclude filters
+		 * @type {Object}
+		 */
 		excludes: {},
+
+		/**
+		 * Test filters
+		 * @type {Object}
+		 */
 		filters: {},
 
+		/**
+		 * Initialize a model
+		 */
 		initialize: function() {
 			this.listenTo( Tests.controller, 'tests:filter', this.setFilters, this );
 			this.listenTo( Tests.controller, 'tests:start', this.clearResults, this );
 			this.listenTo( Tests.controller, 'tests:stop', this.clearCurrentResult, this );
 			this.listenTo( Tests.controller, 'tests:update', this.updateResult, this );
 
-			this.set( 'tests', new Tests.TestsList() );
+			this.set( 'tests', new Tests.TestList() );
 			this.set( 'filtered', new Backbone.VirtualCollection( this.get( 'tests' ) ) );
 		},
 
+		/**
+		 * Parse a response from the API
+		 * @param  {Object} response Response data
+		 * @return {Object}
+		 */
 		parse: function( response ) {
-			response.tests = new Tests.TestsList( response.test, {
+			response.tests = new Tests.TestList( response.test, {
 				parse: false
 			} );
 			response.filtered = new Backbone.VirtualCollection( response.tests );
@@ -419,15 +646,22 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			return response;
 		},
 
+		/**
+		 * Check if a test list needs filtering
+		 * @return {Boolean}
+		 */
 		needsFiltering: function() {
 			return _.some( this.filters, function( filter ) {
 				return filter.length;
 			} );
 		},
 
-		setFilters: function( filters ) {
-			var that = this,
-				name;
+		/**
+		 * Set test filters
+		 * @param {Array} filter Test filter
+		 */
+		setFilters: function( filter ) {
+			var name;
 
 			// reset filters
 			for ( name in this.filters ) {
@@ -438,7 +672,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				this.excludes[ name ] = [];
 			}
 
-			_.each( filters, function( filter ) {
+			_.each( filter, function( filter ) {
 				filter = filter.split( ':' );
 
 				var name = filter[ 0 ];
@@ -446,27 +680,33 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				if ( name.charAt( 0 ) === '-' ) {
 					name = name.substr( 1 );
 
-					if ( !that.excludes[ name ] ) {
-						that.excludes[ name ] = [];
+					if ( !this.excludes[ name ] ) {
+						this.excludes[ name ] = [];
 					}
 
-					that.excludes[ name ].push( filter[ 1 ] );
+					this.excludes[ name ].push( filter[ 1 ] );
 				} else {
-					if ( !that.filters[ name ] ) {
-						that.filters[ name ] = [];
+					if ( !this.filters[ name ] ) {
+						this.filters[ name ] = [];
 					}
 
-					that.filters[ name ].push( filter[ 1 ] );
+					this.filters[ name ].push( filter[ 1 ] );
 				}
-			} );
+			}, this );
 
 			var filtered = this.get( 'filtered' );
 
-			filtered.updateFilter( this.needsFiltering() && _.bind( this.filterFunc, this ) );
+			filtered.updateFilter( this.needsFiltering() && _.bind( this._filterFunc, this ) );
 			this.trigger( 'change', this );
 		},
 
-		filterFunc: function( item ) {
+		/**
+		 * Inner filter function
+		 * @param  {Object} item Test model
+		 * @return {Boolean}
+		 * @private
+		 */
+		_filterFunc: function( item ) {
 			item = item.toJSON();
 
 			function escape( string ) {
@@ -562,6 +802,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				checkProperties( this.filters );
 		},
 
+		/**
+		 * Convert attributes to an object
+		 * @return {Object}
+		 */
 		toJSON: function() {
 			var attr = this.attributes,
 				json = {},
@@ -574,12 +818,19 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			return json;
 		},
 
+		/**
+		 * Collect IDs of filtered tests
+		 * @return {Array}
+		 */
 		getIds: function() {
 			return this.get( 'filtered' ).map( function( item ) {
 				return item.id;
 			} );
 		},
 
+		/**
+		 * Clear the result of current test
+		 */
 		clearCurrentResult: function() {
 			var current = this.get( 'tests' ).get( bender.current );
 
@@ -589,6 +840,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Clear all results
+		 */
 		clearResults: function() {
 			this.get( 'tests' ).each( function( test ) {
 				test.getResult().reset();
@@ -597,6 +851,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.trigger( 'change', this );
 		},
 
+		/**
+		 * Update result of a test matching the given data
+		 * @param {Object} data Result data
+		 */
 		updateResult: function( data ) {
 			var model = this.get( 'tests' ).get( data.id );
 
@@ -606,6 +864,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Get results for a test with the given ID
+		 * @param  {String} id Test ID
+		 * @return {module:Tests.Result}
+		 */
 		getResult: function( id ) {
 			var model = this.get( 'tests' ).get( id );
 
@@ -615,13 +878,40 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 	/**
 	 * Test list view
+	 * @constructor module:Tests.TestsView
+	 * @extends {Marionette.ItemView}
 	 */
-	Tests.TestsView = Marionette.ItemView.extend( {
+	Tests.TestsView = Marionette.ItemView.extend( /** @lends module:Tests.TestsView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#tests',
+
+		/**
+		 * Test template builder
+		 * @type {Function}
+		 */
 		testTemplate: null,
+
+		/**
+		 * Result template builder
+		 * @type {Function}
+		 */
 		resultTemplate: null,
+
+		/**
+		 * Test list view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'panel panel-default',
 
+		/**
+		 * Template helpers
+		 * @type {Object}
+		 */
 		templateHelpers: {
 			getIconStyle: function( style ) {
 				return 'glyphicon' + ( style ?
@@ -636,14 +926,27 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'click .result .result': 'showErrors'
 		},
 
+		/**
+		 * UI element binding
+		 * @default
+		 * @type {Object}
+		 */
 		ui: {
 			container: 'tbody'
 		},
 
+		/**
+		 * Initialize a test list view
+		 */
 		initialize: function() {
 			var that = this;
 
@@ -657,10 +960,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			};
 		},
 
+		/**
+		 * Handle render event
+		 */
 		onRender: function() {
 			this.ui.container.html( this.renderChildren() );
 		},
 
+		/**
+		 * Render child views
+		 * @return {String}
+		 */
 		renderChildren: function() {
 			var filtered = this.model.get( 'filtered' ),
 				html = [];
@@ -674,6 +984,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			return html;
 		},
 
+		/**
+		 * Render a test result and scroll to that test
+		 * @param  {String} id Test ID
+		 */
 		renderResult: function( id ) {
 			var result = this.model.get( 'tests' ).get( id ),
 				row;
@@ -688,54 +1002,33 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				row[ 0 ].className = s ? ' ' + s + ' bg-' + s + ' text-' + s : '';
 
 				row.find( '.result' ).html( this.resultTemplate( _.extend( {}, result, this.templateHelpers ) ) );
-				this.scrollTo( row );
+				Tests.controller.scrollTo( row );
 			}
 		},
 
-		scrollTo: function( elem ) {
-			var top = elem.offset().top,
-				bottom = top + elem.height(),
-				$window = $( window ),
-				scroll = $( window ).scrollTop(),
-				height = $window.height();
-
-
-			// item is hidden at the bottom
-			if ( scroll + height < bottom ) {
-				$window.scrollTop( bottom - height );
-				// item is hidden at the top
-			} else if ( scroll + App.$navbar.height() > top ) {
-				$( window ).scrollTop( top - App.$navbar.height() - 1 );
-			}
-		},
-
+		/**
+		 * Show test error details
+		 * @param {Object} event Click event
+		 */
 		showErrors: function( event ) {
 			var id = $( event.target ).parent().parent().data( 'id' ),
-				result = this.model.getResult( id ),
-				errors;
+				result = this.model.getResult( id );
 
-			if ( !result ) {
-				return;
-			}
-
-			errors = result.get( 'errors' );
-
-			if ( !errors || !errors.length ) {
-				return;
-			}
-
-			App.modal.show(
-				new App.Common.TestErrorsView( {
-					model: result
-				} )
-			);
+			Tests.controller.showErrors( result );
 		}
 	} );
 
 	/**
 	 * New job model
+	 * @constructor module:Tests.NewJob
+	 * @extends {Backbone.Model}
 	 */
-	Tests.NewJob = Backbone.Model.extend( {
+	Tests.NewJob = Backbone.Model.extend( /** @lends module:Tests.NewJob.prototype */ {
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
 		defaults: {
 			browsers: null,
 			description: '',
@@ -744,12 +1037,27 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			filter: null
 		},
 
+		/**
+		 * URL to the jobs API
+		 * @default
+		 * @type {String}
+		 */
+		urlRoot: '/jobs',
+
+		/**
+		 * Initialize a new job model
+		 */
 		initialize: function() {
 			this.set( 'browsers', [] )
 				.set( 'tests', Tests.tests.getIds() )
 				.set( 'filter', Tests.testFilter.get( 'filter' ) );
 		},
 
+		/**
+		 * Validate a new job model
+		 * @param  {Object} attrs Model attributes
+		 * @return {String}
+		 */
 		validate: function( attrs ) {
 			if ( !attrs.browsers.length ) {
 				return 'No browsers specified for the job';
@@ -757,23 +1065,38 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			if ( !attrs.tests.length ) {
 				return 'No tests specified for the job';
 			}
-		},
-
-		urlRoot: '/jobs'
+		}
 	} );
 
 	/**
 	 * Create a job view
+	 * @constructor module:Tests.CreateJobView
+	 * @extends {module:Common.ModalView}
 	 */
-	Tests.CreateJobView = App.Common.ModalView.extend( {
+	Tests.CreateJobView = App.Common.ModalView.extend( /** @lends module:Tests.CreateJobView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#create-job',
 
+		/**
+		 * UI element binding
+		 * @default
+		 * @type {Object}
+		 */
 		ui: {
 			'browsers': '.job-browsers',
 			'description': '.job-description',
 			'create': '.create-button'
 		},
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'change @ui.browsers': 'updateBrowsers',
 			'change @ui.description': 'updateDescription',
@@ -783,11 +1106,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			'click .add-all-button': 'addAll'
 		},
 
+		/**
+		 * Initialize a create job view
+		 */
 		initialize: function() {
 			this.listenTo( this.model, 'invalid', this.showError );
 			this.listenTo( this.model, 'sync', this.handleCreate );
 		},
 
+		/**
+		 * Handler render event
+		 */
 		onRender: function() {
 			App.Common.ModalView.prototype.onRender.apply( this, arguments );
 
@@ -796,6 +1125,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Update a list of browsers selected for a job
+		 * @param {Object} event  Change event
+		 * @param {Object} params Change event parameters
+		 */
 		updateBrowsers: function( event, params ) {
 			var browsers = this.model.get( 'browsers' ),
 				idx;
@@ -810,13 +1144,16 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.model.set( 'browsers', browsers );
 		},
 
+		/**
+		 * Add captured browsers to the job
+		 */
 		addCaptured: function() {
 			var current = this.model.get( 'browsers' ) || [],
 				that = this,
 				captured = [],
 				toAdd;
 
-			App.Browsers.browsersList.each( function( browser ) {
+			App.Browsers.browserList.each( function( browser ) {
 				var clients = browser.get( 'clients' );
 
 				if ( browser.id !== 'Unknown' && clients && clients.length ) {
@@ -835,11 +1172,14 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.ui.browsers.trigger( 'chosen:updated' );
 		},
 
+		/**
+		 * Add all browsers to the job
+		 */
 		addAll: function() {
 			var that = this,
 				browsers = [];
 
-			App.Browsers.browsersList.each( function( browser ) {
+			App.Browsers.browserList.each( function( browser ) {
 				if ( browser.attributes.header && browser.id !== 'Unknown' ) {
 					browsers.push( browser.id.toLowerCase() );
 				}
@@ -854,13 +1194,22 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.ui.browsers.trigger( 'chosen:updated' );
 		},
 
+		/**
+		 * Show error alert on model validation
+		 * @param {Object} model Validated model
+		 * @param {String} error Validation error message
+		 */
 		showError: function( model, error ) {
 			this.ui.create.prop( 'disabled', false );
-			App.Alerts.Manager.add( 'danger', error, 'Error:' );
+			App.Alerts.controller.add( 'danger', error, 'Error:' );
 		},
 
+		/**
+		 * Handle new job creation
+		 * @param {Object} model New job model
+		 */
 		handleCreate: function( model ) {
-			App.Alerts.Manager.add(
+			App.Alerts.controller.add(
 				'success',
 				'New job added with ID: <a href="/#jobs/' + model.id + '">' + model.id + '</a>.',
 				'Success!'
@@ -869,15 +1218,26 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			this.destroy();
 		},
 
+		/**
+		 * Update a job description
+		 * @param {Object} event Change event
+		 */
 		updateDescription: function( event ) {
 			var description = $( event.target ).val().replace( /^\s+|\s+$/g, '' );
 			this.model.set( 'description', description );
 		},
 
+		/**
+		 * Update "snapshot" flag
+		 * @param {Object} event Change event
+		 */
 		updateSnapshot: function( event ) {
 			this.model.set( 'snapshot', event.target.checked );
 		},
 
+		/**
+		 * Create a job
+		 */
 		createJob: function() {
 			this.ui.create.prop( 'disabled', true );
 			this.model.save();
@@ -889,8 +1249,14 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 	/**
 	 * Tests controller
+	 * @constructor module:Tests.Controller
+	 * @extends {Marionette.Controller}
 	 */
-	Tests.controller = new( Marionette.Controller.extend( {
+	Tests.Controller = Marionette.Controller.extend( /** @lends module:Tests.Controller.prototype */ {
+		/**
+		 * List filtered tests
+		 * @param {Array} filter Test filter
+		 */
 		listTests: function( filter ) {
 			Tests.tests = new Tests.Tests();
 
@@ -918,6 +1284,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			App.content.empty();
 
 			Tests.tests.fetch().done( function( data ) {
+				/**
+				 * Tests were loaded
+				 * @event module:Tests.Controller#tests:loaded
+				 */
 				Tests.controller.trigger( 'tests:loaded', data.tests, filter.split( ',' ) );
 
 				App.content.show( new Tests.TestsView( {
@@ -926,6 +1296,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			} );
 		},
 
+		/**
+		 * Run filtered tests
+		 */
 		runTests: function() {
 			var ids;
 
@@ -933,13 +1306,17 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				ids = Tests.tests.getIds();
 
 				if ( !ids.length ) {
-					return App.Alerts.Manager.add(
+					return App.Alerts.controller.add(
 						'danger',
 						'There are no tests to run, aborting.',
 						'Error:'
 					);
 				}
 
+				/**
+				 * Testing started
+				 * @event module:Tests.Controller#tests:start
+				 */
 				Tests.controller.trigger( 'tests:start' );
 
 				// show all filtered
@@ -951,6 +1328,30 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Scroll the page to the given element
+		 * @param {Element} elem DOM element
+		 */
+		scrollTo: function( elem ) {
+			var top = elem.offset().top,
+				bottom = top + elem.height(),
+				$window = $( window ),
+				scroll = $( window ).scrollTop(),
+				height = $window.height();
+
+
+			// item is hidden at the bottom
+			if ( scroll + height < bottom ) {
+				$window.scrollTop( bottom - height );
+				// item is hidden at the top
+			} else if ( scroll + App.$navbar.height() > top ) {
+				$( window ).scrollTop( top - App.$navbar.height() - 1 );
+			}
+		},
+
+		/**
+		 * Show "create new job" modal
+		 */
 		showCreateJob: function() {
 			App.modal.show(
 				new Tests.CreateJobView( {
@@ -959,6 +1360,32 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			);
 		},
 
+		/**
+		 * Show result error details
+		 * @param {module:Tests.Result} result Test result
+		 */
+		showErrors: function( result ) {
+			if ( !result ) {
+				return;
+			}
+
+			var errors = result.get( 'errors' );
+
+			if ( !errors || !errors.length ) {
+				return;
+			}
+
+			App.modal.show(
+				new App.Common.TestErrorsView( {
+					model: result
+				} )
+			);
+		},
+
+		/**
+		 * Update a browser's window title on a test status change
+		 * @param {Object} model Test status
+		 */
 		updateTitle: function( model ) {
 			var status = '';
 
@@ -969,6 +1396,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			document.title = status + oldDocTitle;
 		},
 
+		/**
+		 * Update the URL to reflect the changes in test filters
+		 * @param {Array} filter Test filter
+		 */
 		updateURL: function( filter ) {
 			App.navigate( 'tests/' + filter.join( ',' ), {
 				trigger: false
@@ -978,24 +1409,47 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				App.trigger( 'header:resize' );
 			} );
 		}
-	} ) )();
+	} );
 
 	/**
 	 * Tests Router
+	 * @constructor module:Tests.Router
+	 * @extends {Marionette.AppRouter}
 	 */
-	Tests.Router = Marionette.AppRouter.extend( {
+	Tests.Router = Marionette.AppRouter.extend( /** @lends module:Tests.Router.prototype */ {
+		/**
+		 * Router name
+		 * @default
+		 * @type {String}
+		 */
 		name: 'tests',
 
+		/**
+		 * Routes
+		 * @default
+		 * @type {Object}
+		 */
 		appRoutes: {
 			'tests(/*filters)': 'listTests'
 		}
 	} );
 
 	/**
-	 * Add initialzier for tests module
+	 * Initialize Tests module
 	 */
-	Tests.addInitializer( function() {
-		// create router instance
+	App.on( 'before:start', function() {
+		/**
+		 * Test controller
+		 * @memberOf module:Tests
+		 * @type {module:Tests.Controller}
+		 */
+		Tests.controller = new Tests.Controller();
+
+		/**
+		 * Test router
+		 * @memberOf module:Tests
+		 * @type {module:Tests.Router}
+		 */
 		Tests.router = new Tests.Router( {
 			controller: Tests.controller
 		} );
@@ -1004,16 +1458,32 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		this.listenTo( Tests.controller, 'tests:filter', Tests.controller.updateURL );
 
 		this.listenTo( Tests.controller, 'tests:start', function() {
-			App.vent.trigger( 'tabs:disable' );
+			/**
+			 * Disable tabs menu
+			 * @event module:App#tabs:disable
+			 */
+			App.trigger( 'tabs:disable' );
 		} );
 
 		bender.on( 'update', function( data ) {
+			/**
+			 * Tests results updated
+			 * @event module:Tests.Controller#tests:update
+			 */
 			Tests.controller.trigger( 'tests:update', data );
 		} );
 
 		bender.on( 'complete', function() {
+			/**
+			 * Tests stopped
+			 * @event module:Tests.Controller#tests:stop
+			 */
 			Tests.controller.trigger( 'tests:stop' );
-			App.vent.trigger( 'tabs:enable' );
+			/**
+			 * Enable tabs menu
+			 * @event module:App#tabs:enable
+			 */
+			App.trigger( 'tabs:enable' );
 		} );
 
 		// prevent from accidentally closing the dashboard while the tests are running

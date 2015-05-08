@@ -1,23 +1,13 @@
 /**
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
- *
- * @module App.Tabs
  */
 
+/**
+ * @module Tabs
+ */
 App.module( 'Tabs', function( Tabs, App, Backbone ) {
 	'use strict';
-
-	var tabs = [ {
-		label: 'Tests',
-		id: 'tests'
-	}, {
-		label: 'Jobs',
-		id: 'jobs'
-	}, {
-		label: 'Browsers',
-		id: 'browsers'
-	} ];
 
 	/**
 	 * Tab model
@@ -32,16 +22,29 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 	} );
 
 	/**
-	 * Tabs collection
+	 * Tab collection
+	 * @constructor module:Tabs.TabList
+	 * @extends {Backbone.Collection}
 	 */
-	Tabs.tabsList = new( Backbone.Collection.extend( {
+	Tabs.TabList = Backbone.Collection.extend( /** @lends module:Tabs.TabList.prototype */ {
+		/**
+		 * Tab model
+		 * @type {module:Tabs.Tab}
+		 */
 		model: Tabs.Tab,
 
+		/**
+		 * Initialize tab collection
+		 */
 		initialize: function() {
-			App.vent.on( 'tabs:disable', this.disableTabs, this );
-			App.vent.on( 'tabs:enable', this.enableTabs, this );
+			App.on( 'tabs:disable', this.disableTabs, this );
+			App.on( 'tabs:enable', this.enableTabs, this );
 		},
 
+		/**
+		 * Activate a tab
+		 * @param {String} name Tab name
+		 */
 		activateTab: function( name ) {
 			var next = this.get( name );
 
@@ -54,34 +57,65 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Disable tabs
+		 */
 		disableTabs: function() {
 			this.each( function( tab ) {
 				tab.set( 'disabled', true );
 			} );
 		},
 
+		/**
+		 * Enable tabs
+		 */
 		enableTabs: function() {
 			this.each( function( tab ) {
 				tab.set( 'disabled', false );
 			} );
 		}
-	} ) )( tabs );
+	} );
 
 	/**
 	 * Single tab view
+	 * @constructor module:Tabs.TabView
+	 * @extends {Marionette.ItemView}
 	 */
-	Tabs.TabView = Marionette.ItemView.extend( {
+	Tabs.TabView = Marionette.ItemView.extend( /** @lends module:Tabs.TabView.prototype */ {
+		/**
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
 		template: '#tab',
+
+		/**
+		 * Tab view tag name
+		 * @default
+		 * @type {String}
+		 */
 		tagName: 'li',
 
+		/**
+		 * UI event binding
+		 * @default
+		 * @type {Object}
+		 */
 		events: {
 			'click a': 'navigate'
 		},
 
+		/**
+		 * Initialize a tab view
+		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.changeState );
 		},
 
+		/**
+		 * Navigate to a tab
+		 * @param {Object} event Click event
+		 */
 		navigate: function( event ) {
 			var model = this.model.toJSON();
 
@@ -96,6 +130,9 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 			}
 		},
 
+		/**
+		 * Update a tab state on a model change
+		 */
 		changeState: function() {
 			var model = this.model.toJSON();
 
@@ -106,21 +143,60 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 
 	/**
 	 * Tabs list view
+	 * @constructor module:Tabs.TabListView
+	 * @extends {Marionette.CollectionView}
 	 */
-	Tabs.TabListView = Marionette.CollectionView.extend( {
+	Tabs.TabListView = Marionette.CollectionView.extend( /** @lends module:Tabs.TabListView.prototype */ {
+		/**
+		 * Child item view
+		 * @type {module:Tabs.TabView}
+		 */
 		childView: Tabs.TabView,
+
+		/**
+		 * Tab list vew tag name
+		 * @default
+		 * @type {String}
+		 */
 		tagName: 'ul',
+
+		/**
+		 * Tab list view class name
+		 * @default
+		 * @type {String}
+		 */
 		className: 'nav nav-tabs nav-justified'
 	} );
 
-	Tabs.addInitializer( function() {
+	/**
+	 * Initialize Tabs module
+	 */
+	App.on( 'before:start', function() {
+		var tabs = [ {
+			label: 'Tests',
+			id: 'tests'
+		}, {
+			label: 'Jobs',
+			id: 'jobs'
+		}, {
+			label: 'Browsers',
+			id: 'browsers'
+		} ];
+
+		/**
+		 *	Tab collection
+		 *	@memberOf module:Tabs
+		 *	@type {module:Tabs.TabList}
+		 */
+		Tabs.tabList = new Tabs.TabList( tabs );
+
 		App.tabs.show( new Tabs.TabListView( {
-			collection: Tabs.tabsList
+			collection: Tabs.tabList
 		} ) );
 
 		Backbone.history.on( 'route', function( router ) {
 			if ( router.name ) {
-				Tabs.tabsList.activateTab( router.name );
+				Tabs.tabList.activateTab( router.name );
 			}
 		} );
 	} );

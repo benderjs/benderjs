@@ -12,6 +12,7 @@
 	],
 	"homepage": "http://benderjs.com/",
 	"scripts": {
+		"doc": "jsdoc -r lib/ -d out/server/ && jsdoc -r static/js/ -d out/dashboard/",
 		"lint": "jshint lib/ test/ && jscs .",
 		"postinstall": "bower install",
 		"test": "istanbul test node_modules/mocha/bin/_mocha -- --reporter list --check-leaks --recursive"
@@ -28,7 +29,7 @@
 	"dependencies": {
 		"bower": "~1.3.12",
 		"broadway": "~0.2.9",
-		"browser-launcher2": "~0.4.1",
+		"browser-launcher2": "~0.4.5",
 		"chalk": "~1.0.0",
 		"connect": "~2.21.1",
 		"dom-combiner": "~0.1.1",
