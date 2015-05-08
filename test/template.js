@@ -24,6 +24,8 @@ describe( 'Template', function() {
 		'<img src="%BASE_PATH%_assets/img.jpg" /></body></html>',
 		testDirHtml = '<!DOCTYPE html><html><head></head><body>' +
 		'<img src="%TEST_DIR%_assets/img.jpg" /></body></html>',
+		appsDirHtml = '<!DOCTYPE html><html><head></head><body>' +
+		'<img src="%APPS_DIR%foo/img.jpg" /></body></html>',
 		bender;
 
 	beforeEach( function() {
@@ -73,6 +75,26 @@ describe( 'Template', function() {
 				jobId: jobId
 			}, bender.tests.tests[ 0 ] ),
 			result = bender.template.replaceTags( testDirHtml, task );
+
+		expect( result ).to.equal( expected );
+	} );
+
+	it( 'should replace %APPS_DIR% tag in test\'s HTML', function() {
+		var expected = '<!DOCTYPE html><html><head></head><body>' +
+			'<img src="/apps/foo/img.jpg" /></body></html>',
+			result = bender.template.replaceTags( appsDirHtml, bender.tests.tests[ 0 ] );
+
+		expect( result ).to.equal( expected );
+	} );
+
+	it( 'should replace %APPS_DIR% tag in job task\'s HTML', function() {
+		var jobId = 'foo',
+			expected = '<!DOCTYPE html><html><head></head><body><img src="/jobs/' + jobId +
+			'/apps/foo/img.jpg" /></body></html>',
+			task = _.extend( {
+				jobId: jobId
+			}, bender.tests.tests[ 0 ] ),
+			result = bender.template.replaceTags( appsDirHtml, task );
 
 		expect( result ).to.equal( expected );
 	} );
