@@ -29,13 +29,18 @@ describe( 'Middleware - Default', function() {
 	var bender,
 		instance;
 
-	beforeEach( function() {
+	beforeEach( function( done ) {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets' );
 		bender.middlewares = new Store();
 		bender.middlewares.add( 'default', defaultMiddleware.build );
 		bender.use( [ serverModule, utils ] );
 		bender.init();
-		instance = bender.server.create();
+		bender.server.create().done( function( server ) {
+			instance = server;
+			done();
+		}, function ( err ) {
+			throw err;
+		} );
 	} );
 
 	afterEach( function() {

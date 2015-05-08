@@ -33,14 +33,19 @@ describe( 'Middleware - Tests', function() {
 		instance,
 		bender;
 
-	beforeEach( function() {
+	beforeEach( function( done ) {
 		bender = mocks.getBender( 'conf', 'utils', 'sockets', 'tests', 'template' );
 		bender.use( [ utilsModule, filesModule, pluginsModule, serverModule ] );
 		tests.init.bind( bender )( function() {} );
 		bender.init();
 		bender.middlewares = new Store();
 		bender.middlewares.add( 'tests', tests.build );
-		instance = bender.server.create();
+		bender.server.create().done( function( server ) {
+			instance = server;
+			done();
+		}, function ( err ) {
+			throw err;
+		} );
 	} );
 
 	afterEach( function() {

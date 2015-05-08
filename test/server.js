@@ -21,10 +21,16 @@ describe( 'Server', function() {
 	var bender,
 		instance;
 
-	beforeEach( function() {
-		bender = mocks.getBender( 'sockets', 'middlewares', 'utils' );
+	beforeEach( function( done ) {
+		bender = mocks.getBender( 'sockets', 'middlewares', 'utils', 'conf' );
 		bender.use( server );
-		instance = bender.server.create();
+
+		bender.server.create().done( function( server ) {
+			instance = server;
+			done();
+		}, function ( err ) {
+			throw err;
+		} );
 	} );
 
 	afterEach( function() {
