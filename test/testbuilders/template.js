@@ -241,7 +241,7 @@ describe( 'Test Builders - Template', function() {
 					html: 'test/fixtures/tests/test2/1.html',
 					manual: true,
 					script: 'test/fixtures/tests/test2/1.md',
-					template: 'test/fixtures/tests/test2/__template__.js'
+					js: 'test/fixtures/tests/test2/__template__.js'
 				},
 				'test/fixtures/tests/test2/2': {
 					id: 'test/fixtures/tests/test2/2',
