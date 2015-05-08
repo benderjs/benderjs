@@ -38,6 +38,48 @@
 	};
 
 	/**
+	 * Display the 'Error 404' page
+	 * @memberOf module:App
+	 */
+	App.show404 = function() {
+		App.header.empty();
+		App.content.show( new App.Common.Error404View() );
+	};
+
+	/**
+	 * Show confirmation popup
+	 * @param {Object}   options          Modal configuration
+	 * @param {String}   options.message  Modal message
+	 * @param {Function} options.callback Callback function executed on modal confirmation
+	 * @memberOf module:App
+	 */
+	App.showConfirmPopup = function( options ) {
+		App.modal.show(
+			new App.Common.ConfirmView( options )
+		);
+	};
+
+	/**
+	 * Show "server disconnected" popup
+	 * @memberOf module:App
+	 */
+	App.showDisconnectedPopup = function() {
+		App.modal.show(
+			new App.Common.DisconnectedView()
+		);
+	};
+
+	/**
+	 * Hide "server disconnected" popup
+	 * @memberOf module:App
+	 */
+	App.hideDisconnectedPopup = function() {
+		if ( App.modal.currentView && App.modal.currentView.name === 'disconnected-modal' ) {
+			App.modal.empty();
+		}
+	};
+
+	/**
 	 * Main layout region responsible for displaying dialog modals
 	 * @constructor module:App.ModalRegion
 	 * @extends {Marionette.Region}
