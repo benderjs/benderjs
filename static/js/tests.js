@@ -69,9 +69,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 					if ( filter[ 0 ] !== 'is' ) {
 						return true;
 					} else if ( filter[ 1 ] === 'failed' ) {
-						return item.result && !item.result.toJSON().success;
+						return item.result && !item.result.get( 'success' );
 					} else if ( filter[ 1 ] === 'passed' ) {
-						return !item.result || item.result.toJSON().success;
+						return !item.result || item.result.get( 'success' );
 					} else {
 						return item[ filter[ 1 ] ];
 					}
@@ -777,9 +777,9 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				return _.every( filters, function( filter ) {
 					if ( filter === 'failed' ) {
-						return item.result && !item.result.toJSON().success;
+						return item.result && !item.result.get( 'success' );
 					} else if ( filter === 'passed' ) {
-						return !item.result || item.result.toJSON().success;
+						return !item.result || item.result.get( 'success' );
 					} else {
 						return item[ filter ];
 					}
