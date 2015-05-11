@@ -5,7 +5,7 @@
  * @file Tests for Alerts module
  */
 
-/*global App */
+/*global App, bender */
 
 /* bender-include: %BASE_PATH%_mocks.js, %APPS_DIR%bender/js/common.js */
 
@@ -108,14 +108,267 @@ describe( 'Common', function() {
 				expect( th.timeToText( 0 ) ).to.equal( '000ms' );
 				expect( th.timeToText( 999 ) ).to.equal( '999ms' );
 				expect( th.timeToText( 1000 ) ).to.equal( '01s 000ms' );
-				expect( th.timeToText( 59 * 1000 + 999 ) ).to.equal( '59s 999ms' );
-				expect( th.timeToText( 60 * 1000 ) ).to.equal( '01m 00s 000ms' );
-				expect( th.timeToText( 59 * 60 * 1000 + 59 * 1000 + 999 ) ).to.equal( '59m 59s 999ms' );
-				expect( th.timeToText( 60 * 60 * 1000 ) ).to.equal( '1h 00m 00s 000ms' );
-				expect(
-					th.timeToText( 999 * 60 * 60 * 1000 + 59 * 60 * 1000 + 59 * 1000 + 999 )
-				).to.equal( '999h 59m 59s 999ms' );
+				expect( th.timeToText( 59999 ) ).to.equal( '59s 999ms' );
+				expect( th.timeToText( 60000 ) ).to.equal( '01m 00s 000ms' );
+				expect( th.timeToText( 3599999 ) ).to.equal( '59m 59s 999ms' );
+				expect( th.timeToText( 3600000 ) ).to.equal( '1h 00m 00s 000ms' );
+				expect( th.timeToText( 3599999999 ) ).to.equal( '999h 59m 59s 999ms' );
 			} );
+		} );
+
+		describe( 'getPercent', function() {
+			it( 'should return a percent string', function() {
+				expect( th.getPercent( -1, -1 ) ).to.equal( '0%' );
+				expect( th.getPercent( 1, -1 ) ).to.equal( '0%' );
+				expect( th.getPercent( -1, 1 ) ).to.equal( '0%' );
+				expect( th.getPercent( 0, 1 ) ).to.equal( '0%' );
+				expect( th.getPercent( 1, 0 ) ).to.equal( '0%' );
+				expect( th.getPercent( 1, 2 ) ).to.equal( '50%' );
+				expect( th.getPercent( 2, 2 ) ).to.equal( '100%' );
+			} );
+		} );
+
+		describe( 'isSlow', function() {
+			it( 'should tell if a test was slow', function() {
+				var slowAvg = bender.config.slowAvgThreshold,
+					slow = bender.config.slowThreshold;
+
+				expect( th.isSlow( {
+					total: 5,
+					duration: 6 * slowAvg
+				} ) ).to.be.true();
+
+				expect( th.isSlow( {
+					total: 5,
+					duration: 4 * slowAvg
+				} ) ).to.be.false();
+
+				expect( th.isSlow( {
+					total: 5,
+					duration: slow
+				} ) ).to.be.true();
+
+				expect( th.isSlow( {
+					total: 5,
+					duration: slow / 2
+				} ) ).to.be.true();
+			} );
+		} );
+	} );
+
+	describe( 'ModalView', function() {
+		it( 'should wrap a view with a Bootstrap wrapper', function() {
+			var view = new App.Common.ModalView();
+
+			expect( view.el.classList.contains( 'modal-content' ) ).to.be.true();
+
+			App.modal.show( view );
+
+			expect( view.el.classList.contains( 'modal-content' ) ).to.be.false();
+			expect( view.el.classList.contains( 'modal-dialog' ) ).to.be.true();
+		} );
+
+		it( 'should use "#modal-tmpl" template', function() {
+			var view = new App.Common.ModalView();
+
+			App.modal.show( view );
+
+			expect( view.el.textContent ).to.match( /Modal/ );
+		} );
+
+		it( 'should add "modal-lg" class when the size set to "big"', function() {
+			var view = new( App.Common.ModalView.extend( {
+				size: 'big'
+			} ) )();
+
+			App.modal.show( view );
+
+			expect( view.el.classList.contains( 'modal-lg' ) ).to.be.true();
+		} );
+
+		it( 'should add "modal-sm" class when the size set to "small"', function() {
+			var view = new( App.Common.ModalView.extend( {
+				size: 'small'
+			} ) )();
+
+			App.modal.show( view );
+
+			expect( view.el.classList.contains( 'modal-sm' ) ).to.be.true();
+		} );
+	} );
+
+	describe( 'ConfirmView', function() {
+		var sandbox = sinon.sandbox.create();
+
+		afterEach( function() {
+			sandbox.restore();
+		} );
+
+		it( 'should inherit from App.Common.ModalView', function() {
+			var view = new App.Common.ConfirmView();
+
+			expect( view ).to.be.instanceof( App.Common.ModalView );
+		} );
+
+		it( 'should have "modal-content" and "modal-confirm" classes', function() {
+			var view = new App.Common.ConfirmView();
+
+			expect( view.el.classList.contains( 'modal-content' ) ).to.be.true();
+			expect( view.el.classList.contains( 'modal-confirm' ) ).to.be.true();
+		} );
+
+		it( 'should keep references to UI elements', function() {
+			var view = new App.Common.ConfirmView();
+
+			App.modal.show( view );
+
+			expect( view.ui.submit.text() ).to.equal( 'Submit' );
+		} );
+
+		it( 'should run "submit" function on click on "submit" button', function() {
+			var view = new App.Common.ConfirmView(),
+				spy = sandbox.spy( view, 'submit' );
+
+			App.modal.show( view );
+
+			view.ui.submit.click();
+
+			expect( spy.calledOnce ).to.be.true();
+		} );
+
+		it( 'should create a model with a default message while initializing a view', function() {
+			var view = new App.Common.ConfirmView();
+
+			expect( view.model ).to.be.instanceof( Backbone.Model );
+			expect( view.model.toJSON() ).to.deep.equal( {
+				message: 'Are you sure?',
+				footer: true,
+				title: false
+			} );
+		} );
+
+		it( 'should set a message in a model to the given value', function() {
+			var view = new App.Common.ConfirmView( {
+				message: 'test message'
+			} );
+
+			expect( view.model ).to.be.instanceof( Backbone.Model );
+			expect( view.model.toJSON() ).to.deep.equal( {
+				message: 'test message',
+				footer: true,
+				title: false
+			} );
+		} );
+
+		it( 'should set the callback to the given callback', function() {
+			function callback() {}
+
+			var view = new App.Common.ConfirmView( {
+				callback: callback
+			} );
+
+			expect( view.callback ).to.equal( callback );
+		} );
+
+		it( 'should disable "submit" button on a submission', function() {
+			var view = new App.Common.ConfirmView();
+
+			App.modal.show( view );
+
+			expect( view.ui.submit.prop( 'disabled' ) ).to.be.false();
+
+			view.submit();
+
+			expect( view.ui.submit.prop( 'disabled' ) ).to.be.true();
+		} );
+
+		it( 'should call a callback function on a submission and pass a function as an argument', function( done ) {
+			var view = new App.Common.ConfirmView( {
+				callback: callback
+			} );
+
+			function callback( handler ) {
+				expect( handler ).to.be.a( 'function' );
+				done();
+			}
+
+			App.modal.show( view );
+			view.submit();
+		} );
+
+		it( 'should re-enable "submit" button after calling a handler function from a callback', function( done ) {
+			var view = new App.Common.ConfirmView( {
+				callback: callback
+			} );
+
+			function callback( handler ) {
+				setTimeout( function() {
+					expect( view.ui.submit.prop( 'disabled' ) ).to.be.true();
+
+					handler();
+
+					setTimeout( function() {
+						expect( view.ui.submit.prop( 'disabled' ) ).to.be.false();
+						done();
+					} );
+				}, 0 );
+			}
+
+			App.modal.show( view );
+
+			view.submit();
+		} );
+
+		it( 'should destroy a view if doClose flag is set to true in closeHandler', function() {
+			var view = new App.Common.ConfirmView();
+
+			App.modal.show( view );
+
+			expect( App.modal.hasView() ).to.be.true();
+
+			view.closeHandler( true );
+
+			expect( App.modal.hasView() ).to.be.false();
+		} );
+	} );
+
+	describe( 'DisconnectedView', function() {
+		it( 'should inherit from App.Common.ModalView', function() {
+			var view = new App.Common.DisconnectedView();
+
+			expect( view ).to.be.instanceof( App.Common.ModalView );
+		} );
+
+		it( 'should have name set to "disconnected-modal"', function() {
+			var view = new App.Common.DisconnectedView();
+
+			expect( view.name ).to.equal( 'disconnected-modal' );
+		} );
+
+		it( 'should initialize with a model', function() {
+			var view = new App.Common.DisconnectedView();
+
+			expect( view.model.toJSON() ).to.deep.equal( {
+				message: 'You\'ve been disconnected from the server, reconnecting...',
+				footer: false,
+				title: false
+			} );
+		} );
+	} );
+
+	describe( 'TestErrorsView', function() {
+		it( 'should inherit from App.Common.ModalView', function() {
+			var view = new App.Common.TestErrorsView();
+
+			expect( view ).to.be.instanceof( App.Common.ModalView );
+		} );
+
+		it( 'should use "test-errors" template', function() {
+			var view = new App.Common.TestErrorsView();
+
+			App.modal.show( view );
+
+			expect( view.el.textContent ).to.match( /TestError/ );
 		} );
 	} );
 } );
