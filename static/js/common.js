@@ -9,14 +9,6 @@
 App.module( 'Common', function( Common, App, Backbone ) {
 	'use strict';
 
-	function throwError( message, name ) {
-		var error = new Error( message );
-
-		error.name = name || 'Error';
-
-		throw error;
-	}
-
 	/**
 	 * Helper functions used in underscore templates
 	 * @memberOf module:Common
@@ -113,12 +105,15 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		 * @return {String}
 		 */
 		getPercent: function( completed, total ) {
-			return ( total > 0 ? Math.ceil( completed / total * 100 ) : 0 ) + '%';
+			return ( completed >= 0 && total > 0 ? Math.ceil( completed / total * 100 ) : 0 ) + '%';
 		},
 
 		/**
-		 * Check if a test was "slow"
-		 * @param  {Object}   result Result object
+		 * Check if a test was "slow".
+		 * It takes config.slowAvgThreshold and config.slowThreshold into consideration.
+		 * @param  {Object}   result          Result object
+		 * @param  {Number}   result.total    Total number of test cases
+		 * @param  {Number}   result.duration Test duration
 		 * @return {Boolean}
 		 */
 		isSlow: function( result ) {
@@ -313,13 +308,20 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		className: 'modal-content',
 
 		/**
-		 * Handle render event
+		 * Template ID
+		 * @default
+		 * @type {String}
+		 */
+		template: '#modal-tmpl',
+
+		/**
+		 * Handle render event, wrap the view with a Bootstrap wrapper
 		 */
 		onRender: function() {
 			this.undelegateEvents();
 			this.$el.wrap(
-				'<div class="modal-dialog ' +
-				( this.size === 'big' ? 'modal-lg' : this.size === 'small' ? 'modal-sm' : '' ) +
+				'<div class="modal-dialog' +
+				( this.size === 'big' ? ' modal-lg' : this.size === 'small' ? ' modal-sm' : '' ) +
 				'"></div>'
 			);
 			this.$el = this.$el.parent();
@@ -347,12 +349,6 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	 * @extends {module:Common.ModalView}
 	 */
 	Common.ConfirmView = Common.ModalView.extend( /** @lends module:Common.ConfirmView.prototype */ {
-		/**
-		 * Template ID
-		 * @default [value]
-		 * @type {String}
-		 */
-		template: '#modal-tmpl',
 
 		/**
 		 * Confirmation view class name
@@ -393,8 +389,10 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		},
 
 		/**
-		 * View initialization
-		 * @param {Object} options Configuration options
+		 * View initialization. Creates a view's model
+		 * @param {Object}   options          Configuration options
+		 * @param {String}   options.message  Confirmation modal message
+		 * @param {Function} options.callback Callback function called on confirmation
 		 */
 		initialize: function( options ) {
 			this.model = new Backbone.Model( {
@@ -418,7 +416,8 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		},
 
 		/**
-		 * Submit a confirmation
+		 * Submit a confirmation and call the callback function
+		 * passing closeHandler as a first argument
 		 */
 		submit: function() {
 			if ( typeof this.callback == 'function' ) {
@@ -435,13 +434,6 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	 * @extends {module:Common.ModalView}
 	 */
 	Common.DisconnectedView = Common.ModalView.extend( /** @lends module:Common.DisconnectedView.prototype */ {
-		/**
-		 * Template ID
-		 * @default
-		 * @type {String}
-		 */
-		template: '#modal-tmpl',
-
 		/**
 		 * Modal name
 		 * @default
@@ -568,4 +560,12 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			return this.oldFetch.call( this, options );
 		},
 	};
+
+	function throwError( message, name ) {
+		var error = new Error( message );
+
+		error.name = name || 'Error';
+
+		throw error;
+	}
 } );

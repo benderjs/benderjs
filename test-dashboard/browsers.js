@@ -365,9 +365,6 @@ describe( 'Browsers', function() {
 
 		expect( view ).to.be.instanceof( App.Browsers.BrowsersListView );
 		expect( view.collection ).to.equal( App.Browsers.browserList );
-
-		// TODO
-		console.log(App.content);
 	} );
 
 	it( 'should show a browser list on "browsers" route', function() {
