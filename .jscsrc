@@ -1,5 +1,6 @@
 {
 	"excludeFiles": [
+		".bender/*",
 		"node_modules/*",
 		"static/vendor/*",
 		"coverage/*",
