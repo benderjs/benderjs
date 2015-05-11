@@ -477,17 +477,16 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	 */
 	Common.DeferredFetchMixin = {
 		/**
-		 * Is currently fetching
-		 * @default
-		 * @type {Boolean}
+		 * A reference to the current deferred fetch
+		 * @type {jQuery.Deferred}
 		 */
-		isFetching: false,
+		deferredFetch: null,
 
 		/**
 		 * Deferred fetch timeout ID
 		 * @type {Number}
 		 */
-		deferredFetch: null,
+		deferredFetchTimeout: null,
 
 		/**
 		 * Fetch delay
@@ -507,57 +506,64 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		 * Old fetch function
 		 * @todo Override
 		 */
-		oldFetch: function() {},
+		oldFetch: function() {
+			throw new Error( 'Please override "oldFetch" with the original class fetch' );
+		},
 
 		/**
 		 * Initialize model/collection
 		 */
 		initialize: function() {
 			this.on( 'sync error', function() {
-				this.isFetching = false;
 				this.lastFetch = +new Date();
 			}, this );
 		},
 
 		/**
 		 * Defer a request
+		 * @return {jQuery.Deferred}
 		 */
-		deferFetch: function() {
-			if ( this.deferredFetch ) {
-				clearTimeout( this.deferredFetch );
+		deferFetch: function( options ) {
+			var deferred = $.Deferred();
+
+			if ( this.deferredFetchTimeout ) {
+				clearTimeout( this.deferredFetchTimeout );
 			}
 
-			this.deferredFetch = setTimeout( _.bind( function() {
-				this.deferredFetch = null;
-				this.fetch();
+			this.deferredFetchTimeout = setTimeout( _.bind( function() {
+				this.deferredFetchTimeout = null;
+				deferred.resolve( this.fetch( options ) );
 			}, this ), this.fetchDelay );
+
+			return deferred;
 		},
 
 		/**
 		 * Fetch data from the server
 		 * @param  {Object}  options Fetch options
 		 * @param  {Boolean} [options.force] Force fetching data without deferment
-		 * @return {jQuery.ajax}
+		 * @return {jQuery.Deferred}
 		 */
 		fetch: function( options ) {
 			options = options || {};
 
+			// force fetching
 			if ( options.force ) {
-				return this.oldFetch.call( this, options );
+				this.deferredFetch = this.oldFetch.call( this, options );
+
+				return this.deferredFetch;
 			}
 
-			if ( ( this.isFetching || this.lastFetch + this.fetchDelay > +new Date() ) &&
-				!this.deferredFetch ) {
-				this.deferFetch();
+			// a fetch is already pending or a fetch delay didn't expire yet
+			if ( this.deferredFetch && this.deferredFetch.state() === 'pending' ||
+				this.lastFetch + this.fetchDelay > +new Date() ) {
+
+				return this.deferFetch( options );
 			}
 
-			if ( this.deferredFetch ) {
-				return false;
-			}
+			this.deferredFetch = this.oldFetch.call( this, options );
 
-			this.isFetching = true;
-
-			return this.oldFetch.call( this, options );
+			return this.deferredFetch;
 		},
 	};
 
