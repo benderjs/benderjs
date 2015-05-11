@@ -5,7 +5,7 @@
  * @file Tests for Alerts module
  */
 
-/*global App, bender */
+/*global App, bender, _ */
 
 /* bender-include: %BASE_PATH%_mocks.js, %APPS_DIR%bender/js/common.js */
 
@@ -15,9 +15,8 @@ describe( 'Common', function() {
 
 		describe( 'getTime', function() {
 			it( 'should produce a human readable string from a timestamp', function() {
-				var timestamp = Date.now() - 5000;
-
-				var result = th.getTime( timestamp );
+				var timestamp = Date.now() - 5000,
+					result = th.getTime( timestamp );
 
 				expect( result ).to.match( /few seconds ago/ );
 			} );
@@ -370,5 +369,158 @@ describe( 'Common', function() {
 
 			expect( view.el.textContent ).to.match( /TestError/ );
 		} );
+	} );
+
+	describe( 'DeferredFetchMixin', function() {
+		var requests,
+			sandbox,
+			xhr;
+
+		beforeEach( function() {
+			sandbox = sinon.sandbox.create();
+			xhr = sinon.useFakeXMLHttpRequest();
+
+			requests = [];
+
+			xhr.onCreate = function( req ) {
+				requests.push( req );
+			};
+		} );
+
+		afterEach( function() {
+			xhr.restore();
+			sandbox.restore();
+		} );
+
+		var DELAY = 100,
+			TestModel = Backbone.Model.extend(
+				_.extend( {}, App.Common.DeferredFetchMixin, {
+					defaults: {
+						foo: 'bar',
+						baz: 0
+					},
+					fetchDelay: DELAY,
+					oldFetch: Backbone.Model.prototype.fetch,
+					url: '/test'
+				} )
+			);
+
+		it( 'should throw an error if the oldFetch isn\'t overriden', function() {
+			var TestModel = Backbone.Model.extend(
+					_.extend( {}, App.Common.DeferredFetchMixin, {
+						url: '/test'
+					} )
+				),
+				model = new TestModel();
+
+			expect( function() {
+				model.fetch();
+			} ).to.throw( Error, 'Please override "oldFetch" with the original class fetch' );
+		} );
+
+		it( 'should defer a subsequent fetch if the fetch timeout didn\'t expire yet', function( done ) {
+			var model = new TestModel(),
+				firstSpy = sandbox.spy(),
+				secondSpy = sandbox.spy(),
+				thirdSpy = sandbox.spy();
+
+			// first fetch
+			model.fetch( {
+				success: firstSpy
+			} );
+
+			// the first request should be sent immediately
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				id: 1,
+				foo: 'qux',
+				baz: 42
+			} ) );
+
+			// should respond to the first request right away
+			expect( firstSpy.calledOnce ).to.be.true();
+
+			// deferred fetch
+			model.fetch( {
+				success: secondSpy
+			} );
+
+			// shouldn't create a request at this point
+			expect( requests ).to.have.length( 1 );
+
+			// deferred fetch
+			model.fetch( {
+				success: thirdSpy
+			} );
+
+			// shouldn't create new requests at this point
+			expect( requests ).to.have.length( 1 );
+
+			setTimeout( function() {
+				// should create a request when fetchDelay expires
+				expect( requests ).to.have.length( 2 );
+
+				requests[ 1 ].respond( 200, {
+					'Content-Type': 'application/json'
+				}, JSON.stringify( {
+					id: 1,
+					foo: 'quux',
+					baz: 44
+				} ) );
+
+				// second spy shouldn't be called
+				expect( secondSpy.calledOnce ).to.be.false();
+				expect( thirdSpy.calledOnce ).to.be.true();
+
+				done();
+			}, DELAY );
+		} );
+
+		it( 'should allow to force fetching using "options.force = true" flag', function() {
+			var model = new TestModel(),
+				firstSpy = sandbox.spy(),
+				secondSpy = sandbox.spy();
+
+			// first fetch
+			model.fetch( {
+				success: firstSpy
+			} );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				id: 1,
+				foo: 'qux',
+				baz: 42
+			} ) );
+
+			expect( firstSpy.calledOnce ).to.be.true();
+
+			// forced deferred fetch
+			model.fetch( {
+				success: secondSpy,
+				force: true
+			} );
+
+			// should create a request for the forced fetch
+			expect( requests ).to.have.length( 2 );
+
+			requests[ 1 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				id: 1,
+				foo: 'quux',
+				baz: 44
+			} ) );
+
+			expect( secondSpy.calledOnce ).to.be.true();
+		} );
+
+		// TODO Add tests for "deferred" API
 	} );
 } );
