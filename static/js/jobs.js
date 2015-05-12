@@ -1083,20 +1083,20 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 
 			job.fetch( {
-					reset: true
-				} )
-				.error( function() {
-					App.show404();
-				} )
-				.done( function() {
-					App.header.show( new Jobs.JobHeaderView( {
-						model: job
-					} ) );
+				reset: true
+			} )
+			.error( function() {
+				App.show404();
+			} )
+			.done( function() {
+				App.header.show( new Jobs.JobHeaderView( {
+					model: job
+				} ) );
 
-					App.content.show( new Jobs.JobView( {
-						model: job
-					} ) );
-				} );
+				App.content.show( new Jobs.JobView( {
+					model: job
+				} ) );
+			} );
 		}
 	} );
 

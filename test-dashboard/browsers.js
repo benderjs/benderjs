@@ -10,8 +10,6 @@
 /* bender-include: %BASE_PATH%_mocks.js, %APPS_DIR%bender/js/common.js, %APPS_DIR%bender/js/browsers.js */
 
 describe( 'Browsers', function() {
-	var sandbox = sinon.sandbox.create();
-
 	var example = [ {
 		id: 'chrome',
 		name: 'chrome',
@@ -75,13 +73,13 @@ describe( 'Browsers', function() {
 		App.Browsers.browserList = new App.Browsers.BrowserList();
 	} );
 
+	var sandbox = sinon.sandbox.create();
+
 	afterEach( function() {
 		sandbox.restore();
 	} );
 
 	it( 'should parse a browser list', function() {
-		var result = App.Browsers.controller.parseBrowsers( example );
-
 		var expected = [ {
 			id: 'chrome',
 			name: 'chrome',
@@ -176,7 +174,7 @@ describe( 'Browsers', function() {
 			header: true
 		} ];
 
-		expect( result ).to.deep.equal( expected );
+		expect( App.Browsers.controller.parseBrowsers( example ) ).to.deep.equal( expected );
 	} );
 
 	it( 'should update a browser list', function() {
@@ -374,9 +372,8 @@ describe( 'Browsers', function() {
 			}
 		} );
 
-		var routerSpy = App.Browsers.browserRouter.options.controller.showBrowsers;
-
-		var oldHash = window.location.hash;
+		var routerSpy = App.Browsers.browserRouter.options.controller.showBrowsers,
+			oldHash = window.location.hash;
 
 		Backbone.history.start();
 

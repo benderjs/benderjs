@@ -65,7 +65,7 @@
 	"disallowKeywordsOnNewLine": [
 		"else", "catch"
 	],
-	"maximumLineLength": 120,
+	"maximumLineLength": 140,
 	"safeContextKeyword": [
 		"that", "bender"
 	],
