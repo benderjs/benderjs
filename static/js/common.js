@@ -144,72 +144,29 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		childViewContainer: 'tbody',
 
 		/**
-		 * Get a child view template
-		 * @return {String}
+		 * Render a child view
+		 * @param {Object} view  Child view
+		 * @param {Number} index Child index
 		 */
-		getChildTemplate: function() {
-			var childView = this.getOption( 'childView' );
-
-			if ( !childView ) {
-				throwError( 'A "childView" must be specified', 'NoChildViewError' );
+		renderChildView: function( view, index ) {
+			if ( !view.el || !view.el.innerHTML ) {
+				view.render();
 			}
-
-			return childView.prototype.template;
-		},
-
-		/**
-		 * Handle child addition
-		 * @param {Object} child Child item
-		 * @private
-		 */
-		_onCollectionAdd: function( child ) {
-			this.destroyEmptyView();
-
-			var childTemplate = this.getChildTemplate(),
-				index = this.collection.indexOf( child );
-
-			this.addChild( child, childTemplate, index );
-		},
-
-		/**
-		 * Create a HTML for a view
-		 * @param  {Object} View      View constructor
-		 * @param  {String} innerHTML View's inner HTML
-		 * @return {String}
-		 */
-		createEl: function( View, innerHTML ) {
-			var vp = View.prototype,
-				tagName = vp.tagName,
-				className = vp.className,
-				attributes = vp.attributes,
-				html = [ '<', tagName ];
-
-			if ( className ) {
-				html.push( ' class="' + className + '"' );
-			}
-
-			if ( attributes ) {
-				_.each( attributes, function( val, key ) {
-					html.push( ' ' + key + '="' + val + '"' );
-				} );
-			}
-
-			html.push( '>', innerHTML, '</', tagName, '>' );
-
-			return html.join( '' );
+			this.attachHtml( this, view, index );
 		},
 
 		/**
 		 * Show a collection
+		 * @private
 		 */
 		showCollection: function() {
-			var childTemplate = this.getChildTemplate(),
+			var childTemplate = this._getChildTemplate(),
 				div = document.createElement( 'div' ),
 				html = [ '<table><tbody>' ];
 
 			this.collection.each( function( child ) {
 				html.push(
-					this.createEl(
+					this._createEl(
 						this.childView,
 						Marionette.Renderer.render( childTemplate,
 							_.extend( child.toJSON(), this.childView.prototype.templateHelpers || {} )
@@ -245,16 +202,16 @@ App.module( 'Common', function( Common, App, Backbone ) {
 					m++;
 				}
 			}
-
 		},
 
 		/**
-		 * Add a child to the collection
+		 * Add a child to the view
 		 * @param {Object} child         Child data
 		 * @param {String} childTemplate Child template
 		 * @param {Number} index         Child index
+		 * @private
 		 */
-		addChild: function( child, childTemplate, index ) {
+		_addChild: function( child, childTemplate, index ) {
 			var childViewOptions = this.getOption( 'childViewOptions' );
 
 			if ( _.isFunction( childViewOptions ) ) {
@@ -281,15 +238,65 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		},
 
 		/**
-		 * Render a child view
-		 * @param {Object} view  Child view
-		 * @param {Number} index Child index
+		 * Create a HTML for a view
+		 * @param  {Object} View      View constructor
+		 * @param  {String} innerHTML View's inner HTML
+		 * @return {String}
+		 * @private
 		 */
-		renderChildView: function( view, index ) {
-			if ( !view.el || !view.el.innerHTML ) {
-				view.render();
+		_createEl: function( View, innerHTML ) {
+			var vp = View.prototype,
+				tagName = vp.tagName,
+				className = vp.className,
+				attributes = vp.attributes,
+				html = [ '<', tagName ];
+
+			if ( className ) {
+				html.push( ' class="' + className + '"' );
 			}
-			this.attachHtml( this, view, index );
+
+			if ( attributes ) {
+				_.each( attributes, function( val, key ) {
+					html.push( ' ' + key + '="' + val + '"' );
+				} );
+			}
+
+			html.push( '>', innerHTML, '</', tagName, '>' );
+
+			return html.join( '' );
+		},
+
+		/**
+		 * Get a child view template
+		 * @return {String}
+		 * @private
+		 */
+		_getChildTemplate: function() {
+			var childView = this.getOption( 'childView' );
+
+			if ( !childView ) {
+				var error = new Error( 'A "childView" must be specified' );
+
+				error.name = 'NoChildViewError';
+
+				throw error;
+			}
+
+			return childView.prototype.template;
+		},
+
+		/**
+		 * Handle child addition
+		 * @param {Object} child Child item
+		 * @private
+		 */
+		_onCollectionAdd: function( child ) {
+			this.destroyEmptyView();
+
+			var childTemplate = this._getChildTemplate(),
+				index = this.collection.indexOf( child );
+
+			this._addChild( child, childTemplate, index );
 		}
 	} );
 
@@ -564,14 +571,6 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			this.deferredFetch = this.oldFetch.call( this, options );
 
 			return this.deferredFetch;
-		},
+		}
 	};
-
-	function throwError( message, name ) {
-		var error = new Error( message );
-
-		error.name = name || 'Error';
-
-		throw error;
-	}
 } );
