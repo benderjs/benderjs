@@ -57,7 +57,7 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 		className: 'alert',
 
 		/**
-		 * Destroy the view
+		 * Destroy the view, unbind cliks on the document
 		 */
 		destroy: function() {
 			$( document ).off( 'click', this._destroy );
@@ -68,7 +68,7 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 		},
 
 		/**
-		 * Handle render event
+		 * Handle render event, add alert type class and bind clicks on the document to close the view
 		 */
 		onRender: function() {
 			this.$el.addClass( 'alert-' + this.model.get( 'type' ) );
@@ -92,7 +92,7 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 		model: Alerts.Alert,
 
 		/**
-		 * Initialize the collection
+		 * Initialize the collection, set a timeout after which a new model will be removed
 		 */
 		initialize: function() {
 			// remove a model after a timeout
@@ -146,9 +146,12 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 	} );
 
 	/**
-	 * Initialize Alerts module
+	 * Initialize Alerts module:
+	 * - create an alerts collection - Alerts.alertList
+	 * - create a controller - Alerts.controller
+	 * - show AlertsListView in App.alerts region
 	 */
-	App.on( 'before:start', function() {
+	Alerts.onStart = function() {
 		/**
 		 * Collection of alerts
 		 * @type {module:Alerts.AlertList}
@@ -168,5 +171,7 @@ App.module( 'Alerts', function( Alerts, App, Backbone ) {
 		App.alerts.show( new Alerts.AlertListView( {
 			collection: Alerts.alertList
 		} ) );
-	} );
+	};
+
+	App.on( 'before:start', Alerts.onStart );
 } );
