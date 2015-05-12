@@ -105,6 +105,8 @@ describe( 'Common', function() {
 		describe( 'timeToText', function() {
 			it( 'should convert a timestamp to a human readable form', function() {
 				expect( th.timeToText( 0 ) ).to.equal( '000ms' );
+				expect( th.timeToText( 9 ) ).to.equal( '009ms' );
+				expect( th.timeToText( 99 ) ).to.equal( '099ms' );
 				expect( th.timeToText( 999 ) ).to.equal( '999ms' );
 				expect( th.timeToText( 1000 ) ).to.equal( '01s 000ms' );
 				expect( th.timeToText( 59999 ) ).to.equal( '59s 999ms' );
@@ -368,6 +370,124 @@ describe( 'Common', function() {
 			App.modal.show( view );
 
 			expect( view.el.textContent ).to.match( /TestError/ );
+		} );
+	} );
+
+	describe( 'TableView', function() {
+		var testItems = [ {
+				id: 1,
+				name: 'foo'
+			}, {
+				id: 2,
+				name: 'bar'
+			}, {
+				id: 3,
+				name: 'baz'
+			}, {
+				id: 4,
+				name: 'qux'
+			}, {
+				id: 5,
+				name: 'quux'
+			} ],
+			TestItemView = Marionette.ItemView.extend( {
+				template: '#test-item',
+				tagName: 'tr'
+			} );
+
+		it( 'should have default class names', function() {
+			var table = new App.Common.TableView( {
+				template: '#test-table'
+			} );
+
+			expect( table.el.classList.contains( 'panel' ) ).to.be.true();
+			expect( table.el.classList.contains( 'panel-default' ) ).to.be.true();
+		} );
+
+		it( 'should place children in "tbody" element', function() {
+			var collection = new Backbone.Collection(),
+				TableView = App.Common.TableView.extend( {
+					collection: collection,
+					childView: TestItemView,
+					template: '#test-table'
+				} ),
+				table = new TableView();
+
+			table.render();
+
+			expect( table.$el.find( 'tbody' ).children() ).to.have.length( 0 );
+
+			collection.add( testItems[ 0 ] );
+
+			expect( table.$el.find( 'tbody' ).children() ).to.have.length( 1 );
+		} );
+
+		it( 'should render children on show', function() {
+			var collection = new Backbone.Collection( testItems ),
+				TableView = App.Common.TableView.extend( {
+					collection: collection,
+					childView: TestItemView,
+					template: '#test-table'
+				} ),
+				table = new TableView();
+
+			App.content.show( table );
+
+			expect( table.$el.find( 'tbody' ).children() ).to.have.length( testItems.length );
+		} );
+
+		it( 'should include child view\'s classes while rendering', function() {
+			var collection = new Backbone.Collection( [ testItems[ 0 ] ] ),
+				ClassyTestItemView = TestItemView.extend( {
+					className: 'foo bar'
+				} ),
+				TableView = App.Common.TableView.extend( {
+					collection: collection,
+					childView: ClassyTestItemView,
+					template: '#test-table'
+				} ),
+				table = new TableView();
+
+			table.render();
+
+			var child = table.$el.find( 'tbody' ).children().eq( 0 );
+
+			expect( child.hasClass( 'foo' ) ).to.be.true();
+			expect( child.hasClass( 'bar' ) ).to.be.true();
+		} );
+
+		it( 'should include child view\'s attributes while rendering', function() {
+			var collection = new Backbone.Collection( [ testItems[ 0 ] ] ),
+				ClassyTestItemView = TestItemView.extend( {
+					attributes: {
+						style: 'background: red'
+					}
+				} ),
+				TableView = App.Common.TableView.extend( {
+					collection: collection,
+					childView: ClassyTestItemView,
+					template: '#test-table'
+				} ),
+				table = new TableView();
+
+			table.render();
+
+			var child = table.$el.find( 'tbody' ).children().eq( 0 );
+
+			expect( child.css( 'background' ) ).to.equal( 'red' );
+		} );
+
+		it( 'should throw an error if no child view specified', function() {
+			var collection = new Backbone.Collection( testItems ),
+				TableView = App.Common.TableView.extend( {
+					collection: collection,
+					template: '#test-table'
+				} ),
+				table = new TableView();
+
+			expect( function() {
+				table.render();
+			} ).to.throw( 'A "childView" must be specified' );
 		} );
 	} );
 
