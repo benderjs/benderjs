@@ -64,9 +64,9 @@ describe( 'Alerts', function() {
 
 		expect( App.alerts.currentView.children ).to.have.length( 1 );
 
-		var alert = App.Alerts.alertList.at( 0 );
-		var view = App.alerts.currentView.children.findByModel( alert );
-		var text = view.el.textContent;
+		var alert = App.Alerts.alertList.at( 0 ),
+			view = App.alerts.currentView.children.findByModel( alert ),
+			text = view.el.textContent;
 
 		expect( text.indexOf( 'message' ) ).to.be.above( -1 );
 		expect( text.indexOf( 'title' ) ).to.be.above( -1 );
