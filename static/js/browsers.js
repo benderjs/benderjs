@@ -80,7 +80,7 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 		 */
 		templateHelpers: {
 			/**
-			 * Format a browser name
+			 * Format a browser name by capitalizing it. Exception: ie > IE
 			 * @param  {String} name    Browser name
 			 * @param  {Number} version Browser version
 			 * @return {String}
@@ -93,7 +93,7 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 		},
 
 		/**
-		 * Initialize the view
+		 * Initialize the view, listen to model changes and re-render on those
 		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
@@ -116,10 +116,10 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 
 	/**
 	 * Browser list view
-	 * @constructor module:Browsers.BrowsersListView
+	 * @constructor module:Browsers.BrowserListView
 	 * @extends {module:Common.TableView}
 	 */
-	Browsers.BrowsersListView = App.Common.TableView.extend( /** @lends module:Browsers.BrowsersListView.prototype */ {
+	Browsers.BrowserListView = App.Common.TableView.extend( /** @lends module:Browsers.BrowserListView.prototype */ {
 		/**
 		 * Template ID
 		 * @default
@@ -146,7 +146,7 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 		showBrowsers: function() {
 			App.header.empty();
 
-			App.content.show( new Browsers.BrowsersListView( {
+			App.content.show( new Browsers.BrowserListView( {
 				collection: Browsers.browserList
 			} ) );
 		},
@@ -203,9 +203,13 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 	} );
 
 	/**
-	 * Initialize Browsers module
+	 * Initialize Browsers module:
+	 * - create a browsers collection - Browsers.browserList
+	 * - create a controller - Browsers.controller
+	 * - create a router - Browsers.browserRouter
+	 * - bind to socket events: browsers:update, client:update, disconnect
 	 */
-	App.on( 'before:start', function() {
+	Browsers.onStart = function() {
 		/**
 		 * Browser collection
 		 * @memberOf module:Browsers
@@ -232,8 +236,11 @@ App.module( 'Browsers', function( Browsers, App, Backbone ) {
 			controller: controller
 		} );
 
+		// bind to socket events
 		App.Sockets.socket.on( 'browsers:update', controller.updateBrowsers );
 		App.Sockets.socket.on( 'client:update', controller.updateClient );
 		App.Sockets.socket.on( 'disconnect', controller.clearBrowsers );
-	} );
+	};
+
+	App.on( 'before:start', Browsers.onStart );
 } );
