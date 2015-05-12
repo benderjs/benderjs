@@ -55,16 +55,28 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * Mark a row as selected
 		 * @param {Boolean} selected Is row selected
 		 * @param {Boolean} silent   Change the selection without triggering 'change:selected' event
+		 * @fires module:Jobs.JobRow#update:selected
+		 * @fires module:Jobs.JobRow#change:selected
 		 */
-		setSelect: function( selected, silent ) {
+		setSelected: function( selected, silent ) {
 			this.set( 'selected', !!selected, {
 				silent: true
 			} );
 
 			if ( !silent ) {
+				/**
+				 * Model's "selected" attribute has changed
+				 * @event module:Jobs.JobRow#change:selected
+				 * @type {Boolean}
+				 */
 				this.trigger( 'change:selected', !!selected );
 			}
 
+			/**
+			 * Model's "selected" attribute was toggled
+			 * @event module:Jobs.JobRow#toggle:selected
+			 * @type {Boolean}
+			 */
 			this.trigger( 'toggle:selected', !!selected );
 		}
 	} );
@@ -121,7 +133,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * Initialize a job row view
+		 * Initialize a job row view, bind to the model's toggle:selected event to update the checkbox
 		 */
 		initialize: function() {
 			Marionette.ItemView.prototype.initialize.apply( this, arguments );
@@ -133,7 +145,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * Set a model's selected property to the state of the checkbox
 		 */
 		changeSelected: function() {
-			this.model.setSelect( this.ui.checkbox.prop( 'checked' ) );
+			this.model.setSelected( this.ui.checkbox.prop( 'checked' ) );
 		},
 
 		/**
@@ -170,6 +182,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			 * @param  {Object} first  First model
 			 * @param  {Object} second Secon model
 			 * @return {Number}
+			 * @private
 			 */
 			comparator: function( first, second ) {
 				first = first.attributes.created;
@@ -206,7 +219,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			 */
 			toggleSelectJobs: function( selected ) {
 				this.each( function( item ) {
-					item.setSelect( selected, true );
+					item.setSelected( selected, true );
 				} );
 			}
 		} )
@@ -1083,27 +1096,30 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 
 			job.fetch( {
-				reset: true
-			} )
-			.error( function() {
-				App.show404();
-			} )
-			.done( function() {
-				App.header.show( new Jobs.JobHeaderView( {
-					model: job
-				} ) );
+					reset: true
+				} )
+				.error( function() {
+					App.show404();
+				} )
+				.done( function() {
+					App.header.show( new Jobs.JobHeaderView( {
+						model: job
+					} ) );
 
-				App.content.show( new Jobs.JobView( {
-					model: job
-				} ) );
-			} );
+					App.content.show( new Jobs.JobView( {
+						model: job
+					} ) );
+				} );
 		}
 	} );
 
 	/**
-	 * Initialize Jobs module
+	 * Initialize Jobs module:
+	 * - create a job list collection - Jobs.jobLit
+	 * - create a controller - Jobs.controller
+	 * - create a router - Jobs.jobRouter
 	 */
-	App.on( 'before:start', function() {
+	Jobs.onStart = function() {
 		/**
 		 * Job collection
 		 * @memberOf module:Jobs
@@ -1129,5 +1145,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		Jobs.jobRouter = new Jobs.JobRouter( {
 			controller: Jobs.controller
 		} );
-	} );
+	};
+
+	App.on( 'before:start', Jobs.onStart );
 } );
