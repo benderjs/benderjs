@@ -91,6 +91,46 @@ describe( 'Tests', function() {
 			} );
 	} );
 
+	it( 'should fire `test:created` for every test created', function() {
+		var ids = [],
+			expected = [
+				'test/fixtures/tests/test/1',
+				'test/fixtures/tests/test/2',
+				'test/fixtures/tests/test/3',
+				'test/fixtures/tests/test2/1',
+				'test/fixtures/tests/test2/2',
+				'test/fixtures/tests/test2/3',
+				'test/fixtures/tests/test2/4'
+			];
+
+		// We don't expect the order to be the same, so we'll sort both lists.
+		expected.sort();
+
+		bender.on( 'test:created', function( test ) {
+			ids.push( test.id );
+		} );
+
+		return bender.tests.list()
+			.then( function() {
+				// Just like above, sort the result as we don't expect the order to match.
+				ids.sort();
+				expect( ids ).to.deep.equal( expected );
+			} );
+	} );
+
+	it( 'should allow changing test on `test:created`', function() {
+		bender.on( 'test:created', function( test ) {
+			test.testProperty = true;
+		} );
+
+		return bender.tests.list()
+			.then( function( tests ) {
+				tests.forEach( function( test ) {
+					expect( test ).to.have.property( 'testProperty' );
+				} );
+			} );
+	} );
+
 	it( 'should list tests using the cache for the second attempt', function() {
 		var stub = sinon.stub();
 
