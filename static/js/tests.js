@@ -1270,8 +1270,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 		/**
 		 * Create a job
+		 * @param {Object} event Mouse click event
 		 */
-		createJob: function() {
+		createJob: function( event ) {
+			event.stopPropagation();
 			this.ui.create.prop( 'disabled', true );
 			this.model.save();
 		}
