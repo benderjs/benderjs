@@ -5,7 +5,7 @@
  * @file Tests for Browsers module
  */
 
-/*global App */
+/*global App, _ */
 
 /* bender-include: %BASE_PATH%_mocks.js, %APPS_DIR%bender/js/common.js, %APPS_DIR%bender/js/jobs.js */
 
@@ -336,6 +336,13 @@ describe( 'Jobs', function() {
 			expect( list ).to.be.instanceof( Backbone.Collection );
 		} );
 
+		it( 'should include Common.DeferredFetchMixin', function() {
+			var list = new App.Jobs.JobList();
+
+			expect( list.deferredFetch ).to.be.null();
+			expect( list.fetchDelay ).to.be.a( 'number' );
+		} );
+
 		it( 'should use Jobs.JobRow class for models', function() {
 			var list = new App.Jobs.JobList( [ {
 				id: 1
@@ -623,6 +630,1292 @@ describe( 'Jobs', function() {
 			} );
 
 			expect( view.ui.removeButton.prop( 'disabled' ) ).to.be.false();
+		} );
+	} );
+
+	describe( 'JobListView', function() {
+		var sandbox = sinon.sandbox.create();
+
+		beforeEach( function() {
+			App.Jobs.controller = _.extend( {}, Backbone.Events );
+		} );
+
+		afterEach( function() {
+			sandbox.restore();
+			delete App.Jobs.controller;
+		} );
+
+		it( 'should inherit from Common.TableView', function() {
+			var view = new App.Jobs.JobListView( {
+				collection: new App.Jobs.JobList()
+			} );
+
+			expect( view ).to.be.instanceof( App.Common.TableView );
+		} );
+
+		it( 'should use "#jobs" template', function() {
+			var view = new App.Jobs.JobListView( {
+				collection: new App.Jobs.JobList()
+			} );
+
+			view.render();
+
+			var th = view.$el.find( 'th' );
+
+			expect( th.eq( 1 ).text() ).to.equal( 'ID' );
+			expect( th.eq( 2 ).text() ).to.equal( 'Description' );
+		} );
+
+		it( 'should use Jobs.JobRowView class for items\' views', function() {
+			var view = new App.Jobs.JobListView( {
+				collection: new App.Jobs.JobList( [ {
+					id: 1,
+					description: 'foo'
+				} ] )
+			} );
+
+			view.render();
+
+			expect( view.children.findByIndex( 0 ) ).to.be.instanceof( App.Jobs.JobRowView );
+		} );
+
+		it( 'should use Jobs.NoJobsView view when there are no items in the collection', function() {
+			var view = new App.Jobs.JobListView( {
+				collection: new App.Jobs.JobList()
+			} );
+
+			view.render();
+
+			expect( view.children.findByIndex( 0 ) ).to.be.instanceof( App.Jobs.NoJobsView );
+		} );
+
+		it( 'should create UI element bindings', function() {
+			var view = new App.Jobs.JobListView( {
+				collection: new App.Jobs.JobList()
+			} );
+
+			view.render();
+
+			expect( view.ui.selectAll ).to.have.length( 1 );
+
+			var input = view.ui.selectAll.eq( 0 )[ 0 ];
+
+			expect( input.tagName ).to.equal( 'INPUT' );
+			expect( input.type ).to.equal( 'checkbox' );
+		} );
+
+		it( 'should toggle select all items on the checkbox change', function() {
+			var stub = sandbox.stub( App.Jobs.JobList.prototype, 'toggleSelectJobs' ),
+				collection = new App.Jobs.JobList(),
+				view = new App.Jobs.JobListView( {
+					collection: collection
+				} );
+
+			view.render();
+
+			view.ui.selectAll.prop( 'checked', true );
+			view.ui.selectAll.trigger( 'change' );
+
+			expect( stub.calledOnce ).to.be.true();
+			expect( stub.args[ 0 ][ 0 ] ).to.be.true();
+		} );
+
+		it( 'should re-render on the collection change', function() {
+			var stub = sandbox.stub( App.Jobs.JobListView.prototype, 'render' ),
+				collection = new App.Jobs.JobList(),
+				view = new App.Jobs.JobListView( {
+					collection: collection
+				} );
+
+			collection.trigger( 'change' );
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should update the checkbox on any "selected" change', function() {
+			var stub = sandbox.stub( App.Jobs.JobListView.prototype, 'updateSelectAllCheckbox' ),
+				collection = new App.Jobs.JobList(),
+				view = new App.Jobs.JobListView( {
+					collection: collection
+				} );
+
+			view.render();
+
+			collection.trigger( 'change:selected' );
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should re-fetch the collection on "job:update" event', function() {
+			var stub = sandbox.stub( App.Jobs.JobList.prototype, 'fetch' ),
+				collection = new App.Jobs.JobList(),
+				view = new App.Jobs.JobListView( {
+					collection: collection
+				} );
+
+			view.render();
+
+			App.Jobs.controller.trigger( 'job:update' );
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should toggle select all jobs in the collection', function() {
+			var collection = new App.Jobs.JobList( [ {
+					id: 1,
+					description: 'foo'
+				}, {
+					id: 2,
+					description: 'bar'
+				}, {
+					id: 3,
+					description: 'baz'
+				} ] ),
+				view = new App.Jobs.JobListView( {
+					collection: collection
+				} );
+
+			collection.each( function( model ) {
+				expect( model.get( 'selected' ) ).to.be.false();
+			} );
+
+			view.render();
+
+			view.ui.selectAll.prop( 'checked', true );
+
+			var e = {
+				target: view.ui.selectAll[ 0 ]
+			};
+
+			view.toggleSelectAllJobs( e );
+
+			collection.each( function( model ) {
+				expect( model.get( 'selected' ) ).to.be.true();
+			} );
+		} );
+
+		it( 'should check the "select all" checkbox if all the jobs in the collection are selected', function() {
+			var collection = new App.Jobs.JobList( [ {
+					id: 1,
+					description: 'foo'
+				}, {
+					id: 2,
+					description: 'bar'
+				}, {
+					id: 3,
+					description: 'baz'
+				} ] ),
+				view = new App.Jobs.JobListView( {
+					collection: collection
+				} );
+
+			view.render();
+
+			expect( view.ui.selectAll.prop( 'checked' ) ).to.be.false();
+
+			collection.each( function( model ) {
+				model.setSelected( true, true );
+			} );
+
+			view.updateSelectAllCheckbox();
+
+			expect( view.ui.selectAll.prop( 'checked' ) ).to.be.true();
+		} );
+	} );
+
+	describe( 'Job', function() {
+		var sandbox, requests, xhr;
+
+		beforeEach( function() {
+			sandbox = sinon.sandbox.create();
+			xhr = sinon.useFakeXMLHttpRequest();
+
+			requests = [];
+
+			xhr.onCreate = function( req ) {
+				requests.push( req );
+			};
+		} );
+
+		afterEach( function() {
+			xhr.restore();
+			sandbox.restore();
+		} );
+
+		it( 'should inherit from Backbone.Model', function() {
+			var job = new App.Jobs.Job();
+
+			expect( job ).to.be.instanceof( Backbone.Model );
+		} );
+
+		it( 'should include Common.DeferredFetchMixin', function() {
+			var job = new App.Jobs.Job();
+
+			expect( job.deferredFetch ).to.be.null();
+			expect( job.fetchDelay ).to.be.a( 'number' );
+		} );
+
+		it( 'should instantiate with default attributes', function() {
+			var job = new App.Jobs.Job();
+
+			expect( job.toJSON() ).to.deep.equal( {
+				browsers: [],
+				coverage: false,
+				created: 0,
+				done: false,
+				description: '',
+				filter: [],
+				id: '',
+				results: [],
+				snapshot: false,
+				tasks: [],
+				tempBrowsers: []
+			} );
+		} );
+
+		it( 'should fetch the data from "/jobs/<jobID>" URL', function() {
+			var job = new App.Jobs.Job( {
+				id: 12345
+			} );
+
+			job.fetch();
+
+			expect( requests ).to.have.length( 1 );
+			expect( requests[ 0 ].url ).to.equal( '/jobs/12345' );
+
+			var data = {
+				browsers: [ 'chrome', 'firefox' ],
+				coverage: false,
+				created: Date.now(),
+				done: false,
+				description: 'Foo',
+				filter: [],
+				id: 12345,
+				results: [],
+				snapshot: false,
+				tasks: [],
+				tempBrowsers: []
+			};
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( data ) );
+
+			expect( job.toJSON() ).to.deep.equal( data );
+		} );
+
+		it( 'should validate job and not trigger if everything is fine', function() {
+			var job = new App.Jobs.Job( {
+				id: 12345,
+				browsers: [ 'chrome', 'firefox' ]
+			} );
+
+			job.on( 'invalid', function() {
+				throw new Error( 'Invalid event shouldn\'t be triggered.' );
+			} );
+
+			job.save();
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				success: true,
+				id: 12345
+			} ) );
+		} );
+
+		it( 'should validate job data and trigger "invalid" event if there are no browsers', function( done ) {
+			var job = new App.Jobs.Job( {
+				id: 12345
+			} );
+
+			job.on( 'invalid', function( model, err ) {
+				expect( err ).to.equal( 'No browsers specified for the job' );
+				done();
+			} );
+
+			job.save();
+		} );
+	} );
+
+	describe( 'TaskView', function() {
+		var sandbox = sinon.sandbox.create();
+
+		beforeEach( function() {
+			App.Jobs.controller = {
+				showTaskErrors: function() {}
+			};
+		} );
+
+		afterEach( function() {
+			sandbox.restore();
+			delete App.Jobs.controller;
+		} );
+
+		var task = new Backbone.Model( {
+				id: 'foo',
+				failed: false,
+				results: [ {
+					name: 'chrome',
+					testedUA: 'Chrome 42.0.2311 / Linux 0.0.0',
+					errors: null
+				}, {
+					name: 'firefox',
+					testedUA: 'Firefox 37.0.0 / Ubuntu 0.0.0',
+					errors: null
+				} ]
+			} ),
+			taskFailed = new Backbone.Model( {
+				id: 'bar',
+				failed: true,
+				results: [ {
+					name: 'chrome',
+					testedUA: 'Chrome 42.0.2311 / Linux 0.0.0',
+					errors: null
+				}, {
+					name: 'firefox',
+					testedUA: 'Firefox 37.0.0 / Ubuntu 0.0.0',
+					errors: [ {
+						name: 'should do bar',
+						error: 'Assertion Error: doesn\'t do "bar".'
+					} ]
+				} ]
+			} );
+
+		it( 'should inherit from Marionette.ItemView', function() {
+			var view = new App.Jobs.TaskView( {
+				model: task
+			} );
+
+			expect( view ).to.be.instanceof( Marionette.ItemView );
+		} );
+
+		it( 'should use "#task" template', function() {
+			var view = new App.Jobs.TaskView( {
+				model: task
+			} );
+
+			view.render();
+
+			var td = view.$el.find( 'td' );
+
+			expect( td ).to.have.length( 2 );
+			expect( td.eq( 0 ).text() ).to.equal( 'foo' );
+			expect( td.eq( 1 ).find( 'div' ) ).to.have.length( 2 );
+		} );
+
+		it( 'should use a default tag name - "TR"', function() {
+			var view = new App.Jobs.TaskView( {
+				model: task
+			} );
+
+			view.render();
+
+			expect( view.el.tagName ).to.equal( 'TR' );
+		} );
+
+		it( 'should use a default class name - "task"', function() {
+			var view = new App.Jobs.TaskView( {
+				model: task
+			} );
+
+			view.render();
+
+			expect( view.$el.hasClass( 'task' ) ).to.be.true();
+		} );
+
+		it( 'should use Common.templateHelpers', function() {
+			var view = new App.Jobs.TaskView( {
+				model: task
+			} );
+
+			expect( view.templateHelpers ).to.equal( App.Common.templateHelpers );
+		} );
+
+		it( 'should show errors on a click on ".clickable" element', function() {
+			var stub = sandbox.stub( App.Jobs.TaskView.prototype, 'showErrors' ),
+				view = new App.Jobs.TaskView( {
+					model: taskFailed
+				} );
+
+			view.render();
+
+			var clickable = view.$el.find( '.clickable' );
+
+			expect( clickable ).to.have.length( 1 );
+
+			clickable.click();
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should add "failed" class to the element for a failed task', function() {
+			var view = new App.Jobs.TaskView( {
+				model: taskFailed
+			} );
+
+			view.render();
+
+			expect( view.$el.hasClass( 'failed' ) ).to.be.true();
+		} );
+
+		it( 'shouldn\'t try to show errors if there aren\'t any', function() {
+			var stub = sandbox.stub( App.Jobs.controller, 'showTaskErrors' ),
+				view = new App.Jobs.TaskView( {
+					model: task
+				} );
+
+			view.render();
+
+			view.showErrors( {} );
+
+			expect( stub.called ).to.be.false();
+		} );
+
+		it( 'should show errors for a failed result', function() {
+			var stub = sandbox.stub( App.Jobs.controller, 'showTaskErrors' ),
+				view = new App.Jobs.TaskView( {
+					model: taskFailed
+				} );
+
+			view.render();
+
+			var el = view.$el.find( '.clickable' )[ 0 ];
+
+			view.showErrors( {
+				currentTarget: el
+			} );
+
+			expect( stub.called ).to.be.true();
+
+			var arg = stub.args[ 0 ][ 0 ];
+
+			expect( arg ).to.be.instanceof( Backbone.Model );
+
+			expect( arg.toJSON() ).to.deep.equal( {
+				errors: [ {
+					error: 'Assertion Error: doesn\'t do "bar".',
+					name: 'should do bar'
+				} ],
+				id: 'bar',
+				name: 'firefox',
+				testedUA: 'Firefox 37.0.0 / Ubuntu 0.0.0'
+			} );
+		} );
+	} );
+
+	describe( 'JobHeaderView', function() {
+		var sandbox = sinon.sandbox.create();
+
+		beforeEach( function() {
+			App.Jobs.controller = {
+				removeJob: function() {},
+				restartJob: function() {},
+				editJob: function() {}
+			};
+		} );
+
+		afterEach( function() {
+			sandbox.restore();
+			delete App.Jobs.controller;
+		} );
+
+		it( 'should inherit from Marionette.ItemView', function() {
+			var view = new App.Jobs.JobHeaderView( {
+				model: new App.Jobs.Job()
+			} );
+
+			expect( view ).to.be.instanceof( Marionette.ItemView );
+		} );
+
+		it( 'should use common template helpers', function() {
+			var view = new App.Jobs.JobHeaderView( {
+				model: new App.Jobs.Job()
+			} );
+
+			expect( view.templateHelpers ).to.equal( App.Common.templateHelpers );
+		} );
+
+		it( 'should create bindings for UI elements', function() {
+			var view = new App.Jobs.JobHeaderView( {
+				model: new App.Jobs.Job()
+			} );
+
+			view.render();
+
+			expect( view.ui.all ).to.have.length( 1 );
+			expect( view.ui.all.eq( 0 )[ 0 ].tagName ).to.equal( 'INPUT' );
+
+			expect( view.ui.failed ).to.have.length( 1 );
+			expect( view.ui.failed.eq( 0 )[ 0 ].tagName ).to.equal( 'INPUT' );
+		} );
+
+		it( 'should remove a job after clicking on "Remove" button', function() {
+			var stub = sandbox.stub( App.Jobs.JobHeaderView.prototype, 'removeJob' ),
+				view = new App.Jobs.JobHeaderView( {
+					model: new App.Jobs.Job()
+				} );
+
+			view.render();
+
+			view.$el.find( '.remove-button' ).click();
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should restart a job after clicking on "Restart" button', function() {
+			var stub = sandbox.stub( App.Jobs.JobHeaderView.prototype, 'restartJob' ),
+				view = new App.Jobs.JobHeaderView( {
+					model: new App.Jobs.Job()
+				} );
+
+			view.render();
+
+			view.$el.find( '.restart-button' ).click();
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should edit a job after clicking on "Edit" button', function() {
+			var stub = sandbox.stub( App.Jobs.JobHeaderView.prototype, 'editJob' ),
+				view = new App.Jobs.JobHeaderView( {
+					model: new App.Jobs.Job()
+				} );
+
+			view.render();
+
+			view.$el.find( '.edit-button' ).click();
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should filter results after switching show all/failed radio', function() {
+			var stub = sandbox.stub( App.Jobs.JobHeaderView.prototype, 'filterFailed' ),
+				view = new App.Jobs.JobHeaderView( {
+					model: new App.Jobs.Job()
+				} );
+
+			view.render();
+
+			view.ui.all.trigger( 'change' );
+			view.ui.failed.trigger( 'change' );
+
+			expect( stub.calledTwice ).to.be.true();
+		} );
+
+		it( 'should re-render on model changes', function() {
+			var stub = sandbox.stub( App.Jobs.JobHeaderView.prototype, 'render' ),
+				model = new App.Jobs.Job();
+
+			new App.Jobs.JobHeaderView( {
+				model: model
+			} );
+
+			model.trigger( 'change' );
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should set a model\'s onlyFailed to false on init', function() {
+			var model = new App.Jobs.Job( {
+				onlyFailed: true
+			} );
+
+			new App.Jobs.JobHeaderView( {
+				model: model
+			} );
+
+			expect( model.get( 'onlyFailed' ) ).to.be.false();
+		} );
+
+		it( 'should trigger App#header:resize event on render', function() {
+			var view = new App.Jobs.JobHeaderView( {
+				model: new App.Jobs.Job()
+			} );
+
+			var spy = sinon.spy();
+
+			App.on( 'header:resize', spy );
+
+			view.render();
+
+			App.off( 'header:resize', spy );
+
+			expect( spy.calledOnce ).to.be.true();
+		} );
+
+		it( 'should remove a job', function() {
+			var spy = sandbox.spy( App.Jobs.controller, 'removeJob' ),
+				model = new App.Jobs.Job(),
+				view = new App.Jobs.JobHeaderView( {
+					model: model
+				} );
+
+			view.removeJob();
+
+			expect( spy.calledOnce ).to.be.true();
+			expect( spy.calledWith( model ) ).to.be.true();
+		} );
+
+		it( 'should restart a job', function() {
+			var spy = sandbox.spy( App.Jobs.controller, 'restartJob' ),
+				model = new App.Jobs.Job(),
+				view = new App.Jobs.JobHeaderView( {
+					model: model
+				} );
+
+			view.restartJob();
+
+			expect( spy.calledOnce ).to.be.true();
+			expect( spy.calledWith( model ) ).to.be.true();
+		} );
+
+		it( 'should edit a job', function() {
+			var spy = sandbox.spy( App.Jobs.controller, 'editJob' ),
+				model = new App.Jobs.Job(),
+				view = new App.Jobs.JobHeaderView( {
+					model: model
+				} );
+
+			view.editJob();
+
+			expect( spy.calledOnce ).to.be.true();
+			expect( spy.calledWith( model ) ).to.be.true();
+		} );
+
+		it( 'should filter toggle filter failed tests', function() {
+			var model = new App.Jobs.Job( {
+					onlyFailed: true
+				} ),
+				view = new App.Jobs.JobHeaderView( {
+					model: model
+				} );
+
+			view.render();
+			view.ui.all.prop( 'checked', true );
+			view.filterFailed();
+
+			expect( model.get( 'onlyFailed' ) ).to.be.false();
+
+			view.ui.all.prop( 'checked', false );
+			view.ui.failed.prop( 'checked', true );
+			view.filterFailed();
+
+			expect( model.get( 'onlyFailed' ) ).to.be.true();
+		} );
+	} );
+
+	describe( 'JobView', function() {
+		var sandbox = sinon.sandbox.create();
+
+		beforeEach( function() {
+			App.Jobs.controller = _.extend( {
+				show404: function() {}
+			}, Backbone.Events );
+		} );
+
+		afterEach( function() {
+			sandbox.restore();
+			delete App.Jobs.controller;
+		} );
+
+		var testJob = {
+			browsers: [ 'chrome', 'firefox' ],
+			coverage: false,
+			created: Date.now(),
+			description: 'foo',
+			filter: [ 'is:unit' ],
+			snapshot: false,
+			done: false,
+			tasks: [ {
+				id: 'foo',
+				results: [ {
+					name: 'chrome',
+					version: 0,
+					status: 2,
+					testedUA: 'Chrome 42.0.2311 / Linux 0.0.0'
+				}, {
+					name: 'firefox',
+					version: 0,
+					status: 0
+				} ],
+				failed: false
+			}, {
+				id: 'bar',
+				results: [ {
+					name: 'chrome',
+					version: 0,
+					status: 2,
+					testedUA: 'Chrome 42.0.2311 / Linux 0.0.0'
+				}, {
+					name: 'firefox',
+					version: 0,
+					jobId: 'nX1Jk10DUtCcH7Wd',
+					status: 0
+				} ],
+				failed: false
+			}, {
+				id: 'baz',
+				results: [ {
+					name: 'chrome',
+					version: 0,
+					status: 2,
+					testedUA: 'Chrome 42.0.2311 / Linux 0.0.0'
+				}, {
+					name: 'firefox',
+					version: 0,
+					jobId: 'nX1Jk10DUtCcH7Wd',
+					status: 0
+				} ],
+				failed: false
+			} ],
+			id: 'nX1Jk10DUtCcH7Wd',
+			results: [ {
+				name: 'chrome',
+				version: 0,
+				status: 2,
+				testedUA: 'Chrome 42.0.2311 / Linux 0.0.0'
+			}, {
+				name: 'firefox',
+				version: 0,
+				status: 0
+			} ]
+		};
+
+		it( 'should inherit from Common.TableView', function() {
+			var view = new App.Jobs.JobView( {
+				model: new App.Jobs.Job()
+			} );
+
+			expect( view ).to.be.instanceof( App.Common.TableView );
+		} );
+
+		it( 'should use "#job" template', function() {
+			var view = new App.Jobs.JobView( {
+				model: new App.Jobs.Job()
+			} );
+
+			expect( view.$el.find( 'th' ).eq( 0 ).text() ).to.equal( 'ID' );
+			expect( view.$el.find( 'th' ).eq( 1 ).text() ).to.equal( '' );
+			expect( view.$el.find( 'tbody' ) ).to.have.length( 1 );
+		} );
+
+		it( 'should have default class names - panel, panel-default', function() {
+			var view = new App.Jobs.JobView( {
+				model: new App.Jobs.Job()
+			} );
+
+			expect( view.$el.hasClass( 'panel' ) ).to.be.true();
+			expect( view.$el.hasClass( 'panel-default' ) ).to.be.true();
+		} );
+
+		it( 'should use common template helpers', function() {
+			var view = new App.Jobs.JobView( {
+				model: new App.Jobs.Job()
+			} );
+
+			expect( view.templateHelpers ).to.equal( App.Common.templateHelpers );
+		} );
+
+		it( 'should use Jobs.TaskView class for result views', function() {
+			var view = new App.Jobs.JobView( {
+				model: new App.Jobs.Job( testJob )
+			} );
+
+			expect( view.children ).to.have.length.above( 0 );
+			expect( view.children.findByIndex( 0 ) ).to.be.instanceof( App.Jobs.TaskView );
+		} );
+
+		it( 'should create a collection during initialization and fill it with a model\'s tasks', function() {
+			var model = new App.Jobs.Job( testJob ),
+				view = new App.Jobs.JobView( {
+					model: model
+				} );
+
+			expect( view.collection ).to.be.instanceof( Backbone.Collection );
+			expect( view.collection.length ).to.equal( model.get( 'tasks' ).length );
+		} );
+
+		it( 'should update on model changes', function() {
+			var stub = sandbox.stub( App.Jobs.JobView.prototype, 'update' ),
+				model = new App.Jobs.Job();
+
+			new App.Jobs.JobView( {
+				model: model
+			} );
+
+			expect( stub.calledOnce ).to.be.true();
+
+			model.trigger( 'change' );
+
+			expect( stub.calledTwice ).to.be.true();
+		} );
+
+		it( 'should show 404 page on model errors', function() {
+			var stub = sandbox.stub( App.Jobs.controller, 'show404' ),
+				model = new App.Jobs.Job();
+
+			new App.Jobs.JobView( {
+				model: model
+			} );
+
+			model.trigger( 'error' );
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should re-fetch the model on "job:update" event when a jobID matches', function() {
+			var stub = sandbox.stub( App.Jobs.Job.prototype, 'fetch' ),
+				model = new App.Jobs.Job( testJob );
+
+			new App.Jobs.JobView( {
+				model: model
+			} );
+
+			App.Jobs.controller.trigger( 'job:update', model.get( 'id' ) );
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'shouldn\'t re-fetch the model on "job:update" event when a jobID doesn\'t match', function() {
+			var stub = sandbox.stub( App.Jobs.Job.prototype, 'fetch' ),
+				model = new App.Jobs.Job( testJob );
+
+			new App.Jobs.JobView( {
+				model: model
+			} );
+
+			App.Jobs.controller.trigger( 'job:update', 'unknown' );
+
+			expect( stub.called ).to.be.false();
+		} );
+
+		it( 'should render during initialization', function() {
+			var view = new App.Jobs.JobView( {
+				model: new App.Jobs.Job()
+			} );
+
+			expect( view.isRendered ).to.be.true();
+		} );
+
+		it( 'should trigger App#header:update on update', function() {
+			var spy = sandbox.spy();
+
+			App.on( 'header:update', spy );
+
+			new App.Jobs.JobView( {
+				model: new App.Jobs.Job()
+			} );
+
+			App.off( 'header:update', spy );
+
+			expect( spy.calledOnce ).to.be.true();
+			expect( spy.calledWith( true ) ).to.be.true();
+		} );
+	} );
+
+	describe( 'EditJobView', function() {
+		var sandbox = sinon.sandbox.create();
+
+		beforeEach( function() {
+			App.Browsers = {
+				browserList: new Backbone.Collection( [ {
+					id: 'chrome',
+					name: 'chrome',
+					clients: [ {
+						browser: 'chrome',
+						version: 42,
+						id: 'edfed367-5e46-4162-9cdc-a2331011c665',
+						mode: 'unit',
+						name: '',
+						header: false
+					} ],
+					version: 0,
+					header: true
+				}, {
+					browser: 'chrome',
+					version: 42,
+					id: 'edfed367-5e46-4162-9cdc-a2331011c665',
+					mode: 'unit',
+					name: '',
+					header: false
+				}, {
+					id: 'firefox',
+					name: 'firefox',
+					clients: [ {
+						browser: 'firefox',
+						version: 37,
+						id: 'fa705b6c-5ea2-4d5f-824e-ca3cfd2662ec',
+						mode: 'unit',
+						name: '',
+						header: false
+					} ],
+					version: 0,
+					header: true
+				}, {
+					browser: 'firefox',
+					version: 37,
+					id: 'fa705b6c-5ea2-4d5f-824e-ca3cfd2662ec',
+					mode: 'unit',
+					name: '',
+					header: false
+				}, {
+					id: 'ie11',
+					name: 'ie',
+					clients: [],
+					version: 11,
+					header: true
+				}, {
+					id: 'safari',
+					name: 'safari',
+					clients: [],
+					version: 0,
+					header: true
+				} ] )
+			};
+
+			App.Alerts = {
+				controller: {
+					add: function() {}
+				}
+			};
+		} );
+
+		afterEach( function() {
+			sandbox.restore();
+			delete App.Alerts;
+			delete App.Browsers;
+		} );
+
+		it( 'should inherit from Common.ModalView', function() {
+			var view = new App.Jobs.EditJobView( {
+				model: new App.Jobs.Job()
+			} );
+
+			expect( view ).to.be.instanceof( App.Common.ModalView );
+		} );
+
+		it( 'should use #edit-job template', function() {
+			var view = new App.Jobs.EditJobView( {
+				model: new App.Jobs.Job( {
+					id: 'foo'
+				} )
+			} );
+
+			view.render();
+
+			expect( view.$el.find( 'h4' ).text() ).to.match( /Edit job: foo/ );
+		} );
+
+		it( 'should create UI bindings', function() {
+			var view = new App.Jobs.EditJobView( {
+				model: new App.Jobs.Job( {
+					id: 'foo'
+				} )
+			} );
+
+			view.render();
+
+			expect( view.ui.browsers ).to.have.length( 1 );
+			expect( view.ui.browsers.eq( 0 )[ 0 ].tagName ).to.equal( 'SELECT' );
+			expect( view.ui.description ).to.have.length( 1 );
+			expect( view.ui.description.eq( 0 )[ 0 ].tagName ).to.equal( 'INPUT' );
+			expect( view.ui.save ).to.have.length( 1 );
+			expect( view.ui.save.eq( 0 )[ 0 ].tagName ).to.equal( 'BUTTON' );
+		} );
+
+		it( 'should update browsers on a browsers input change', function() {
+			var stub = sandbox.stub( App.Jobs.EditJobView.prototype, 'updateBrowsers' ),
+				view = new App.Jobs.EditJobView( {
+					model: new App.Jobs.Job( {
+						id: 'foo'
+					} )
+				} );
+
+			view.render();
+
+			view.ui.browsers.trigger( 'change' );
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should save a job after clicking on "Save" button', function() {
+			var stub = sandbox.stub( App.Jobs.EditJobView.prototype, 'saveJob' ),
+				view = new App.Jobs.EditJobView( {
+					model: new App.Jobs.Job( {
+						id: 'foo'
+					} )
+				} );
+
+			view.render();
+
+			view.ui.save.click();
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should add captured browsers after clicking on "Add captured" button', function() {
+			var stub = sandbox.stub( App.Jobs.EditJobView.prototype, 'addCaptured' ),
+				view = new App.Jobs.EditJobView( {
+					model: new App.Jobs.Job( {
+						id: 'foo'
+					} )
+				} );
+
+			view.render();
+
+			view.$el.find( '.add-captured-button' ).click();
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should add all browsers after clicking on "Add all" button', function() {
+			var stub = sandbox.stub( App.Jobs.EditJobView.prototype, 'addAll' ),
+				view = new App.Jobs.EditJobView( {
+					model: new App.Jobs.Job( {
+						id: 'foo'
+					} )
+				} );
+
+			view.render();
+
+			view.$el.find( '.add-all-button' ).click();
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should find a browser using templateHelpers.findBrowser', function() {
+			var browsersA = [ 'Chrome', 'Firefox', 'Safari' ],
+				browsersB = [ 'Chrome', 'Safari', 'IE' ];
+
+			var find = App.Jobs.EditJobView.prototype.templateHelpers.findBrowser;
+
+			expect( find( browsersA, 'Firefox' ) ).to.be.true();
+			expect( find( browsersA, 'firefox' ) ).to.be.true();
+			expect( find( browsersB, 'Firefox' ) ).to.be.false();
+			expect( find( browsersB, 'firefox' ) ).to.be.false();
+		} );
+
+		it( 'should show an error on model\'s "invalid" event', function() {
+			var stub = sandbox.stub( App.Jobs.EditJobView.prototype, 'showValidationError' ),
+				model = new App.Jobs.Job( {
+					id: 'foo'
+				} );
+
+			new App.Jobs.EditJobView( {
+				model: model
+			} );
+
+			model.trigger( 'invalid' );
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should handle a model save', function() {
+			var stub = sandbox.stub( App.Jobs.EditJobView.prototype, 'handleSave' ),
+				model = new App.Jobs.Job( {
+					id: 'foo'
+				} );
+
+			new App.Jobs.EditJobView( {
+				model: model
+			} );
+
+			model.trigger( 'sync' );
+
+			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should store current model browsers in the tempBrowsers attribute', function() {
+			var model = new App.Jobs.Job( {
+				id: 'foo',
+				browsers: [ 'chrome', 'firefox' ]
+			} );
+
+			new App.Jobs.EditJobView( {
+				model: model
+			} );
+
+			expect( model.get( 'tempBrowsers' ) ).to.deep.equal( [ 'chrome', 'firefox' ] );
+		} );
+
+		it( 'should convert a browsers input to a "Chosen" component on render', function() {
+			var view = new App.Jobs.EditJobView( {
+				model: new App.Jobs.Job( {
+					id: 'foo'
+				} )
+			} );
+
+			view.render();
+
+			expect( view.ui.browsers.data( 'chosen' ) ).to.be.ok();
+		} );
+
+		it( 'should update a list of selected browsers', function() {
+			var model = new App.Jobs.Job( {
+					id: 'foo',
+					browsers: [ 'chrome', 'firefox', 'ie11', 'opera', 'safari' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.updateBrowsers( {}, {} );
+
+			expect( model.get( 'tempBrowsers' ) ).to.deep.equal( model.get( 'browsers' ) );
+
+			view.updateBrowsers( {}, {
+				deselected: 'chrome'
+			} );
+
+			expect( model.get( 'tempBrowsers' ) ).to.deep.equal( [ 'firefox', 'ie11', 'opera', 'safari' ] );
+
+			view.updateBrowsers( {}, {
+				selected: 'chrome'
+			} );
+
+			expect( model.get( 'tempBrowsers' ) ).to.deep.equal( [ 'firefox', 'ie11', 'opera', 'safari', 'chrome' ] );
+		} );
+
+		it( 'should add captured browsers to the browsers list', function() {
+			var model = new App.Jobs.Job( {
+					id: 'foo',
+					browsers: [ 'ie11' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.render();
+
+			expect( model.get( 'tempBrowsers' ) ).to.deep.equal( [ 'ie11' ] );
+
+			view.addCaptured();
+
+			expect( model.get( 'tempBrowsers' ) ).to.deep.equal( [ 'ie11', 'chrome', 'firefox' ] );
+		} );
+
+		it( 'should add all browsers to the browsers list', function() {
+			var model = new App.Jobs.Job( {
+					id: 'foo',
+					browsers: [ 'ie11' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.render();
+
+			expect( model.get( 'tempBrowsers' ) ).to.deep.equal( [ 'ie11' ] );
+
+			view.addAll();
+
+			expect( model.get( 'tempBrowsers' ) ).to.deep.equal( [ 'chrome', 'firefox', 'ie11', 'safari' ] );
+		} );
+
+		it( 'should show a model validation error', function() {
+			var stub = sandbox.stub( App.Alerts.controller, 'add' ),
+				model = new App.Jobs.Job( {
+					id: 'foo',
+					browsers: [ 'ie11' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.render();
+
+			view.showValidationError( model, 'validation error' );
+
+			expect( stub.calledOnce ).to.be.true();
+			expect( stub.calledWith( 'danger', 'validation error', 'Error:' ) ).to.be.true();
+		} );
+
+		it( 'should show a notification after saving a job', function() {
+			sandbox.stub( App.Jobs.Job.prototype, 'fetch' );
+
+			var stub = sandbox.stub( App.Alerts.controller, 'add' ),
+				model = new App.Jobs.Job( {
+					id: 'foo',
+					browsers: [ 'ie11' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.render();
+
+			view.handleSave();
+
+			expect( stub.calledOnce ).to.be.true();
+			expect( stub.calledWith( 'success', 'Job saved.', 'Success!' ) ).to.be.true();
+		} );
+
+		it( 'should destroy the view after saving a job', function() {
+			sandbox.stub( App.Jobs.Job.prototype, 'fetch' );
+
+			var model = new App.Jobs.Job( {
+					id: 'foo',
+					browsers: [ 'ie11' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.render();
+
+			view.handleSave();
+
+			expect( view.isRendered ).to.be.false();
+			expect( view.isDestroyed ).to.be.true();
+		} );
+
+		it( 'should re-fetch a model after saving a job', function() {
+			var stub = sandbox.stub( App.Jobs.Job.prototype, 'fetch' ),
+				model = new App.Jobs.Job( {
+					id: 'foo',
+					browsers: [ 'ie11' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.render();
+
+			view.handleSave();
+
+			expect( stub.calledOnce ).to.be.true();
+			expect( stub.args[ 0 ][ 0 ].force ).to.be.true();
+		} );
+
+		it( 'should save an edited job', function() {
+			var stub = sandbox.stub( App.Jobs.Job.prototype, 'save' ),
+				model = new App.Jobs.Job( {
+					id: 'foo',
+					description: 'foo',
+					browsers: [ 'ie11' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.render();
+
+			model.set( 'tempBrowsers', [ 'ie11', 'chrome', 'safari' ], {
+				silent: true
+			} );
+
+			view.ui.description.val( '    bar   ' );
+
+			view.saveJob( {
+				stopPropagation: function() {}
+			} );
+
+			expect( model.get( 'description' ) ).to.equal( 'bar' );
+			expect( model.get( 'browsers' ) ).to.deep.equal( [ 'ie11', 'chrome', 'safari' ] );
+			expect( stub.calledOnce ).to.be.true();
 		} );
 	} );
 } );

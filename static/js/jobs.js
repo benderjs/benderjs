@@ -360,7 +360,10 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * Initialize job list view
+		 * Initialize job list view:
+		 * - re-render the view on collection changes
+		 * - update the checkbox on any "selected" change
+		 * - re-fetch the collection on a "job:update" event
 		 */
 		initialize: function() {
 			this.listenTo( this.collection, 'change', this.render );
@@ -369,27 +372,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.listenTo( Jobs.controller, 'job:update', _.bind( function() {
 				this.collection.fetch();
 			}, this ) );
-		},
-
-		appendHtml: function( collectionView, childView, index ) {
-			var childrenContainer,
-				children;
-
-			if ( collectionView.isBuffering ) {
-				collectionView._bufferedChildren.push( childView );
-			}
-
-			childrenContainer = collectionView.isBuffering ?
-				$( collectionView.elBuffer ) :
-				this.getChildViewContainer( collectionView );
-
-			children = childrenContainer.children();
-
-			if ( children.size() <= index ) {
-				childrenContainer.append( childView.el );
-			} else {
-				children.eq( index ).before( childView.el );
-			}
 		},
 
 		/**
@@ -425,17 +407,17 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * @type {Object}
 		 */
 		defaults: {
-			browsers: null,
+			browsers: [],
 			coverage: false,
 			created: 0,
 			done: false,
 			description: '',
-			filter: null,
+			filter: [],
 			id: '',
-			results: null,
+			results: [],
 			snapshot: false,
-			tasks: null,
-			tempBrowsers: null
+			tasks: [],
+			tempBrowsers: []
 		},
 
 		/**
@@ -450,21 +432,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * @type {Function}
 		 */
 		oldFetch: Backbone.Model.prototype.fetch,
-
-		/**
-		 * Initialize a model
-		 */
-		initialize: function() {
-			this.set( {
-				browsers: [],
-				filter: [],
-				results: [],
-				tasks: [],
-				tempBrowsers: []
-			} );
-
-			App.Common.DeferredFetchMixin.initialize.apply( this, arguments );
-		},
 
 		/**
 		 * Validate a model, mark it as invalid if there are no browsers defined
@@ -517,11 +484,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * @type {Object}
 		 */
 		events: {
-			'click .clickable': 'showError'
+			'click .clickable': 'showErrors'
 		},
 
 		/**
-		 * Initialize a task view
+		 * Initialize a task view, add "failed" class to the element if a task was failed
 		 */
 		initialize: function() {
 			if ( this.model.get( 'failed' ) ) {
@@ -533,12 +500,12 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * Show task result error details
 		 * @param {Object} event Click event
 		 */
-		showError: function( event ) {
+		showErrors: function( event ) {
 			var $elem = $( event.currentTarget ),
 				result = this.model.get( 'results' )[ $elem.index() ];
 
 			if ( result && result.errors ) {
-				Jobs.controller.showError( new Backbone.Model(
+				Jobs.controller.showTaskErrors( new Backbone.Model(
 					_.extend( {
 						id: this.model.get( 'id' )
 					}, result )
@@ -589,7 +556,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * Initialize a job header view
+		 * Initialize a job header view, listen to the model's changes and re-render on those.
+		 * Set the model's filtering to show all.
 		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
@@ -600,6 +568,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		/**
 		 * Handle render event
+		 * @fires module:App#header:resize
 		 */
 		onRender: function() {
 			/**
@@ -628,11 +597,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * Edit a job
 		 */
 		editJob: function() {
-			App.modal.show(
-				new Jobs.EditJobView( {
-					model: this.model
-				} )
-			);
+			Jobs.controller.editJob( this.model );
 		},
 
 		/**
@@ -644,6 +609,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					silent: true
 				} );
 				$( '.jobs' ).removeClass( 'only-failed' );
+				/* istanbul ignore else */
 			} else if ( this.ui.failed.is( ':checked' ) ) {
 				this.model.set( 'onlyFailed', true, {
 					silent: true
@@ -686,14 +652,17 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		childView: Jobs.TaskView,
 
 		/**
-		 * Initialize a job view
+		 * Initialize a job view - bind to model and controller events, update on model changes
+		 * and fetch the model on job updates
 		 */
 		initialize: function() {
 			this.collection = new Backbone.Collection();
 
 			this.listenTo( this.model, 'change', this.update );
-			this.listenTo( this.model, 'error', App.show404 );
+			this.listenTo( this.model, 'error', Jobs.controller.show404 );
 			// TODO should we disable this on IE8?
+
+			// re-fetch the model if a job was updated
 			this.listenTo( Jobs.controller, 'job:update', function( jobId ) {
 				if ( jobId === this.model.id ) {
 					this.model.fetch();
@@ -759,6 +728,12 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * @type {Object}
 		 */
 		templateHelpers: {
+			/**
+			 * Checks if a browser exisits in the browsers array
+			 * @param  {Array}  browsers Array of browsers
+			 * @param  {String} browser  Browser name
+			 * @return {Boolean}
+			 */
 			findBrowser: function( browsers, browser ) {
 				return _.indexOf( _.map( browsers, function( browser ) {
 					return browser.toLowerCase();
@@ -767,10 +742,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * Initialize an edit job view
+		 * Initialize an edit job view, bind to the model's events,
+		 * save current browsers in model's tempBrowsers attribute
 		 */
 		initialize: function() {
-			this.listenTo( this.model, 'invalid', this.showError );
+			this.listenTo( this.model, 'invalid', this.showValidationError );
 			this.listenTo( this.model, 'sync', this.handleSave );
 
 			this.model.set( 'tempBrowsers', this.model.get( 'browsers' ).slice(), {
@@ -812,6 +788,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		/**
 		 * Add all captured browsers to a job
+		 * @event
 		 */
 		addCaptured: function() {
 			var current = this.model.get( 'tempBrowsers' ) || [],
@@ -869,13 +846,13 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * @param {Object} model Validated model
 		 * @param {String} error Error message
 		 */
-		showError: function( model, error ) {
+		showValidationError: function( model, error ) {
 			this.ui.save.prop( 'disabled', false );
 			App.Alerts.controller.add( 'danger', error, 'Error:' );
 		},
 
 		/**
-		 * Handle job save
+		 * Handle job save - show a notification, destroy the view and re-fetch the model
 		 */
 		handleSave: function() {
 			App.Alerts.controller.add(
@@ -893,11 +870,14 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 
 		/**
 		 * Save changes to a job
+		 * @param {Object} event Mouse click event
 		 */
-		saveJob: function() {
+		saveJob: function( event ) {
 			var description = this.ui.description.val().replace( /^\s+|\s+$/g, '' );
 
 			this.ui.save.prop( 'disabled', true );
+
+			event.stopPropagation();
 
 			this.model
 				.set( 'browsers', this.model.get( 'tempBrowsers' ) )
@@ -924,6 +904,18 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				 */
 				this.trigger( 'job:update', jobId );
 			}, this ) );
+		},
+
+		/**
+		 * Show Edit a job modal
+		 * @param {Object} job Job model
+		 */
+		editJob: function( job ) {
+			App.modal.show(
+				new Jobs.EditJobView( {
+					model: job
+				} )
+			);
 		},
 
 		/**
@@ -1075,10 +1067,17 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * Show test error details
+		 * Show 404 error view
+		 */
+		show404: function() {
+			App.show404();
+		},
+
+		/**
+		 * Show task error details
 		 * @param {Object} result Test result
 		 */
-		showError: function( result ) {
+		showTaskErrors: function( result ) {
 			App.modal.show(
 				new App.Common.TestErrorsView( {
 					model: result
@@ -1099,7 +1098,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					reset: true
 				} )
 				.error( function() {
-					App.show404();
+					Jobs.controller.show404();
 				} )
 				.done( function() {
 					App.header.show( new Jobs.JobHeaderView( {
