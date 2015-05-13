@@ -35,36 +35,42 @@ describe( 'Tests', function() {
 	it( 'should list tests specified in the configuration file', function() {
 		var expected = [ {
 			id: 'test/fixtures/tests/test/1',
+			displayName: 'test/fixtures/tests/test/1',
 			js: path.normalize( 'test/fixtures/tests/test/1.js' ),
 			framework: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/2',
+			displayName: 'test/fixtures/tests/test/2',
 			js: path.normalize( 'test/fixtures/tests/test/2.js' ),
 			framework: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/3',
+			displayName: 'test/fixtures/tests/test/3',
 			js: path.normalize( 'test/fixtures/tests/test/3.js' ),
 			framework: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test2/1',
+			displayName: 'test/fixtures/tests/test2/1',
 			js: path.normalize( 'test/fixtures/tests/test2/1.js' ),
 			framework: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/2',
+			displayName: 'test/fixtures/tests/test2/2',
 			js: path.normalize( 'test/fixtures/tests/test2/2.js' ),
 			framework: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/3',
+			displayName: 'test/fixtures/tests/test2/3',
 			js: path.normalize( 'test/fixtures/tests/test2/3.js' ),
 			script: path.normalize( 'test/fixtures/tests/test2/3.md' ),
 			framework: 'test',
@@ -72,6 +78,7 @@ describe( 'Tests', function() {
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/4',
+			displayName: 'test/fixtures/tests/test2/4',
 			script: path.normalize( 'test/fixtures/tests/test2/4.md' ),
 			framework: 'test',
 			applications: [ 'test' ],
