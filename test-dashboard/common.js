@@ -474,7 +474,7 @@ describe( 'Common', function() {
 
 			var child = table.$el.find( 'tbody' ).children().eq( 0 );
 
-			expect( child.css( 'background' ) ).to.equal( 'red' );
+			expect( child.css( 'background' ) ).to.match( /red/ );
 		} );
 
 		it( 'should throw an error if no child view specified', function() {
