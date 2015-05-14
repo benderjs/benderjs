@@ -2,7 +2,7 @@
  * Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
  * Licensed under the terms of the MIT License (see LICENSE.md).
  *
- * @file Tests for Applications test page builder
+ * @file Tests for Files test page builder
  */
 
 /*global describe, it, before, after */
@@ -12,19 +12,17 @@
 'use strict';
 
 var mocks = require( '../fixtures/_mocks' ),
-	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
-	_ = require( 'lodash' ),
 	files = rewire( '../../lib/pagebuilders/files' );
 
-describe( 'Page Builders - Applications', function() {
+describe( 'Page Builders - Files', function() {
 	var oldAttach,
 		bender;
 
 	before( function() {
 		oldAttach = files.attach;
-		bender = mocks.getBender( 'applications', 'plugins' );
+		bender = mocks.getBender( 'plugins' );
 		files.attach = oldAttach || mocks.attachPagebuilder( bender, 'files', files );
 		bender.use( files );
 	} );
