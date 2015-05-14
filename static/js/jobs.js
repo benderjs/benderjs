@@ -659,7 +659,12 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.collection = new Backbone.Collection();
 
 			this.listenTo( this.model, 'change', this.update );
-			this.listenTo( this.model, 'error', Jobs.controller.show404 );
+			this.listenTo( this.model, 'error', function( model, res ) {
+				/* istanbul ignore else */
+				if ( res.status === 404 ) {
+					Jobs.controller.showError( res.status, res.responseText );
+				}
+			} );
 			// TODO should we disable this on IE8?
 
 			// re-fetch the model if a job was updated
@@ -747,8 +752,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 */
 		initialize: function() {
 			this.listenTo( this.model, 'invalid', this.showValidationError );
-			this.listenTo( this.model, 'sync', this.handleSave );
-
 			this.model.set( 'tempBrowsers', this.model.get( 'browsers' ).slice(), {
 				silent: true
 			} );
@@ -791,7 +794,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 * @event
 		 */
 		addCaptured: function() {
-			var current = this.model.get( 'tempBrowsers' ) || [],
+			var current = this.model.get( 'tempBrowsers' ),
 				that = this,
 				captured = [],
 				toAdd;
@@ -852,28 +855,12 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * Handle job save - show a notification, destroy the view and re-fetch the model
-		 */
-		handleSave: function() {
-			App.Alerts.controller.add(
-				'success',
-				'Job saved.',
-				'Success!'
-			);
-
-			this.ui.save.prop( 'disabled', false );
-			this.destroy();
-			this.model.fetch( {
-				force: true
-			} );
-		},
-
-		/**
 		 * Save changes to a job
 		 * @param {Object} event Mouse click event
 		 */
 		saveJob: function( event ) {
-			var description = this.ui.description.val().replace( /^\s+|\s+$/g, '' );
+			var description = this.ui.description.val().replace( /^\s+|\s+$/g, '' ),
+				that = this;
 
 			this.ui.save.prop( 'disabled', true );
 
@@ -882,7 +869,34 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			this.model
 				.set( 'browsers', this.model.get( 'tempBrowsers' ) )
 				.set( 'description', description )
-				.save();
+				.save( null, {
+					success: function() {
+						App.Alerts.controller.add(
+							'success',
+							'Job saved.',
+							'Success!'
+						);
+
+						that.destroy();
+						that.model.fetch( {
+							force: true
+						} );
+					},
+					error: function( model, response ) {
+						App.Alerts.controller.add(
+							'danger',
+							response.responseText,
+							'Error!'
+						);
+
+						// the page will be redirected any way so just remove the view
+						if ( response.status === 404 ) {
+							that.destroy();
+						} else {
+							that.ui.save.prop( 'disabled', false );
+						}
+					}
+				} );
 		}
 	} );
 
@@ -893,7 +907,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 	 */
 	Jobs.Controller = Marionette.Controller.extend( /** @lends module:Jobs.Controller.prototype */ {
 		/**
-		 * Initialize a controller
+		 * Initialize a controller, listen to App.Sockets.socket job:update event
 		 */
 		initialize: function() {
 			App.Sockets.socket.on( 'job:update', _.bind( function( jobId ) {
@@ -919,7 +933,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * List all jobs
+		 * List all jobs - show a list header and a list, fetch the job list
 		 */
 		listJobs: function() {
 			App.header.show( new Jobs.JobListHeaderView( {
@@ -950,11 +964,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 				job.destroy( {
 					success: function( model, response ) {
 						App.Alerts.controller.add(
-							response.success ? 'success' : 'danger',
-							response.success ?
-							'Removed a job: <strong>' + response.id + '</strong>' :
-							response.error,
-							response.success ? 'Success!' : 'Error!'
+							'success',
+							'Removed a job: <strong>' + response.id + '</strong>',
+							'Success!'
 						);
 						callback( true );
 						App.navigate( 'jobs' );
@@ -962,10 +974,10 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					error: function( model, response ) {
 						App.Alerts.controller.add(
 							'danger',
-							response.responseText || 'Error while removing a job.',
+							response.responseText,
 							'Error!'
 						);
-						callback( false );
+						callback( true );
 					}
 				} );
 			}
@@ -987,25 +999,21 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					dataType: 'json',
 					success: function( response ) {
 						App.Alerts.controller.add(
-							response.success ? 'success' : 'danger',
-							response.success ?
-							'Restarted a job: <strong>' + response.id + '</strong>' :
-							response.error,
-							response.success ? 'Success!' : 'Error!'
+							'success',
+							'Restarted a job: <strong>' + response.id + '</strong>',
+							'Success!'
 						);
 
-						if ( response.success ) {
-							job.fetch( {
-								force: true
-							} );
-						}
+						job.fetch( {
+							force: true
+						} );
 
-						callback( !!response.success );
+						callback( true );
 					},
-					error: function( response, status ) {
+					error: function( response ) {
 						App.Alerts.controller.add(
 							'danger',
-							status || 'Error while restarting a job.',
+							response.responseText,
 							'Error!'
 						);
 
@@ -1026,6 +1034,11 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 
 			if ( !selected.length ) {
+				App.Alerts.controller.add(
+					'danger',
+					'No jobs selected.',
+					'Error!'
+				);
 				return;
 			}
 
@@ -1040,11 +1053,9 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					type: 'DELETE',
 					success: function( response ) {
 						App.Alerts.controller.add(
-							response.success ? 'success' : 'danger',
-							response.success ?
-							'Removed jobs: <strong>' + selected.join( ', ' ) + '</strong>' :
-							response.error,
-							response.success ? 'Success!' : 'Error!'
+							'success',
+							'Removed jobs: <strong>' + response.id.join( ', ' ) + '</strong>',
+							'Success!'
 						);
 
 						Jobs.jobList.fetch( {
@@ -1057,7 +1068,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					error: function( response ) {
 						App.Alerts.controller.add(
 							'danger',
-							response.responseText || 'Error while removing jobs.',
+							response.responseText,
 							'Error!'
 						);
 						callback( false );
@@ -1067,14 +1078,14 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * Show 404 error view
+		 * Show an error view
 		 */
-		show404: function() {
-			App.show404();
+		showError: function( code, message ) {
+			App.showError( code, message );
 		},
 
 		/**
-		 * Show task error details
+		 * Show task error details with Common.TestErrorsView modal
 		 * @param {Object} result Test result
 		 */
 		showTaskErrors: function( result ) {
@@ -1097,8 +1108,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			job.fetch( {
 					reset: true
 				} )
-				.error( function() {
-					Jobs.controller.show404();
+				.error( function( res ) {
+					Jobs.controller.showError( res.status, res.responseText );
 				} )
 				.done( function() {
 					App.header.show( new Jobs.JobHeaderView( {
