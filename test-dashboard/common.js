@@ -198,6 +198,39 @@ describe( 'Common', function() {
 		} );
 	} );
 
+	describe( 'ErrorView', function() {
+		it( 'should inherit from Marionette.ItemView', function() {
+			var view = new App.Common.ErrorView();
+
+			expect( view ).to.be.instanceof( Marionette.ItemView );
+		} );
+
+		it( 'should use "#error" template', function() {
+			var view = new App.Common.ErrorView();
+
+			view.render();
+
+			expect( view.$el.find( 'h4' ) ).to.have.length( 1 );
+			expect( view.$el.find( 'h5' ) ).to.have.length( 1 );
+		} );
+
+		it( 'should accept code and message options on creation and render it', function() {
+			var view = new App.Common.ErrorView( {
+				code: 404,
+				message: 'Not found'
+			} );
+
+			expect( view.model ).to.be.instanceof( Backbone.Model );
+			expect( view.model.get( 'code' ) ).to.equal( 404 );
+			expect( view.model.get( 'message' ) ).to.equal( 'Not found' );
+
+			view.render();
+
+			expect( view.$el.find( 'h4' ).text() ).to.equal( '404' );
+			expect( view.$el.find( 'h5' ).text() ).to.equal( 'Not found' );
+		} );
+	} );
+
 	describe( 'ConfirmView', function() {
 		var sandbox = sinon.sandbox.create();
 

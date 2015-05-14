@@ -38,12 +38,15 @@
 	};
 
 	/**
-	 * Display the 'Error 404' page
+	 * Display an error page
 	 * @memberOf module:App
 	 */
-	App.show404 = function() {
+	App.showError = function( code, message ) {
 		App.header.empty();
-		App.content.show( new App.Common.Error404View() );
+		App.content.show( new App.Common.ErrorView( {
+			code: code,
+			message: message
+		} ) );
 	};
 
 	/**
@@ -143,6 +146,10 @@
 
 	// show/hide the fake fixed header depending on the document scroll position
 	function toggleHeader() {
+		if ( !currentHeader ) {
+			return;
+		}
+
 		var supportPageOffset = window.pageYOffset !== undefined,
 			isCSS1Compat = ( ( document.compatMode || '' ) === 'CSS1Compat' );
 

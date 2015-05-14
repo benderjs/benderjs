@@ -337,17 +337,30 @@ App.module( 'Common', function( Common, App, Backbone ) {
 	} );
 
 	/**
-	 * View for 404 error page
-	 * @constructor module:Common.Error404View
+	 * View for an error page
+	 * @constructor module:Common.ErrorView
 	 * @extends {Marionette.ItemView}
 	 */
-	Common.Error404View = Marionette.ItemView.extend( /** @lends module:Common.Error404View.prototype */ {
+	Common.ErrorView = Marionette.ItemView.extend( /** @lends module:Common.Error404View.prototype */ {
 		/**
 		 * Template ID
 		 * @default
 		 * @type {String}
 		 */
-		template: '#error404'
+		template: '#error',
+
+		/**
+		 * Initialize the view, create a model for view options
+		 * @param {Object} options View options
+		 * @param {Number} [options.code] Error code
+		 * @param {String} [options.message] Error message
+		 */
+		initialize: function( options ) {
+			this.model = new Backbone.Model( {
+				code: options.code || null,
+				message: options.message || ''
+			} );
+		}
 	} );
 
 	/**

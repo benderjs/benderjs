@@ -504,17 +504,10 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	</script>
 
 
-	<!-- template for error 404 page -->
-	<script type="text/html" id="error404">
-	<h4>Error 404</h4>
-	<h5>Page not found</h5>
-	</script>
-
-
-	<!-- template for unknown error page -->
+	<!-- template for error pages -->
 	<script type="text/html" id="error">
-	<h4>Error</h4>
-	<h5>Unknown error occured</h5>
+	<h4>Error<%= code ? ' ' + code : '' %></h4>
+	<h5><%= message || 'Unknown error occured' %></h5>
 	</script>
 
 
