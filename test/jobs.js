@@ -406,11 +406,10 @@ describe( 'Jobs', function() {
 	it( 'should return an error when trying to restart non-existent job', function() {
 		var promise = bender.jobs.restart( 'unknown' );
 
-		return expect( promise )
-			.to.be.rejectedWith( 'There are no tasks for this job or a job does not exist.' );
+		return expect( promise ).to.be.rejectedWith( 'There\'s no such job.' );
 	} );
 
-	it( 'should edit existing job', function() {
+	it( 'should edit an existing job', function() {
 		var store = bender.jobs.db.browserTasks;
 
 		return bender.jobs.create( job )

@@ -283,22 +283,26 @@ moduleMocks = {
 
 				return job ?
 					when.resolve() :
-					when.reject( 'There are no tasks for this job or a job does not exist.' );
+					when.reject( 'There\'s no such job.' );
 			},
-
 
 			create: function() {
 				return when.resolve( 'newJobId' );
 			},
 
 			edit: function( id ) {
-				var job = bender.jobs.find( id );
-
-				return when.resolve( job );
+				return bender.jobs.find( id )
+					.then( function( job ) {
+						return job ? when.resolve( job ) : when.reject( 'There\'s no such job.' );
+					} );
 			},
 
-			delete: function() {
-				return when.resolve( 'newJobId' );
+			delete: function( ids ) {
+				var found = jobs.some( function( job ) {
+					return ids.indexOf( job._id ) > -1;
+				} );
+
+				return found ? when.resolve() : when.reject( 'There\'s no such job.' );
 			},
 
 			startTask: function( task ) {

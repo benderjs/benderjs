@@ -279,11 +279,8 @@ describe( 'Middleware - Jobs', function() {
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
-				expect( res.statusCode ).to.equal( 200 );
-				expect( JSON.parse( body ) ).to.deep.equal( {
-					success: false,
-					error: 'There are no tasks for this job or a job does not exist.'
-				} );
+				expect( res.statusCode ).to.equal( 404 );
+				expect( body ).to.equal( http.STATUS_CODES[ '404' ] );
 
 				done();
 			} );
@@ -321,11 +318,22 @@ describe( 'Middleware - Jobs', function() {
 		} );
 	} );
 
+	it( 'should handle DELETE:/jobs/<jobIds> request for a non-existent job', function( done ) {
+		instance.listen( 1031, function() {
+			request.del( 'http://localhost:1031/jobs/unknown', function( err, res, body ) {
+				expect( res.statusCode ).to.equal( 404 );
+				expect( body ).to.equal( http.STATUS_CODES[ '404' ] );
+
+				done();
+			} );
+		} );
+	} );
+
 	it( 'should handle PUT:/jobs/<jobId> request to edit a job', function( done ) {
 		var id = 'AYIlcxZa1i1nhLox';
 
 		instance.listen( 1031, function() {
-			request.put( 'http://localhost:1031/jobs/AYIlcxZa1i1nhLox', function( err, res, body ) {
+			request.put( 'http://localhost:1031/jobs/' + id, function( err, res, body ) {
 				expect( res.statusCode ).to.equal( 200 );
 
 				bender.jobs.find( id ).done( function( job ) {
@@ -334,7 +342,22 @@ describe( 'Middleware - Jobs', function() {
 					done();
 				} );
 			} ).form( {
-				id: id,
+				description: 'new description',
+				browsers: [ 'chrome' ]
+			} );
+		} );
+	} );
+
+	it( 'should handle PUT:/jobs/<jobId> request on a non-existend job', function( done ) {
+		var id = 'unknown';
+
+		instance.listen( 1031, function() {
+			request.put( 'http://localhost:1031/jobs/' + id, function( err, res, body ) {
+				expect( res.statusCode ).to.equal( 404 );
+				expect( body ).to.equal( http.STATUS_CODES[ '404' ] );
+
+				done();
+			} ).form( {
 				description: 'new description',
 				browsers: [ 'chrome' ]
 			} );
