@@ -1312,7 +1312,7 @@ describe( 'Jobs', function() {
 
 		beforeEach( function() {
 			App.Jobs.controller = _.extend( {
-				show404: function() {}
+				showError: function() {}
 			}, Backbone.Events );
 		} );
 
@@ -1453,15 +1453,18 @@ describe( 'Jobs', function() {
 			expect( stub.calledTwice ).to.be.true();
 		} );
 
-		it( 'should show 404 page on model errors', function() {
-			var stub = sandbox.stub( App.Jobs.controller, 'show404' ),
+		it( 'should show an error page on model errors', function() {
+			var stub = sandbox.stub( App.Jobs.controller, 'showError' ),
 				model = new App.Jobs.Job();
 
 			new App.Jobs.JobView( {
 				model: model
 			} );
 
-			model.trigger( 'error' );
+			model.trigger( 'error', model, {
+				status: 404,
+				responseText: 'Not Found'
+			} );
 
 			expect( stub.calledOnce ).to.be.true();
 		} );
@@ -1517,7 +1520,9 @@ describe( 'Jobs', function() {
 	} );
 
 	describe( 'EditJobView', function() {
-		var sandbox = sinon.sandbox.create();
+		var sandbox = sinon.sandbox.create(),
+			requests,
+			xhr;
 
 		beforeEach( function() {
 			App.Browsers = {
@@ -1581,10 +1586,18 @@ describe( 'Jobs', function() {
 					add: function() {}
 				}
 			};
+
+			xhr = sinon.useFakeXMLHttpRequest();
+			requests = [];
+
+			xhr.onCreate = function( req ) {
+				requests.push( req );
+			};
 		} );
 
 		afterEach( function() {
 			sandbox.restore();
+			xhr.restore();
 			delete App.Alerts;
 			delete App.Browsers;
 		} );
@@ -1713,21 +1726,6 @@ describe( 'Jobs', function() {
 			expect( stub.calledOnce ).to.be.true();
 		} );
 
-		it( 'should handle a model save', function() {
-			var stub = sandbox.stub( App.Jobs.EditJobView.prototype, 'handleSave' ),
-				model = new App.Jobs.Job( {
-					id: 'foo'
-				} );
-
-			new App.Jobs.EditJobView( {
-				model: model
-			} );
-
-			model.trigger( 'sync' );
-
-			expect( stub.calledOnce ).to.be.true();
-		} );
-
 		it( 'should store current model browsers in the tempBrowsers attribute', function() {
 			var model = new App.Jobs.Job( {
 				id: 'foo',
@@ -1833,65 +1831,9 @@ describe( 'Jobs', function() {
 			expect( stub.calledWith( 'danger', 'validation error', 'Error:' ) ).to.be.true();
 		} );
 
-		it( 'should show a notification after saving a job', function() {
-			sandbox.stub( App.Jobs.Job.prototype, 'fetch' );
-
-			var stub = sandbox.stub( App.Alerts.controller, 'add' ),
-				model = new App.Jobs.Job( {
-					id: 'foo',
-					browsers: [ 'ie11' ]
-				} ),
-				view = new App.Jobs.EditJobView( {
-					model: model
-				} );
-
-			view.render();
-
-			view.handleSave();
-
-			expect( stub.calledOnce ).to.be.true();
-			expect( stub.calledWith( 'success', 'Job saved.', 'Success!' ) ).to.be.true();
-		} );
-
-		it( 'should destroy the view after saving a job', function() {
-			sandbox.stub( App.Jobs.Job.prototype, 'fetch' );
-
-			var model = new App.Jobs.Job( {
-					id: 'foo',
-					browsers: [ 'ie11' ]
-				} ),
-				view = new App.Jobs.EditJobView( {
-					model: model
-				} );
-
-			view.render();
-
-			view.handleSave();
-
-			expect( view.isRendered ).to.be.false();
-			expect( view.isDestroyed ).to.be.true();
-		} );
-
-		it( 'should re-fetch a model after saving a job', function() {
-			var stub = sandbox.stub( App.Jobs.Job.prototype, 'fetch' ),
-				model = new App.Jobs.Job( {
-					id: 'foo',
-					browsers: [ 'ie11' ]
-				} ),
-				view = new App.Jobs.EditJobView( {
-					model: model
-				} );
-
-			view.render();
-
-			view.handleSave();
-
-			expect( stub.calledOnce ).to.be.true();
-			expect( stub.args[ 0 ][ 0 ].force ).to.be.true();
-		} );
-
 		it( 'should save an edited job', function() {
-			var stub = sandbox.stub( App.Jobs.Job.prototype, 'save' ),
+			var stub = sandbox.stub( App.Jobs.Job.prototype, 'fetch' ),
+				spy = sandbox.spy( App.Alerts.controller, 'add' ),
 				model = new App.Jobs.Job( {
 					id: 'foo',
 					description: 'foo',
@@ -1915,7 +1857,616 @@ describe( 'Jobs', function() {
 
 			expect( model.get( 'description' ) ).to.equal( 'bar' );
 			expect( model.get( 'browsers' ) ).to.deep.equal( [ 'ie11', 'chrome', 'safari' ] );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				success: true,
+				id: 'foo'
+			} ) );
+
+			expect( spy.calledOnce ).to.be.true();
+			expect( spy.calledWith( 'success', 'Job saved.', 'Success!' ) ).to.be.true();
+
+			expect( view.isRendered ).to.be.false();
+			expect( view.isDestroyed ).to.be.true();
 			expect( stub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should show a notification on errors while saving an edited job', function() {
+			var spy = sandbox.spy( App.Alerts.controller, 'add' ),
+				model = new App.Jobs.Job( {
+					id: 'foo',
+					description: 'foo',
+					browsers: [ 'ie11' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.render();
+
+			model.set( 'tempBrowsers', [ 'ie11', 'chrome', 'safari' ], {
+				silent: true
+			} );
+
+			view.ui.description.val( '    bar   ' );
+
+			view.saveJob( {
+				stopPropagation: function() {}
+			} );
+
+			expect( model.get( 'description' ) ).to.equal( 'bar' );
+			expect( model.get( 'browsers' ) ).to.deep.equal( [ 'ie11', 'chrome', 'safari' ] );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 404, {
+				'Content-Type': 'text/plain'
+			}, 'Not found' );
+
+			expect( spy.calledOnce ).to.be.true();
+			expect( spy.calledWith( 'danger', 'Not found', 'Error!' ) ).to.be.true();
+
+			expect( view.isRendered ).to.be.false();
+			expect( view.isDestroyed ).to.be.true();
+		} );
+
+		it( 'should show a notification on errors while saving an edited job 2', function() {
+			var spy = sandbox.spy( App.Alerts.controller, 'add' ),
+				model = new App.Jobs.Job( {
+					id: 'foo',
+					description: 'foo',
+					browsers: [ 'ie11' ]
+				} ),
+				view = new App.Jobs.EditJobView( {
+					model: model
+				} );
+
+			view.render();
+
+			model.set( 'tempBrowsers', [ 'ie11', 'chrome', 'safari' ], {
+				silent: true
+			} );
+
+			view.ui.description.val( '    bar   ' );
+
+			view.saveJob( {
+				stopPropagation: function() {}
+			} );
+
+			expect( model.get( 'description' ) ).to.equal( 'bar' );
+			expect( model.get( 'browsers' ) ).to.deep.equal( [ 'ie11', 'chrome', 'safari' ] );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 500, {
+				'Content-Type': 'text/plain'
+			}, 'Internal server error' );
+
+			expect( spy.calledOnce ).to.be.true();
+			expect( spy.calledWith( 'danger', 'Internal server error', 'Error!' ) ).to.be.true();
+
+			expect( view.isRendered ).to.be.true();
+		} );
+	} );
+
+	describe( 'Controller', function() {
+		var sandbox = sinon.sandbox.create(),
+			requests,
+			xhr;
+
+		beforeEach( function() {
+			App.Sockets = {
+				socket: _.extend( {}, Backbone.Events )
+			};
+
+			App.Alerts = {
+				controller: {
+					add: sandbox.spy()
+				}
+			};
+
+			App.showError = sandbox.spy();
+			App.showConfirmPopup = sandbox.spy();
+			App.navigate = sandbox.spy();
+			App.Jobs.controller = new App.Jobs.Controller();
+			App.Jobs.jobList = new App.Jobs.JobList();
+
+			xhr = sinon.useFakeXMLHttpRequest();
+			requests = [];
+
+			xhr.onCreate = function( req ) {
+				requests.push( req );
+			};
+		} );
+
+		afterEach( function() {
+			sandbox.restore();
+			xhr.restore();
+
+			delete App.showConfirmPopup;
+			delete App.Sockets;
+			delete App.Alerts;
+			delete App.Jobs.controller;
+			delete App.Jobs.jobList;
+		} );
+
+		it( 'should bind to App.Sockets.socket#job:update event and re-emit it', function() {
+			var spy = sandbox.spy();
+
+			App.Jobs.controller.on( 'job:update', spy );
+			App.Sockets.socket.trigger( 'job:update', 'foo' );
+
+			expect( spy.calledOnce ).to.be.true();
+			expect( spy.calledWith( 'foo' ) ).to.be.true();
+		} );
+
+		it( 'should show "Edit a job" modal', function() {
+			var stub = sandbox.stub( App.modal, 'show' ),
+				model = new App.Jobs.Job();
+
+			App.Jobs.controller.editJob( model );
+
+			expect( stub.calledOnce ).to.be.true();
+
+			var view = stub.args[ 0 ][ 0 ];
+
+			expect( view ).to.be.instanceof( App.Jobs.EditJobView );
+			expect( view.model ).to.equal( model );
+		} );
+
+		it( 'should list jobs', function() {
+			var headerStub = sandbox.stub( App.header, 'show' ),
+				contentStub = sandbox.stub( App.content, 'show' ),
+				fetchStub = sandbox.stub( App.Jobs.JobList.prototype, 'fetch' );
+
+			App.Jobs.controller.listJobs();
+
+			expect( headerStub.calledOnce ).to.be.true();
+
+			var arg = headerStub.args[ 0 ][ 0 ];
+
+			expect( arg ).to.be.instanceof( App.Jobs.JobListHeaderView );
+			expect( arg.collection ).to.equal( App.Jobs.jobList );
+
+			expect( contentStub.calledOnce ).to.be.true();
+
+			arg = contentStub.args[ 0 ][ 0 ];
+
+			expect( arg ).to.be.instanceof( App.Jobs.JobListView );
+			expect( arg.collection ).to.equal( App.Jobs.jobList );
+
+			expect( fetchStub.calledOnce ).to.be.true();
+
+			arg = fetchStub.args[ 0 ][ 0 ];
+
+			expect( arg ).to.deep.equal( {
+				force: true,
+				reset: true
+			} );
+		} );
+
+		it( 'should remove a job', function() {
+			var destroyStub = sandbox.stub( App.Jobs.Job.prototype, 'destroy' );
+
+			App.Jobs.controller.removeJob( new App.Jobs.Job( {
+				id: 'foo'
+			} ) );
+
+			expect( App.showConfirmPopup.calledOnce ).to.be.true();
+
+			var arg = App.showConfirmPopup.args[ 0 ][ 0 ];
+
+			expect( arg.message ).to.equal( 'Do you want to remove this job?' );
+			expect( arg.callback ).to.be.a( 'function' );
+
+			arg.callback();
+
+			expect( destroyStub.calledOnce ).to.be.true();
+		} );
+
+		it( 'should show a success notification after removing a job', function() {
+			App.Jobs.controller.removeJob( new App.Jobs.Job( {
+				id: 'foo'
+			} ) );
+
+			expect( App.showConfirmPopup.calledOnce ).to.be.true();
+
+			var arg = App.showConfirmPopup.args[ 0 ][ 0 ];
+
+			expect( arg.callback ).to.be.a( 'function' );
+
+			var closeSpy = sandbox.spy();
+
+			arg.callback( closeSpy );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				success: true,
+				id: 'foo'
+			} ) );
+
+			expect( App.Alerts.controller.add.calledOnce ).to.be.true();
+
+			expect( App.Alerts.controller.add.calledWith(
+				'success',
+				'Removed a job: <strong>foo</strong>',
+				'Success!'
+			) ).to.be.true();
+
+			expect( closeSpy.calledOnce ).to.be.true();
+			expect( closeSpy.calledWith( true ) ).to.be.true();
+			expect( App.navigate.calledOnce ).to.be.true();
+			expect( App.navigate.calledWith( 'jobs' ) ).to.be.true();
+		} );
+
+		it( 'should show an error notification on remove error', function() {
+			App.Jobs.controller.removeJob( new App.Jobs.Job( {
+				id: 'foo'
+			} ) );
+
+			expect( App.showConfirmPopup.calledOnce ).to.be.true();
+
+			var arg = App.showConfirmPopup.args[ 0 ][ 0 ];
+
+			expect( arg.callback ).to.be.a( 'function' );
+
+			var closeSpy = sandbox.spy();
+
+			arg.callback( closeSpy );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 404, {
+				'Content-Type': 'text/plain'
+			}, 'Not found' );
+
+			expect( App.Alerts.controller.add.calledOnce ).to.be.true();
+			expect( App.Alerts.controller.add.calledWith( 'danger', 'Not found', 'Error!' ) ).to.be.true();
+
+			expect( closeSpy.calledOnce ).to.be.true();
+			expect( closeSpy.calledWith( true ) ).to.be.true();
+
+			expect( App.navigate.called ).to.be.false();
+		} );
+
+		it( 'should restart a job', function() {
+			App.Jobs.controller.restartJob( new App.Jobs.Job( {
+				id: 'foo'
+			} ) );
+
+			expect( App.showConfirmPopup.calledOnce ).to.be.true();
+
+			var arg = App.showConfirmPopup.args[ 0 ][ 0 ];
+
+			expect( arg.message ).to.equal( 'Do you want to restart this job?' );
+			expect( arg.callback ).to.be.a( 'function' );
+
+			var closeSpy = sandbox.spy();
+
+			arg.callback( closeSpy );
+
+			expect( requests ).to.have.length( 1 );
+			expect( requests[ 0 ].url ).to.equal( '/jobs/foo/restart' );
+			expect( requests[ 0 ].method ).to.equal( 'GET' );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				success: true,
+				id: 'foo'
+			} ) );
+		} );
+
+		it( 'should show a success notification after restarting', function() {
+			var fetchStub = sandbox.stub( App.Jobs.Job.prototype, 'fetch' );
+
+			App.Jobs.controller.restartJob( new App.Jobs.Job( {
+				id: 'foo'
+			} ) );
+
+			expect( App.showConfirmPopup.calledOnce ).to.be.true();
+
+			var arg = App.showConfirmPopup.args[ 0 ][ 0 ];
+
+			expect( arg.message ).to.equal( 'Do you want to restart this job?' );
+			expect( arg.callback ).to.be.a( 'function' );
+
+			var closeSpy = sandbox.spy();
+
+			arg.callback( closeSpy );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				success: true,
+				id: 'foo'
+			} ) );
+
+			expect( App.Alerts.controller.add.calledOnce ).to.be.true();
+			expect( App.Alerts.controller.add.calledWith(
+				'success',
+				'Restarted a job: <strong>foo</strong>',
+				'Success!'
+			) ).to.be.true();
+
+			expect( fetchStub.calledOnce ).to.be.true();
+
+			expect( closeSpy.calledOnce ).to.be.true();
+			expect( closeSpy.calledWith( true ) ).to.be.true();
+		} );
+
+		it( 'should show an error notification on restart errors', function() {
+			App.Jobs.controller.restartJob( new App.Jobs.Job( {
+				id: 'foo'
+			} ) );
+
+			expect( App.showConfirmPopup.calledOnce ).to.be.true();
+
+			var arg = App.showConfirmPopup.args[ 0 ][ 0 ];
+
+			expect( arg.message ).to.equal( 'Do you want to restart this job?' );
+			expect( arg.callback ).to.be.a( 'function' );
+
+			var closeSpy = sandbox.spy();
+
+			arg.callback( closeSpy );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 404, {
+				'Content-Type': 'text/plain'
+			}, 'Not found' );
+
+			expect( App.Alerts.controller.add.calledOnce ).to.be.true();
+			expect( App.Alerts.controller.add.calledWith( 'danger', 'Not found', 'Error!' ) ).to.be.true();
+
+			expect( closeSpy.calledOnce ).to.be.true();
+			expect( closeSpy.calledWith( false ) ).to.be.true();
+		} );
+
+		it( 'shouldn\'t proceed if there\'s no selected jobx', function() {
+			App.Jobs.controller.removeSelectedJobs();
+
+			expect( App.showConfirmPopup.called ).to.be.false();
+
+			expect( App.Alerts.controller.add.calledOnce ).to.be.true();
+			expect( App.Alerts.controller.add.calledWith( 'danger', 'No jobs selected.', 'Error!' ) ).to.be.true();
+		} );
+
+		it( 'should remove selected jobs', function() {
+			App.Jobs.jobList.add( [ {
+				id: 'foo',
+				selected: true
+			}, {
+				id: 'bar',
+				selected: true
+			}, {
+				id: 'baz',
+				selected: false
+			} ] );
+
+			App.Jobs.controller.removeSelectedJobs();
+
+			expect( App.showConfirmPopup.calledOnce ).to.be.true();
+
+			var arg = App.showConfirmPopup.args[ 0 ][ 0 ];
+
+			expect( arg.message ).to.equal( 'Do you want to remove selected jobs?' );
+			expect( arg.callback ).to.be.a( 'function' );
+
+			var closeSpy = sandbox.spy();
+
+			arg.callback( closeSpy );
+
+			expect( requests ).to.have.length( 1 );
+			expect( requests[ 0 ].url ).to.equal( 'jobs/foo,bar' );
+			expect( requests[ 0 ].method ).to.equal( 'DELETE' );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				success: true,
+				id: [ 'foo', 'bar' ]
+			} ) );
+		} );
+
+		it( 'should show a success notification after removing selected jobs', function() {
+			App.Jobs.jobList.add( [ {
+				id: 'foo',
+				selected: true
+			}, {
+				id: 'bar',
+				selected: true
+			}, {
+				id: 'baz',
+				selected: false
+			} ] );
+
+			App.Jobs.controller.removeSelectedJobs();
+
+			expect( App.showConfirmPopup.calledOnce ).to.be.true();
+
+			var arg = App.showConfirmPopup.args[ 0 ][ 0 ];
+
+			expect( arg.message ).to.equal( 'Do you want to remove selected jobs?' );
+			expect( arg.callback ).to.be.a( 'function' );
+
+			var closeSpy = sandbox.spy();
+
+			arg.callback( closeSpy );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				success: true,
+				id: [ 'foo', 'bar' ]
+			} ) );
+
+			expect( App.Alerts.controller.add.calledOnce ).to.be.true();
+			expect( App.Alerts.controller.add.calledWith(
+				'success',
+				'Removed jobs: <strong>foo, bar</strong>',
+				'Success!'
+			) ).to.be.true();
+
+			expect( closeSpy.calledOnce ).to.be.true();
+			expect( closeSpy.calledWith( true ) ).to.be.true();
+		} );
+
+		it( 'should show an error notification on removal errors', function() {
+			App.Jobs.jobList.add( [ {
+				id: 'foo',
+				selected: true
+			}, {
+				id: 'baz',
+				selected: false
+			} ] );
+
+			App.Jobs.controller.removeSelectedJobs();
+
+			expect( App.showConfirmPopup.calledOnce ).to.be.true();
+
+			var arg = App.showConfirmPopup.args[ 0 ][ 0 ];
+
+			expect( arg.message ).to.equal( 'Do you want to remove selected jobs?' );
+			expect( arg.callback ).to.be.a( 'function' );
+
+			var closeSpy = sandbox.spy();
+
+			arg.callback( closeSpy );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 404, {
+				'Content-Type': 'text/plain'
+			}, 'Not found' );
+
+			expect( App.Alerts.controller.add.calledOnce ).to.be.true();
+			expect( App.Alerts.controller.add.calledWith( 'danger', 'Not found', 'Error!' ) ).to.be.true();
+
+			expect( closeSpy.calledOnce ).to.be.true();
+			expect( closeSpy.calledWith( false ) ).to.be.true();
+		} );
+
+		it( 'should show 404 error', function() {
+			App.Jobs.controller.showError();
+
+			expect( App.showError.calledOnce ).to.be.true();
+		} );
+
+		it( 'should show task errors', function() {
+			var modalStub = sandbox.stub( App.modal, 'show' ),
+				model = new Backbone.Model();
+
+			App.Jobs.controller.showTaskErrors( model );
+
+			expect( modalStub.calledOnce ).to.be.true();
+
+			var arg = modalStub.args[ 0 ][ 0 ];
+
+			expect( arg ).to.be.instanceof( App.Common.TestErrorsView );
+			expect( arg.model ).to.equal( model );
+		} );
+
+		it( 'should show a job', function() {
+			var headerSpy = sandbox.stub( App.header, 'show' ),
+				contentSpy = sandbox.stub( App.content, 'show' ),
+				id = 'foo';
+
+			App.Jobs.controller.showJob( id );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, JSON.stringify( {
+				browsers: [ 'chrome' ],
+				description: '',
+				tasks: [ {
+					id: 'test-dashboard/jobs',
+					results: [ {
+						name: 'chrome',
+						version: 0,
+						status: 2,
+						testedUA: 'Chrome 42.0.2311 / Linux 0.0.0',
+						errors: null
+					} ],
+					failed: true
+				} ],
+				id: 'rbqBboaAWPGzuOxB',
+				results: [ {
+					name: 'chrome',
+					version: 0,
+					status: 2,
+					testedUA: 'Chrome 42.0.2311 / Linux 0.0.0',
+					errors: null
+				} ]
+			} ) );
+
+			expect( headerSpy.calledOnce ).to.be.true();
+			expect( headerSpy.args[ 0 ][ 0 ] ).to.be.instanceof( App.Jobs.JobHeaderView );
+
+			expect( contentSpy.calledOnce ).to.be.true();
+			expect( contentSpy.args[ 0 ][ 0 ] ).to.be.instanceof( App.Jobs.JobView );
+
+			expect( headerSpy.args[ 0 ][ 0 ].model ).to.equal( contentSpy.args[ 0 ][ 0 ].model )
+				.to.be.instanceof( App.Jobs.Job );
+		} );
+
+		it( 'should show an error page if a job wasn\'t found', function() {
+			var stub = sandbox.stub( App.Jobs.Controller.prototype, 'showError' ),
+				id = 'foo';
+
+			App.Jobs.controller.showJob( id );
+
+			expect( requests ).to.have.length( 1 );
+
+			requests[ 0 ].respond( 404, {
+				'Content-Type': 'text/plain'
+			}, 'Not found' );
+
+			expect( stub.calledOnce ).to.be.true();
+			expect( stub.calledWith( 404, 'Not found' ) ).to.be.true();
+		} );
+	} );
+
+	describe( 'onStart', function() {
+		beforeEach( function() {
+			App.Sockets = {
+				socket: _.extend( {}, Backbone.Events )
+			};
+
+			App.Jobs.onStart();
+		} );
+
+		afterEach( function() {
+			delete App.Sockets;
+			delete App.Jobs.jobList;
+			delete App.Jobs.controller;
+			delete App.Jobs.jobRouter;
+		} );
+
+		it( 'should create an instance of Jobs.JobList', function() {
+			expect( App.Jobs.jobList ).to.be.instanceof( App.Jobs.JobList );
+		} );
+
+		it( 'should create an instance of Jobs.Controller', function() {
+			expect( App.Jobs.controller ).to.be.instanceof( App.Jobs.Controller );
+		} );
+
+		it( 'should create an instance of Jobs.JobRouter', function() {
+			expect( App.Jobs.jobRouter ).to.be.instanceof( App.Jobs.JobRouter );
 		} );
 	} );
 } );
