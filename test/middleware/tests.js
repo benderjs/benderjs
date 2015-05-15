@@ -43,7 +43,7 @@ describe( 'Middleware - Tests', function() {
 		bender.server.create().done( function( server ) {
 			instance = server;
 			done();
-		}, function ( err ) {
+		}, function( err ) {
 			throw err;
 		} );
 	} );
