@@ -5,8 +5,6 @@
  * @file Tests for Browsers module
  */
 
-/*global App, _ */
-
 /* bender-include: %BASE_PATH%_mocks.js, %APPS_DIR%bender/js/common.js, %APPS_DIR%bender/js/browsers.js */
 
 describe( 'Browsers', function() {
@@ -24,12 +22,11 @@ describe( 'Browsers', function() {
 
 		it( 'should show a browser list on "browsers" route', function() {
 			var router = new App.Browsers.BrowserRouter( {
-				controller: {
-					showBrowsers: sinon.spy()
-				}
-			} );
-
-			var routerSpy = router.options.controller.showBrowsers,
+					controller: {
+						showBrowsers: sinon.spy()
+					}
+				} ),
+				routerSpy = router.options.controller.showBrowsers,
 				oldHash = window.location.hash;
 
 			Backbone.history.start();

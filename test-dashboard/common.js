@@ -5,8 +5,6 @@
  * @file Tests for Alerts module
  */
 
-/*global App, bender, _ */
-
 /* bender-include: %BASE_PATH%_mocks.js, %APPS_DIR%bender/js/common.js */
 
 describe( 'Common', function() {

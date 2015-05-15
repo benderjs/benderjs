@@ -1106,20 +1106,20 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 			} );
 
 			job.fetch( {
-					reset: true
-				} )
-				.error( function( res ) {
-					Jobs.controller.showError( res.status, res.responseText );
-				} )
-				.done( function() {
-					App.header.show( new Jobs.JobHeaderView( {
-						model: job
-					} ) );
+				reset: true
+			} )
+			.error( function( res ) {
+				Jobs.controller.showError( res.status, res.responseText );
+			} )
+			.done( function() {
+				App.header.show( new Jobs.JobHeaderView( {
+					model: job
+				} ) );
 
-					App.content.show( new Jobs.JobView( {
-						model: job
-					} ) );
-				} );
+				App.content.show( new Jobs.JobView( {
+					model: job
+				} ) );
+			} );
 		}
 	} );
 

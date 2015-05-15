@@ -5,8 +5,6 @@
  * @file Tests for Browsers module
  */
 
-/*global App, _ */
-
 /* bender-include: %BASE_PATH%_mocks.js, %APPS_DIR%bender/js/common.js, %APPS_DIR%bender/js/jobs.js */
 
 describe( 'Jobs', function() {
@@ -32,13 +30,12 @@ describe( 'Jobs', function() {
 
 		it( 'should list jobs on "jobs" route', function() {
 			var router = new App.Jobs.JobRouter( {
-				controller: {
-					listJobs: sinon.spy(),
-					showJob: function() {},
-				}
-			} );
-
-			var routerSpy = router.options.controller.listJobs,
+					controller: {
+						listJobs: sinon.spy(),
+						showJob: function() {},
+					}
+				} ),
+				routerSpy = router.options.controller.listJobs,
 				oldHash = window.location.hash;
 
 			router.navigate( 'jobs', {
@@ -52,13 +49,12 @@ describe( 'Jobs', function() {
 
 		it( 'should show a job details on "jobs/<jobID>" route', function() {
 			var router = new App.Jobs.JobRouter( {
-				controller: {
-					listJobs: function() {},
-					showJob: sinon.spy(),
-				}
-			} );
-
-			var routerSpy = router.options.controller.showJob,
+					controller: {
+						listJobs: function() {},
+						showJob: sinon.spy(),
+					}
+				} ),
+				routerSpy = router.options.controller.showJob,
 				oldHash = window.location.hash;
 
 			router.navigate( 'jobs/foo', {
@@ -1232,10 +1228,9 @@ describe( 'Jobs', function() {
 
 		it( 'should trigger App#header:resize event on render', function() {
 			var view = new App.Jobs.JobHeaderView( {
-				model: new App.Jobs.Job()
-			} );
-
-			var spy = sinon.spy();
+					model: new App.Jobs.Job()
+				} ),
+				spy = sinon.spy();
 
 			App.on( 'header:resize', spy );
 
@@ -1701,9 +1696,8 @@ describe( 'Jobs', function() {
 
 		it( 'should find a browser using templateHelpers.findBrowser', function() {
 			var browsersA = [ 'Chrome', 'Firefox', 'Safari' ],
-				browsersB = [ 'Chrome', 'Safari', 'IE' ];
-
-			var find = App.Jobs.EditJobView.prototype.templateHelpers.findBrowser;
+				browsersB = [ 'Chrome', 'Safari', 'IE' ],
+				find = App.Jobs.EditJobView.prototype.templateHelpers.findBrowser;
 
 			expect( find( browsersA, 'Firefox' ) ).to.be.true();
 			expect( find( browsersA, 'firefox' ) ).to.be.true();
