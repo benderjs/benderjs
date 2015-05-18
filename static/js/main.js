@@ -96,7 +96,8 @@
 		el: '#modal',
 
 		/**
-		 * Modal region constructor, binds to Bootstrap modal events
+		 * Modal region constructor, binds to Bootstrap modal events:
+		 * - empty itself on Bootstrap#hidden.bs.modal
 		 */
 		constructor: function() {
 			Marionette.Region.prototype.constructor.apply( this, arguments );
@@ -106,17 +107,22 @@
 		},
 
 		/**
-		 * Handle show event, display Bootstrap's backdrop
+		 * Handle show event:
+		 * - hide Bootstrap modal on a child view's "destroy" event
+		 * - display Bootstrap's modal with backdrop
+		 * - focus the first button
 		 * @param {Object} view View
 		 */
 		onShow: function( view ) {
 			view.once( 'destroy', _.bind( this.onEmpty, this ) );
 
+			// show a modal with a backdrop
 			this.$el.modal( {
 				backdrop: 'static',
 				show: true
 			} );
 
+			// focus the first button in a modal
 			this.$el.find( 'button' ).first().focus();
 		},
 
@@ -141,12 +147,77 @@
 		alerts: '#alerts'
 	} );
 
-	var currentHeader,
-		headerTop = 0;
+	// references to dom elements
+	App.$body = null;
+	App.$navbar = null;
+	App.$fixedHeader = null;
 
-	// show/hide the fake fixed header depending on the document scroll position
-	function toggleHeader() {
-		if ( !currentHeader ) {
+	// adjust body padding to match header height each time the content is changed
+	App.on( 'start', App.onStart );
+
+	/**
+	 * Handle application startup - save references to DOM elements and bind to Application and DOM events
+	 */
+	App.onStart = function() {
+		// save references to DOM elements
+		App.$body = $( 'body' );
+		App.$navbar = $( '.navbar' );
+
+		// update header on content show
+		App.content.on( 'show', App.onContentShow );
+
+		// update the fake header's content
+		App.on( 'header:update', App.onHeaderUpdate );
+		App.on( 'header:resize', App.onHeaderResize );
+
+		// handle window events
+		$( window ).bind( 'resize', App.onWindowResize );
+		$( window ).bind( 'scroll', App.onWindowScroll );
+
+		// start the router
+		Backbone.history.start();
+
+		// navigate to the test list if no route specified
+		/* istanbul ignore else */
+		if ( !App.getCurrentRoute() ) {
+			App.navigate( 'tests' );
+		}
+	};
+
+	/**
+	 * Handle content show - trigger header update and resize events
+	 * @fires App#header:update
+	 * @fires App#header:resize
+	 */
+	App.onContentShow = function() {
+		App.trigger( 'header:update' );
+		App.trigger( 'header:resize', App.$navbar.height() );
+	};
+
+	/**
+	 * Handle window resize events - trigger the header resize event and toggle show/hide the header
+	 * @fires App#header:resize
+	 */
+	App.onWindowResize = function() {
+		App.trigger( 'header:resize', App.$navbar.height() );
+		App._toggleHeader();
+	};
+
+	/**
+	 * Handle window scroll events - toggle show/hide the header
+	 */
+	App.onWindowScroll = function() {
+		App._toggleHeader();
+	};
+
+	var headerTop = 0;
+
+	/**
+	 * Toggle show/hide the fake fixed header depending on the document scroll position
+	 * @private
+	 */
+	App._toggleHeader = function() {
+		if ( !App.$fixedHeader ) {
 			return;
 		}
 
@@ -158,76 +229,53 @@
 			// standards-compliant mode is enabled
 			isCSS1Compat ? document.documentElement.scrollTop :
 			// otherwise use body.scrollTop
-			document.body.scrollTop && currentHeader.hasClass( 'hidden' ) ) {
-			currentHeader.removeClass( 'hidden' );
+			document.body.scrollTop && App.$fixedHeader.hasClass( 'hidden' ) ) {
+			App.$fixedHeader.removeClass( 'hidden' );
 		} else {
-			currentHeader.addClass( 'hidden' );
+			App.$fixedHeader.addClass( 'hidden' );
 		}
-	}
+	};
 
-	// adjust body padding to match header height each time the content is changed
-	App.addInitializer( function() {
-		App.$body = $( 'body' );
-		App.$navbar = $( '.navbar' );
-
-		App.content.on( 'show', function() {
-			App.trigger( 'header:update' );
-			App.trigger( 'header:resize', App.$navbar.height() );
-		} );
-
-		// adjust body padding on window resize
-		$( window ).bind( 'resize', function() {
-			App.trigger( 'header:resize', App.$navbar.height() );
-			toggleHeader();
-		} );
-
-		$( window ).bind( 'scroll', toggleHeader );
-	} );
-
-	// update the fake header's content
-	App.on( 'header:update', function( contentOnly ) {
+	/**
+	 * Handle header update events
+	 * @param {Boolean} contentOnly Context changed only flag
+	 */
+	App.onHeaderUpdate = function( contentOnly ) {
 		var header = App.content.$el.find( '.fixed-header' );
 
 		// just replace the contents of the header
-		if ( contentOnly && currentHeader && header.length ) {
-			return currentHeader.find( '.table' ).empty().append( header.clone() );
+		if ( contentOnly && App.$fixedHeader && header.length ) {
+			return App.$fixedHeader.find( '.table' ).empty().append( header.clone() );
 		}
 
-		if ( currentHeader ) {
-			currentHeader.remove();
+		if ( App.$fixedHeader ) {
+			App.$fixedHeader.remove();
 		}
 
 		if ( header.length ) {
-			currentHeader = $( '<div class="fixed hidden"><div class="container"><div class="panel panel-default">' +
+			App.$fixedHeader = $( '<div class="fixed hidden"><div class="container"><div class="panel panel-default">' +
 				'<table class="table"></table></div></div></div>' );
 
-			currentHeader.find( '.table' ).append( header.clone() );
-			currentHeader.appendTo( 'body' );
+			App.$fixedHeader.find( '.table' ).append( header.clone() );
+			App.$fixedHeader.appendTo( 'body' );
 		} else {
-			currentHeader = null;
+			App.$fixedHeader = null;
 		}
-	} );
+	};
 
-	// adjust document.body's top padding and fake header's position
-	App.on( 'header:resize', function( height ) {
+	/**
+	 * Handle header resize events - adjust the document.body's top padding and the fake header's position
+	 * @param {Number} [height] Header's height
+	 */
+	App.onHeaderResize = function( height ) {
 		height = height !== undefined ? height : App.$navbar.height();
 
 		App.$body.css( 'paddingTop', height + 1 + 'px' );
 
-		if ( currentHeader && headerTop !== height + 1 ) {
+		if ( App.$fixedHeader && headerTop !== height + 1 ) {
 			headerTop = height + 1;
-			currentHeader.css( 'top', headerTop + 'px' );
+			App.$fixedHeader.css( 'top', headerTop + 'px' );
 		}
-	} );
-
-	// start the router
-	App.on( 'start', function() {
-		Backbone.history.start();
-
-		// navigate to the test list if no route specified
-		if ( App.getCurrentRoute() === '' ) {
-			App.navigate( 'tests' );
-		}
-	} );
+	};
 
 } )( this );
