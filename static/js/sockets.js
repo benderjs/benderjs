@@ -40,21 +40,21 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 	 */
 	Sockets.SocketStatusView = Backbone.View.extend( /** @lends module:Sockets.SocketStatusView.prototype */ {
 		/**
-		 * Status view tag anme
+		 * Status view tag name
 		 * @default
 		 * @type {String}
 		 */
 		tagName: 'span',
 
 		/**
-		 * Initialize status view
+		 * Initialize a status view
 		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.render );
 		},
 
 		/**
-		 * Render status view
+		 * Render a status view, set the content and class names according to the model
 		 */
 		render: function() {
 			var status = this.model.get( 'status' );
@@ -66,9 +66,12 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 	} );
 
 	/**
-	 * Initialize Sockets module
+	 * Initialize Sockets module:
+	 * - connect to the WebSockets /dashboard channel
+	 * - create a socket status
+	 * - bind to socket events
 	 */
-	App.on( 'before:start', function() {
+	Sockets.onStart = function() {
 		var socket = io.connect( '/dashboard', {
 			'reconnection delay': 2000,
 			'reconnection limit': 2000,
@@ -88,29 +91,42 @@ App.module( 'Sockets', function( Sockets, App, Backbone ) {
 		 */
 		Sockets.socket = socket;
 
-		// expose socket.io emit method
-		Sockets.emit = socket.emit;
+		// bind to socket events
+		socket.on( 'connect', Sockets.onConnect );
+		socket.on( 'disconnect', Sockets.onDisconnect );
 
-		socket.on( 'connect', function() {
-			socket.emit( 'register' );
-			Sockets.socketStatus.setStatus( 'connected' );
-			App.hideDisconnectedPopup();
-		} );
-
-		function handleDisconnect() {
-			Sockets.socketStatus.setStatus( 'disconnected' );
-			App.showDisconnectedPopup();
-		}
-
-		socket.on( 'disconnect', handleDisconnect );
-
+		// show a socket status view
 		App.socketStatus.show( new Sockets.SocketStatusView( {
 			model: Sockets.socketStatus
 		} ) );
 
 		$( window ).on( 'beforeunload', function() {
-			socket.removeListener( 'disconnect', handleDisconnect );
+			socket.removeListener( 'disconnect', Sockets.onDisconnect );
 			socket.disconnect();
 		} );
-	} );
+	};
+
+	/**
+	 * Handle a socket connect event:
+	 * - emit "register" event
+	 * - set the status to "connected"
+	 * - hide the "disconnected" popup
+	 */
+	Sockets.onConnect = function() {
+		Sockets.socket.emit( 'register' );
+		Sockets.socketStatus.setStatus( 'connected' );
+		App.hideDisconnectedPopup();
+	};
+
+	/**
+	 * Handle a socket disconnect event:
+	 * - set the status to "disconnected"
+	 * - show the "disconnected" popup
+	 */
+	Sockets.onDisconnect = function() {
+		Sockets.socketStatus.setStatus( 'disconnected' );
+		App.showDisconnectedPopup();
+	};
+
+	App.on( 'before:start', Sockets.onStart );
 } );
