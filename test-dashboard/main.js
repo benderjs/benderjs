@@ -271,6 +271,7 @@ describe( 'App', function() {
 
 		App.start();
 		App.content.show( view );
+		App.$body.scrollTop( 0 );
 
 		App.$fixedHeader.removeClass( 'hidden' );
 
