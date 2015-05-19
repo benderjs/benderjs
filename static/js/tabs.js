@@ -34,7 +34,8 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		model: Tabs.Tab,
 
 		/**
-		 * Initialize tab collection
+		 * Initialize tab collection:
+		 * - bind to App events: tabs:disable and tabs:enable to update the collection items accordingly
 		 */
 		initialize: function() {
 			App.on( 'tabs:disable', this.disableTabs, this );
@@ -106,7 +107,7 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		},
 
 		/**
-		 * Initialize a tab view
+		 * Initialize a tab view - bind to the model changes to update the tab state
 		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change', this.changeState );
@@ -131,7 +132,7 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		},
 
 		/**
-		 * Update a tab state on a model change
+		 * Update the tab class name to reflect the model state
 		 */
 		changeState: function() {
 			var model = this.model.toJSON();
@@ -169,9 +170,12 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 	} );
 
 	/**
-	 * Initialize Tabs module
+	 * Initialize the Tabs module:
+	 * - create tabs
+	 * - show the tab list view
+	 * - bind to the router events to activate the tabs accordingly
 	 */
-	App.on( 'before:start', function() {
+	Tabs.onStart = function() {
 		var tabs = [ {
 			label: 'Tests',
 			id: 'tests'
@@ -195,9 +199,12 @@ App.module( 'Tabs', function( Tabs, App, Backbone ) {
 		} ) );
 
 		Backbone.history.on( 'route', function( router ) {
+			/* istanbul ignore else */
 			if ( router.name ) {
 				Tabs.tabList.activateTab( router.name );
 			}
 		} );
-	} );
+	};
+
+	App.on( 'before:start', Tabs.onStart );
 } );
