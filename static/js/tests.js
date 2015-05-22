@@ -30,17 +30,18 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		 * Initialize a filter
 		 */
 		initialize: function() {
+			// save new tests and build new filters for those
 			this.listenTo( Tests.controller, 'tests:loaded', function( tests, filter ) {
 				this.set( 'tests', tests );
 
-				this.buildFilters( tests, filter );
+				this.buildTokens( filter );
 			}, this );
 
+			// rebuild the tokens on the filter change
 			this.on( 'change:filter', function() {
-				var tests = this.get( 'tests' ),
-					filter = this.get( 'filter' );
+				var filter = this.get( 'filter' );
 
-				this.buildFilters( tests, filter );
+				this.buildTokens( filter );
 				/**
 				 * Test filter has changed
 				 * @event module:Tests.Controller#tests:filter
@@ -51,11 +52,10 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		/**
-		 * Build filters for the given tests
-		 * @param {Object} tests  Tests collection
-		 * @param {Array}  filter Test filter
+		 * Build tokens for the given tests and filter
+		 * @param {Array} filter Test filter
 		 */
-		buildFilters: function( tests, filter ) {
+		buildTokens: function( filter ) {
 			var tokens = [];
 
 			function checkFlags( item, filters ) {
@@ -78,7 +78,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				} );
 			}
 
-			tests.each( function( item ) {
+			this.get( 'tests' ).each( function( item ) {
 				item = item.toJSON();
 
 				if ( !checkFlags( item, filter ) ) {
@@ -188,7 +188,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		/**
-		 * Initialize a filter view
+		 * Initialize a filter view - bind to the model's events
 		 */
 		initialize: function() {
 			this.listenTo( this.model, 'change:tokens', this.render );
@@ -206,7 +206,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		},
 
 		/**
-		 * Update a filter view
+		 * Update the view - mark selected tokens
 		 */
 		update: function() {
 			var filter = this.model.get( 'filter' );
@@ -1472,7 +1472,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	/**
 	 * Initialize Tests module
 	 */
-	App.on( 'before:start', function() {
+	Tests.onStart = function() {
 		/**
 		 * Test controller
 		 * @memberOf module:Tests
@@ -1527,5 +1527,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				return 'The tests are still running.';
 			}
 		} );
-	} );
+	};
+
+	App.on( 'before:start', Tests.onStart );
 } );

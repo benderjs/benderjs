@@ -1,0 +1,15 @@
+<script type="text/html" id="test-filter">
+	<select multiple class="test-filter">
+		<% _.each( tokens, function ( token ) { %>
+		<option value="<%= token %>" <%= _.indexOf( filter, token ) > -1 ? 'selected' : '' %>><%= token %></option>
+		<% } ) %>
+	</select>
+</script>
+
+
+<div id="socket-status"></div>
+<div id="modal"></div>
+<div id="tabs"></div>
+<div id="header"></div>
+<div id="content"></div>
+<div id="alerts"></div>
