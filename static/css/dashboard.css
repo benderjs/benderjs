@@ -289,7 +289,7 @@ table > thead > tr > .job-browsers {
 	background-image: url('../images/logos/firefox_32x32.png');
 }
 
-.ie {
+.ie, .edge {
 	background-image: url('../images/logos/ie_32x32.png');
 }
 
