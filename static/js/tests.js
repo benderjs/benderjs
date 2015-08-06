@@ -1472,7 +1472,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 	/**
 	 * Initialize Tests module
 	 */
-	Tests.onStart = function() {
+	Tests.onBeforeStart = function() {
 		/**
 		 * Test controller
 		 * @memberOf module:Tests
@@ -1528,6 +1528,4 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			}
 		} );
 	};
-
-	App.on( 'before:start', Tests.onStart );
 } );
