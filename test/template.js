@@ -12,6 +12,7 @@
 'use strict';
 
 var mocks = require( './fixtures/_mocks' ),
+	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	_ = require( 'lodash' ),
@@ -135,14 +136,12 @@ describe( 'Template', function() {
 		return expect( promise ).to.eventually.equal( expected );
 	} );
 
-	it( 'should expose data.files, data.addCSS and data.addJS', function() {
+	it( 'should expose data.addCSS, data.addJS and data.addFile', function() {
 		var testPagebuilder = function( data ) {
-			expect( data ).to.have.property( 'files' );
-			expect( data.files ).to.have.property( 'css' ).that.deep.equal( [] );
-			expect( data.files ).to.have.property( 'js' ).that.deep.equal( [] );
 
 			expect( data ).to.have.property( 'addCSS' ).that.is.a( 'function' );
 			expect( data ).to.have.property( 'addJS' ).that.is.a( 'function' );
+			expect( data ).to.have.property( 'addFile' ).that.is.a( 'function' );
 
 			// Error without this.
 			data.parts.push( '' );
@@ -157,55 +156,43 @@ describe( 'Template', function() {
 		return promise;
 	} );
 
-	it( 'should have data.files.css filled by data.addCSS', function() {
+	it( 'should have data.parts filled by data.addFile', function() {
 		var testPagebuilder = function( data ) {
+			data.addFile( '<link rel="stylesheet" href="test1.css">' );
+			data.addFile( '<script src="test2.js"></script>', 'body' );
+
+			expect( data.parts ).to.have.length( 2 );
+
+			expect( data.parts[ 0 ] ).to.equal( '<head><link rel="stylesheet" href="test1.css"></head>' );
+			expect( data.parts[ 1 ] ).to.equal( '<body><script src="test2.js"></script></body>' );
+
+			// Dom-combiner throws error when it actually gets to combine data.parts so we clear it.
+			data.parts = [ '' ];
+
+			return when.resolve( data );
+		};
+
+		bender.pagebuilders.add( 'testPagebuilder', testPagebuilder );
+
+		var promise = bender.template.build( bender.tests.tests[ 0 ] );
+
+		return promise;
+	} );
+
+	it( 'should use data.addFile when calling data.addJS or data.addCSS', function() {
+		var testPagebuilder = function( data ) {
+			sinon.spy( data, 'addFile' );
+
+			data.parts.push( '<body></body>' );
+
 			data.addCSS( 'test1.css' );
-			data.addCSS( 'test2.css', { body: true } );
+			data.addJS( 'test2.js', 'body' );
 
-			expect( data.files.css ).to.have.length( 2 );
+			sinon.assert.calledWith( data.addFile, '<link rel="stylesheet" href="test1.css">' );
+			sinon.assert.calledWithExactly( data.addFile, '<script src="test2.js"></script>', 'body' );
 
-			expect( data.files.css[ 0 ] ).to.deep.equal( {
-				url: 'test1.css',
-				options: {}
-			} );
-
-			expect( data.files.css[ 1 ] ).to.deep.equal( {
-				url: 'test2.css',
-				options: { body: true }
-			} );
-
-			// Error without this.
-			data.parts.push( '' );
-
-			return when.resolve( data );
-		};
-
-		bender.pagebuilders.add( 'testPagebuilder', testPagebuilder );
-
-		var promise = bender.template.build( bender.tests.tests[ 0 ] );
-
-		return promise;
-	} );
-
-	it( 'should have data.files.js filled by data.addJS', function() {
-		var testPagebuilder = function( data ) {
-			data.addJS( 'test1.js' );
-			data.addJS( 'test2.js', { body: true } );
-
-			expect( data.files.js ).to.have.length( 2 );
-
-			expect( data.files.js[ 0 ] ).to.deep.equal( {
-				url: 'test1.js',
-				options: {}
-			} );
-
-			expect( data.files.js[ 1 ] ).to.deep.equal( {
-				url: 'test2.js',
-				options: { body: true }
-			} );
-
-			// Error without this.
-			data.parts.push( '' );
+			// Dom-combiner throws error when it actually gets to combine data.parts so we clear it.
+			data.parts = [ '' ];
 
 			return when.resolve( data );
 		};
