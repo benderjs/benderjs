@@ -83,7 +83,6 @@ Commands:
   init     Initialize Bender.js for this directory
   run      Run the tests in a browser and output the results to the console
   server   Handle Bender.js server
-  version  Print Bender.js version
 
 Options:
 
@@ -91,6 +90,7 @@ Options:
   -d, --debug
   -H, --hostname  Hostname used to run the server
   -p, --port      Port on which the server will listen
+  -v, --version   Print Bender.js version
 ```
 
 In order to run Bender in your project, open the console in project's directory and type:
