@@ -70,7 +70,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<table class="table table-hover tests">
 		<thead class="fixed-header">
 			<tr>
-				<th class="col-md-5">ID</th>
+				<th class="col-md-5">Test</th>
 				<th class="col-md-1">Group</th>
 				<th class="col-md-2">Tags</th>
 				<th class="col-md-4">Status</th>
@@ -88,7 +88,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<!-- template for a single test row -->
 	<script type="text/html" id="test">
 	<tr data-id="<%= id %>" class="<%= getClass(result) %>">
-		<td><a href="/<%= id %>" title="<%= id %>" target="_blank"><%= id %></a></td>
+		<td><a href="/<%= id %>" title="<%= id %>" target="_blank"><%= displayName %></a></td>
 		<td title="<%= group %>"><%= group %></td>
 		<td title="<%= tags.join( ', ' ) %>"><%= tags.join( ', ' ) %></td>
 		<td class="result"><%= renderResult( result ) %></td>
@@ -189,8 +189,8 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<td><small><%= getTime(created) %></small></td>
 	<td class="results">
 		<% _.each(results, function (result) { %>
-		<div class="job-browser <%= result.name %> <%= getResultStyle(result) %>" title ="<%= getResultMessage(result) %>">
-			<span class="glyphicon <%= getIcon(result) %>"></span>
+		<div class="job-browser <%= result.name %> <%= getResultClass(result) %>" title ="<%= getResultMessage(result) %>">
+			<span class="glyphicon <%= getResultIcon(result) %>"></span>
 			<small><%= result.testedVersion && result.testedVersion !== result.version ?
 				result.testedVersion : result.version ? result.version : '*' %></small>
 		</div>
@@ -280,8 +280,8 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 				<th class="col-md-3">Test ID</th>
 				<th class="col-md-9 job-browsers">
 					<% _.each(results, function (result) { %>
-					<div class="job-browser <%= result.name %> <%= getResultStyle(result, true) %>" title ="<%= getResultMessage(result) %>">
-						<span class="glyphicon <%= getIcon(result) %>"></span>
+					<div class="job-browser <%= result.name %> <%= getResultClass(result, true) %>" title ="<%= getResultMessage(result) %>">
+						<span class="glyphicon <%= getResultIcon(result) %>"></span>
 						<small><%= result.version ? result.version : '' %></small>
 					</div>
 					<% }) %>
@@ -318,8 +318,8 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<td><a href="/jobs/<%= jobId %>/tests/<%= id %>" title="<%= id %>" target="_blank"><%= id %></a></td>
 		<td class="results">
 			<% _.each(results, function (result) { %>
-				<div class="task-result <%= getResultStyle(result) %><%= result.errors ? ' clickable' : '' %><%= isSlow(result) ? ' slow' : '' %>">
-					<span class="glyphicon <%= getIcon(result) %>" title="<%= getResultMessage(result) %>"></span>
+				<div class="task-result <%= getResultClass(result) %><%= result.errors ? ' clickable' : '' %><%= isSlow(result) ? ' slow' : '' %>">
+					<span class="glyphicon <%= getResultIcon(result) %>" title="<%= getResultMessage(result) %>"></span>
 					<% if (result.testedVersion && result.testedVersion !== result.version) { %>
 					<small title="<%= result.testedUA %>"><%= result.testedVersion %></small>
 					<% } %>
@@ -352,7 +352,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 				</button>
 			</label>
 			<select data-placeholder="Choose..." multiple class="job-browsers form-control" name="job-browsers">
-			<% _.each(App.Browsers.browsersList.models, function (browser) { %>
+			<% _.each(App.Browsers.browserList.models, function (browser) { %>
 				<% if (browser.attributes.header && browser.id !== 'Unknown') { %>
 					<option value="<%= browser.id.toLowerCase() %>"><%= browser.id %></option>
 				<% } %>
@@ -408,7 +408,7 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 				</button>
 			</label>
 			<select data-placeholder="Choose..." multiple class="job-browsers form-control" name="job-browsers">
-			<% _.each(App.Browsers.browsersList.models, function (browser) { %>
+			<% _.each(App.Browsers.browserList.models, function (browser) { %>
 				<% if (browser.attributes.header && browser.id !== 'Unknown') { %>
 					<option value="<%= browser.id.toLowerCase() %>" <%= findBrowser(browsers, browser.id) ? 'selected' : '' %>><%= browser.id %></option>
 				<% } %>
@@ -504,17 +504,10 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	</script>
 
 
-	<!-- template for error 404 page -->
-	<script type="text/html" id="error404">
-	<h4>Error 404</h4>
-	<h5>Page not found</h5>
-	</script>
-
-
-	<!-- template for unknown error page -->
+	<!-- template for error pages -->
 	<script type="text/html" id="error">
-	<h4>Error</h4>
-	<h5>Unknown error occured</h5>
+	<h4>Error<%= code ? ' ' + code : '' %></h4>
+	<h5><%= message || 'Unknown error occured' %></h5>
 	</script>
 
 

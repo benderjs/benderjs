@@ -35,36 +35,42 @@ describe( 'Tests', function() {
 	it( 'should list tests specified in the configuration file', function() {
 		var expected = [ {
 			id: 'test/fixtures/tests/test/1',
+			displayName: 'test/fixtures/tests/test/1',
 			js: path.normalize( 'test/fixtures/tests/test/1.js' ),
 			framework: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/2',
+			displayName: 'test/fixtures/tests/test/2',
 			js: path.normalize( 'test/fixtures/tests/test/2.js' ),
 			framework: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test/3',
+			displayName: 'test/fixtures/tests/test/3',
 			js: path.normalize( 'test/fixtures/tests/test/3.js' ),
 			framework: 'test',
 			applications: [],
 			group: 'Test'
 		}, {
 			id: 'test/fixtures/tests/test2/1',
+			displayName: 'test/fixtures/tests/test2/1',
 			js: path.normalize( 'test/fixtures/tests/test2/1.js' ),
 			framework: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/2',
+			displayName: 'test/fixtures/tests/test2/2',
 			js: path.normalize( 'test/fixtures/tests/test2/2.js' ),
 			framework: 'test',
 			applications: [ 'test' ],
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/3',
+			displayName: 'test/fixtures/tests/test2/3',
 			js: path.normalize( 'test/fixtures/tests/test2/3.js' ),
 			script: path.normalize( 'test/fixtures/tests/test2/3.md' ),
 			framework: 'test',
@@ -72,6 +78,7 @@ describe( 'Tests', function() {
 			group: 'Test2'
 		}, {
 			id: 'test/fixtures/tests/test2/4',
+			displayName: 'test/fixtures/tests/test2/4',
 			script: path.normalize( 'test/fixtures/tests/test2/4.md' ),
 			framework: 'test',
 			applications: [ 'test' ],
@@ -81,6 +88,46 @@ describe( 'Tests', function() {
 		return bender.tests.list()
 			.then( function( tests ) {
 				expect( tests ).to.deep.equal( expected );
+			} );
+	} );
+
+	it( 'should fire `test:created` for every test created', function() {
+		var ids = [],
+			expected = [
+				'test/fixtures/tests/test/1',
+				'test/fixtures/tests/test/2',
+				'test/fixtures/tests/test/3',
+				'test/fixtures/tests/test2/1',
+				'test/fixtures/tests/test2/2',
+				'test/fixtures/tests/test2/3',
+				'test/fixtures/tests/test2/4'
+			];
+
+		// We don't expect the order to be the same, so we'll sort both lists.
+		expected.sort();
+
+		bender.on( 'test:created', function( test ) {
+			ids.push( test.id );
+		} );
+
+		return bender.tests.list()
+			.then( function() {
+				// Just like above, sort the result as we don't expect the order to match.
+				ids.sort();
+				expect( ids ).to.deep.equal( expected );
+			} );
+	} );
+
+	it( 'should allow changing test on `test:created`', function() {
+		bender.on( 'test:created', function( test ) {
+			test.testProperty = true;
+		} );
+
+		return bender.tests.list()
+			.then( function( tests ) {
+				tests.forEach( function( test ) {
+					expect( test ).to.have.property( 'testProperty' );
+				} );
 			} );
 	} );
 

@@ -1,0 +1,81 @@
+<script type="text/html" id="job-row">
+	<td><input type="checkbox"></td>
+	<td><%= id %></td>
+	<td><%= description %></td>
+</script>
+
+<script type="text/html" id="no-jobs">
+	<td>No jobs</td>
+</script>
+
+<script type="text/html" id="job-list-header">
+	<button class="remove-selected-button">Remove</button>
+</script>
+
+<script type="text/html" id="jobs">
+	<table>
+		<thead>
+			<tr>
+				<th><input type="checkbox" class="select-all-jobs"></th>
+				<th>ID</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</script>
+
+<script type="text/html" id="task">
+	<td><%= id %></td>
+	<td>
+		<% _.each(results, function (result) { %>
+			<div <%= result.errors ? 'class="clickable"' : '' %>>
+				<%= result.testedUA %>
+			</div>
+		<% }) %>
+	</td>
+</script>
+
+<script type="text/html" id="job-header">
+	<div><%= id %></div>
+	<div><%= created %></div>
+	<div><%= description %></div>
+	<div>
+		<label><input type="radio" name="show-mode" class="check-all"> All</label>
+		<label><input type="radio" name="show-mode" class="check-failed"> Failed</label>
+	</div>
+	<div>
+		<button class="edit-button">Edit</button>
+		<button class="remove-button">Remove</button>
+		<button class="restart-button">Restart</button>
+	</div>
+</script>
+
+<script type="text/html" id="job">
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</script>
+
+<script type="text/html" id="edit-job">
+	<h4>Edit job: <%= id %></h4>
+	<button class="add-all-button">Add all</button>
+	<button class="add-captured-button">Add captured</button>
+	<select multiple class="job-browsers">
+		<% App.Browsers.browserList.each( function (browser) { %>
+			<% if (browser.attributes.header && browser.id !== 'Unknown') { %>
+				<option value="<%= browser.id.toLowerCase() %>" <%= findBrowser(browsers, browser.id) ? 'selected' : '' %>><%= browser.id %></option>
+			<% } %>
+		<% }) %>
+	</select>
+	<input type="text" class="job-description" value="<%= description %>">
+	<button class="save-button">Save <span class="loader"></span></button>
+</script>

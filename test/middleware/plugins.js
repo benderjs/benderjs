@@ -49,7 +49,7 @@ describe( 'Middleware - Plugins', function() {
 		oldLog = pluginsModule.__set__( 'logger', oldLog );
 	} );
 
-	beforeEach( function() {
+	beforeEach( function( done ) {
 		bender = mocks.getBender( 'conf', 'sockets' );
 		bender.conf.plugins = [ 'framework-test' ];
 		bender.use( [ utilsModule, filesModule, pluginsModule, serverModule ] );
@@ -57,7 +57,12 @@ describe( 'Middleware - Plugins', function() {
 		bender.middlewares = new Store();
 		bender.middlewares.add( 'plugins', plugins.build );
 		bender.init();
-		instance = bender.server.create();
+		bender.server.create().done( function( server ) {
+			instance = server;
+			done();
+		}, function( err ) {
+			throw err;
+		} );
 	} );
 
 	afterEach( function() {

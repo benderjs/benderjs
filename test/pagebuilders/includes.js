@@ -12,6 +12,7 @@
 'use strict';
 
 var mocks = require( '../fixtures/_mocks' ),
+	sinon = require( 'sinon' ),
 	expect = require( 'chai' ).expect,
 	rewire = require( 'rewire' ),
 	_ = require( 'lodash' ),
@@ -53,36 +54,40 @@ describe( 'Page Builders - Includes', function() {
 		expect( builder( _.cloneDeep( data ) ) ).to.deep.equal( data );
 	} );
 
-	it( 'should add a script tag for each source defined in data.include array', function() {
-		var data = {
+	it( 'should call addJS for each source defined in data.include array', function() {
+		var spy = sinon.spy(),
+			data = {
 				id: 'foo',
 				framework: 'bar',
 				applications: {},
 				group: 'Test',
 				include: [ 'foo/bar.js', 'baz/test.js' ],
-				parts: []
-			},
-			expected = '<head>\n<script src="foo/bar.js"></script>\n<script src="baz/test.js"></script>\n</head>',
-			result = builder( data );
+				addJS: spy
+			};
 
-		expect( result.parts ).to.have.length( 1 );
-		expect( result.parts[ 0 ] ).to.equal( expected );
+		builder( data );
+
+		sinon.assert.calledTwice( spy );
+		sinon.assert.calledWithExactly( spy, 'foo/bar.js' );
+		sinon.assert.calledWithExactly( spy, 'baz/test.js' );
 	} );
 
 	it( 'should support %BASE_PATH% and %TEST_DIR% tags in include paths', function() {
-		var data = {
+		var spy = sinon.spy(),
+			data = {
 				id: 'test/fixtures/tests/bar/baz',
 				framework: 'bar',
 				applications: {},
 				group: 'Test',
 				include: [ '%TEST_DIR%foo/bar.js', '%BASE_PATH%baz/test.js' ],
-				parts: []
-			},
-			expected = '<head>\n<script src="/test/fixtures/tests/bar/foo/bar.js"></script>\n' +
-			'<script src="/test/fixtures/tests/baz/test.js"></script>\n</head>',
-			result = builder( data );
+				addJS: spy
+			};
 
-		expect( result.parts ).to.have.length( 1 );
-		expect( result.parts[ 0 ] ).to.equal( expected );
+		builder( data );
+
+		sinon.assert.calledTwice( spy );
+		sinon.assert.calledWithExactly( spy, '/test/fixtures/tests/bar/foo/bar.js' );
+		sinon.assert.calledWithExactly( spy, '/test/fixtures/tests/baz/test.js' );
+
 	} );
 } );

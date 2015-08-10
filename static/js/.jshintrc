@@ -2,5 +2,5 @@
 	"browser": true,
 	"undef": true,
 	"unused": true,
-	"predef": ["bender", "Backbone", "Marionette", "App", "_", "$", "moment"]
+	"predef": ["bender", "Backbone", "Marionette", "App", "_", "$", "moment", "io"]
 }

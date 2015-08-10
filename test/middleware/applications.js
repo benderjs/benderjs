@@ -44,14 +44,19 @@ describe( 'Middleware - Applications', function() {
 		instance,
 		bender;
 
-	beforeEach( function() {
+	beforeEach( function( done ) {
 		bender = mocks.getBender( 'conf', 'sockets' );
 		bender.preprocessors = [];
 		bender.middlewares = new Store();
 		bender.middlewares.add( 'applications', applications.build );
 		bender.use( [ utilsModule, filesModule, serverModule, appsModule ] );
 		bender.init();
-		instance = bender.server.create();
+		bender.server.create().done( function( server ) {
+			instance = server;
+			done();
+		}, function( err ) {
+			throw err;
+		} );
 	} );
 
 	afterEach( function() {
@@ -59,6 +64,8 @@ describe( 'Middleware - Applications', function() {
 			instance.close();
 		} catch ( e ) {}
 	} );
+
+	this.timeout( 5000 );
 
 	it( 'should expose build function', function() {
 		expect( applications.build ).to.be.a( 'function' );

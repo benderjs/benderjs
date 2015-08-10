@@ -1,5 +1,6 @@
 {
 	"excludeFiles": [
+		".bender/*",
 		"node_modules/*",
 		"static/vendor/*",
 		"coverage/*",
@@ -64,7 +65,7 @@
 	"disallowKeywordsOnNewLine": [
 		"else", "catch"
 	],
-	"maximumLineLength": 120,
+	"maximumLineLength": 140,
 	"safeContextKeyword": [
 		"that", "bender"
 	],

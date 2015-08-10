@@ -1,0 +1,9 @@
+{
+	"browser": true,
+	"predef": [
+		"Marionette", "Backbone", "sinon", "_", "App", "document", "bender",
+		"describe", "expect", "beforeEach", "afterEach", "it"
+	],
+	"undef": true,
+	"unused": true
+}
