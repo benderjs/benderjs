@@ -292,7 +292,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				this.set( {
 					completed: model.completed + 1,
-					failed: model.failed + ( data.failed || 0 ),
+					failed: model.failed + ( data.failed || 0 ) + ( data.broken ? 1 : 0),
 					passed: model.passed + ( data.passed || 0 ),
 					time: new Date() - model.start
 				} );
