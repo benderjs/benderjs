@@ -14,6 +14,7 @@
 var mocks = require( './fixtures/_mocks' ),
 	expect = require( 'chai' ).expect,
 	http = require( 'http' ),
+	https = require( 'https' ),
 	rewire = require( 'rewire' ),
 	server = rewire( '../lib/server' );
 
@@ -21,22 +22,30 @@ describe( 'Server', function() {
 	var bender,
 		instance;
 
-	beforeEach( function( done ) {
-		bender = mocks.getBender( 'sockets', 'middlewares', 'utils', 'conf' );
-		bender.use( server );
-
+	function createServer( done ) {
 		bender.server.create().done( function( server ) {
 			instance = server;
 			done();
 		}, function( err ) {
 			throw err;
 		} );
-	} );
+	}
 
-	afterEach( function() {
+	function closeServer() {
 		try {
 			instance.close();
 		} catch ( e ) {}
+	}
+
+	beforeEach( function( done ) {
+		bender = mocks.getBender( 'sockets', 'middlewares', 'utils', 'conf' );
+		bender.use( server );
+
+		createServer( done );
+	} );
+
+	afterEach( function() {
+		closeServer();
 	} );
 
 	it( 'should expose "create" function when attached to Bender', function() {
@@ -94,6 +103,20 @@ describe( 'Server', function() {
 					done();
 				} );
 			} );
+		} );
+	} );
+
+	it( 'should create https server', function( done ) {
+		// Close the instance that was created in beforeEach.
+		closeServer();
+
+		bender.conf.secure = true;
+		bender.conf.certificate = "server.crt";
+		bender.conf.privateKey = "server.key";
+
+		createServer( function() {
+			expect( instance ).to.be.instanceof( https.Server );
+			done();
 		} );
 	} );
 } );
