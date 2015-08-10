@@ -42,13 +42,17 @@ Below is an empty configuration file:
  * @param {Object}   applications       Applications used in current project
  * @param {Array}    browsers           List of browsers used for testing
  * @param {Number}   captureTimeout     Timeout before which a launched browser should connect to the server
+ * @param {String}   certificate		Location of the certificate file
  * @param {Boolean}  debug              Enable debug logs
+ * @param {Number}   defermentTimeout	Timeout before which a plugin should finish initializing on a test page
  * @param {String}   framework          Default framework used for the tests
  * @param {String}   hostname           Host on which the HTTP and WebSockets servers will listen
  * @param {Array}    manualBrowsers     List of browsers accepting manual tests
  * @param {Number}   manualTestTimeout  Timeout after which a manual test is marked as failed
  * @param {Array}    plugins            List of Bender plugins to load at startup (Required)
  * @param {Number}   port               Port on which the HTTP and WebSockets servers will listen
+ * @param {String}   privateKey			Location of the private key file
+ * @param {Boolean}  secure				Flag telling whether to serve contents over HTTPS and WSS
  * @param {Number}   slowAvgThreshold   Average test case duration threshold above which a test is marked as slow
  * @param {Number}   slowThreshold      Test duration threshold above which a test is marked as slow
  * @param {String}   startBrowser       Name of a browser to start when executing bender run command
@@ -97,10 +101,16 @@ $ bender server run
 
 This will start the server in the verbose mode.
 
-Now open a web browser. Bender.js dashboard is available under:
+Now open a web browser. By default, Bender.js dashboard is available under:
 
 ```
 http://localhost:1030
+```
+
+If you configured Bender.js to serve contents over HTTPS, use:
+
+```
+https://localhost:1030
 ```
 
 **Note:** You can also run the server as a daemon:
