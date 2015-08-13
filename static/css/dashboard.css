@@ -140,8 +140,15 @@ th:last-child {
 	display: table-row !important;
 }
 
+.tests .clickable {
+	border-bottom: 1px dashed #a94442;
+	padding-bottom: 2px;
+	position: relative;
+	top: -1px;
+}
+
 .tests .clickable:hover {
-	text-decoration: underline;
+	border-bottom-style: solid;
 }
 
 .context-frame {

@@ -1022,11 +1022,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		 * @param  {String} id Test ID
 		 */
 		renderResult: function( id ) {
-			var result = this.model.get( 'tests' ).get( id ),
+			var resultObj = this.model.get( 'tests' ).get( id ),
 				row;
 
-			if ( result ) {
-				result = result.get( 'result' ).toJSON();
+			if ( resultObj ) {
+				var result = resultObj.get( 'result' ).toJSON();
 
 				row = this.$el.find( '[data-id="' + id + '"]' );
 
@@ -1036,7 +1036,20 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				row.find( '.result' ).html( this.resultTemplate( _.extend( {}, result, this.templateHelpers ) ) );
 				Tests.controller.scrollTo( row );
+
+				this.logErrors( result );
 			}
+		},
+
+		logErrors: function( result ) {
+			var suiteName = result.displayName;
+			_.each( result.errors, function( error ) {
+				var logMessage = 'Test failed in: ' + suiteName + ' \n' +
+					'Name: ' + error.name + '\n\n' +
+					error.error;
+
+				console.error( logMessage );
+			} );
 		},
 
 		/**
