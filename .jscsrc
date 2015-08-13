@@ -1,10 +1,13 @@
 {
 	"excludeFiles": [
 		".bender/*",
-		"node_modules/*",
-		"static/vendor/*",
+		"node_modules/**",
+		"static/vendor/**",
 		"coverage/*",
-		"out/*"
+		"out/**"
+	],
+	"fileExtensions": [
+	  ".js"
 	],
 	"requireCurlyBraces": [
 		"if", "else", "for", "while", "do", "switch", "try", "catch"
@@ -69,6 +72,8 @@
 	"safeContextKeyword": [
 		"that", "bender"
 	],
-	"requireDotNotation": true,
+	"requireDotNotation": {
+		"allExcept": [ "keywords" ]
+	},
 	"disallowYodaConditions": true
 }
