@@ -1037,7 +1037,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				row.find( '.result' ).html( this.resultTemplate( _.extend( {}, result, this.templateHelpers ) ) );
 				Tests.controller.scrollTo( row );
 
-				this.logErrors( result );
+				bender.env.supportsConsole && this.logErrors( result );
 			}
 		},
 
