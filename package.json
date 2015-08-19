@@ -14,7 +14,7 @@
 	"scripts": {
 		"doc": "jsdoc -r lib/ -d out/server/ && jsdoc -r static/js/ -d out/dashboard/",
 		"lint": "jshint lib/ test/ && jscs .",
-		"postinstall": "bower install",
+		"postinstall": "bower install && rm -rf ./.git/hooks/* && cp ./hooks/* ./.git/hooks",
 		"test": "istanbul test node_modules/mocha/bin/_mocha -- test/ --reporter list --check-leaks --recursive",
 		"test-dashboard": "node lib/cli.js server run"
 	},
