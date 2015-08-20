@@ -88,6 +88,5 @@ describe( 'Page Builders - Includes', function() {
 		sinon.assert.calledTwice( spy );
 		sinon.assert.calledWithExactly( spy, '/test/fixtures/tests/bar/foo/bar.js' );
 		sinon.assert.calledWithExactly( spy, '/test/fixtures/tests/baz/test.js' );
-
 	} );
 } );

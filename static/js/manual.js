@@ -69,9 +69,7 @@
 			i;
 
 		for ( i = 0, len = inputs.length; i < len; i++ ) {
-			if ( ( input = inputs[ i ] ) &&
-				input.type === 'checkbox' && !input.checked ) {
-
+			if ( ( input = inputs[ i ] ) &&	input.type === 'checkbox' && !input.checked ) {
 				if ( !sent ) {
 					sent = true;
 				}
@@ -132,6 +130,7 @@
 		if ( target === hideSidebarEl ) {
 			bodyEl.className = 'sidebar-hidden';
 			event.preventDefault();
+
 			return false;
 		}
 
@@ -188,6 +187,7 @@
 	bender.addListener( showSidebarEl, 'click', function( event ) {
 		bodyEl.className = '';
 		event.preventDefault();
+
 		return false;
 	} );
 

@@ -204,5 +204,4 @@ describe( 'Browsers', function() {
 
 		bender.browsers.setClientReady( id );
 	} );
-
 } );

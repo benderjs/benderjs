@@ -123,7 +123,6 @@ describe( 'Files', function() {
 		bender.files.send( file1, req, res, file2 );
 	} );
 
-
 	it( 'should reject a promise if no file found to be send', function() {
 		var req = mocks.createFakeRequest(),
 			res = mocks.createFakeResponse();
@@ -188,6 +187,7 @@ describe( 'Files', function() {
 			return file.read()
 				.then( function( result ) {
 					content = result.toString();
+
 					return file.read();
 				} )
 				.then( function( result ) {

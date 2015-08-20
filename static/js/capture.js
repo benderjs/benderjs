@@ -184,6 +184,7 @@
 			// close everything on disconnect
 			if ( this.running ) {
 				this.running = false;
+
 				if ( bender.env.ie && testWindow ) {
 					testWindow.close();
 					testWindow = null;
@@ -255,6 +256,7 @@
 		for ( i = 0; i < options.length; i++ ) {
 			if ( options[ i ].value === mode ) {
 				selectEl.selectedIndex = i;
+
 				return;
 			}
 		}

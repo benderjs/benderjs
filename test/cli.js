@@ -20,7 +20,6 @@ var sinon = require( 'sinon' ),
 	oldWrite,
 	writeBuffer;
 
-
 describe( 'CLI', function() {
 	before( function() {
 		oldWrite = process.stdout.write;

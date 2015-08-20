@@ -46,7 +46,6 @@
 				};
 
 				that.next( JSON.stringify( result ) );
-
 			}, that.config.testTimeout );
 		}
 

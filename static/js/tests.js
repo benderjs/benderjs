@@ -110,7 +110,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				if ( _.indexOf( tokens, name ) < 0 ) {
 					tokens.push( name );
 				}
-
 			} );
 
 			tokens.sort();
@@ -199,6 +198,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		 * Handle render event
 		 */
 		onRender: function() {
+			// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+
 			this.ui.filter.chosen( {
 				width: '100%',
 				search_contains: true
@@ -275,7 +276,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				passed: 0,
 				failed: 0,
 				time: 0,
-				start: +new Date(),
+				start: Number( new Date() ),
 				completed: 0,
 				total: 0,
 				running: false
@@ -1108,6 +1109,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			if ( !attrs.browsers.length ) {
 				return 'No browsers specified for the job';
 			}
+
 			if ( !attrs.tests.length ) {
 				return 'No tests specified for the job';
 			}

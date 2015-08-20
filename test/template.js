@@ -138,7 +138,6 @@ describe( 'Template', function() {
 
 	it( 'should expose data.addCSS, data.addJS and data.addFile', function() {
 		var testPagebuilder = function( data ) {
-
 			expect( data ).to.have.property( 'addCSS' ).that.is.a( 'function' );
 			expect( data ).to.have.property( 'addJS' ).that.is.a( 'function' );
 			expect( data ).to.have.property( 'addFile' ).that.is.a( 'function' );

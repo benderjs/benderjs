@@ -134,7 +134,6 @@ describe( 'Plugins', function() {
 		process.exit.restore();
 	} );
 
-
 	it( 'should load framework plugin', function() {
 		var bender = mocks.getBender();
 

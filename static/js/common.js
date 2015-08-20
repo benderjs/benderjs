@@ -535,7 +535,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 		 */
 		initialize: function() {
 			this.on( 'sync error', function() {
-				this.lastFetch = +new Date();
+				this.lastFetch = Number( new Date() );
 			}, this );
 		},
 
@@ -575,9 +575,7 @@ App.module( 'Common', function( Common, App, Backbone ) {
 			}
 
 			// a fetch is already pending or a fetch delay didn't expire yet
-			if ( this.deferredFetch && this.deferredFetch.state() === 'pending' ||
-				this.lastFetch + this.fetchDelay > +new Date() ) {
-
+			if ( this.deferredFetch && this.deferredFetch.state() === 'pending' || this.lastFetch + this.fetchDelay > Number( new Date() ) ) {
 				return this.deferFetch( options );
 			}
 
