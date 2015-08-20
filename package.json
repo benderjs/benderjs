@@ -57,7 +57,7 @@
 	},
 	"devDependencies": {
 		"benderjs-coverage": "^0.2.0",
-		"benderjs-mocha": "^0.2.3",
+		"benderjs-mocha": "^0.3.0",
 		"benderjs-sinon": "^0.2.3",
 		"chai": "^3.2.0",
 		"chai-as-promised": "^5.1.0",
