@@ -401,3 +401,7 @@ input.job-description {
 .fixed .panel {
 	margin-bottom: 0;
 }
+
+.container {
+	width: 100%;
+}
