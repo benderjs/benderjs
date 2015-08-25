@@ -3,182 +3,171 @@ Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
 Licensed under the terms of the MIT License (see LICENSE.md).
 */
 
-body {
-	position: relative;
-	margin-left: 300px;
-	padding: 10px;
+html, body {
+	width: 100%;
 	height: 100%;
-}
-
-.summary {
-	left: 300px;
-}
-
-.manual-sidebar {
-	font-family: 'Arial', 'Helvetica', sans-serif;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 300px;
-	height: 100%;
-	border-right: 1px solid #e7e7e7;
-	background: #f8f8f8;
+	padding: 0 !important;
+	margin: 0 !important;
 	overflow: hidden;
+	font-family: Arial, sans-serif;
+	font-size: 14px;
 }
 
-.manual-sidebar h1 {
+.center {
+	padding: 14px;
+	overflow: auto;
+}
+
+.test-description {
+	width: 300px;
+	border-right: 1px solid #AAAAAA;
+	background: #F6F6F6;
+	position: relative;
+	line-height: 20px;
+}
+
+.console-panel {
+	border-top: 4px solid #AAAAAA;
+	height: 200px;
+	position: relative;
+	font-family: monospace;
+	line-height: 18px;
+	color: #000000;
+}
+
+.panel-content {
+	width: 100%;
+	height: 100%;
+	padding: 14px;
+	box-sizing: border-box;
+	overflow: auto;
+}
+
+.test-description .panel-content {
+	padding-top: 4px;
+}
+
+.console-panel .panel-content {
+	padding: 0px;
+	overflow-y: scroll;
+}
+
+.console-panel p {
+	border-bottom: 1px solid #EEEEEE;
+	padding: 3px 5px;
+	line-height: 18px;
+	margin: 0px;
+}
+
+.console-panel p.error {
+	color: #FF0000;
+	background: #FFF4F4;
+}
+
+.top-bar {
+	height: 36px;
+	padding: 10px;
+	background: #F6F6F6;
+	border-bottom: 1px solid #AAAAAA;
+}
+
+.top-bar div {
+	display: inline-block;
+	margin-right: 100px;
+}
+
+.top-bar a {
+	display: inline-block;
+	height: 34px;
+	line-height: 34px;
+	white-space: nowrap;
+	background: #FFFFFF;
+	padding: 0px 10px;
+	text-decoration: none;
+	color: #606060;
+	border: 1px solid #AAAAAA;
+	border-radius: 4px;
+	box-shadow: inset 0px 0px 7px -2px #909090;
+	margin-right: 6px;
+}
+
+.layout-toggle.active {
+	box-shadow: inset 3px 3px 9px -3px #909090;
+	background: #F8F8F8;
+}
+
+a.btn-pass {
+	background: #DDFFDD;
+	box-shadow: none;
+}
+
+a.btn-fail {
+	background: #FFDDDD;
+	box-shadow: none;
+}
+
+a.btn-finish {
+	box-shadow: none;
+}
+
+.hidden {
+	display: none;
+}
+
+.test-description h1 {
 	font-size: 1.5em;
 	margin: 0 0 10px 0;
 	color: #777;
 }
 
-.manual-sidebar p {
-	line-height: 1.25em;
-}
-
-.manual-sidebar code {
+.test-description code {
 	display: inline-block;
 	padding: 2px 5px;
-	background: #eee;
+	background: #E9E9E9;
 	border: 1px solid #e7e7e7;
 	border-radius: 3px;
 }
 
-.manual-sidebar p code {
+.test-description p code {
 	padding: 2px 0 2px;
 	font-size: 85%;
 }
 
-.manual-sidebar p code:before,
-.manual-sidebar p code:after {
+.test-description p code:before,
+.test-description p code:after {
 	letter-spacing: -0.2em;
 	content: '\00a0';
 }
 
-.manual-sidebar ol,
-.manual-sidebar ul {
+.test-description ol,
+.test-description ul {
 	padding-left: 25px;
 }
 
-.manual-sidebar .script {
-	overflow-y: scroll;
-	position: absolute;
-	top: 0;
-	bottom: 50px;
-	left: 0;
-	right: 0;
-	color: #333;
-	padding: 10px;
+.test-description li {
+	padding-bottom: 4px;
 }
 
-.manual-sidebar .script .fail {
-	background: #f2dede;
-}
+/*.test-description .fail-check {*/
+	/*visibility: hidden*/
+/*}*/
 
-.manual-sidebar .fail-check {
-	float: right;
-	clear: right;
-	visibility: hidden
-}
+/*.test-description .fail-check:not(:checked) {*/
+	/*visibility: visible;*/
+/*}*/
 
-.manual-sidebar .fail-check:not(:checked) {
+.test-description li:hover > .fail-check {
 	visibility: visible;
 }
 
-.manual-sidebar li:hover > .fail-check {
-	visibility: visible;
-}
-
-.manual-sidebar .controls {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	height: 50px;
-	padding: 0 10px 0;
-	text-align: center;
-	line-height: 50px;
-	box-shadow: 0 0 10px 5px #f8f8f8;
-}
-
-.manual-sidebar .controls .ok {
-	background: #dff0d8;
-    border: 1px solid #9c9;
-	color: #090;
-}
-
-.manual-sidebar .controls .ok:hover {
-	background: #efe;
-}
-
-.manual-sidebar .controls .fail {
-	background: #f2dede;
-    border: 1px solid #c99;
-	color: #900;
-}
-
-.manual-sidebar .controls .fail:hover {
-	background: #fee;
-}
-
-.manual-sidebar .controls .btn-finish {
-	background: #def;
-	color: #36c;
-	border: 1px solid #36c;
-}
-
-.manual-sidebar .controls .btn-finish:hover {
-	background: #eff;
-}
-
-.manual-sidebar .controls button {
-	font-size: 16px;
-	line-height: 28px;
-	border-radius: 3px;
-	text-align: center;
-	cursor: pointer;
+.top-bar .test-controls a {
 	display: none;
 }
 
-.manual-sidebar .controls .visible {
-	display: inline;
+.top-bar .test-controls .visible {
+	display: inline-block;
 }
 
-.manual-sidebar .controls .disabled {
-	color: #ccc;
-	background: #efefef;
-	border: 1px solid #ccc;
-	cursor: default;
-}
-
-.manual-sidebar .controls .disabled:hover {
-	background: #efefef;
-}
-
-.hide-sidebar {
-	position: absolute;
-	top: -4px;
-	right: 23px;
-	z-index: 1;
-	color: #000;
-}
-
-.show-sidebar {
-	position: fixed;
-	top: -4px;
-	left: -3px;
-	display: none;
-	color: #000;
-}
-
-body.sidebar-hidden {
-	margin-left: 36px;
-}
-
-body.sidebar-hidden .show-sidebar {
-	display: block;
-}
-
-body.sidebar-hidden .manual-sidebar {
-	display: none;
+.center {
+	box-shadow: inset 0px 0px 18px -2px #CCCCCC;
 }

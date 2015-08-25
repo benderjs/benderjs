@@ -8,12 +8,9 @@
 ( function() {
 	'use strict';
 
-	var sidebarEl = document.getElementById( 'manual-sidebar' ),
-		scriptEl = document.getElementById( 'manual-script' ),
-		buttonEls = sidebarEl.getElementsByTagName( 'button' ),
-		showSidebarEl = document.getElementById( 'show-sidebar' ),
-		hideSidebarEl = document.getElementById( 'hide-sidebar' ),
-		bodyEl = document.getElementsByTagName( 'body' )[ 0 ],
+	var buttonsHolder = document.getElementById( 'test-controls' ),
+		buttonEls = buttonsHolder.getElementsByTagName( 'a' ),
+		scriptEl = document.getElementById( 'test-description' ),
 		passBtn = buttonEls[ 0 ],
 		finishBtn = buttonEls[ 1 ],
 		failBtn = buttonEls[ 2 ],
@@ -127,13 +124,6 @@
 			disableButtons();
 		}
 
-		if ( target === hideSidebarEl ) {
-			bodyEl.className = 'sidebar-hidden';
-			event.preventDefault();
-
-			return false;
-		}
-
 		if ( target === finishBtn && bender.testData.js ) {
 			oldStart();
 		}
@@ -144,34 +134,6 @@
 		}
 	}
 
-	/**
-	 * Add a checkbox to the element
-	 * @param {Element} elem DOM element
-	 */
-	function addCheckbox( elem ) {
-		var checkbox = document.createElement( 'input' );
-
-		checkbox.type = 'checkbox';
-		checkbox.checked = true;
-		checkbox.className = 'fail-check';
-		checkbox.title = 'Mark as failed';
-
-		elem.insertBefore( checkbox, elem.firstChild );
-	}
-
-	/**
-	 * Add checkboxes to all list items in the manual test sidebar
-	 */
-	function addCheckboxes() {
-		var elems = scriptEl.getElementsByTagName( 'li' ),
-			len = elems.length,
-			i;
-
-		for ( i = 0; i < len; i++ ) {
-			addCheckbox( elems[ i ] );
-		}
-	}
-
 	// show proper controls depending on type of a test
 	if ( bender.testData.js ) {
 		finishBtn.className += ' visible';
@@ -179,17 +141,131 @@
 		passBtn.className += ' visible';
 	}
 
+	bender.addListener( buttonsHolder, 'click', handleClick );
+
 	// restore the old alert function
 	window.alert = bender.oldAlert;
 
-	// bind a click handler
-	bender.addListener( sidebarEl, 'click', handleClick );
-	bender.addListener( showSidebarEl, 'click', function( event ) {
-		bodyEl.className = '';
-		event.preventDefault();
-
-		return false;
-	} );
-
-	addCheckboxes();
+	//addCheckboxes();
 } )();
+
+var ManualLayout = function( domSelectors ) {
+	var TEST_DESCRIPTION_MAX_WIDTH = 420,
+		CONSOLE_MAX_HEIGHT = 400,
+		MIN_SIZE = 80,
+		LAYOUT_OPTIONS = {
+			resize: false,
+			type: 'border',
+			hgap: 0,
+			vgap: 0
+		},
+		COOKIE_SETTINGS = {
+			expires: 365,
+			path: '/'
+		};
+
+	var that = this;
+
+	this.$topBar = null;
+	this.$container = null;
+	this.$testDescription = null;
+	this.$consolePanel = null;
+
+	this.fixSizes = function( saveSizes ) {
+		this.$container.layout( LAYOUT_OPTIONS );
+		saveSizes && this.saveSizes();
+	};
+
+	this.saveSizes = function() {
+		$.cookie( 'test-description-hidden', Number( this.$testDescription.hasClass( 'hidden' ) ), COOKIE_SETTINGS );
+		$.cookie( 'console-panel-hidden', Number( this.$consolePanel.hasClass( 'hidden' ) ), COOKIE_SETTINGS );
+		$.cookie( 'test-description-width', this.$testDescription.css( 'width' ), COOKIE_SETTINGS );
+		$.cookie( 'console-panel-height', this.$consolePanel.css( 'height' ), COOKIE_SETTINGS );
+	};
+
+	this.restoreSizes = function() {
+		var testDescriptionHidden = Number( $.cookie( 'test-description-hidden' ) ),
+			consolePanelHidden = Number( $.cookie( 'console-panel-hidden' ) ),
+			testDescriptionWidth = $.cookie( 'test-description-width' ),
+			consolePanelHeight = $.cookie( 'console-panel-height' );
+
+		this.$testDescription.css( 'width', testDescriptionWidth || '' );
+		this.$consolePanel.css( 'height', consolePanelHeight || '' );
+
+		testDescriptionHidden && this.$testDescription.addClass( 'hidden' );
+		consolePanelHidden && this.$consolePanel.addClass( 'hidden' );
+	};
+
+	this.enableButtons = function() {
+		var that = this;
+		$( '.layout-toggle' ).on( 'click', function( e ) {
+			e.preventDefault();
+
+			var $panel = $( '.' + $( this ).attr( 'rel' ) );
+			$panel.toggleClass( 'hidden' );
+
+			$( this ).toggleClass( 'active' );
+
+			that.fixSizes( true );
+		} ).each( function() {
+			var $panel = $( '.' + $( this ).attr( 'rel' ) );
+
+			if ( $panel.hasClass( 'hidden' ) ) {
+				$( this ).removeClass( 'active' );
+			}
+		} );
+	};
+
+	this.init = function( domSelectors ) {
+		var that = this;
+
+		this.$container = $( domSelectors.container );
+		this.$topBar = $( domSelectors.topBar ).addClass( 'north' );
+		this.$testDescription = $( domSelectors.testDescription ).addClass( 'west' );
+		this.$consolePanel = $( domSelectors.consolePanel ).addClass( 'south' );
+
+		this.$container.layout( LAYOUT_OPTIONS );
+
+		this.$consolePanel.resizable( {
+			handles: 'n',
+			minHeight: MIN_SIZE,
+			maxHeight: CONSOLE_MAX_HEIGHT,
+			stop: function() {
+				that.fixSizes( true );
+			}
+		} );
+
+		this.$testDescription.resizable( {
+			handles: 'e',
+			minWidth: MIN_SIZE,
+			maxWidth: TEST_DESCRIPTION_MAX_WIDTH,
+			stop: function() {
+				that.fixSizes( true );
+			}
+		} );
+
+		this.restoreSizes();
+
+		this.enableButtons();
+
+		$( window ).on( 'resize', function() {
+			that.fixSizes( true );
+		} );
+
+		this.fixSizes( false );
+	};
+
+	this.init( domSelectors );
+};
+
+var oldConsoleLog = window.console.log;
+window.console.log = function() {
+	$( '#console' ).append( '<p>' + Array.prototype.slice.call( arguments ).join( ' ' ) + '</p>' );
+	oldConsoleLog.apply( window.console, arguments );
+};
+
+var oldConsoleErr = window.console.error;
+window.console.error = function() {
+	$( '#console' ).append( '<p class="error">' + Array.prototype.slice.call( arguments ).join( ' ' ) + '</p>' );
+	oldConsoleErr.apply( window.console, arguments );
+};

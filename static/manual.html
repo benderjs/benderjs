@@ -1,25 +1,44 @@
-<!--
-Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
-Licensed under the terms of the MIT License (see LICENSE.md).
--->
-<html>
 <head>
-	<link rel="stylesheet" href="/css/manual.css">
+	<link type="text/css" href="/css/manual.css" rel="stylesheet" />
+	<link type="text/css" href="/vendor/jlayout/jquery-ui.structure.min.css" rel="stylesheet" />
+	<script src="/vendor/jquery/dist/jquery.min.js"></script>
+	<script src="/vendor/jlayout/jquery-ui.min.js"></script>
+	<script src="/vendor/jlayout/jquery.cookie.js"></script>
+	<script src="/vendor/jlayout/jquery.sizes.js"></script>
+	<script src="/vendor/jlayout/jlayout.border.js"></script>
+	<script src="/vendor/jlayout/jquery.jlayout.js"></script>
 </head>
+
 <body>
-	<div id="manual-sidebar" class="manual-sidebar">
-		<a href="#" class="btn failed hide-sidebar" id="hide-sidebar"></a>
-		<div id="manual-script" class="script">
-			<h1>Test steps</h1>
-			%SCRIPT%
+	<div class="top-bar">
+		<div class="layout-controls">
+			<a href="#" class="layout-toggle active" rel="test-description">Description</a>
+			<a href="#" class="layout-toggle active" rel="console-panel">Console</a>
 		</div>
-		<div class="controls">
-			<button class="ok btn-pass">Pass</button>
-			<button class="btn-finish">Finish</button>
-			<button class="fail btn-fail visible">Fail</button>
+		<div id="test-controls" class="test-controls">
+			<a href="#" class="ok btn-pass">Pass</a>
+			<a href="#" class="btn-finish">Finish</a>
+			<a href="#" class="fail btn-fail visible">Fail</a>
 		</div>
 	</div>
-	<a href="#" id="show-sidebar" class="btn all show-sidebar"></a>
+	<div class="test-description" id="test-description">
+		<div class="panel-content">
+			%SCRIPT%
+		</div>
+	</div>
+	<div class="console-panel">
+		<div class="panel-content" id="console"></div>
+	</div>
+
 	<script src="/js/manual.js"></script>
+	<script>
+		$( document ).ready( function() {
+			var layout = new ManualLayout( {
+				container: 'body',
+				topBar: '.top-bar',
+				testDescription: '.test-description',
+				consolePanel: '.console-panel'
+			} );
+		} );
+	</script>
 </body>
-</html>
