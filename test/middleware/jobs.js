@@ -262,11 +262,11 @@ describe( 'Middleware - Jobs', function() {
 		} );
 	} );
 
-	it( 'should handle /jobs/<jobId>/restart request for an existing job', function( done ) {
-		var url = 'AYIlcxZa1i1nhLox/restart';
+	it( 'should handle /jobs/<jobId>/recreate request for an existing job', function( done ) {
+		var url = 'AYIlcxZa1i1nhLox/recreate';
 
 		instance.listen( 1031, function() {
-			request.get( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
+			request.post( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
 				expect( res.statusCode ).to.equal( 200 );
 				expect( JSON.parse( body ) ).to.deep.equal( {
 					success: true,
@@ -274,19 +274,23 @@ describe( 'Middleware - Jobs', function() {
 				} );
 
 				done();
+			} ).form( {
+				ids: [ 'test/fixtures/tests/' ]
 			} );
 		} );
 	} );
 
-	it( 'should handle /jobs/<jobId>/restart request for a non-existent job', function( done ) {
-		var url = 'unknown/restart';
+	it( 'should handle /jobs/<jobId>/recreate request for a non-existent job', function( done ) {
+		var url = 'unknown/recreate';
 
 		instance.listen( 1031, function() {
-			request.get( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
+			request.post( 'http://localhost:1031/jobs/' + url, function( err, res, body ) {
 				expect( res.statusCode ).to.equal( 404 );
 				expect( body ).to.equal( http.STATUS_CODES[ '404' ] );
 
 				done();
+			} ).form( {
+				ids: [ 'test/fixtures/tests/' ]
 			} );
 		} );
 	} );

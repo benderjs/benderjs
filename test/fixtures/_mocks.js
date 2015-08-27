@@ -273,13 +273,13 @@ moduleMocks = {
 				return when.resolve( jobs );
 			},
 
-			restart: function( jobId ) {
+			recreate: function( jobId, testsIds ) {
 				var job = _.where( jobs, {
 					_id: jobId
 				} )[ 0 ];
 
 				return job ?
-					when.resolve() :
+					when.resolve( job ) :
 					when.reject( 'There\'s no such job.' );
 			},
 
