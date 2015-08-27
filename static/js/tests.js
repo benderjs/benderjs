@@ -292,7 +292,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				this.set( {
 					completed: model.completed + 1,
-					failed: model.failed + ( data.failed || 0 ) + ( data.broken ? 1 : 0),
+					failed: model.failed + ( data.failed || 0 ) + ( data.broken ? 1 : 0 ),
 					passed: model.passed + ( data.passed || 0 ),
 					time: new Date() - model.start
 				} );
@@ -615,122 +615,41 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		model: Tests.Test
 	} );
 
-	/**
-	 * Tests and filtered tests collections
-	 * @constructor module:Tests.Tests
-	 * @extends {Backbone.Model}
-	 */
-	Tests.Tests = Backbone.Model.extend( /** @lends module:Tests.Tests.prototype */ {
-		/**
-		 * URL to the tests API
-		 * @default
-		 * @type {String}
-		 */
-		url: '/tests',
+	Tests.FilteredTestList = Backbone.VirtualCollection.extend( /** @lends module:Tests.FilteredTestList.prototype */ {
+		setFilters: function( filter ) {
+			this.filters = this.extractFilters( filter, false );
+			this.excludes = this.extractFilters( filter, true );
 
-		/**
-		 * Default values
-		 * @default
-		 * @type {Object}
-		 */
-		defaults: {
-			tests: null,
-			filtered: null
-		},
-
-		/**
-		 * Test exclude filters
-		 * @type {Object}
-		 */
-		excludes: {},
-
-		/**
-		 * Test filters
-		 * @type {Object}
-		 */
-		filters: {},
-
-		/**
-		 * Initialize a model
-		 */
-		initialize: function() {
-			this.listenTo( Tests.controller, 'tests:filter', this.setFilters, this );
-			this.listenTo( Tests.controller, 'tests:start', this.clearResults, this );
-			this.listenTo( Tests.controller, 'tests:stop', this.clearCurrentResult, this );
-			this.listenTo( Tests.controller, 'tests:update', this.updateResult, this );
-
-			this.set( 'tests', new Tests.TestList() );
-			this.set( 'filtered', new Backbone.VirtualCollection( this.get( 'tests' ) ) );
-		},
-
-		/**
-		 * Parse a response from the API
-		 * @param  {Object} response Response data
-		 * @return {Object}
-		 */
-		parse: function( response ) {
-			response.tests = new Tests.TestList( response.test, {
-				parse: false
-			} );
-			response.filtered = new Backbone.VirtualCollection( response.tests );
-
-			delete response.test;
-
-			return response;
-		},
-
-		/**
-		 * Check if a test list needs filtering
-		 * @return {Boolean}
-		 */
-		needsFiltering: function() {
-			return _.some( this.filters, function( filter ) {
+			var needsFiltering = _.some( this.filters, function( filter ) {
 				return filter.length;
 			} );
+
+			this.updateFilter( needsFiltering && this._filterFunc );
 		},
 
-		/**
-		 * Set test filters
-		 * @param {Array} filter Test filter
-		 */
-		setFilters: function( filter ) {
-			var name;
-
-			// reset filters
-			for ( name in this.filters ) {
-				this.filters[ name ] = [];
-			}
-
-			for ( name in this.excludes ) {
-				this.excludes[ name ] = [];
-			}
+		extractFilters: function( filter, getExcludes ) {
+			var filters = {};
 
 			_.each( filter, function( filter ) {
 				filter = filter.split( ':' );
 
-				var name = filter[ 0 ];
+				var name = filter[ 0 ],
+					isExclude = name.charAt( 0 ) === '-';
 
-				if ( name.charAt( 0 ) === '-' ) {
-					name = name.substr( 1 );
-
-					if ( !this.excludes[ name ] ) {
-						this.excludes[ name ] = [];
+				if ( getExcludes === isExclude ) {
+					if ( isExclude ) {
+						name = name.substr( 1 );
 					}
 
-					this.excludes[ name ].push( filter[ 1 ] );
-				} else {
-					if ( !this.filters[ name ] ) {
-						this.filters[ name ] = [];
+					if ( !filters[ name ] ) {
+						filters[ name ] = [];
 					}
 
-					this.filters[ name ].push( filter[ 1 ] );
+					filters[ name ].push( filter[ 1 ] );
 				}
 			}, this );
 
-			var filtered = this.get( 'filtered' );
-
-			filtered.updateFilter( this.needsFiltering() && _.bind( this._filterFunc, this ) );
-			this.trigger( 'change', this );
+			return filters;
 		},
 
 		/**
@@ -833,6 +752,71 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			return checkFlags( this.filters.is ) &&
 				checkExcludes( this.excludes ) &&
 				checkProperties( this.filters );
+		}
+	} );
+
+	/**
+	 * Tests and filtered tests collections
+	 * @constructor module:Tests.Tests
+	 * @extends {Backbone.Model}
+	 */
+	Tests.Tests = Backbone.Model.extend( /** @lends module:Tests.Tests.prototype */ {
+		/**
+		 * URL to the tests API
+		 * @default
+		 * @type {String}
+		 */
+		url: '/tests',
+
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
+		defaults: {
+			tests: null,
+			filtered: null
+		},
+
+		/**
+		 * Initialize a model
+		 */
+		initialize: function() {
+			this.listenTo( Tests.controller, 'tests:filter', this.setFilters, this );
+			this.listenTo( Tests.controller, 'tests:start', this.clearResults, this );
+			this.listenTo( Tests.controller, 'tests:stop', this.clearCurrentResult, this );
+			this.listenTo( Tests.controller, 'tests:update', this.updateResult, this );
+
+			this.set( 'tests', new Tests.TestList() );
+			this.set( 'filtered', new Tests.FilteredTestList( this.get( 'tests' ) ) );
+		},
+
+		/**
+		 * Parse a response from the API
+		 * @param  {Object} response Response data
+		 * @return {Object}
+		 */
+		parse: function( response ) {
+			response.tests = new Tests.TestList( response.test, {
+				parse: false
+			} );
+			response.filtered = new Tests.FilteredTestList( response.tests );
+
+			delete response.test;
+
+			return response;
+		},
+
+		/**
+		 * Set test filters
+		 * @param {Array} filter Test filter
+		 */
+		setFilters: function( filter ) {
+			var filtered = this.get( 'filtered' );
+
+			filtered.setFilters( filter );
+
+			this.trigger( 'change', this );
 		},
 
 		/**

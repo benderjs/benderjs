@@ -69,6 +69,8 @@
 	"safeContextKeyword": [
 		"that", "bender"
 	],
-	"requireDotNotation": true,
+	"requireDotNotation": {
+		"allExcept": [ "keywords" ]
+	},
 	"disallowYodaConditions": true
 }

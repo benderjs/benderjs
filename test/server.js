@@ -111,8 +111,8 @@ describe( 'Server', function() {
 		closeServer();
 
 		bender.conf.secure = true;
-		bender.conf.certificate = "server.crt";
-		bender.conf.privateKey = "server.key";
+		bender.conf.certificate = 'server.crt';
+		bender.conf.privateKey = 'server.key';
 
 		createServer( function() {
 			expect( instance ).to.be.instanceof( https.Server );

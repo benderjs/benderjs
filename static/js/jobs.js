@@ -550,7 +550,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		 */
 		events: {
 			'click .remove-button': 'removeJob',
-			'click .restart-button': 'restartJob',
+			'click .restart-button': 'recreateJob',
 			'click .edit-button': 'editJob',
 			'change @ui.all, @ui.failed': 'filterFailed'
 		},
@@ -587,10 +587,10 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * Restart a job
+		 * Recreate a job
 		 */
-		restartJob: function() {
-			Jobs.controller.restartJob( this.model );
+		recreateJob: function() {
+			Jobs.controller.recreateJob( this.model );
 		},
 
 		/**
@@ -900,6 +900,64 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		}
 	} );
 
+	Jobs.Tests = Backbone.Model.extend( /** @lends module:Jobs.Tests.prototype */ {
+		/**
+		 * URL to the tests API
+		 * @default
+		 * @type {String}
+		 */
+		url: '/tests',
+
+		/**
+		 * Default values
+		 * @default
+		 * @type {Object}
+		 */
+		defaults: {
+			filtered: null
+		},
+
+		/**
+		 * Initialize a model
+		 */
+		initialize: function() {
+			this.set( 'filtered', new App.Tests.FilteredTestList( new App.Tests.TestList() ) );
+		},
+
+		/**
+		 * Parse a response from the API
+		 * @param  {Object} response Response data
+		 * @return {Object}
+		 */
+		parse: function( response ) {
+			response.filtered = new App.Tests.FilteredTestList( new App.Tests.TestList( response.test, {
+				parse: false
+			} ) );
+
+			delete response.test;
+
+			return response;
+		},
+
+		/**
+		 * Set test filters
+		 * @param {Array} filter Test filter
+		 */
+		setFilters: function( filter ) {
+			this.get( 'filtered' ).setFilters( filter );
+		},
+
+		/**
+		 * Collect IDs of filtered tests
+		 * @return {Array}
+		 */
+		getIds: function() {
+			return this.get( 'filtered' ).map( function( item ) {
+				return item.id;
+			} );
+		}
+	} );
+
 	/**
 	 * Controller for Jobs module
 	 * @constructor module:Jobs.Controller
@@ -984,18 +1042,27 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		},
 
 		/**
-		 * Restart the given job
+		 * Recreate the given job
 		 * @param {Object} job Job model
 		 */
-		restartJob: function( job ) {
+		recreateJob: function( job ) {
 			App.showConfirmPopup( {
 				message: 'Do you want to restart this job?',
-				callback: restart
+				callback: recreate
 			} );
 
-			function restart( callback ) {
-				$.ajax( {
-					url: '/jobs/' + job.id + '/restart',
+			function ajaxCall() {
+				var data = {};
+
+				if ( !job.attributes.snapshot ) {
+					Jobs.tests.setFilters( job.attributes.filter );
+					data.ids = Jobs.tests.getIds();
+				}
+
+				return $.ajax( {
+					url: '/jobs/' + job.id + '/recreate',
+					data: data,
+					method: 'POST',
 					dataType: 'json',
 					success: function( response ) {
 						App.Alerts.controller.add(
@@ -1007,8 +1074,6 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 						job.fetch( {
 							force: true
 						} );
-
-						callback( true );
 					},
 					error: function( response ) {
 						App.Alerts.controller.add(
@@ -1016,10 +1081,19 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 							response.responseText,
 							'Error!'
 						);
-
-						callback( false );
 					}
 				} );
+			}
+
+			function recreate( callback ) {
+				Jobs.tests.fetch()
+					.then( ajaxCall )
+					.done( function() {
+						callback( true );
+					} )
+					.fail( function() {
+						callback( false );
+					} );
 			}
 		},
 
@@ -1155,6 +1229,8 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 		Jobs.jobRouter = new Jobs.JobRouter( {
 			controller: Jobs.controller
 		} );
+
+		Jobs.tests = new Jobs.Tests();
 	};
 
 	App.on( 'before:start', Jobs.onStart );
