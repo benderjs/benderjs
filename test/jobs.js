@@ -379,7 +379,7 @@ describe( 'Jobs', function() {
 
 		return bender.jobs.create( job )
 			.then( function( id ) {
-				return bender.jobs.restart( id )
+				return bender.jobs.recreate( id, [ 'test/fixtures/tests/test/1' ] )
 					.then( function() {
 						return id;
 					} );
@@ -403,8 +403,49 @@ describe( 'Jobs', function() {
 			} );
 	} );
 
-	it( 'should return an error when trying to restart non-existent job', function() {
-		var promise = bender.jobs.restart( 'unknown' );
+	it( 'should recreate tests list of an existing job', function() {
+		var store = bender.jobs.db.tasks;
+
+		return bender.jobs.create( job )
+			.then( function( id ) {
+				return bender.jobs.recreate( id, [ 'test/fixtures/tests/test/1' ] )
+					.then( function() {
+						return id;
+					} );
+			} )
+			.then( function( id ) {
+				return nodeCall( store.find, {
+					jobId: id
+				} );
+			} )
+			.then( function( results ) {
+				expect( results.length ).to.equal( 1 );
+				expect( results[ 0 ].id ).to.equal( 'test/fixtures/tests/test/1' );
+			} );
+	} );
+
+	it( 'should not recreate tests list of a snapshot job', function() {
+		var store = bender.jobs.db.tasks;
+
+		return bender.jobs.create( job_snapshot )
+			.then( function( id ) {
+				return bender.jobs.recreate( id, [ 'test/fixtures/tests/test/1' ] )
+					.then( function() {
+						return id;
+					} );
+			} )
+			.then( function( id ) {
+				return nodeCall( store.find, {
+					jobId: id
+				} );
+			} )
+			.then( function( results ) {
+				expect( results.length ).to.equal( 3 );
+			} );
+	} );
+
+	it( 'should return an error when trying to recreate non-existent job', function() {
+		var promise = bender.jobs.recreate( 'unknown' );
 
 		return expect( promise ).to.be.rejectedWith( 'There\'s no such job.' );
 	} );
