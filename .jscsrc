@@ -58,6 +58,9 @@
 	"disallowMixedSpacesAndTabs": true,
 	"disallowTrailingWhitespace": true,
 	"maximumLineLength": 140,
+	"safeContextKeyword": [
+		"that", "bender"
+	],
 	"requireCapitalizedConstructors": true,
 	"requireDotNotation": {
 		"allExcept": [ "keywords" ]
