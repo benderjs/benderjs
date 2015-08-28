@@ -1950,7 +1950,13 @@ describe( 'Jobs', function() {
 	describe( 'Controller', function() {
 		var sandbox = sinon.sandbox.create(),
 			requests,
-			xhr;
+			xhr,
+			testsResponse = JSON.stringify( {
+				'test': [
+					{ 'id': 'test-dashboard/alerts', 'displayName': 'test-dashboard/alerts', 'group': 'Dashboard', 'tags': [], 'unit': true }
+				]
+			} );
+
 
 		beforeEach( function() {
 			App.Sockets = {
@@ -2154,11 +2160,7 @@ describe( 'Jobs', function() {
 
 			requests[ 0 ].respond( 200, {
 				'Content-Type': 'application/json'
-			}, JSON.stringify( {
-				'test': [
-					{ 'id': 'test-dashboard/alerts', 'displayName': 'test-dashboard/alerts', 'group': 'Dashboard', 'tags': [], 'unit': true }
-				]
-			} ) );
+			}, testsResponse );
 
 			expect( requests ).to.have.length( 2 );
 			expect( requests[ 1 ].url ).to.equal( '/jobs/foo/recreate' );
@@ -2192,11 +2194,7 @@ describe( 'Jobs', function() {
 
 			requests[ 0 ].respond( 200, {
 				'Content-Type': 'application/json'
-			}, JSON.stringify( {
-				'test': [
-					{ 'id': 'test-dashboard/alerts', 'displayName': 'test-dashboard/alerts', 'group': 'Dashboard', 'tags': [], 'unit': true }
-				]
-			} ) );
+			}, testsResponse );
 
 			requests[ 1 ].respond( 200, {
 				'Content-Type': 'application/json'
@@ -2236,11 +2234,7 @@ describe( 'Jobs', function() {
 
 			requests[ 0 ].respond( 200, {
 				'Content-Type': 'application/json'
-			}, JSON.stringify( {
-				'test': [
-					{ 'id': 'test-dashboard/alerts', 'displayName': 'test-dashboard/alerts', 'group': 'Dashboard', 'tags': [], 'unit': true }
-				]
-			} ) );
+			}, testsResponse );
 
 			requests[ 1 ].respond( 404, {
 				'Content-Type': 'text/plain'
