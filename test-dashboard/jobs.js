@@ -5,7 +5,7 @@
  * @file Tests for Browsers module
  */
 
-/* bender-include: %BASE_PATH%_mocks.js, %APPS_DIR%bender/js/common.js, %APPS_DIR%bender/js/jobs.js */
+/* bender-include: %BASE_PATH%_mocks.js, %APPS_DIR%bender/js/common.js, %APPS_DIR%bender/js/jobs.js, %APPS_DIR%bender/js/tests.js  */
 
 describe( 'Jobs', function() {
 	describe( 'JobRouter', function() {
@@ -1108,7 +1108,7 @@ describe( 'Jobs', function() {
 		beforeEach( function() {
 			App.Jobs.controller = {
 				removeJob: function() {},
-				restartJob: function() {},
+				recreateJob: function() {},
 				editJob: function() {}
 			};
 		} );
@@ -1161,8 +1161,8 @@ describe( 'Jobs', function() {
 			expect( stub.calledOnce ).to.be.true();
 		} );
 
-		it( 'should restart a job after clicking on "Restart" button', function() {
-			var stub = sandbox.stub( App.Jobs.JobHeaderView.prototype, 'restartJob' ),
+		it( 'should recreate a job after clicking on "Restart" button', function() {
+			var stub = sandbox.stub( App.Jobs.JobHeaderView.prototype, 'recreateJob' ),
 				view = new App.Jobs.JobHeaderView( {
 					model: new App.Jobs.Job()
 				} );
@@ -1254,14 +1254,14 @@ describe( 'Jobs', function() {
 			expect( spy.calledWith( model ) ).to.be.true();
 		} );
 
-		it( 'should restart a job', function() {
-			var spy = sandbox.spy( App.Jobs.controller, 'restartJob' ),
+		it( 'should recreate a job', function() {
+			var spy = sandbox.spy( App.Jobs.controller, 'recreateJob' ),
 				model = new App.Jobs.Job(),
 				view = new App.Jobs.JobHeaderView( {
 					model: model
 				} );
 
-			view.restartJob();
+			view.recreateJob();
 
 			expect( spy.calledOnce ).to.be.true();
 			expect( spy.calledWith( model ) ).to.be.true();
@@ -1950,7 +1950,13 @@ describe( 'Jobs', function() {
 	describe( 'Controller', function() {
 		var sandbox = sinon.sandbox.create(),
 			requests,
-			xhr;
+			xhr,
+			testsResponse = JSON.stringify( {
+				'test': [
+					{ 'id': 'test-dashboard/alerts', 'displayName': 'test-dashboard/alerts', 'group': 'Dashboard', 'tags': [], 'unit': true }
+				]
+			} );
+
 
 		beforeEach( function() {
 			App.Sockets = {
@@ -1968,6 +1974,7 @@ describe( 'Jobs', function() {
 			App.navigate = sandbox.spy();
 			App.Jobs.controller = new App.Jobs.Controller();
 			App.Jobs.jobList = new App.Jobs.JobList();
+			App.Jobs.tests = new App.Jobs.Tests();
 
 			xhr = sinon.useFakeXMLHttpRequest();
 			requests = [];
@@ -1986,6 +1993,7 @@ describe( 'Jobs', function() {
 			delete App.Alerts;
 			delete App.Jobs.controller;
 			delete App.Jobs.jobList;
+			delete App.Jobs.tests;
 		} );
 
 		it( 'should bind to App.Sockets.socket#job:update event and re-emit it', function() {
@@ -2130,8 +2138,8 @@ describe( 'Jobs', function() {
 			expect( App.navigate.called ).to.be.false();
 		} );
 
-		it( 'should restart a job', function() {
-			App.Jobs.controller.restartJob( new App.Jobs.Job( {
+		it( 'should recreate a job', function() {
+			App.Jobs.controller.recreateJob( new App.Jobs.Job( {
 				id: 'foo'
 			} ) );
 
@@ -2147,10 +2155,18 @@ describe( 'Jobs', function() {
 			arg.callback( closeSpy );
 
 			expect( requests ).to.have.length( 1 );
-			expect( requests[ 0 ].url ).to.equal( '/jobs/foo/restart' );
+			expect( requests[ 0 ].url ).to.equal( '/tests' );
 			expect( requests[ 0 ].method ).to.equal( 'GET' );
 
 			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, testsResponse );
+
+			expect( requests ).to.have.length( 2 );
+			expect( requests[ 1 ].url ).to.equal( '/jobs/foo/recreate' );
+			expect( requests[ 1 ].method ).to.equal( 'POST' );
+
+			requests[ 1 ].respond( 200, {
 				'Content-Type': 'application/json'
 			}, JSON.stringify( {
 				success: true,
@@ -2158,10 +2174,10 @@ describe( 'Jobs', function() {
 			} ) );
 		} );
 
-		it( 'should show a success notification after restarting', function() {
+		it( 'should show a success notification after recreating', function() {
 			var fetchStub = sandbox.stub( App.Jobs.Job.prototype, 'fetch' );
 
-			App.Jobs.controller.restartJob( new App.Jobs.Job( {
+			App.Jobs.controller.recreateJob( new App.Jobs.Job( {
 				id: 'foo'
 			} ) );
 
@@ -2176,9 +2192,11 @@ describe( 'Jobs', function() {
 
 			arg.callback( closeSpy );
 
-			expect( requests ).to.have.length( 1 );
-
 			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, testsResponse );
+
+			requests[ 1 ].respond( 200, {
 				'Content-Type': 'application/json'
 			}, JSON.stringify( {
 				success: true,
@@ -2198,10 +2216,10 @@ describe( 'Jobs', function() {
 			expect( closeSpy.calledWith( true ) ).to.be.true();
 		} );
 
-		it( 'should show an error notification on restart errors', function() {
-			App.Jobs.controller.restartJob( new App.Jobs.Job( {
+		it( 'should show an error notification on recreate errors', function() {
+			App.Jobs.controller.recreateJob( new App.Jobs.Job( {
 				id: 'foo'
-			} ) );
+			} ), [] );
 
 			expect( App.showConfirmPopup.calledOnce ).to.be.true();
 
@@ -2214,9 +2232,11 @@ describe( 'Jobs', function() {
 
 			arg.callback( closeSpy );
 
-			expect( requests ).to.have.length( 1 );
+			requests[ 0 ].respond( 200, {
+				'Content-Type': 'application/json'
+			}, testsResponse );
 
-			requests[ 0 ].respond( 404, {
+			requests[ 1 ].respond( 404, {
 				'Content-Type': 'text/plain'
 			}, 'Not found' );
 
