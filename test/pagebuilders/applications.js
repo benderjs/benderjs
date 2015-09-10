@@ -54,7 +54,6 @@ describe( 'Page Builders - Applications', function() {
 
 		sinon.assert.calledOnce( spy );
 		sinon.assert.calledWithExactly( spy, 'test.js' );
-
 	} );
 
 	it( 'should call addCSS for each defined application\'s stylesheet', function() {

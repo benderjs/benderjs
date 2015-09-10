@@ -277,5 +277,4 @@
 			App.$fixedHeader.css( 'top', headerTop + 'px' );
 		}
 	};
-
 } )( this );

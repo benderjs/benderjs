@@ -110,7 +110,7 @@
 			}
 
 			// Trim className; trim() function is not available on IE8.
-			resultsElClassName = ( resultsEl.className + '' ).replace( /^\s+|\s+$/g, '' );
+			resultsElClassName = ( resultsEl.className ).replace( /^\s+|\s+$/g, '' );
 
 			if ( target === collapseEl ) {
 				collapsed = isCollapsed();
@@ -144,7 +144,7 @@
 	 * @return {Boolean}
 	 */
 	function isCollapsed() {
-		return ( resultsEl.className + '' ).indexOf( 'collapsed' ) > -1;
+		return ( resultsEl.className ).indexOf( 'collapsed' ) > -1;
 	}
 
 	/**
@@ -152,7 +152,7 @@
 	 * @return {Boolean}
 	 */
 	function isFailed() {
-		return ( resultsEl.className + '' ).indexOf( 'failed' ) > -1;
+		return ( resultsEl.className ).indexOf( 'failed' ) > -1;
 	}
 
 	/**

@@ -163,9 +163,9 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 		<thead class="fixed-header">
 			<tr>
 				<th class="checkbox-column"><input type="checkbox" class="select-all-jobs"></th>
-				<th class="col-md-1">ID</th>
 				<th class="col-md-2">Description</th>
-				<th class="col-md-2">Created</th>
+				<th class="col-md-3">Filters</th>
+				<th class="col-md-1">Created</th>
 				<th>Results</th>
 			</tr>
 		</thead>
@@ -184,8 +184,12 @@ Licensed under the terms of the MIT License (see LICENSE.md).
 	<!-- template for a single job row -->
 	<script type="text/html" id="job-row">
 	<td><input type="checkbox" <%= selected ? 'checked=checked' : '' %>></td>
-	<td><a href="#jobs/<%= id %>" title="<%= id %>"><%= id %></a></td>
-	<td><span title="<%= description %>"><%= description %></span></td>
+	<td><a href="#jobs/<%= id %>" title="<%= id %>"><%= description ? description : id %></a></td>
+	<td>
+		<% _.each(filter, function (filterItem) { %>
+		<span class="filter btn-xs"><%= filterItem %></span>
+		<% }) %>
+	</td>
 	<td><small><%= getTime(created) %></small></td>
 	<td class="results">
 		<% _.each(results, function (result) { %>

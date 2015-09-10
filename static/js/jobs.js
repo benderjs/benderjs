@@ -1039,6 +1039,7 @@ App.module( 'Jobs', function( Jobs, App, Backbone ) {
 					'No jobs selected.',
 					'Error!'
 				);
+
 				return;
 			}
 

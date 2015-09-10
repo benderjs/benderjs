@@ -1,5 +1,20 @@
 {
-	"node": true,
+	"immed": true,
+	"latedef": "nofunc",
+	"noarg": true,
+	"nonbsp": true,
 	"undef": true,
-	"unused": true
+	"globals": {
+		"require": true,
+		"process": true,
+		"__dirname": true,
+		"setTimeout": true,
+		"clearTimeout": true,
+		"module": true,
+		"console": true
+	},
+	"unused": true,
+	"strict": true,
+
+	"globalstrict": true
 }

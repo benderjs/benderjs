@@ -88,7 +88,6 @@ describe( 'Middleware - Jobs', function() {
 
 		instance.listen( 1031, function() {
 			request.get( 'http://localhost:1031/jobs/' + id, function( err, res, body ) {
-
 				expect( res.statusCode ).to.equal( 200 );
 
 				bender.jobs.get( id ).done( function( job ) {
@@ -368,5 +367,4 @@ describe( 'Middleware - Jobs', function() {
 			} );
 		} );
 	} );
-
 } );

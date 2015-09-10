@@ -64,8 +64,6 @@ describe( 'Config', function() {
 			bender = mocks.getBender(),
 			oldHome = config.__get__( 'osenv.home' );
 
-
-
 		config.__set__( 'osenv.home', function() {
 			return path.resolve( 'test/fixtures/home/' );
 		} );

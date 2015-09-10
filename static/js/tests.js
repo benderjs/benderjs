@@ -110,7 +110,6 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				if ( _.indexOf( tokens, name ) < 0 ) {
 					tokens.push( name );
 				}
-
 			} );
 
 			tokens.sort();
@@ -199,6 +198,8 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		 * Handle render event
 		 */
 		onRender: function() {
+			// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
+
 			this.ui.filter.chosen( {
 				width: '100%',
 				search_contains: true
@@ -275,7 +276,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 				passed: 0,
 				failed: 0,
 				time: 0,
-				start: +new Date(),
+				start: Number( new Date() ),
 				completed: 0,
 				total: 0,
 				running: false
@@ -292,7 +293,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				this.set( {
 					completed: model.completed + 1,
-					failed: model.failed + ( data.failed || 0 ) + ( data.broken ? 1 : 0),
+					failed: model.failed + ( data.failed || 0 ) + ( data.broken ? 1 : 0 ),
 					passed: model.passed + ( data.passed || 0 ),
 					time: new Date() - model.start
 				} );
@@ -1022,11 +1023,11 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 		 * @param  {String} id Test ID
 		 */
 		renderResult: function( id ) {
-			var result = this.model.get( 'tests' ).get( id ),
+			var resultObj = this.model.get( 'tests' ).get( id ),
 				row;
 
-			if ( result ) {
-				result = result.get( 'result' ).toJSON();
+			if ( resultObj ) {
+				var result = resultObj.get( 'result' ).toJSON();
 
 				row = this.$el.find( '[data-id="' + id + '"]' );
 
@@ -1036,7 +1037,20 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 
 				row.find( '.result' ).html( this.resultTemplate( _.extend( {}, result, this.templateHelpers ) ) );
 				Tests.controller.scrollTo( row );
+
+				bender.env.supportsConsole && this.logErrors( result );
 			}
+		},
+
+		logErrors: function( result ) {
+			var suiteName = result.displayName;
+			_.each( result.errors, function( error ) {
+				var logMessage = 'Test failed in: ' + suiteName + ' \n' +
+					'Name: ' + error.name + '\n\n' +
+					error.error;
+
+				console.error( logMessage );
+			} );
 		},
 
 		/**
@@ -1095,6 +1109,7 @@ App.module( 'Tests', function( Tests, App, Backbone ) {
 			if ( !attrs.browsers.length ) {
 				return 'No browsers specified for the job';
 			}
+
 			if ( !attrs.tests.length ) {
 				return 'No tests specified for the job';
 			}

@@ -11,6 +11,9 @@
 	var sidebarEl = document.getElementById( 'manual-sidebar' ),
 		scriptEl = document.getElementById( 'manual-script' ),
 		buttonEls = sidebarEl.getElementsByTagName( 'button' ),
+		showSidebarEl = document.getElementById( 'show-sidebar' ),
+		hideSidebarEl = document.getElementById( 'hide-sidebar' ),
+		bodyEl = document.getElementsByTagName( 'body' )[ 0 ],
 		passBtn = buttonEls[ 0 ],
 		finishBtn = buttonEls[ 1 ],
 		failBtn = buttonEls[ 2 ],
@@ -66,9 +69,7 @@
 			i;
 
 		for ( i = 0, len = inputs.length; i < len; i++ ) {
-			if ( ( input = inputs[ i ] ) &&
-				input.type === 'checkbox' && !input.checked ) {
-
+			if ( ( input = inputs[ i ] ) &&	input.type === 'checkbox' && !input.checked ) {
 				if ( !sent ) {
 					sent = true;
 				}
@@ -126,6 +127,13 @@
 			disableButtons();
 		}
 
+		if ( target === hideSidebarEl ) {
+			bodyEl.className = 'sidebar-hidden';
+			event.preventDefault();
+
+			return false;
+		}
+
 		if ( target === finishBtn && bender.testData.js ) {
 			oldStart();
 		}
@@ -176,6 +184,12 @@
 
 	// bind a click handler
 	bender.addListener( sidebarEl, 'click', handleClick );
+	bender.addListener( showSidebarEl, 'click', function( event ) {
+		bodyEl.className = '';
+		event.preventDefault();
+
+		return false;
+	} );
 
 	addCheckboxes();
 } )();

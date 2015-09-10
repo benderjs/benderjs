@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/benderjs/benderjs.svg?branch=master)](https://travis-ci.org/benderjs/benderjs)
 [![NPM Version](http://img.shields.io/npm/v/benderjs.svg)](https://www.npmjs.org/package/benderjs)
+[![Dependency Status](https://david-dm.org/benderjs/benderjs.svg)](https://david-dm.org/benderjs/benderjs)
+[![devDependency Status](https://david-dm.org/benderjs/benderjs/dev-status.svg)](https://david-dm.org/benderjs/benderjs#info=devDependencies)
 
 # Bender.js
 
