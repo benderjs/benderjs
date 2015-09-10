@@ -428,7 +428,7 @@ describe( 'Jobs', function() {
 	it( 'should not recreate tests list of a snapshot job', function() {
 		var store = bender.jobs.db.tasks;
 
-		return bender.jobs.create( job_snapshot )
+		return bender.jobs.create( jobSnapshot )
 			.then( function( id ) {
 				return bender.jobs.recreate( id, [ 'test/fixtures/tests/test/1' ] )
 					.then( function() {
