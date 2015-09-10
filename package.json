@@ -56,8 +56,8 @@
 		"winston": "^1.0.1"
 	},
 	"devDependencies": {
-		"benderjs-coverage": "^0.2.0",
-		"benderjs-mocha": "^0.3.0",
+		"benderjs-coverage": "^0.2.1",
+		"benderjs-mocha": "^0.3.2",
 		"benderjs-sinon": "^0.2.3",
 		"chai": "^3.2.0",
 		"chai-as-promised": "^5.1.0",
