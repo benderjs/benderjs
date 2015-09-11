@@ -1,0 +1,18 @@
+if [ -d ./.git/hooks ]
+then
+	if [ -d ./hooks ]
+	then
+		if rm -rf ./.git/hooks/* && cp ./hooks/* ./.git/hooks
+		then
+			echo "Hooks correctly copied"
+			exit 0
+		else
+			echo "An error occured while copying files"
+		fi
+	else
+		echo "./hooks directory not found"
+	fi
+else
+	echo ".git/hooks directory not found"
+fi
+exit 1
