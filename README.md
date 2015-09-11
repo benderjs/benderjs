@@ -147,6 +147,14 @@ $ npm test --coverage
 
 A detailed report will be created in `./coverage/lcov-report/index.html` file.
 
+## Development
+
+If you are interested in developing Bender, enable git hooks:
+
+```
+$ ./move-hooks
+```
+
 License
 -------
 
