@@ -3,34 +3,9 @@ Copyright (c) 2014-2015, CKSource - Frederico Knabben. All rights reserved.
 Licensed under the terms of the MIT License (see LICENSE.md).
 */
 
-@font-face {
-	font-family: 'icomoon';
-	src:url('../fonts/icomoon.eot?-fg1qcw');
-	src:url('../fonts/icomoon.eot?#iefix-fg1qcw') format('embedded-opentype'),
-		url('../fonts/icomoon.woff?-fg1qcw') format('woff'),
-		url('../fonts/icomoon.ttf?-fg1qcw') format('truetype'),
-		url('../fonts/icomoon.svg?-fg1qcw#icomoon') format('svg');
-	font-weight: normal;
-	font-style: normal;
-}
-
 body {
 	margin: 0;
 	padding: 0;
-}
-
-.icon,
-.btn {
-	font-family: 'icomoon';
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	font-size: 16px;
-	text-transform: none;
-	margin-right: 10px;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
 }
 
 .results {
@@ -85,25 +60,6 @@ body {
 	float: left;
 }
 
-.btn {
-	display: block;
-	float: right;
-	margin: 10px 0 0 10px;
-	width: 28px;
-	height: 28px;
-	line-height: 28px;
-	border: 1px solid #ccc;
-	border-radius: 3px;
-	text-align: center;
-	text-decoration: none;
-	background: #fff;
-}
-
-.btn:hover {
-	background: #ebebeb;
-	border-color: #adadad;
-}
-
 .runall:before {
 	content: '\e604';
 }
@@ -114,14 +70,6 @@ body {
 
 .expand:before {
 	content: '\e600';
-}
-
-.btn.failed:before {
-	content: '\e602';
-}
-
-.btn.all:before {
-	content: '\e606';
 }
 
 .results .ok {
