@@ -47,7 +47,7 @@
     "osenv": "~0.1.0",
     "request": "^2.60.0",
     "send": "^0.15.2",
-    "socket.io": "2.2.0",
+    "socket.io": "2.4.0",
     "subcommander": "~1.0.0",
     "tv4": "^1.2.3",
     "useragent": "~2.1.4",
